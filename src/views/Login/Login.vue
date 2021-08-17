@@ -3,7 +3,7 @@
     <ion-content :fullscreen="true">
       <div id="login" class="table-container">
        
-        <Inputs v-bind:inputs="inputs"></Inputs>
+        <Inputs v-bind:keys="keys"></Inputs>
 
         <img src="../../../public/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png" class="logos" id="mw-img" />
         <img src="../../../public/assets/images/login-logos/PEPFAR.png" class="logos" id="donor-img" />

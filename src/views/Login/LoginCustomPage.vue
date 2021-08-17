@@ -12,12 +12,15 @@
 					v-on:click="renderKeyBoard($event)" class="input-boxes"/>
 			</div>
 		</div>
+		<div id="keyboard" v-bind:key="k" v-for="k in keys">
+			<button class="key-btn">{{k}}</button>
+		</div>
 	</div>
 </template>
 
 <script lang="ts">
 export default {
-	props: ["inputs"],
+	props: ["keys"],
   data: function() {
     return {
       username: null,
@@ -50,4 +53,19 @@ export default {
   padding: 8px;
 }
 
+.table-container {
+  display: table;
+  width: 96.5%;
+  text-align: center;
+  margin-top: 10%;
+}
+
+.rows {
+  display: table-row;
+  line-height: 120px;
+}
+
+.cells {
+  display: table-cell;
+}
 </style>
