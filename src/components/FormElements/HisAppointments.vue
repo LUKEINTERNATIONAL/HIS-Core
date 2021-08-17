@@ -4,13 +4,33 @@
       <ion-grid>
         <ion-row>
           <ion-col size="9">
-            <DatePicker
-              :min-date="new Date()"
-              v-model="startDate"
-              is-expanded
+            <Calendar
+              color="blue"
               ref="calendar"
+              is-expanded
+              class="custom-calendar max-w-full"
+              :min-date="sessionDate"
               :max-date="runOutDate"
-            />
+            >
+              <template v-slot:day-content="{ day }">
+                <div
+                  v-bind:class="{
+                    selected: day.id === cDate,
+                    isDisabled: day.isDisabled,
+                  }"
+                >
+                  <span
+                    @click="dayClicked(day)"
+                    class="day-label text-sm text-gray-900"
+                    style="top: 20%"
+                    >{{ day.day }}</span
+                  >
+                  <sup v-if="day.id === cDate" class="appointments">{{
+                    appointments.length
+                  }}</sup>
+                </div>
+              </template>
+            </Calendar>
           </ion-col>
           <ion-col size="3">
             <table>
@@ -65,12 +85,12 @@
 import { defineComponent, PropType } from "vue";
 import ViewPort from "@/components/DataViews/ViewPort.vue";
 import { IonGrid, IonCol, IonRow } from "@ionic/vue";
-import { Calendar, DatePicker } from "v-calendar";
+import { Calendar } from "v-calendar";
 import HisDate from "@/utils/Date";
 import { AppointmentService } from "@/apps/ART/services/appointment_service";
 import { GlobalPropertyService } from "@/services/global_property_service";
 export default defineComponent({
-  components: { ViewPort, DatePicker, IonGrid, IonCol, IonRow },
+  components: { ViewPort, Calendar, IonGrid, IonCol, IonRow },
   props: {
     options: {
       type: Function,
@@ -84,9 +104,12 @@ export default defineComponent({
   watch: {
     startDate: {
       async handler(params: any) {
-        this.$emit("onValue", {label: '', value: params});
+        
         if (params) {
-          this.getAppointments(params);
+          this.getAppointments();
+          this.emitVal(params);
+        }else {
+          this.emitVal(HisDate.toStandardHisDisplayFormat(this.sessionDate));
         }
       },
       immediate: true,
@@ -97,27 +120,40 @@ export default defineComponent({
     startDate: null as any,
     runOutDate: null as any,
     appointments: [],
-    appointmentLimit: 0 as any
+    appointmentLimit: 0 as any,
+    sessionDate: null as any
   }),
   async created() {
     const items = await this.options(this.fdata);
-    this.startDate = new Date(items[0].other.appointmentDate);
-    const calendar: any = this.$refs.calendar;
-    await calendar.move(this.startDate);
+    this.sessionDate = AppointmentService.getSessionDate();
+    const date = items[0].other.appointmentDate;
+    this.setDate(date);
     this.getAppointmentLimit();
     this.runOutDate = new Date(items[0].other.runOutDate);
   },
   methods: {
-    async getAppointments(date: Date) {
+    async getAppointments() {
       this.appointments = await AppointmentService.getDailiyAppointments(
         HisDate.toStandardHisFormat(this.aDate)
       );
     },
     async getAppointmentLimit() {
       const limit = await GlobalPropertyService.getAppointmentLimit();
-      if(limit) {
+      if (limit) {
         this.appointmentLimit = limit;
       }
+    },
+    async setDate(date: any) {
+      this.startDate = new Date(date);
+      const calendar: any = this.$refs.calendar;
+      await calendar.move(this.startDate);
+      await calendar.focusDate(this.startDate);
+    },
+    dayClicked(day: any) {
+      !day.isDisabled && this.setDate(day.id);
+    },
+    emitVal(date: any) {
+      this.$emit("onValue", { label: "", value: date });
     }
   },
   computed: {
@@ -127,9 +163,29 @@ export default defineComponent({
     rDate(): string {
       return HisDate.toStandardHisDisplayFormat(this.runOutDate);
     },
+    cDate(): string {
+      return HisDate.toStandardHisFormat(this.startDate);
+    },
   },
 });
 </script>
+<style>
+.vc-day {
+  position: relative;
+  min-height: 32px;
+  z-index: 1;
+  text-align: center;
+  font-size: 3vh;
+  height: 80px;
+}
+.selected {
+  font-size: 4vh;
+  color: green;
+}
+.isDisabled {
+  color: #00000040;
+}
+</style>
 <style scoped>
 table {
   font-family: arial, sans-serif;
@@ -141,5 +197,13 @@ td,
 th {
   text-align: left;
   padding: 8px;
+}
+.appointments {
+  font-size: 3vh;
+  color: rgb(5, 123, 233);
+}
+.custom-calendar .vc-day {
+  height: 50px;
+  text-align: center;
 }
 </style>
