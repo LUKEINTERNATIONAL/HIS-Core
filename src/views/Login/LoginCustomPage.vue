@@ -1,5 +1,5 @@
 <template>
-	 <div class="main">
+	 <div class="main" ref="main">
 		<div class="rows">
 			<div class="cells">
 				<input type="text" name="usename" autocomplete="off"
@@ -30,7 +30,8 @@ export default {
       username: null,
       password: null,
       focusInput: null,
-			display: 'none'
+			display: 'none',
+			keyboardLeft: ''
     };
   }/*,
 	computed: {
@@ -41,14 +42,20 @@ export default {
 	methods: {
 		renderKeyBoard(e: any) {
 			//console.log(e.currentTarget);
+
+			const main = document.getElementsByClassName("main")[0];
+      const width = main.getBoundingClientRect().width;
+      //const divPos = ((50 / width)*100);
+      let inputPos = e.getBoundingClientRect().top;
+      inputPos = parseInt(inputPos);
+
+      this.keyboardLeft = ((width / 2) - 320) + "px;top: " + (inputPos + 77) + "px;";
 			this.display = "table";
 		}
 	},
 	computed: {
-    btnStyles(): {} {
-      return {
-        "display": this.display
-      };
+    btnStyles(): string {
+      return `display: ${this.display};`;
     }
   }
 };
@@ -75,6 +82,12 @@ export default {
   text-align: center;
   margin-top: 10%;
   display: table;
+}
+
+.keyboard {
+	z-index: 40; 
+	border-radius: 25px; 
+	width: auto;
 }
 
 .rows {
