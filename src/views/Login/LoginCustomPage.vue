@@ -8,16 +8,19 @@
 		</div>
 		<div class="rows input-rows">
 			<div class="cells">
-				<input type="password" name="password" 
+				<input type="password" name="password" ref="password" id="password"
 					v-on:click="renderKeyBoard($event)" class="input-boxes"/>
 			</div>
 		</div>
-		<div id="keyboard" :style="btnStyles" class="keyboard" v-bind:key="k" v-for="k in keys">
+		<div id="keyboard" :style="btnStyles" class="keyboard">
+			<span v-bind:key="k" v-for="k in keys">
 			<div class="rows">
 				<div class="cells" v-bind:key="r" v-for="r in k">
-					<button class="keyboard-btn">{{r}}</button>
+					<button v-if="r === 'Next' || r === 'Login'" :id="btnCaption" class="keyboard-btn login-btn" v-on:click="keyPress($event)">{{btnCaption}}</button>
+					<button v-if="r != 'Login' && r != 'Next'" :id="r" class="keyboard-btn" v-on:click="keyPress($event)">{{r}}</button>
 				</div>
 			</div>
+			</span>
 		</div>
 	</div>
 </template>
@@ -29,9 +32,16 @@ export default {
     return {
       username: null,
       password: null,
-      focusInput: null,
+      focusInput: {
+				type: Object,
+				value: '',
+				id: ''
+			},
 			display: 'none',
-			keyboardLeft: ''
+			keyboardLeft: '',
+			keyboardTop: '',
+			btnCaption: '',
+			passwordInput: this.$refs.password
     };
   }/*,
 	computed: {
@@ -41,21 +51,42 @@ export default {
   }*/,
 	methods: {
 		renderKeyBoard(e: any) {
-			//console.log(e.currentTarget);
+		this.focusInput = e.currentTarget;
+		this.focusInput.id == 'password' ? this.btnCaption = 'Login' : this.btnCaption = 'Next';
 
 			const main = document.getElementsByClassName("main")[0];
       const width = main.getBoundingClientRect().width;
       //const divPos = ((50 / width)*100);
-      let inputPos = e.getBoundingClientRect().top;
+      let inputPos = e.currentTarget.getBoundingClientRect().top;
       inputPos = parseInt(inputPos);
 
-      this.keyboardLeft = ((width / 2) - 320) + "px;top: " + (inputPos + 77) + "px;";
-			this.display = "table";
+      this.keyboardLeft = "auto;";//((width / 2) - 320) + "px;";
+			this.keyboardTop = (inputPos + 77) + "px;";
+			this.display = "table";		
+		},
+		keyPress(e: any){
+			const key = e.currentTarget.id;
+			try{
+				if(key.match(/Del./i)){
+					this.focusInput.value = this.focusInput.value.substring(0, this.focusInput.value.length - 1);
+				}else if(key.match(/Next/i)){
+					this.display = "none";
+					let elem: any;
+					elem = this.$refs.password;
+    			elem.click()
+				}else if(key.match(/Login/i)){
+				}else if(key.match(/Caps/i)){
+				}else if(key.match(/Hide/i)){
+					this.display = "none";
+				}else{
+					this.focusInput.value += key;
+				}
+			}catch(x) { }
 		}
 	},
 	computed: {
     btnStyles(): string {
-      return `display: ${this.display};`;
+      return `display: ${this.display}; left: ${this.keyboardLeft} top: ${this.keyboardTop}`;
     }
   }
 };
@@ -80,14 +111,15 @@ export default {
 .main {
   width: 96.5%;
   text-align: center;
-  margin-top: 10%;
+  margin-top: 5%;
   display: table;
 }
 
 .keyboard {
 	z-index: 40; 
-	border-radius: 25px; 
 	width: auto;
+	position: absolute;
+	background-color: white;
 }
 
 .rows {
@@ -120,13 +152,22 @@ export default {
   background-image: -o-linear-gradient(top, #a7cfdf, #23538a);
   background-image: linear-gradient(to bottom, #a7cfdf, #23538a);
   filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr=#a7cfdf, endColorstr=#23538a);
-  min-width: 60px;
-  min-height: 55px;
+  min-width: 85px;
+  min-height: 85px;
   cursor: pointer;
-  /*width: 84px;*/
-  height: 35px;
+  /*width: 84px;
+  height: 35px; */
   text-align: center;
   margin: 3px;
+}
+.login-btn {
+	background-image: -webkit-gradient(linear, left top, left bottom, from(green), to green);
+  background-image: -webkit-linear-gradient(top,green, green);
+  background-image: -moz-linear-gradient(top, green, green);
+  background-image: -ms-linear-gradient(top, green, green);
+  background-image: -o-linear-gradient(top, green, green);
+  background-image: linear-gradient(to bottom, green, green);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr=green, endColorstr=green);
 }
 
 .input-rows {
