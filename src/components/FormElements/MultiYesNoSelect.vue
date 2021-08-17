@@ -59,7 +59,13 @@ export default defineComponent({
   mixins: [SelectMixin],
   watch: {
     clear(val: boolean) {
-      if (val) this.clearSelection();
+      if (val) {
+        this.listData = this.listData.map(i => {
+          i.value = ''
+          return i
+        })
+        this.$emit('onClear')
+      }
     }
   },
   computed: {
