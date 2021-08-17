@@ -79,7 +79,10 @@ export default defineComponent({
   },
   methods: {
     onChange(): void {
-      this.$emit("onValue", this.listData);
+      const values = this.listData.map(i => i.value != '')
+      if (values.every(Boolean)) {
+        this.$emit("onValue", this.listData);
+      }
     }
   }
 });
