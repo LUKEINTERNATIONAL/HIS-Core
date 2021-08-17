@@ -16,6 +16,7 @@ import Validation from "@/components/Forms/validations/StandardValidations";
 import { toastWarning, toastSuccess } from "@/utils/Alerts"
 import EncounterMixinVue from './EncounterMixin.vue';
 import {AppointmentService} from '@/apps/ART/services/appointment_service'
+import { PatientPrintoutService } from "@/services/patient_printout_service";
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -50,7 +51,8 @@ export default defineComponent({
       if (!obs) return toastWarning('Unable to create Obs')
 
       toastSuccess('Encounter created')
-
+      const printer = new PatientPrintoutService(this.patientID);
+      await printer.printVisitSummaryLbl();
       this.nextTask()
     },
     async init() {
