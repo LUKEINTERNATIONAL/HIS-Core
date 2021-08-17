@@ -20,6 +20,13 @@ export default {
   name: "login",
   components: {
     Inputs
+  },
+  data() {
+    return {
+      keys: [
+        ['q',]
+      ] 
+    }
   }
 };
 </script>

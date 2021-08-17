@@ -27,7 +27,7 @@ export default {
   },
 	methods: {
 		renderKeyBoard(e: any) {
-			console.log(e);
+			console.log(e.currentTarget);
 		},
 	}
 };
