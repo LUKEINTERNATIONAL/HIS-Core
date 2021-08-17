@@ -36,6 +36,18 @@ export default {
 
 
 <style scoped>
+.input-boxes {
+  height: 70px;
+  /*width: 50%;*/
 
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: calc(100% - 500px);
+  font-family: Nimbus Sans L,Arial Narrow,sans-serif;
+  font-size: 2.2em;
+  background-color: #dcdcdc;
+  color: #000;
+  padding: 8px;
+}
 
 </style>
