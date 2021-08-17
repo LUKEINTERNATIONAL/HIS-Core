@@ -28,7 +28,6 @@
 
             </ion-row>
             </ion-grid>
-        
           </ion-col>
         </ion-row>
       </ion-grid>
@@ -79,13 +78,13 @@ export default defineComponent({
   },
   methods: {
     onChange(): void {
-      const values = this.listData.map(i => i.value != '')
-      if (values.every(Boolean)) {
-        this.$emit("onValue", this.listData);
-      }
+      this.$nextTick(() => {
+        const values = this.listData.map(i => i.value!='')
+        if (values.every(Boolean)) this.$emit("onValue", this.listData)
+      })
     }
   }
-});
+})
 </script>
 <style scoped>
 ion-segment-button {
