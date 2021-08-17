@@ -36,7 +36,7 @@
               <tr>
                 <td>
                   <tr>
-                    <td>Medication Run out Date</td>
+                    <td><b>Medication Run out Date</b></td>
                   </tr>
                   <tr>
                     <td>{{ rDate }}</td>
@@ -46,7 +46,12 @@
               <tr>
                 <td>
                   <tr>
-                    <td>User set appointment date</td>
+                    <td>
+                      <b>
+
+                        User set appointment date
+                      </b>
+</td>
                   </tr>
                   <tr>
                     <td>{{ aDate }}</td>
@@ -56,7 +61,7 @@
               <tr>
                 <td>
                   <tr>
-                    <td>Appointment(s)</td>
+                    <td><b>Appointment(s)</b></td>
                   </tr>
                   <tr>
                     <td>{{ appointments.length }}</td>
@@ -66,7 +71,7 @@
               <tr>
                 <td>
                   <tr>
-                    <td>Appointment limit (per/day)</td>
+                    <td><b>Appointment limit (per/day)</b></td>
                   </tr>
                   <tr>
                     <td>{{ appointmentLimit }}</td>
@@ -206,7 +211,10 @@ table {
   border-collapse: collapse;
   width: 100%;
 }
+b {
 
+  border-bottom: solid 1px black;
+}
 td,
 th {
   text-align: left;
