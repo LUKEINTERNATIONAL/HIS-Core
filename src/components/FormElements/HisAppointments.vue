@@ -11,6 +11,7 @@
               class="custom-calendar max-w-full"
               :min-date="sessionDate"
               :max-date="runOutDate"
+              :attributes="attributes"
             >
               <template v-slot:day-content="{ day }">
                 <div
@@ -21,8 +22,6 @@
                 >
                   <span
                     @click="dayClicked(day)"
-                    class="day-label text-sm text-gray-900"
-                    style="top: 20%"
                     >{{ day.day }}</span
                   >
                   <sup v-if="day.id === cDate" class="appointments">{{
@@ -166,6 +165,14 @@ export default defineComponent({
     cDate(): string {
       return HisDate.toStandardHisFormat(this.startDate);
     },
+    attributes() {
+      return [
+        {
+          highlight: true,
+          dates: this.aDate
+        }
+      ]
+    }
   },
 });
 </script>
@@ -178,9 +185,16 @@ export default defineComponent({
   font-size: 3vh;
   height: 80px;
 }
+.vc-highlight {
+  width: 100%;
+  height: 100%;
+  border-radius: 0%;
+}
 .selected {
   font-size: 4vh;
-  color: green;
+  height: 100%;
+  margin-top: 15%;
+  color: white;
 }
 .isDisabled {
   color: #00000040;
@@ -200,7 +214,7 @@ th {
 }
 .appointments {
   font-size: 3vh;
-  color: rgb(5, 123, 233);
+  color: rgb(0, 255, 115);
 }
 .custom-calendar .vc-day {
   height: 50px;
