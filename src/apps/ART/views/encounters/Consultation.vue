@@ -16,7 +16,7 @@ import Validation from "@/components/Forms/validations/StandardValidations";
 import EncounterMixinVue from "./EncounterMixin.vue";
 import { alertAction, toastSuccess, toastWarning } from "@/utils/Alerts";
 import HisDate from "@/utils/Date";
-import { findIndex, isEmpty } from "lodash";
+import { findIndex, isEmpty, find } from "lodash";
 import { ConsultationService } from "@/apps/ART/services/consultation_service";
 import { UserService } from "@/services/user_service";
 import { OrderService } from "@/services/order_service";
@@ -279,38 +279,40 @@ export default defineComponent({
         },
       ];
     },
-    getFPMethods(exclusionList: string[] = []) {
+    getFPMethods(exclusionList: string[] = [], preChecked: Array<Option>) {
       const methods = this.consultation.getFamilyPlanningMethods(); 
       const filtered = methods.filter((data: string) => !exclusionList.includes(data));
-      return filtered.map((method: any) => {
-        return { label: method, value: method };
-      });
+      return filtered.map((method: any) => ({
+        label: method, 
+        value: method,
+        isChecked: preChecked.map(i => i.label).includes(method)
+      }));
     },
-    async getOptions(options: string[]) {
+    async getOptions(options: string[], preValues: Array<Option>) {
       return options.map((data: any) => {
+        const preValue = find(preValues, { label: data })
         return {
           label: data,
-          value: "",
+          value: preValue ? preValue.value : '',
           other: {
             values: this.getYesNo(),
-          },
-        };
-      });
+          }
+        }
+      })
     },
-    getContraindications() {
+    getContraindications(preValues: Array<Option>) {
       const contraIndications = ConceptService.getConceptsByCategory('contraindication').map(data => data.name);
-      return this.getOptions([...contraIndications, 'Other']);
+      return this.getOptions([...contraIndications, 'Other'], preValues);
     },
-    getOtherContraindications() {
+    getOtherContraindications(preValues: Array<Option>) {
       const contraIndications = ConceptService.getConceptsByCategory('side_effect').map(data => data.name);
-      return this.getOptions([...contraIndications, 'Other (Specify)']);
+      return this.getOptions([...contraIndications, 'Other (Specify)'], preValues);
     },
-    getTBSymptoms() {
-
+    getTBSymptoms(preValues: Array<Option>) {
       const contraIndications = ConceptService.getConceptsByCategory('tb_symptom').map(data => data.name);
-      return this.getOptions([...contraIndications]);
+      return this.getOptions([...contraIndications], preValues);
     },
-    getPrescriptionFields() {
+    getPrescriptionFields(preChecked: Array<Option>) {
       const vals = [
         { label: "ARVs", value: "ARVs", isChecked: true },
         { label: "CPT", value: "CPT", isChecked: true },
@@ -334,8 +336,13 @@ export default defineComponent({
           { value: "3HP (RFP + INH)", description: "Completed TPT" }
         );
       }
-      return [...this.removeAndDisable(vals, exclusions)];
-      // if(this.isAllergic)
+      const data = vals.map(v => {
+        if (!isEmpty(preChecked)) {
+          v.isChecked = preChecked.map(v => v.value).includes(v.value)
+        }
+        return v
+      })
+      return [...this.removeAndDisable(data, exclusions)];
     },
     removeAndDisable(initialFields: any[], exclusionList: any[]) {
       return initialFields.map((data) => {
@@ -372,7 +379,7 @@ export default defineComponent({
           onValueUpdate: (listData: Array<Option>, value: Option) => {
             return this.disablePrescriptions(listData, value);
           },
-          options: () => this.getPrescriptionFields(),
+          options: (_: any, checked: Array<Option>) => this.getPrescriptionFields(checked),
           condition: () => false, // show if guardian only visit
         },
         {
@@ -486,7 +493,7 @@ export default defineComponent({
           condition: (formData: any) =>
             this.showCurrentContraceptionMethods(formData),
           type: FieldType.TT_MULTIPLE_SELECT,
-          options: () => this.getFPMethods(),
+          options: (_: any, checked: Array<Option>) => this.getFPMethods([], checked),
         },
         {
           id: "fp_methods",
@@ -503,7 +510,7 @@ export default defineComponent({
             });
           },
           type: FieldType.TT_MULTIPLE_SELECT,
-          options: () => this.getFPMethods(),
+          options: (_: any, checked: Array<Option>) => this.getFPMethods([], checked),
         },
         {
           id: "reason_for_no_fpm",
@@ -602,12 +609,11 @@ export default defineComponent({
               return this.consultation.buildValueCoded(data.label, data.value);
             });
           },
-          options: () => this.getFPMethods(["NONE"]),
+          options: (_: any, checked: Array<Option>) => this.getFPMethods(["NONE"], checked),
         },
         {
           id: "side_effects",
-          helpText:
-            "Contraindications / Side effects (select either 'Yes' or 'No')",
+          helpText: "Contraindications / Side effects (select either 'Yes' or 'No')",
           type: FieldType.TT_MULTIPLE_YES_NO,
           validation: (data: any) => Validation.anyEmpty(data),
           unload: async (data: any) => {
@@ -625,17 +631,16 @@ export default defineComponent({
                 child: {
                   ...child,
                 },
-              };
-            });
+              }
+            })
           },
-          options: () => this.getContraindications(),
+          options: (_: any, checked: Array<Option>) => this.getContraindications(checked),
         },
         {
           id: "other_side_effects",
           condition: (formData: any) => this.showOtherSideEffects(formData),
           validation: (data: any) => Validation.anyEmpty(data),
-          helpText:
-            "Other Contraindications / Side effects (select either 'Yes' or 'No')",
+          helpText: "Other Contraindications / Side effects (select either 'Yes' or 'No')",
           type: FieldType.TT_MULTIPLE_YES_NO,
           unload: async (data: any) => {
             const filtered = data.filter((d: any) => {
@@ -658,7 +663,7 @@ export default defineComponent({
               };
             });
           },
-          options: () => this.getOtherContraindications(),
+          options: (_: any, checked: Array<Option>) => this.getOtherContraindications(checked)
         },
         {
           id: "on_tb_treatment",
@@ -707,7 +712,7 @@ export default defineComponent({
             });
           },
           type: FieldType.TT_MULTIPLE_YES_NO,
-          options: () => this.getTBSymptoms(),
+          options: (_: any, checked: Array<Option>) => this.getTBSymptoms(checked)
         },
         {
           id: "tb_status",
@@ -815,7 +820,7 @@ export default defineComponent({
           onValueUpdate: (listData: Array<Option>, value: Option) => {
             return this.disablePrescriptions(listData, value);
           },
-          options: () => this.getPrescriptionFields(),
+          options: (_: any, checked: Array<Option>) => this.getPrescriptionFields(checked),
         },
       ];
     },
