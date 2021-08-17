@@ -81,7 +81,10 @@ export default defineComponent({
                         value,
                         label: `${label} followup`
                     }),
-                    validation: (v: any) => Validation.anyEmpty(v),
+                    validation: (v: any) => this.validateSeries([
+                       () => Validation.required(v), 
+                       () => Validation.anyEmpty(v)
+                    ]),
                     computedValue: (d: Array<Option>) => {
                         const obs: any = []
                         d.forEach(({ label, value }: Option) => {
