@@ -27,14 +27,15 @@ export default {
   },
 	methods: {
 		renderKeyBoard(e: any) {
-			console.log(e.currentTarget);
+			//console.log(e.currentTarget);
+			console.log(this.$props.inputs)
 		},
 	}
 };
 </script>
 
 
-<style scope>
+<style scoped>
 
 
 </style>

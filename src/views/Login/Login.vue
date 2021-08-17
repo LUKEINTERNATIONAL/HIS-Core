@@ -24,7 +24,10 @@ export default {
   data() {
     return {
       keys: [
-        ['q',]
+        ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+        ["q","w","e","r","t","y","u","i","o","p"],
+        ["a","s","d","f","g","h","j","k","l","Del."],
+        ["z","x","c","v","b","n","m", "Hide","Caps"]
       ] 
     }
   }
@@ -32,6 +35,6 @@ export default {
 </script>
 
 
-<style scope>
+<style scoped>
 
 </style>
