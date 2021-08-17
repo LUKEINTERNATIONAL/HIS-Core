@@ -320,8 +320,8 @@ export default defineComponent({
                     }),
                     condition: (f: any) => f.has_transfer_letter.value === 'Yes',
                     validation: (val: any) => this.validateSeries([
-                        this.vitals.isNotEmptyandFloat(val),
-                        Validation.rangeOf(val, 1, 300)
+                        () => this.vitals.isNotEmptyandFloat(val),
+                        () => Validation.rangeOf(val, 1, 300)
                     ]),
                     config: {
                         customKeyboard: [

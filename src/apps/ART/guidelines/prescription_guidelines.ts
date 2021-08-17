@@ -278,11 +278,8 @@ export const PRESCRIPTION_GUIDELINES: Record<string, GuideLineInterface> = {
             regimenCode(code: number) {
                 return code >= 12
             },
-            gender(gender: string) {
-                return gender === 'F'
-            },
-            age(age: number) {
-                return age >= 14 && age <= 45
+            isChildBearing(isBearing: boolean){
+                return isBearing
             }
         }
     },

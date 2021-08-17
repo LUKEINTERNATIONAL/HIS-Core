@@ -5,7 +5,7 @@ import { Field, Option } from "@/components/Forms/FieldInterface"
 import { StagingService } from "@/apps/ART/services/staging_service"
 import EncounterMixinVue from './EncounterMixin.vue'
 import Validation from "@/components/Forms/validations/StandardValidations"
-import MonthOptions from "@/components/FormElements/Presets/MonthOptions"
+import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import HisDate from "@/utils/Date"
 import { isEmpty } from "lodash"
 import { CD4_COUNT_PAD_LO } from "@/components/Keyboard/KbLayouts"
@@ -24,6 +24,7 @@ export default defineComponent({
             stage: -1 as number,
             cd4: -1 as number,
             date: '' as string,
+            isChildBearing: false as boolean,
             stageOneConditions: [] as Array<string>,
             stageTwoConditions: [] as Array<string>,
             stageThreeConditions: [] as Array<string>,
@@ -52,6 +53,7 @@ export default defineComponent({
             this.stagingFacts.gender = patient.isMale() ? 'M' : 'F' 
             this.stagingFacts.testType = this.staging.getConfirmatoryTestType()
             this.stagingFacts.ageInMonths = patient.getAgeInMonths()
+            this.stagingFacts.isChildBearing = patient.isChildBearing()
 
             if (this.staging.isPedaid()) {
                 this.stagingFacts.weightPercentile = await patient.calculateWeightPercentile()
@@ -256,7 +258,7 @@ export default defineComponent({
                             }
                         }
                     ]),
-                    condition: (f: any) => this.hasStaging(f) && this.patient.isFemale(),
+                    condition: (f: any) => this.hasStaging(f) && this.stagingFacts.isChildBearing,
                 },
                 {
                     id: 'patient_weight_chart',
@@ -389,8 +391,8 @@ export default defineComponent({
                     validation: (val: any) => {
                         const isCd4 = () => this.staging.cd4CountIsValid(val.value)
                         return this.validateSeries([
-                            Validation.required(val),
-                            !isCd4() ? ['Please start with either modifier first: >, <, or ='] : null
+                            () => Validation.required(val),
+                            () => !isCd4() ? ['Please start with either modifier first: >, <, or ='] : null
                         ])
                     },
                     config: {
@@ -403,71 +405,26 @@ export default defineComponent({
                     },
                     condition: (f: any) => this.hasStaging(f) && f.cd4_available.value === 'Yes',
                 },
-                {
-                    id: 'year_of_cd4_result',
-                    helpText: 'Year of CD4 result',
-                    type: FieldType.TT_NUMBER,
-                    appearInSummary: () => false,
+                ...generateDateFields({
+                    id: 'cd4_result_date',
+                    helpText: 'Cd4 Results',
+                    condition: (f: any) =>  this.hasStaging(f) && f.cd4_available.value === 'Yes',
                     validation: (val: any) => {
-                        const date = HisDate.stitchDate(val.value)
                         return this.validateSeries([
-                            Validation.required(val),
-                            Validation.isNumber(val),
-                            this.yearNotHundredAgo(val.value),
-                            this.dateBeforeBirthDate(date),
-                            this.dateInFuture(date)
+                            () => Validation.required(val),
+                            () => this.dateBeforeBirthDate(val.value),
+                            () => this.dateInFuture(val.value)
                         ])
                     },
-                    condition: (f: any) => this.hasStaging(f) && f.cd4_available.value === 'Yes',
-                },
-                {
-                    id: 'month_of_cd4_result',
-                    helpText: 'Month of CD4 result',
-                    type: FieldType.TT_SELECT,
-                    appearInSummary: () => false,
-                    options: () => MonthOptions,
-                    validation: (val: any, f: any) => {
-                        const date = HisDate.stitchDate(
-                            f.year_of_cd4_result.value, val.value
-                        )
-                        console.log(date)
-                        return this.validateSeries([
-                            Validation.required(val),
-                            this.dateBeforeBirthDate(date),
-                            this.dateInFuture(date)
-                        ])
-                    },
-                    condition: (f: any) => this.hasStaging(f) && f.cd4_available.value === 'Yes',
-                },
-                {
-                    id: 'day_of_cd4_result',
-                    helpText: 'Day of CD4 result',
-                    type: FieldType.TT_MONTHLY_DAYS,
-                    summaryMapValue: (_: any, f: any, computedValue: any) => ({
-                        label: 'Date of cd4 result', value: computedValue.date
-                    }),
-                    computedValue: ({ value }: Option, f: any) => {
-                        const date = HisDate.stitchDate(
-                            f.year_of_cd4_result.value,
-                            f.month_of_cd4_result.value,
-                            value
-                        )
+                    computeValue: (date: string, isEstimate: boolean) => {
                         return {
                             date,
                             tag: 'staging',
-                            obs: this.staging.buildValueDate('Cd4 count datetime', date)
+                            isEstimate,
+                            obs: this.staging.buildValueDate('Cd4 count datetime', date) 
                         }
-                    },
-                    validation: (val: any, f: any, computedValue: any) => {
-                        return this.validateSeries([
-                            Validation.required(val),
-                            Validation.isNumber(val),
-                            this.dateBeforeBirthDate(computedValue.date),
-                            this.dateInFuture(computedValue.date)
-                        ])
-                    },
-                    condition: (f: any) => this.hasStaging(f) && f.cd4_available.value === 'Yes'
-                },
+                    }
+                }, this.staging.getDate()),
                 {
                     id: 'location',
                     helpText: 'CD4 Location',

@@ -45,11 +45,16 @@ export class Patientservice extends Service {
     }
 
     isMale() {
-        return this.getGender() === 'Male'
+        return ['Male', 'M'].includes(this.getGender())
     }
 
     isFemale() {
-        return this.getGender() === 'Female'
+        return ['Female', 'F'].includes(this.getGender())
+    }
+
+    isChildBearing() {
+        const age = this.getAge()
+        return this.isFemale() && age >= 12 && age <= 50
     }
 
     async getRecentWeight() {
@@ -83,12 +88,13 @@ export class Patientservice extends Service {
         });
     }
     async getBMI() {
+        //TODO: weight and height should have optional parameters to get weight and height
         const weight = await this.getRecentWeight()
         const height = await this.getRecentHeight()
 
         if (!(weight && height)) return 0
 
-        const gender = this.getGender() === 'Male' ? 'M': 'F'
+        const gender = this.isMale() ? 'M' : 'F'
         const bmi: any = await BMIService.getBMI(weight, height, gender, this.getAge())
 
         return bmi
