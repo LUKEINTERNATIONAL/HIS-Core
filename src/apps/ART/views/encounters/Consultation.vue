@@ -424,7 +424,10 @@ export default defineComponent({
           helpText: `Patient Pregnant or breastfeeding?`,
           condition: () => this.showPregnancyQuestions(),
           type: FieldType.TT_MULTIPLE_YES_NO,
-          validation: (data: any) => Validation.anyEmpty(data),
+          validation: (data: any) => this.validateSeries([
+            () => Validation.required(data), 
+            () => Validation.anyEmpty(data)
+          ]),
           unload: (data: any) => {
             this.pregnancy = data.map((data: Option) => {
               return this.consultation.buildValueCoded(
@@ -615,7 +618,10 @@ export default defineComponent({
           id: "side_effects",
           helpText: "Contraindications / Side effects (select either 'Yes' or 'No')",
           type: FieldType.TT_MULTIPLE_YES_NO,
-          validation: (data: any) => Validation.anyEmpty(data),
+          validation: (data: any) => this.validateSeries([
+            () => Validation.required(data), 
+            () => Validation.anyEmpty(data)
+          ]),
           unload: async (data: any) => {
             this.sideEffects = await data.map(async (data: Option) => {
               const host = await this.consultation.buildValueCoded(
@@ -639,7 +645,10 @@ export default defineComponent({
         {
           id: "other_side_effects",
           condition: (formData: any) => this.showOtherSideEffects(formData),
-          validation: (data: any) => Validation.anyEmpty(data),
+          validation: (data: any) => this.validateSeries([
+            () => Validation.required(data), 
+            () => Validation.anyEmpty(data)
+          ]),
           helpText: "Other Contraindications / Side effects (select either 'Yes' or 'No')",
           type: FieldType.TT_MULTIPLE_YES_NO,
           unload: async (data: any) => {
@@ -686,7 +695,10 @@ export default defineComponent({
         {
           id: "tb_side_effects",
           helpText: "TB Associated symptoms",
-          validation: (data: any) => Validation.anyEmpty(data),
+          validation: (data: any) => this.validateSeries([
+            () => Validation.required(data), 
+            () => Validation.anyEmpty(data)
+          ]),
           condition: (formData: any) => this.notOnTBTreatment(formData),
           unload: async (vals: any) => {
             const val =
