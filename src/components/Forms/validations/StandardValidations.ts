@@ -40,10 +40,12 @@ function neitherOr(val: any): null | Array<string> {
     return null;
 }
 function anyEmpty(val: any): null | Array<string> {
-    const allNo = val.filter((i: any) => i.value === '')
-    if(allNo.length > 0) return ['all must be selected']
+    const error = ['all must be selected']
 
-    return null;
+    if (!val) return error
+
+    const allNo = val.filter((i: any) => i.value === '')
+    return allNo.length > 0 ? error : null
 }
 function notTheSame(val: any, comparison: string): null | Array<string> {
     return val.value === comparison ? ['Values can not be the same'] : null;
