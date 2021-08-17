@@ -206,14 +206,13 @@ export default defineComponent({
 }
 </style>
 <style scoped>
+.view-port-content {
+  background-color: white;
+}
 table {
   font-family: arial, sans-serif;
   border-collapse: collapse;
   width: 100%;
-}
-b {
-
-  border-bottom: solid 1px black;
 }
 td,
 th {
