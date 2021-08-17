@@ -36,5 +36,31 @@ export default {
 
 
 <style scoped>
+#container {
+  margin: 15px;
+  /*border-style: solid;
+  border-width: 1px;*/
+  height: 95%;
+}
 
+#donor-img {
+  left: 270px;
+  height: 120px;
+  width: 120px;
+}
+
+#mw-img {
+  left: 10px;
+  width: 190px;
+  height: 190px;
+}
+
+.logos {
+  bottom: 10px;
+  width: 120px;
+  height: 70px;
+  margin-left: 10px;
+  float: left;
+  position: absolute;
+}
 </style>
