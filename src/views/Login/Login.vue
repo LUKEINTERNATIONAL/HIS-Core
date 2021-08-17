@@ -1,7 +1,7 @@
 <template>
   <ion-page>
     <ion-content :fullscreen="true">
-      <div id="login" class="table-container">
+      <div id="login" class="container">
        
         <Inputs v-bind:keys="keys"></Inputs>
 

@@ -1,19 +1,23 @@
 <template>
-	 <div class="table-container main">
+	 <div class="main">
 		<div class="rows">
 			<div class="cells">
 				<input type="text" name="usename" autocomplete="off"
 					id="username" v-on:click="renderKeyBoard($event)" class="input-boxes"/>
 			</div>
 		</div>
-		<div class="rows">
+		<div class="rows input-rows">
 			<div class="cells">
 				<input type="password" name="password" 
 					v-on:click="renderKeyBoard($event)" class="input-boxes"/>
 			</div>
 		</div>
-		<div id="keyboard" v-bind:key="k" v-for="k in keys">
-			<button class="key-btn">{{k}}</button>
+		<div id="keyboard" :style="btnStyles" class="keyboard" v-bind:key="k" v-for="k in keys">
+			<div class="rows">
+				<div class="cells" v-bind:key="r" v-for="r in k">
+					<button class="keyboard-btn">{{r}}</button>
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
@@ -25,15 +29,28 @@ export default {
     return {
       username: null,
       password: null,
-      focusInput: null
+      focusInput: null,
+			display: 'none'
     };
-  },
+  }/*,
+	computed: {
+    computedDisplay(): string {
+      return this.display;
+    }
+  }*/,
 	methods: {
 		renderKeyBoard(e: any) {
 			//console.log(e.currentTarget);
-			console.log(this.$props.inputs)
-		},
-	}
+			this.display = "table";
+		}
+	},
+	computed: {
+    btnStyles(): {} {
+      return {
+        "display": this.display
+      };
+    }
+  }
 };
 </script>
 
@@ -53,19 +70,53 @@ export default {
   padding: 8px;
 }
 
-.table-container {
-  display: table;
+.main {
   width: 96.5%;
   text-align: center;
   margin-top: 10%;
+  display: table;
 }
 
 .rows {
   display: table-row;
-  line-height: 120px;
+  line-height: 1px;
 }
 
 .cells {
   display: table-cell;
+}
+
+.keyboard-btn {
+  border: 1px solid #7eb9d0;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 5px !important;
+  font-size: 25px !important;
+  font-family: arial, helvetica, sans-serif;
+  padding: 10px 10px 10px 10px;
+  text-decoration: none;
+  display: inline-block;
+  text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  color: #fff;
+  background-color: #a7cfdf;
+  background-image: -webkit-gradient(linear, left top, left bottom, from(#a7cfdf), to(#23538a));
+  background-image: -webkit-linear-gradient(top, #a7cfdf, #23538a);
+  background-image: -moz-linear-gradient(top, #a7cfdf, #23538a);
+  background-image: -ms-linear-gradient(top, #a7cfdf, #23538a);
+  background-image: -o-linear-gradient(top, #a7cfdf, #23538a);
+  background-image: linear-gradient(to bottom, #a7cfdf, #23538a);
+  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr=#a7cfdf, endColorstr=#23538a);
+  min-width: 60px;
+  min-height: 55px;
+  cursor: pointer;
+  /*width: 84px;*/
+  height: 35px;
+  text-align: center;
+  margin: 3px;
+}
+
+.input-rows {
+	line-height: 140px;
 }
 </style>
