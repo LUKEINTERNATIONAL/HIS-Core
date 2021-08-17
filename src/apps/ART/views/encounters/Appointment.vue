@@ -73,6 +73,11 @@ export default defineComponent({
               obs: this.appointment.buildValueDate('Appointment date', d.value)
             }
           },
+          config: {
+            hiddenFooterBtns: [
+                'Clear'
+            ]
+          },
           options: () =>  {return [{
             label: "",
             value: "",
