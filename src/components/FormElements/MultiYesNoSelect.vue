@@ -6,15 +6,15 @@
           <ion-col :size="getSize" v-for="(item, index) in listData" :key="index">
             <ion-grid>
             <ion-row>
-  <ion-col size="6">
+            <ion-col size="6">
             <h1>{{ item.label }}</h1>
           </ion-col>
           <ion-col size="6">
             <ion-segment
               mode="ios"
               v-model="item.value"
+              @ionChange="onChange"
             >
-
               <ion-segment-button
                 class="yes-no"
                 v-for="(option, idx) in item.other.values"
@@ -60,40 +60,22 @@ export default defineComponent({
   watch: {
     clear(val: boolean) {
       if (val) this.clearSelection();
-    },
-    listData: {
-      async handler( params ) {
-        this.$emit("onValue",params);
-      },
-      deep: true,
-      immediate: true,
-    },
+    }
   },
   computed: {
     getSize(): string {
       return this.listData.length > 6 ? '6' : '12'
     }
   },
-  data() {
-    return {
-      values: {} as any,
-    };
-  },
   async activated() {
-    this.listData = await this.options(this.fdata);
-  },
-  async mounted() {
-    this.listData = await this.options(this.fdata);
-    await this.listData.forEach((element: any) => {
-      this.values[element.property] = "";
-    });
+    const values = this.listData.filter(i => i.value != '')
+    this.listData = await this.options(this.fdata, values);
   },
   methods: {
-    onselect(data: any): void {
+    onChange(): void {
       this.$emit("onValue", this.listData);
-    },
-   
-  },
+    }
+  }
 });
 </script>
 <style scoped>
