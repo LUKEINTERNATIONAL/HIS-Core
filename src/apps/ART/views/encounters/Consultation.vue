@@ -191,6 +191,7 @@ export default defineComponent({
       return listData;
     },
     setDrugOrderObs(listData: Array<Option>) {
+      let prescribeDrugs = 'Yes';
       listData.forEach((element) => {
         if (element.label != "NONE OF THE ABOVE" && element.isChecked) {
           this.medicationObs.push(
@@ -201,11 +202,12 @@ export default defineComponent({
           );
         }
         if (element.label === "NONE OF THE ABOVE" && element.isChecked) {
-          this.medicationObs.push(
-            this.consultation.buildValueCoded("Prescribe drugs", "No")
-          );
+         prescribeDrugs = 'No'; 
         }
       });
+      this.medicationObs.push(
+        this.consultation.buildValueCoded("Prescribe drugs", prescribeDrugs)
+      );
     },
     declinedFPM(formData: any) {
       if (!formData.fp_methods) return false;
