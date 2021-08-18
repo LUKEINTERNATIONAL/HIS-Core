@@ -238,6 +238,7 @@ export default defineComponent({
                             () => this.dateInFuture(val.value)
                         ])
                     },
+                    allowEstimationField: true,
                     computeValue: (date: string, isEstimate: boolean) => {
                         this.staging.setDate(date)
                         this.vitals.setDate(date)
@@ -248,7 +249,7 @@ export default defineComponent({
                             obs: this.buildDateObs('Drug start date', date, isEstimate) 
                         }
                     },
-                }, this.registration.getDate(), true),
+                }, this.registration.getDate()),
                 {
                     id: 'previous_art_number',
                     helpText: 'ART number at previous location',
@@ -429,6 +430,7 @@ export default defineComponent({
                             () => this.dateInFuture(val.value)
                         ])
                     },
+                    allowEstimationField: true,
                     computeValue: (date: string, isEstimate: boolean) => {
                         return {
                             date,
@@ -437,7 +439,7 @@ export default defineComponent({
                             obs: this.buildDateObs('Confirmatory HIV test date', date, isEstimate) 
                         }
                     },
-                }, this.registration.getDate(), true),
+                }, this.registration.getDate()),
                 this.getStagingSummaryField('Staging summary')
             ]
         }

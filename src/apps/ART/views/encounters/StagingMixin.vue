@@ -416,6 +416,7 @@ export default defineComponent({
                             () => this.dateInFuture(val.value)
                         ])
                     },
+                    allowUnknown: false,
                     computeValue: (date: string, isEstimate: boolean) => {
                         return {
                             date,

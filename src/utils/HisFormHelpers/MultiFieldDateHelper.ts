@@ -18,23 +18,20 @@ export interface DateFieldInterface {
 function onValidation(
     datePart: 'year' | 'month' | 'day', 
     field: DateFieldInterface, 
-    val: Option, 
-    formData: any, 
+    val: Option,
+    formData: any,
     computedFormData: any) {
 
     const validate = (data: any) => field.validation ? field.validation(data, formData, computedFormData) : true
-
-    if (!val) {
-        // Let any custom validation deal with null values
-        return validate(val)
-    }
+    // Let any custom validation deal with null values
+    if (!val) return validate(val)
 
     if (val.value.toString().match(/unknown/i)) {
         if ('allowUnknown' in field && !field.allowUnknown) {
             return ['Unknown value not permitted']
         }
         //If year is unknown, treat the whole date as unknown and dont do anything here
-        if (datePart === 'year') return null
+        if (datePart.match(/year/)) return null
     }
     const getValue = (type: string) => {
         const id = type === 'day' ? field.id : `${type}_${field.id}`
