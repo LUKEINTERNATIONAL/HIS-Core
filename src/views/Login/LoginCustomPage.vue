@@ -52,7 +52,6 @@ export default {
 			keyboardLeft: '',
 			keyboardTop: '',
 			btnCaption: '',
-			passwordInput: this.$refs.password,
       Caps: {
         type: Boolean,
         on: false
