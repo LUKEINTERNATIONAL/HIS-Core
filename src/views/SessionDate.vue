@@ -12,32 +12,27 @@ import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import HisDate from "@/utils/Date"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 
-
 export default defineComponent({
     components: { HisStandardForm },
     data: () => ({
         fields: [] as Array<Field>
     }),
     created(){
-        this.fields = this.getFields()
+        this.fields = generateDateFields({
+            id: 'session_date',
+            helpText: 'Session Date',
+            estimation: {
+                allowUnknown: false
+            },
+            validation: (v: Option) => Validation.required(v),
+            computeValue: (date: string) => date
+        }, '')
     },
     methods: {
         async onSubmit(f: any, computedData: any) {
             const date = computedData.session_date
-            //TODO: Change session date here
-            Service.setSessionDate(date)
+            await Service.setSessionDate(date)
             toastSuccess(`Successfully Back dated to ${HisDate.toStandardHisDisplayFormat(date)}`)
-        },
-        getFields() {
-            return generateDateFields({
-                id: 'session_date',
-                helpText: 'Session Date',
-                estimation: {
-                    allowUnknown: false
-                },
-                validation: (v: Option) => Validation.required(v),
-                computeValue: (date: string) => date
-            }, '')
         }
     }
 })

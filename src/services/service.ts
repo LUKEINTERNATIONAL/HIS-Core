@@ -33,6 +33,13 @@ export class Service {
         throw 'Unable to delete record'
     }
 
+    static async getApiDate() {
+        const req = await this.getJson('current_time')
+        if (req) {
+            return req.date
+        }
+    }
+
     static getActiveApp(): AppInterface | {} { 
         return HisApp.getActiveApp() || {}
     }
@@ -40,6 +47,7 @@ export class Service {
     static getUserLocation() {
         return sessionStorage.getItem('userLocation')
     }
+
     static getLocationName() {
         return sessionStorage.getItem('locationName')
     }
@@ -48,8 +56,16 @@ export class Service {
         return sessionStorage.getItem('sessionDate') || '';
     }
     
-    static setSessionDate(date: string) {
-        sessionStorage.setItem('sessionDate', date)
+    static async setSessionDate(sessionDate: string) {
+        const apiDate = await this.getApiDate()
+        sessionStorage.setItem('apiDate', apiDate)
+        sessionStorage.setItem('sessionDate', sessionDate)
+    }
+
+    static isBDE() {
+        const apiDate = sessionStorage.getItem('apiDate')
+        const sessionDate = sessionStorage.getItem('sessionDate')
+        return apiDate === sessionDate
     }
 
     static getProgramID() {
@@ -59,7 +75,7 @@ export class Service {
         
         return 0;
     }
-    
+
     static getUserRoles() {
        const roles = sessionStorage.getItem('userRoles');
        
