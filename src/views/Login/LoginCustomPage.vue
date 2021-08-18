@@ -2,14 +2,14 @@
 	 <div class="main" ref="main">
 		<div class="rows">
 			<div class="cells">
-				<input type="text" name="usename" autocomplete="off"
+				<input type="text" name="usename" autocomplete="off" placeholder="Username"
 					id="username" ref="username" v-on:click="renderKeyBoard($event)" class="input-boxes"/>
 			</div>
 		</div>
 		<div class="rows input-rows">
 			<div class="cells">
 				<input type="password" name="password" ref="password" id="password"
-					v-on:click="renderKeyBoard($event)" class="input-boxes"/>
+					v-on:click="renderKeyBoard($event)" class="input-boxes" placeholder="Password"/>
 			</div>
 		</div>
 		<div id="keyboard" :style="btnStyles" class="keyboard">
