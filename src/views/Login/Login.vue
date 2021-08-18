@@ -78,11 +78,12 @@ export default {
 
 .header {
   border-style: solid;
-  border-width: 0px 0px 3px 0px;
   height: 40px;
   text-align: right;
   margin: 10px;
   padding-right: 10px;
+  border-width: 0px 0px 1px 0px;
+  border-color:  rgb(204, 204, 204);
 }
 
 </style>

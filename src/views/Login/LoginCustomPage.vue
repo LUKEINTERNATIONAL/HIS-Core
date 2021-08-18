@@ -60,7 +60,7 @@ export default {
       let inputPos = e.currentTarget.getBoundingClientRect().top;
       inputPos = parseInt(inputPos);
 
-      this.keyboardLeft = "auto;";//((width / 2) - 320) + "px;";
+      this.keyboardLeft = ((width / 2) - 447) + "px;";
 			this.keyboardTop = (inputPos + 77) + "px;";
 			this.display = "table";		
 		},
@@ -117,9 +117,13 @@ export default {
 
 .keyboard {
 	z-index: 40; 
-	width: auto;
+	/*width: auto;*/
 	position: absolute;
 	background-color: white;
+	width: 50%;
+	margin: auto;
+	background-color: rgba(255, 255, 255, 0.9);
+	border: 1px solid rgb(204, 204, 204);
 }
 
 .rows {
