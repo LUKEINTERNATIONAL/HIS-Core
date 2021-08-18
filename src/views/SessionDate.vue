@@ -32,7 +32,24 @@ export default defineComponent({
                 () => this.dateisTooFar(v.value.toString()),
                 () => this.dateIsTooOld(v.value.toString())
             ]),
-            computeValue: (date: string) => date
+            computeValue: (date: string) => date,
+            config: {
+                footerBtns: [
+                    {
+                        name: 'Reset',
+                        size: 'large',
+                        slot: 'end',
+                        color: 'success',
+                        visible: false,
+                        visibleOnStateChange: (state: Record<string, any>) => {
+                            return state.index === 0 && Service.isBDE()
+                        },
+                        onClick: async () => {
+                            await this.resetSessionDate()
+                        }
+                    }
+                ]
+            }
         }, '')
     },
     async mounted() {
@@ -52,35 +69,41 @@ export default defineComponent({
                 `The system is currently in Back Data Entry Mode(BDE). \
                 Do you wish to reset the date to ${apiDate}?`,
                 `BDE Date: ${sessionDate}`,
-                 [
+                [
                     { name: `Yes, Reset to ${apiDate}`, slot: 'start', color: 'primary'},
                     { name: `No, keep ${sessionDate}`, slot: 'end', color: 'danger' }
                 ],
             )
-            if (action != `No, keep ${sessionDate}`) {
-                try {
-                    await Service.resetSessionDate()
-                    return toastSuccess('Session date has been reset!')
-                } catch (e) {
-                    toastWarning(e)
-                }
+            if (action != `No, keep ${sessionDate}`) await this.resetSessionDate()
+        },
+        async resetSessionDate() {
+            try {
+                await Service.resetSessionDate()
+                return toastSuccess(`Session date has been reset to ${this.formatDate(this.apiDate)}`)
+            } catch (e) {
+                toastWarning(e)
             }
         },
         async onSubmit(_: any, computedData: any) {
             const date = computedData.session_date
             try {
                 await Service.setSessionDate(date)
-                toastSuccess(`Successfully Back dated to ${HisDate.toStandardHisDisplayFormat(date)}`)
+                toastSuccess(`Successfully Back dated to ${this.formatDate(date)}`)
+                return true
             } catch(e) {
                 toastWarning(e)
+                return false
             }
         },
+        formatDate(date: string) {
+            return HisDate.toStandardHisDisplayFormat(date)
+        },
         dateIsTooOld(date: string) {
-            return date > this.apiDate ? [`Date is beyond reference date ${this.apiDate}`] : null
+            return date > this.apiDate ? [`Date is beyond reference date ${this.formatDate(this.apiDate)}`] : null
         },
         dateisTooFar(date: string) {
             const dateLimit = '2000-01-01'
-            return date < dateLimit ? [`Date less than limit date of ${dateLimit}`] : null
+            return date < dateLimit ? [`Date less than limit date of ${this.formatDate(dateLimit)}`] : null
         }
     }
 })

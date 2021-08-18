@@ -22,6 +22,7 @@ export interface DateFieldInterface {
     computeValue: Function;
     appearInSummary?: Function;
     estimation: EstimationInterface;
+    config?: any;
 }
 
 function onValidation(
@@ -90,7 +91,8 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             type: FieldType.TT_NUMBER,
             appearInSummary: () => false,
             condition: (f: any) => field.condition ? field.condition(f) : true,
-            validation: (v: Option, f: any, c: any) => onValidation('year', field, v, f, c)
+            validation: (v: Option, f: any, c: any) => onValidation('year', field, v, f, c),
+            config: field.config
         },
         {
             id: monthId,
