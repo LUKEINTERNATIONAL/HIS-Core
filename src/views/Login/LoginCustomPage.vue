@@ -3,7 +3,7 @@
 		<div class="rows">
 			<div class="cells">
 				<input type="text" name="usename" autocomplete="off"
-					id="username" v-on:click="renderKeyBoard($event)" class="input-boxes"/>
+					id="username" ref="username" v-on:click="renderKeyBoard($event)" class="input-boxes"/>
 			</div>
 		</div>
 		<div class="rows input-rows">
@@ -16,8 +16,13 @@
 			<span v-bind:key="k" v-for="k in keys">
 			<div class="rows">
 				<div class="cells" v-bind:key="r" v-for="r in k">
-					<button v-if="r === 'Next' || r === 'Login'" :id="btnCaption" class="keyboard-btn login-btn" v-on:click="keyPress($event)">{{btnCaption}}</button>
-					<button v-if="r != 'Login' && r != 'Next'" :id="r" class="keyboard-btn" v-on:click="keyPress($event)">{{r}}</button>
+
+					<button v-if="r === 'Next' || r === 'Login'" :id="btnCaption" class="keyboard-btn login-btn" 
+            v-on:click="keyPress($event)">{{btnCaption}}</button>
+
+					<button v-if="r != 'Login' && r != 'Next'" :id="Caps.on ? r.toUpperCase() : r.toLowerCase()" class="keyboard-btn" 
+            v-on:click="keyPress($event)">{{r === 'Del.' || r === 'Caps' ? r : (Caps.on ? r.toUpperCase() : r.toLowerCase())}}</button>
+
 				</div>
 			</div>
 			</span>
@@ -47,7 +52,11 @@ export default {
 			keyboardLeft: '',
 			keyboardTop: '',
 			btnCaption: '',
-			passwordInput: this.$refs.password
+			passwordInput: this.$refs.password,
+      Caps: {
+        type: Boolean,
+        on: false
+      }
     };
   }/*,
 	computed: {
@@ -72,19 +81,27 @@ export default {
 		},
 		keyPress(e: any){
 			const key = e.currentTarget.id;
+      let elem: any;
 
 			try{
 				if(key.match(/Del./i)){
 					this.focusInput.value = this.focusInput.value.substring(0, this.focusInput.value.length - 1);
 				}else if(key.match(/Next/i)){
 					this.display = "none";
-					let elem: any;
 					elem = this.$refs.password;
-    			elem.click()
+    			elem.click();
 				}else if(key.match(/Login/i)){
 					this.display = "none";
 					this.doLogin();
 				}else if(key.match(/Caps/i)){
+          this.Caps.on = (this.Caps.on ? false : true);
+					this.display = "none";
+          if(this.focusInput.id === 'username'){
+            elem = this.$refs.username;
+          } else {
+            elem = this.$refs.password;
+          }
+    			elem.click();
 				}else if(key.match(/Hide/i)){
 					this.display = "none";
 				}else{
