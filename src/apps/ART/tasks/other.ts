@@ -224,6 +224,11 @@ export const PREFERENCES = {
             route: "/",
           },
           {
+            name: "Change Session Date",
+            component: FieldType.TT_SESSION_DATE,
+            route: "/session/date",
+          },
+          {
             name: "TPT new initiations",
             component: FieldType.TT_SET_SITE_CODE,
             route: "/",

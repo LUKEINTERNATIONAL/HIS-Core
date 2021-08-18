@@ -117,6 +117,7 @@ import Reports from "@/components/ART/reports.vue";
 import Overview from "@/components/ART/overview.vue";
 import HisDate from "@/utils/Date"
 import { AppInterface } from "@/apps/interfaces/AppInterface";
+import { Service } from "@/services/service"
 export default defineComponent({
   name: "Home",
   components: {
@@ -198,7 +199,7 @@ export default defineComponent({
       sessionStorage.locationName = data.name;
     },
     loadApplicationData() {
-      this.fetchSessionDate();
+      if (!Service.isBDE()) this.fetchSessionDate();
       this.ready = true;
       this.userLocation = sessionStorage.userLocation;
       this.userName = sessionStorage.username;
