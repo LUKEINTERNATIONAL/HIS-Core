@@ -26,7 +26,8 @@
 </template>
 
 <script lang="ts">
-import ApiClient from "@/services/api_client"
+import ApiClient from "@/services/api_client";
+import { toastWarning } from "@/utils/Alerts";
 
 export default {
 	props: ["keys"],
@@ -118,15 +119,15 @@ export default {
         sessionStorage.setItem("userRoles", JSON.stringify(user.roles));
         this.$router.push("/select_hc_location");
           } else if (response.status === 401) {
-            //toastWarning("Invalid username or password");
+            toastWarning("Invalid username or password");
           } else {
-            //toastWarning("An error has occured");
+            toastWarning("An error has occured");
             console.warn(`Response: ${response.status} - ${response.body}`);
           }
         }
       }
       else {
-        //toastWarning("Complete form to log in");
+        toastWarning("Complete form to log in");
       }
     }
 	},
