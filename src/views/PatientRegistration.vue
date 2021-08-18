@@ -23,6 +23,7 @@ import { ObservationService } from "@/services/observation_service";
 import { PatientPrintoutService } from "@/services/patient_printout_service";
 import { toastWarning, toastSuccess } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
+import { isEmpty } from "lodash"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -87,7 +88,11 @@ export default defineComponent({
         return this.generatePersonAttributes(data, personId)
     },
     resolvePerson(form: any, computedForm: any) {
-        return {...computedForm.birth_date.data, ...this.resolveData(form, 'person')}
+        return {...this.resolveBirthDate(computedForm), ...this.resolveData(form, 'person')}
+    },
+    resolveBirthDate(data: any) {
+        const value: any = Object.values(data).filter((i: any) => i.dob)
+        return !isEmpty(value) ? value[0].dob : {}
     },
     resolveData(form: Record<string, Option> | Record<string, null>, group: string) {
         const output: any = {} 
@@ -265,7 +270,7 @@ export default defineComponent({
                     return {
                         date,
                         isEstimate,
-                        data: {
+                        dob: {
                             birthdate: date,
                             'birthdate_estimated': isEstimate
                         }
