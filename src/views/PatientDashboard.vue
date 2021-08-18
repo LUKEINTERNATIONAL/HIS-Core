@@ -22,7 +22,7 @@
                                 </span>
                             </ion-col>
                             <ion-col size-md="3" size-sm="12"> 
-                                <b>Set Date:</b> {{ sessionDate }}
+                                <b>Set Date:</b> <ion-label :color="isBDE ? 'danger' : ''">{{ sessionDate }}</ion-label>
                             </ion-col>
                         </ion-row>
                         <ion-row> 
@@ -115,6 +115,7 @@ export default defineComponent({
     },
     data: () => ({
         app: {} as AppInterface | {},
+        isBDE: false as boolean,
         currentDate: '',
         sessionDate: '',
         nextTask: {} as any,
@@ -173,6 +174,7 @@ export default defineComponent({
             this.programID = ProgramService.getProgramID()
             this.currentDate = HisDate.currentDisplayDate()
             this.sessionDate = HisDate.toStandardHisDisplayFormat(ProgramService.getSessionDate())
+            this.isBDE = ProgramService.isBDE() || false
         },
         async fetchPatient(patientId: number | string){
             const patient: Patient = await Patientservice.findByID(patientId);
