@@ -15,7 +15,7 @@
                             </ion-col> 
                             <ion-col size-md="5" size-sm="6"> 
                                 <span v-if="nextTask.name"> 
-                                    <ion-chip :style="{marginTop: '-8px'}" color="danger" @click="$router.push(nextTask)">Next Task: <b>{{ nextTask.name.toUpperCase() }}</b> </ion-chip>
+                                    <ion-chip :style="{marginTop: '-8px'}" color="success" @click="$router.push(nextTask)"><b>Next Task: {{ nextTask.name.toUpperCase() }}</b> </ion-chip>
                                 </span>
                                 <span v-else> 
                                     <b> Next Task</b>: NONE
