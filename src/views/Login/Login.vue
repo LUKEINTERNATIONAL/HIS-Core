@@ -3,6 +3,7 @@
     <ion-content :fullscreen="true">
       <div id="login" class="container">
         <div class="header">
+          <div id="app-name"><b style="color:#8B4513;">National</b>&nbsp;<b style="color:#CD853F;">EMR</b></div>
           <span>{{versionDetails.title}}</span>|
           &nbsp;Series: <span>{{versionDetails.series}}</span>|
           &nbsp;Version: <span>{{versionDetails.version}}</span>
@@ -86,4 +87,8 @@ export default {
   border-color:  rgb(204, 204, 204);
 }
 
+#app-name {
+  float: left;
+  font-size: 2.1em;
+}
 </style>

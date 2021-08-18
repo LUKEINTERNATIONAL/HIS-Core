@@ -26,12 +26,17 @@
 </template>
 
 <script lang="ts">
+import ApiClient from "@/services/api_client"
+
 export default {
 	props: ["keys"],
   data: function() {
     return {
-      username: null,
-      password: null,
+      userInput: {
+				type: String,
+				username: '',
+				password: ''
+			},
       focusInput: {
 				type: Object,
 				value: '',
@@ -66,6 +71,7 @@ export default {
 		},
 		keyPress(e: any){
 			const key = e.currentTarget.id;
+
 			try{
 				if(key.match(/Del./i)){
 					this.focusInput.value = this.focusInput.value.substring(0, this.focusInput.value.length - 1);
@@ -75,14 +81,54 @@ export default {
 					elem = this.$refs.password;
     			elem.click()
 				}else if(key.match(/Login/i)){
+					this.display = "none";
+					this.doLogin();
 				}else if(key.match(/Caps/i)){
 				}else if(key.match(/Hide/i)){
 					this.display = "none";
 				}else{
 					this.focusInput.value += key;
 				}
+				
+				this.focusInput.id == 'username' ? this.userInput.username = this.focusInput.value : 
+					this.userInput.password = this.focusInput.value;
 			}catch(x) { }
-		}
+		},
+		doLogin: async function () {
+
+      if (this.userInput.username && this.userInput.password) {
+        const params = {
+          username: this.userInput.username,
+          password: this.userInput.password,
+        };
+        const response = await ApiClient.post(
+          "auth/login",
+          params
+        ).catch((error) => {
+          console.log(error);
+        });
+        if (response) {
+          if (response.status === 200) {
+           const {
+          authorization: { token, user }
+        } = await response.json();
+        sessionStorage.setItem("apiKey", token);
+        sessionStorage.setItem("username", user.username);
+        sessionStorage.setItem("userID", user.user_id);
+        sessionStorage.setItem("userRoles", JSON.stringify(user.roles));
+        this.$router.push("/select_hc_location");
+          } else if (response.status === 401) {
+            //toastWarning("Invalid username or password");
+          } else {
+            //toastWarning("An error has occured");
+            console.warn(`Response: ${response.status} - ${response.body}`);
+          }
+        }
+      }
+      else {
+        //toastWarning("Complete form to log in");
+      }
+    }
 	},
 	computed: {
     btnStyles(): string {
