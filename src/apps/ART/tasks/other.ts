@@ -44,7 +44,7 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     id: "change_session_Date",
     name: "Change session date",
     description: "Change session date (for retrospective entry)",
-    url: "/",
+    url: "/session/date",
     icon: img("time.png")
   },
   {

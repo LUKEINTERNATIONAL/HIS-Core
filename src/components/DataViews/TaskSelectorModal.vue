@@ -53,15 +53,18 @@ export default defineComponent({
       await modalController.dismiss({})
     },
     doTask(taskItem: TaskInterface) {
-      if (taskItem.action) 
-        return taskItem.action(this.taskParams)
-
-      this.$router.push({ 
-        name: taskItem.id,
-        params: {
-          'patient_id': this.taskParams?.patient.patient_id
-        }
-      })
+      if (taskItem.action) {
+        taskItem.action(this.taskParams)
+      } else if (taskItem.url) {
+        this.$router.push({ path: taskItem.url })
+      } else {
+        this.$router.push({ 
+          name: taskItem.id,
+          params: {
+            'patient_id': this.taskParams?.patient.patient_id
+          }
+        })
+      }
       this.closeModal()
     }
   },

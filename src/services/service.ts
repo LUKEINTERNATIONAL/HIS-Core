@@ -43,10 +43,15 @@ export class Service {
     static getLocationName() {
         return sessionStorage.getItem('locationName')
     }
+    
     static getSessionDate() {
         return sessionStorage.getItem('sessionDate') || '';
     }
     
+    static setSessionDate(date: string) {
+        sessionStorage.setItem('sessionDate', date)
+    }
+
     static getProgramID() {
         const app = this.getActiveApp()
         
