@@ -21,8 +21,13 @@
                                     <b> Next Task</b>: NONE
                                 </span>
                             </ion-col>
-                            <ion-col size-md="3" size-sm="12"> 
-                                <b>Set Date:</b> <ion-label :color="isBDE ? 'danger' : ''">{{ sessionDate }}</ion-label>
+                            <ion-col size-md="3" size-sm="12">
+                                <span v-if="isBDE"> 
+                                    <ion-chip :style="{marginTop: '-8px'}" color="danger" @click="$router.push({name: 'Session Date'})"><b> BDE: {{ sessionDate.toUpperCase() }}</b> </ion-chip>
+                                </span>
+                                <span v-else> 
+                                    <b>Set Date:</b> {{ sessionDate }}
+                                </span>
                             </ion-col>
                         </ion-row>
                         <ion-row> 
