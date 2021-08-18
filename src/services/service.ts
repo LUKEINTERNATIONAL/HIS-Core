@@ -51,21 +51,39 @@ export class Service {
     static getLocationName() {
         return sessionStorage.getItem('locationName')
     }
-    
+
     static getSessionDate() {
         return sessionStorage.getItem('sessionDate') || '';
     }
-    
+
+    static getCachedApiDate() {
+        return sessionStorage.getItem('apiDate')
+    }
+
     static async setSessionDate(sessionDate: string) {
         const apiDate = await this.getApiDate()
-        sessionStorage.setItem('apiDate', apiDate)
-        sessionStorage.setItem('sessionDate', sessionDate)
+        if (apiDate) {
+            sessionStorage.setItem('apiDate', apiDate)
+            sessionStorage.setItem('sessionDate', sessionDate)
+            return
+        }
+        throw 'Unable to set api date'
+    }
+
+    static async resetSessionDate() {
+        const apiDate = await this.getApiDate()
+        if (apiDate) {
+            sessionStorage.removeItem('apiDate')
+            sessionStorage.setItem('sessionDate', apiDate)
+            return
+        }
+        throw 'Unable to reset session date'
     }
 
     static isBDE() {
         const apiDate = sessionStorage.getItem('apiDate')
         const sessionDate = sessionStorage.getItem('sessionDate')
-        return apiDate === sessionDate
+        return apiDate && apiDate != sessionDate
     }
 
     static getProgramID() {
