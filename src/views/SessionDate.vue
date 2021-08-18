@@ -17,9 +17,10 @@ export default defineComponent({
     components: { HisStandardForm },
     data: () => ({
         apiDate: '' as string,
-        fields: [] as Array<Field>
+        fields: [] as Array<Field>    
     }),
     async created(){
+
         this.apiDate = await Service.getApiDate()
         this.fields = generateDateFields({
             id: 'session_date',
@@ -74,7 +75,7 @@ export default defineComponent({
                     { name: `No, keep ${sessionDate}`, slot: 'end', color: 'danger' }
                 ],
             )
-            if (action != `No, keep ${sessionDate}`) await this.resetSessionDate()
+            if (action != `No, keep ${sessionDate}`) await this.resetSessionDate(), this.exitPage()
         },
         async resetSessionDate() {
             try {
@@ -84,15 +85,17 @@ export default defineComponent({
                 toastWarning(e)
             }
         },
+        exitPage() {
+            this.$router.back()
+        },
         async onSubmit(_: any, computedData: any) {
             const date = computedData.session_date
             try {
                 await Service.setSessionDate(date)
                 toastSuccess(`Successfully Back dated to ${this.formatDate(date)}`)
-                return true
+                this.exitPage()
             } catch(e) {
                 toastWarning(e)
-                return false
             }
         },
         formatDate(date: string) {
