@@ -20,7 +20,6 @@ export default defineComponent({
         fields: [] as Array<Field>    
     }),
     async created(){
-
         this.apiDate = await Service.getApiDate()
         this.fields = generateDateFields({
             id: 'session_date',
@@ -75,12 +74,13 @@ export default defineComponent({
                     { name: `No, keep ${sessionDate}`, slot: 'end', color: 'danger' }
                 ],
             )
-            if (action != `No, keep ${sessionDate}`) await this.resetSessionDate(), this.exitPage()
+            if (action != `No, keep ${sessionDate}`) await this.resetSessionDate()
         },
         async resetSessionDate() {
             try {
                 await Service.resetSessionDate()
-                return toastSuccess(`Session date has been reset to ${this.formatDate(this.apiDate)}`)
+                toastSuccess(`Session date has been reset to ${this.formatDate(this.apiDate)}`)
+                this.exitPage()
             } catch (e) {
                 toastWarning(e)
             }
