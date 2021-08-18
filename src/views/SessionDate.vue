@@ -16,16 +16,22 @@ import { infoActionSheet } from "@/utils/ActionSheets"
 export default defineComponent({
     components: { HisStandardForm },
     data: () => ({
+        apiDate: '' as string,
         fields: [] as Array<Field>
     }),
-    created(){
+    async created(){
+        this.apiDate = await Service.getApiDate()
         this.fields = generateDateFields({
             id: 'session_date',
             helpText: 'Session Date',
             estimation: {
                 allowUnknown: false
             },
-            validation: (v: Option) => Validation.required(v),
+            validation: (v: Option) => Validation.validateSeries([
+                () => Validation.required(v),
+                () => this.dateisTooFar(v.value.toString()),
+                () => this.dateIsTooOld(v.value.toString())
+            ]),
             computeValue: (date: string) => date
         }, '')
     },
@@ -68,6 +74,13 @@ export default defineComponent({
             } catch(e) {
                 toastWarning(e)
             }
+        },
+        dateIsTooOld(date: string) {
+            return date > this.apiDate ? [`Date is beyond reference date ${this.apiDate}`] : null
+        },
+        dateisTooFar(date: string) {
+            const dateLimit = '2000-01-01'
+            return date < dateLimit ? [`Date less than limit date of ${dateLimit}`] : null
         }
     }
 })
