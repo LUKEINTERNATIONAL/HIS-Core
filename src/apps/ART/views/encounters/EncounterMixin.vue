@@ -19,6 +19,7 @@ export default defineComponent({
         patientID: '' as any,
         providerID: -1 as number,
         providers: [] as any,
+        bdeChecked: false as boolean,
         ready: false
     }),
     watch: {
@@ -44,7 +45,8 @@ export default defineComponent({
     },
     methods: {
         async checkBDE() {
-            if (ProgramService.isBDE()) {
+            if (ProgramService.isBDE() && !this.bdeChecked) {
+                this.bdeChecked = true
                 this.providers = await UserService.getUsers()
                 const providerNames = this.providers.map((p: any) => `${p.username} \
                     (${p.person.names[0].given_name} ${p.person.names[0].family_name})`)
