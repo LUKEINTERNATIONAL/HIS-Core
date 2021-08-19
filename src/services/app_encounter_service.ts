@@ -112,16 +112,15 @@ export class AppEncounterService extends ObservationService {
     }
 
     async createEncounter():  Promise<Encounter | undefined>  {
-        const encounter = await EncounterService.create({
+        const payload: any = {
             'encounter_type_id': this.encounterTypeID,
             'patient_id': this.patientID,
             'encounter_datetime': this.date
-        })
-
-        if (this.providerID != -1) {
-            encounter['provider_id'] = this.providerID
         }
-
+        if (this.providerID != -1) {
+            payload['provider_id'] = this.providerID
+        }
+        const encounter = await EncounterService.create(payload)
         if (encounter) {
             this.encounterID = encounter.encounter_id
             return encounter
