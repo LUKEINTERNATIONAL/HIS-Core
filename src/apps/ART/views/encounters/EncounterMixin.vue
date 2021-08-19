@@ -6,6 +6,8 @@ import { ProgramService } from "@/services/program_service"
 import { WorkflowService } from "@/services/workflow_service"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { optionsActionSheet } from "@/utils/ActionSheets"
+import { UserService } from "@/services/user_service"
+import { find } from "lodash"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -16,6 +18,7 @@ export default defineComponent({
         form: {} as Record<string, Option> | Record<string, null>,
         patientID: '' as any,
         provider: '' as string,
+        providers: [] as any,
         ready: false
     }),
     watch: {
@@ -42,21 +45,26 @@ export default defineComponent({
     methods: {
         async checkBDE() {
             if (ProgramService.isBDE()) {
-                this.provider = await this.selectProvider()
-                console.log(this.provider)
+                this.providers = await UserService.getUsers()
+
+                const providerNames = this.providers.map((p: any) => {
+                    const name = p.person.names[0]
+                    return `${p.username} (${name.given_name} ${name.family_name})`
+                })
+                
+                const selection = await this.selectProvider(providerNames)
+                const [ username ] = selection.split(' ')
+
+                this.provider = find(this.providers, { username })
             }
         },
-        async selectProvider() {
+        async selectProvider(providers: Array<string>) {
             const modal = await optionsActionSheet(
-                'BDE date: 2001-01-01',
-                `Select provider`,
-                [ 
-                   'Admin',
-                   'Test',
-                   'Harry'
-                ],
+                'Please select a provider',
+                `BDE: ${ProgramService.getSessionDate()} | Current: ${ProgramService.getCachedApiDate()}`,
+                providers,
                 [
-                    { name: 'Continue', slot: 'end', role: 'action' }
+                    { name: 'Confirm', slot: 'end', role: 'action' }
                 ]
             )
             return modal.selection
