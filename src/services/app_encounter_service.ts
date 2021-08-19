@@ -6,14 +6,16 @@ import { ConceptService } from "@/services/concept_service"
 export class AppEncounterService extends ObservationService {
     encounterTypeID: number;
     encounterID: number;
+    providerID: number;
     patientID: number;
     date: string;
-    constructor(patientID: number, encounterTypeID: number) {
+    constructor(patientID: number, encounterTypeID: number, providerID=-1) {
         super()
         this.encounterTypeID = encounterTypeID
         this.patientID = patientID
         this.encounterID = 0
         this.date = ObservationService.getSessionDate()
+        this.providerID = providerID
     }
 
     getDate() {
@@ -115,6 +117,10 @@ export class AppEncounterService extends ObservationService {
             'patient_id': this.patientID,
             'encounter_datetime': this.date
         })
+
+        if (this.providerID != -1) {
+            encounter['provider_id'] = this.providerID
+        }
 
         if (encounter) {
             this.encounterID = encounter.encounter_id
