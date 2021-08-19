@@ -5,6 +5,7 @@ import { Patientservice } from "@/services/patient_service"
 import { ProgramService } from "@/services/program_service"
 import { WorkflowService } from "@/services/workflow_service"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
+import { optionsActionSheet } from "@/utils/ActionSheets"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -14,12 +15,14 @@ export default defineComponent({
         fields: [] as Array<Field>,
         form: {} as Record<string, Option> | Record<string, null>,
         patientID: '' as any,
+        provider: '' as string,
         ready: false
     }),
     watch: {
        '$route': {
             async handler(route: any) {
                 if(route.params.patient_id) {
+                    await this.checkBDE()
                     this.patientID = route.params.patient_id;
                     const response = await Patientservice.findByID(this.patientID);
                     this.patient = new Patientservice(response);
@@ -37,6 +40,27 @@ export default defineComponent({
         }
     },
     methods: {
+        async checkBDE() {
+            if (ProgramService.isBDE()) {
+                this.provider = await this.selectProvider()
+                console.log(this.provider)
+            }
+        },
+        async selectProvider() {
+            const modal = await optionsActionSheet(
+                'BDE date: 2001-01-01',
+                `Select provider`,
+                [ 
+                   'Admin',
+                   'Test',
+                   'Harry'
+                ],
+                [
+                    { name: 'Continue', slot: 'end', role: 'action' }
+                ]
+            )
+            return modal.selection
+        },
         patientDashboardUrl() {
             return `/patient/dashboard/${this.patientID}`
         },
