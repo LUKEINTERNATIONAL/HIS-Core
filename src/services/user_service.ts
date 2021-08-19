@@ -21,4 +21,8 @@ export class UserService extends Service {
       );
       return roles.length > 0;
 	}
+
+  static getUsers() {
+    return super.getJson('users', { role: 'Superuser' })
+  }
 }

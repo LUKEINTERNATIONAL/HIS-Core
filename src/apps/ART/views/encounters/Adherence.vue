@@ -20,8 +20,8 @@ export default defineComponent({
     }),
     watch: {
         patient: {
-            async handler(patient: any){
-                this.adherence = new AdherenceService(patient.getID())
+            async handler(patient: any) {
+                this.adherence = new AdherenceService(patient.getID(), this.providerID)
                 await this.adherence.loadPreviousDrugs()
                 this.fields = this.getFields()
             },

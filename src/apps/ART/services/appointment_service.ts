@@ -1,8 +1,8 @@
 import { AppEncounterService } from "@/services/app_encounter_service";
 
 export class AppointmentService extends AppEncounterService {
-  constructor(patientID: number) {
-    super(patientID, 7);
+  constructor(patientID: number, providerID: number) {
+    super(patientID, 7, providerID);
   }
 
   async getNextAppointment() {

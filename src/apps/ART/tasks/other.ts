@@ -44,7 +44,7 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     id: "change_session_Date",
     name: "Change session date",
     description: "Change session date (for retrospective entry)",
-    url: "/",
+    url: "/session/date",
     icon: img("time.png")
   },
   {
@@ -222,6 +222,11 @@ export const PREFERENCES = {
             name: "Survival analysis",
             component: FieldType.TT_SET_SITE_CODE,
             route: "/",
+          },
+          {
+            name: "Change Session Date",
+            component: FieldType.TT_SESSION_DATE,
+            route: "/session/date",
           },
           {
             name: "TPT new initiations",

@@ -15,14 +15,19 @@
                             </ion-col> 
                             <ion-col size-md="5" size-sm="6"> 
                                 <span v-if="nextTask.name"> 
-                                    <ion-chip :style="{marginTop: '-8px'}" color="danger" @click="$router.push(nextTask)">Next Task: <b>{{ nextTask.name.toUpperCase() }}</b> </ion-chip>
+                                    <ion-chip :style="{marginTop: '-8px'}" color="success" @click="$router.push(nextTask)"><b>Next Task: {{ nextTask.name.toUpperCase() }}</b> </ion-chip>
                                 </span>
                                 <span v-else> 
                                     <b> Next Task</b>: NONE
                                 </span>
                             </ion-col>
-                            <ion-col size-md="3" size-sm="12"> 
-                                <b>Set Date:</b> {{ sessionDate }}
+                            <ion-col size-md="3" size-sm="12">
+                                <span v-if="isBDE"> 
+                                    <ion-chip :style="{marginTop: '-8px'}" color="danger" @click="$router.push({name: 'Session Date'})"><b> BDE: {{ sessionDate.toUpperCase() }}</b> </ion-chip>
+                                </span>
+                                <span v-else> 
+                                    <b>Set Date:</b> {{ sessionDate }}
+                                </span>
                             </ion-col>
                         </ion-row>
                         <ion-row> 
@@ -115,6 +120,7 @@ export default defineComponent({
     },
     data: () => ({
         app: {} as AppInterface | {},
+        isBDE: false as boolean,
         currentDate: '',
         sessionDate: '',
         nextTask: {} as any,
@@ -173,6 +179,7 @@ export default defineComponent({
             this.programID = ProgramService.getProgramID()
             this.currentDate = HisDate.currentDisplayDate()
             this.sessionDate = HisDate.toStandardHisDisplayFormat(ProgramService.getSessionDate())
+            this.isBDE = ProgramService.isBDE() || false
         },
         async fetchPatient(patientId: number | string){
             const patient: Patient = await Patientservice.findByID(patientId);

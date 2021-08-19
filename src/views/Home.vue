@@ -16,7 +16,7 @@
           <ion-col size="5">
             <p>Facility name: {{ facilityName }}</p>
             <p>Location: {{ userLocation }}</p>
-            <p>Date: {{ sessionDate }}</p>
+            <p>Date: <ion-label :color="isBDE ? 'danger' : 'success'"> {{ sessionDate }} </ion-label></p>
             <p>User: {{ userName }}</p>
           </ion-col>
           <ion-col size="3">
@@ -117,6 +117,7 @@ import Reports from "@/components/ART/reports.vue";
 import Overview from "@/components/ART/overview.vue";
 import HisDate from "@/utils/Date"
 import { AppInterface } from "@/apps/interfaces/AppInterface";
+import { Service } from "@/services/service"
 export default defineComponent({
   name: "Home",
   components: {
@@ -151,7 +152,8 @@ export default defineComponent({
       APIVersion: "",
       activeTab: 1,
       ready: false,
-      patientBarcode: ""
+      patientBarcode: "",
+      isBDE: false
     };
   },
   methods: {
@@ -198,7 +200,12 @@ export default defineComponent({
       sessionStorage.locationName = data.name;
     },
     loadApplicationData() {
-      this.fetchSessionDate();
+      if (!Service.isBDE()) {
+        this.fetchSessionDate();
+      } else {
+        this.sessionDate = Service.getSessionDate()
+        this.isBDE = true
+      }
       this.ready = true;
       this.userLocation = sessionStorage.userLocation;
       this.userName = sessionStorage.username;

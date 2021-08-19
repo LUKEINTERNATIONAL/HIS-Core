@@ -31,7 +31,8 @@ export default defineComponent({
   watch: {
     patient: {
       async handler(patient: any) {
-        this.reception = new ReceptionService(patient.getID())
+        console.log('Reception', this.providerID)
+        this.reception = new ReceptionService(patient.getID(), this.providerID)
 
         await this.reception.loadSitePrefix()
 

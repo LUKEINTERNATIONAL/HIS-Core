@@ -13,7 +13,7 @@ import { CD4_COUNT_PAD_LO } from "@/components/Keyboard/KbLayouts"
 import { toastWarning, toastSuccess} from "@/utils/Alerts"
 import { VitalsService } from "@/apps/ART/services/vitals_service";
 import { BMIService } from "@/services/bmi_service"
-import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
+import { generateDateFields, EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import HisDate from "@/utils/Date"
 
 export default defineComponent({
@@ -25,8 +25,8 @@ export default defineComponent({
     watch: {
         patient: {
             async handler(patient: any){
-                this.registration = new ClinicRegistrationService(patient.getID())
-                this.vitals = new VitalsService(patient.getID())
+                this.registration = new ClinicRegistrationService(patient.getID(), this.providerID)
+                this.vitals = new VitalsService(patient.getID(), this.providerID)
                 await this.initStaging(this.patient)
 
                 this.showStagingWeightChart = false
@@ -134,6 +134,9 @@ export default defineComponent({
                             () => this.dateInFuture(val.value)
                         ])
                     },
+                    estimation: {
+                        allowUnknown: false
+                    },
                     computeValue: (date: string, isEstimate: boolean) => {
                         return {
                             date,
@@ -238,6 +241,10 @@ export default defineComponent({
                             () => this.dateInFuture(val.value)
                         ])
                     },
+                    estimation: {
+                        allowUnknown: true,
+                        estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
+                    },
                     computeValue: (date: string, isEstimate: boolean) => {
                         this.staging.setDate(date)
                         this.vitals.setDate(date)
@@ -248,7 +255,7 @@ export default defineComponent({
                             obs: this.buildDateObs('Drug start date', date, isEstimate) 
                         }
                     },
-                }, this.registration.getDate(), true),
+                }, this.registration.getDate()),
                 {
                     id: 'previous_art_number',
                     helpText: 'ART number at previous location',
@@ -429,6 +436,9 @@ export default defineComponent({
                             () => this.dateInFuture(val.value)
                         ])
                     },
+                    estimation: {
+                        allowUnknown: true
+                    },
                     computeValue: (date: string, isEstimate: boolean) => {
                         return {
                             date,
@@ -437,7 +447,7 @@ export default defineComponent({
                             obs: this.buildDateObs('Confirmatory HIV test date', date, isEstimate) 
                         }
                     },
-                }, this.registration.getDate(), true),
+                }, this.registration.getDate()),
                 this.getStagingSummaryField('Staging summary')
             ]
         }

@@ -1,5 +1,16 @@
-import { ConceptService } from "@/services/concept_service"
 import {isEmpty} from "lodash"
+
+function validateSeries(conditions: Array<any>){
+    try {
+        for(const i in conditions) {
+            const condition = conditions[i]()
+
+            if (condition) return condition
+        }
+    } catch (e) {
+        return [e]
+    }
+}
 
 function required(value: any): null | Array<string> {
     return isEmpty(value) ? ['Value is required'] : null
@@ -51,6 +62,7 @@ function notTheSame(val: any, comparison: string): null | Array<string> {
     return val.value === comparison ? ['Values can not be the same'] : null;
 }
 export default {
+    validateSeries,
     required,
     isMWPhoneNumber,
     isName,

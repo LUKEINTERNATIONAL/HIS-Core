@@ -15,6 +15,7 @@ import PatientDashboard from '../views/PatientDashboard.vue'
 import Configuration from '@/views/Configuration.vue'
 import Settings from '@/components/ART/Settings.vue'
 import HisApps from '@/apps/his_apps';
+import SessionDate from "@/views/SessionDate.vue"
 
 const HIS_APP_ROUTES = (() => {
   let routes: Array<RouteRecordRaw> = []
@@ -52,6 +53,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/search_patient',
     name: 'Search Patient',
     component: SearchPatient
+  },
+  {
+    path: '/session/date',
+    name: 'Session Date',
+    component: SessionDate
   },
   {
     path: '/select_hc_location',

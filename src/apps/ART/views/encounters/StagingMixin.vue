@@ -43,7 +43,7 @@ export default defineComponent({
     }),
     methods: {
         async initStaging(patient: any) {
-            this.staging = new StagingService(patient.getID(), patient.getAge())
+            this.staging = new StagingService(patient.getID(), patient.getAge(), this.providerID)
 
             await this.staging.loadHivConfirmatoryTestType()
             this.bmiObj = await patient.getBMI()
@@ -415,6 +415,9 @@ export default defineComponent({
                             () => this.dateBeforeBirthDate(val.value),
                             () => this.dateInFuture(val.value)
                         ])
+                    },
+                    estimation: {
+                        allowUnknown: false
                     },
                     computeValue: (date: string, isEstimate: boolean) => {
                         return {
