@@ -2,8 +2,8 @@ import { AppEncounterService } from "@/services/app_encounter_service";
 
 export class PatientTypeService extends AppEncounterService {
   patientType: string
-  constructor(patientID: number) {
-    super(patientID, 5);
+  constructor(patientID: number, providerID: number) {
+    super(patientID, 5, providerID);
     this.patientType = 'N/A'
   }
 

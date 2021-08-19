@@ -31,7 +31,8 @@ export default defineComponent({
   watch: {
     patient: {
       async handler(patient: any) {
-        this.reception = new ReceptionService(patient.getID())
+        console.log('Reception', this.providerID)
+        this.reception = new ReceptionService(patient.getID(), this.providerID)
 
         await this.reception.loadSitePrefix()
 
@@ -76,7 +77,7 @@ export default defineComponent({
           id: "who_is_present",
           helpText: "Hiv Reception",
           type: FieldType.TT_MULTIPLE_YES_NO,
-          validation: (val: any) => Validation.neitherOr(val) || Validation.anyEmpty(val),
+          validation: (val: any) => Validation.required(val) || Validation.neitherOr(val) || Validation.anyEmpty(val),
           computedValue: (d: Array<Option>) => {
             return {
               tag: 'obs',

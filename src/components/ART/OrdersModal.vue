@@ -142,8 +142,8 @@ export default defineComponent({
       this.testTypes[this.activeIndex]['specimenConcept'] = data.concept_id;
     },
     async postActivities() {
-      const patientID= `${this.$route.query.patient_id}`;
-      const orders = new LabOrderService(parseInt(patientID));
+      const patientID= `${this.$route.params.patient_id}`;
+      const orders = new LabOrderService(parseInt(patientID), -1); //TODO: get selected provider for this encounter
       const encounter = await orders.createEncounter();
       if(encounter) {
         const formattedOrders = await OrderService.buildLabOrders(encounter, this.finalOrders);

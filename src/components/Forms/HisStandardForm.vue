@@ -62,7 +62,6 @@ export default defineComponent({
         cancelDestinationPath: {
             type: String,
             required: false,
-            default: () => '/'
         }
     },
     data:()=>({
@@ -145,8 +144,10 @@ export default defineComponent({
                 visibleOnStateChange: () => !this.isFieldConfigureBtnHidden('Cancel'),
                 onClick: async () => {
                     const confirmation = await alertConfirmation('Are you sure you want to cancel?') 
-                    
-                    if (confirmation) this.$router.push({path: this.cancelDestinationPath })
+                    const path = this.cancelDestinationPath
+                    if (confirmation) {
+                        !path ? this.$router.back() : this.$router.push({path})
+                    }
                 }
             }
         },

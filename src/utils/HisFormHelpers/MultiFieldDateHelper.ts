@@ -1,7 +1,18 @@
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import MonthOptions from "@/components/FormElements/Presets/MonthOptions"
 import { Field, Option } from "@/components/Forms/FieldInterface"
+import Validation from "@/components/Forms/validations/StandardValidations"
 import HisDate from "@/utils/Date"
+
+export enum EstimationFieldType {
+    AGE_ESTIMATE_FIELD = "age-estimate-field",
+    MONTH_ESTIMATE_FIELD = "month-period-estimate-field"
+}
+
+export interface EstimationInterface {
+    estimationFieldType?: EstimationFieldType;
+    allowUnknown: boolean; 
+}
 
 export interface DateFieldInterface {
     id: string;
@@ -10,22 +21,57 @@ export interface DateFieldInterface {
     validation?: Function;
     computeValue: Function;
     appearInSummary?: Function;
+    estimation: EstimationInterface;
+    config?: any;
 }
 
-function onValidation(field: DateFieldInterface, val: Option, formData: any, computedFormData: any) {
-    let data = val
-    if (data) {
-        if (data.value === 'Unknown') return null
+function onValidation(
+    datePart: 'year' | 'month' | 'day', 
+    field: DateFieldInterface, 
+    val: Option,
+    formData: any,
+    computedFormData: any) {
 
-        const year = formData[`year_${field.id}`] || {}
-        const month = formData[`month_${field.id}`] || {}
-        const day = formData[`day_${field.id}`] || {}
-        data = {
-            label: val.label,
-            value: HisDate.stitchDate(year.value, month.value, day.value)
+    const validate = (data: any) => field.validation ? field.validation(data, formData, computedFormData) : true
+    // Let any custom validation deal with null values
+    if (!val) return validate(val)
+
+    if (val.value.toString().match(/unknown/i)) {
+        if (!field.estimation.allowUnknown) {
+            return ['Unknown value not permitted']
         }
+        //If year is unknown, treat the whole date as unknown and dont do anything here
+        if (datePart.match(/year/)) return null
     }
-    return field.validation ? field.validation(data, formData, computedFormData) : true
+    const getValue = (type: string) => {
+        const id = type === 'day' ? field.id : `${type}_${field.id}`
+        return formData[id] ? formData[id].value : ''
+    }
+    const year = getValue('year')
+    let month = ''
+    let day = ''
+    /**
+     * Check date part and clear it's successor's value. 
+     * This will allow us to validate current datePart individually
+    */
+    switch(datePart) {
+        case 'year':
+            month = ''
+            day = ''
+            break
+        case 'month':
+            month = getValue('month')
+            day = ''
+            break
+        case 'day':
+            month = getValue('month')
+            day = getValue('day')
+            break
+    }
+    return validate({
+        label: val.label,
+        value: HisDate.stitchDate(year, month, day)
+    })
 }
 
 function onCondition(field: DateFieldInterface, formData: any) {
@@ -35,30 +81,31 @@ function onCondition(field: DateFieldInterface, formData: any) {
     return field.condition ? field.condition(formData): true 
 }
 
-export function generateDateFields(field: DateFieldInterface, currentDate: string, estimateUnknown=false): Array<Field>{
+export function generateDateFields(field: DateFieldInterface, currentDate=''): Array<Field>{
     const yearId = `year_${field.id}`
     const monthId = `month_${field.id}`
     return [
         {
             id: yearId,
-            helpText: `Year ${field.helpText}`,
+            helpText: `${field.helpText} Year`,
             type: FieldType.TT_NUMBER,
             appearInSummary: () => false,
             condition: (f: any) => field.condition ? field.condition(f) : true,
-            validation: (v: Option, f: any, c: any) => onValidation(field, v, f, c)
+            validation: (v: Option, f: any, c: any) => onValidation('year', field, v, f, c),
+            config: field.config
         },
         {
             id: monthId,
-            helpText: `Month ${field.helpText}`,
+            helpText: `${field.helpText} Month`,
             type: FieldType.TT_SELECT,
             appearInSummary: () => false,
             options: () => MonthOptions,
             condition: (f: any) => onCondition(field, f),
-            validation: (v: Option, f: any, c: any) => onValidation(field, v, f, c)
+            validation: (v: Option, f: any, c: any) => onValidation('month', field, v, f, c)
         },
         {
             id: field.id,
-            helpText: `Day ${field.helpText}`,
+            helpText: `${field.helpText} Day`,
             type: FieldType.TT_MONTHLY_DAYS,
             condition: (f: any) => onCondition(field, f),
             appearInSummary: (f: any) => {
@@ -68,7 +115,7 @@ export function generateDateFields(field: DateFieldInterface, currentDate: strin
                 label: `${field.helpText} Date`,
                 value: `${computed.date} ${computed.isEstimate ? '(Estimated Date)': ''}`
             }),
-            validation: (v: Option, f: any, c: any) => onValidation(field, v, f, c),
+            validation: (v: Option, f: any, c: any) => onValidation('day', field, v, f, c),
             computedValue: ({ value }: Option, f: Record<string, any>) => {
                 const day = value
                 let isEstimate = false
@@ -85,22 +132,21 @@ export function generateDateFields(field: DateFieldInterface, currentDate: strin
             id: `estimated_${field.id}`,
             helpText: `${field.helpText} Estimated period`,
             type: FieldType.TT_SELECT,
+            validation: (v: Option) => Validation.required(v),
             summaryMapValue: ({ label }: Option, f: any, computedValue: any) => ({ 
                 label: `${field.helpText} Date Estimate`,
                 value: `${label} (${computedValue.date})`
             }),
             condition: (f: any) => {
                 const conditions = [
-                    estimateUnknown,
+                    field.estimation.estimationFieldType === EstimationFieldType.MONTH_ESTIMATE_FIELD,
                     f[yearId].value === 'Unknown',
                     field.condition ? field.condition(f): true
                 ]
                 return conditions.every(Boolean)
             },
             computedValue: ({ value }: Option) => {
-                const date = HisDate.getDateBeforeByDays(
-                    currentDate, parseInt(value.toString())
-                )
+                const date = HisDate.getDateBeforeByDays(currentDate, parseInt(value.toString()))
                 return field.computeValue(date, true)
             },
             options: () => ([
@@ -110,6 +156,31 @@ export function generateDateFields(field: DateFieldInterface, currentDate: strin
                 { label: '24 months ago', value: 730 },
                 { label: 'Over 2 years ago', value: 730 }
             ])
-        }
+        },
+        {
+            id: `age_estimate_${field.id}`,
+            helpText: `${field.helpText} Age Estimate`,
+            type: FieldType.TT_NUMBER,
+            summaryMapValue: ({ label }: Option, f: any, computedValue: any) => ({ 
+                label: `${field.helpText} Date Estimate`,
+                value: `${label} (${computedValue.date})`
+            }),
+            computedValue: ({ value }: Option) => {
+                const date = HisDate.estimateDateFromAge(parseInt(value.toString()))
+                // We want to get default estimate month and day that the function below provides... 
+                // DON NOT GENERATE JUST ANY OTHER DAY AND MONTH.. JUST YEAR
+                const estimateDate = HisDate.stitchDate(new Date(date).getFullYear())
+                return field.computeValue(estimateDate, true)
+            },
+            condition: (f: any) => {
+                const conditions = [
+                    field.estimation.estimationFieldType === EstimationFieldType.AGE_ESTIMATE_FIELD,
+                    f[yearId].value === 'Unknown',
+                    field.condition ? field.condition(f): true
+                ]
+                return conditions.every(Boolean)
+            },
+            validation: (v: Option) => Validation.required(v) || Validation.isNumber(v),
+        },
     ]
 }

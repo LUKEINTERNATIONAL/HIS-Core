@@ -1,7 +1,7 @@
 import { AppEncounterService } from "@/services/app_encounter_service";
 export class ConsultationService extends AppEncounterService {
-  constructor(patientID: number) {
-    super(patientID, 53);
+  constructor(patientID: number, providerID: number) {
+    super(patientID, 53, providerID);
   }
   getFamilyPlanningMethods() {
     return [

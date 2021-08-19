@@ -6,7 +6,7 @@ import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Field, Option } from "@/components/Forms/FieldInterface"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
-import MonthOptions from "@/components/FormElements/Presets/MonthOptions"
+import { generateDateFields, EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import {LocationService} from "@/services/location_service"
 import {PersonService, NewPerson} from "@/services/person_service"
@@ -23,6 +23,7 @@ import { ObservationService } from "@/services/observation_service";
 import { PatientPrintoutService } from "@/services/patient_printout_service";
 import { toastWarning, toastSuccess } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
+import { isEmpty } from "lodash"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -51,8 +52,8 @@ export default defineComponent({
     }
   },
   methods: {
-    async onFinish(form: Record<string, Option> | Record<string, null>) {
-      const personPayload: NewPerson = this.resolvePerson(form)
+    async onFinish(form: Record<string, Option> | Record<string, null>, computedData: any) {
+      const personPayload: NewPerson = this.resolvePerson(form, computedData)
       try {
         const person: Person = await new PersonService(personPayload).create()
         if (person.person_id) {
@@ -86,8 +87,12 @@ export default defineComponent({
         const data: Record<string, string> = this.resolveData(form, 'person_attributes')
         return this.generatePersonAttributes(data, personId)
     },
-    resolvePerson(form: any) {
-        return {...this.resolveBirthDate(form), ...this.resolveData(form, 'person')}
+    resolvePerson(form: any, computedForm: any) {
+        return {...this.resolveBirthDate(computedForm), ...this.resolveData(form, 'person')}
+    },
+    resolveBirthDate(data: any) {
+        const value: any = Object.values(data).filter((i: any) => i.dob)
+        return !isEmpty(value) ? value[0].dob : {}
     },
     resolveData(form: Record<string, Option> | Record<string, null>, group: string) {
         const output: any = {} 
@@ -120,29 +125,6 @@ export default defineComponent({
             })
         }
         return patientAttributes
-    },
-    resolveBirthDate(form: any) {
-        const ageEstimate = form.age_estimate
-        const year = form.birth_year
-        const month = form.birth_month
-        const day = form.birth_day
-
-        if (ageEstimate && ageEstimate.value) {
-            return { 
-                'birthdate_estimated': true, 
-                birthdate: HisDate.estimateDateFromAge(ageEstimate.value)
-            }
-        }
-        if (month && month.label.match(/Unknown/i)) {
-            return {
-                'birthdate_estimated': true,
-                birthdate: HisDate.stitchDate(year.value)
-            }
-        }
-        return { 
-            'birthdate_estimated': false, 
-            birthdate: HisDate.stitchDate(year.value, month.value, day.value) 
-        }
     },
     mapToOption(listOptions: Array<string>): Array<Option> {
         return listOptions.map((item: any) => ({ label: item, value: item })) 
@@ -271,62 +253,30 @@ export default defineComponent({
                     }
                 ])
             },
-            {
-                id: 'birth_year',
-                helpText: 'Year of birth',
-                type: FieldType.TT_NUMBER,
-                validation(val: any) {
-                    if (Validation.required(val)) return ['Year value is required']
-
-                    const minYr = HisDate.getYearFromAge(100)
-                    const maxYr = HisDate.getCurrentYear()
-                    const notNum = Validation.isNumber(val)
-                    const notInRange = Validation.rangeOf(val, minYr, maxYr)
-
-                    if (val.label.match(/Unknown/i)) return
-
-                    return notNum || notInRange
+            ...generateDateFields({
+                id: 'birth_date',
+                helpText: 'Birth',
+                validation: (val: any) => {
+                    return Validation.validateSeries([
+                        () => Validation.required(val),
+                        () => HisDate.dateIsAfter(val.value) ? null : ['Date is greater than current date']
+                    ])
+                },
+                estimation: {
+                    allowUnknown: true,
+                    estimationFieldType: EstimationFieldType.AGE_ESTIMATE_FIELD
+                },
+                computeValue: (date: string, isEstimate: boolean) => {
+                    return {
+                        date,
+                        isEstimate,
+                        dob: {
+                            birthdate: date,
+                            'birthdate_estimated': isEstimate
+                        }
+                    }
                 }
-            },
-            {
-                id: 'birth_month',
-                helpText: 'Month of Birth',
-                type: FieldType.TT_SELECT,
-                options: () => MonthOptions,
-                condition: (form: any) => !form.birth_year.value.match(/Unknown/i),
-                validation: (val: any,form: any) => {
-                    const month = val.value
-                    const year = form.birth_year.value
-                    const date = `${year}-${month}-01`
-                    const notValid = HisDate.dateIsAfter(date) ? null : ['Month is greater than current month']
-                    const noMonth = Validation.required(val)
-
-                    return noMonth || notValid
-                }
-            },
-            {
-                id: 'birth_day',
-                helpText: 'Birth day',
-                type: FieldType.TT_MONTHLY_DAYS,
-                condition: (form: any) => form.birth_month != null && !form.birth_month.label.match(/Unknown/i),
-                validation: (val: any, form: any) => {
-                    const day = val.value
-                    const year = form.birth_year.value
-                    const month = form.birth_month.value
-                    const date = `${year}-${month}-${day}`
-                    const notValid = HisDate.dateIsAfter(date) ? null : ['Date is greater than current date']
-                    const noDay = Validation.required(val)
-
-                    return noDay || notValid
-                }
-            },
-            {
-                id: 'age_estimate',
-                helpText: 'Age Estimate',
-                type: FieldType.TT_NUMBER,
-                condition: (form: any) => form.birth_year.value.match(/Unknown/i),
-                validation: (val: any) => Validation.isNumber(val)
-            },
+            }),
             {
                 id: 'home_region',
                 helpText: 'Region of origin',

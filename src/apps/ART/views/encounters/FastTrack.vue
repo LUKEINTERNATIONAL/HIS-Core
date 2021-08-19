@@ -51,7 +51,7 @@ export default defineComponent({
     },
     async init(patient: any) {
       this.gender = patient.getGender();
-      this.fastTrack = new FastTrackService(patient.getID());
+      this.fastTrack = new FastTrackService(patient.getID(), this.providerID);
       this.values = await this.getYesNo();
       this.options = await this.getOptions();
       this.fields = this.getFields();

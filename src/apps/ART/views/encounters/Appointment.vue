@@ -16,6 +16,7 @@ import Validation from "@/components/Forms/validations/StandardValidations";
 import { toastWarning, toastSuccess } from "@/utils/Alerts"
 import EncounterMixinVue from './EncounterMixin.vue';
 import {AppointmentService} from '@/apps/ART/services/appointment_service'
+import { PatientPrintoutService } from "@/services/patient_printout_service";
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -29,7 +30,7 @@ export default defineComponent({
   watch: {
     patient: {
       async handler(patient: any) {
-        this.appointment = new AppointmentService(this.patientID);
+        this.appointment = new AppointmentService(patient.getID(), this.providerID);
         this.init();
       },
       deep: true
@@ -50,7 +51,8 @@ export default defineComponent({
       if (!obs) return toastWarning('Unable to create Obs')
 
       toastSuccess('Encounter created')
-
+      const printer = new PatientPrintoutService(this.patientID);
+      await printer.printVisitSummaryLbl();
       this.nextTask()
     },
     async init() {
@@ -72,6 +74,11 @@ export default defineComponent({
               tag: 'obs',
               obs: this.appointment.buildValueDate('Appointment date', d.value)
             }
+          },
+          config: {
+            hiddenFooterBtns: [
+                'Clear'
+            ]
           },
           options: () =>  {return [{
             label: "",

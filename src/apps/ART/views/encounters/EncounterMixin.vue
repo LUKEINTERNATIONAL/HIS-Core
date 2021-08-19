@@ -5,6 +5,9 @@ import { Patientservice } from "@/services/patient_service"
 import { ProgramService } from "@/services/program_service"
 import { WorkflowService } from "@/services/workflow_service"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
+import { optionsActionSheet } from "@/utils/ActionSheets"
+import { UserService } from "@/services/user_service"
+import { find } from "lodash"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -14,12 +17,16 @@ export default defineComponent({
         fields: [] as Array<Field>,
         form: {} as Record<string, Option> | Record<string, null>,
         patientID: '' as any,
+        providerID: -1 as number,
+        providers: [] as any,
+        bdeChecked: false as boolean,
         ready: false
     }),
     watch: {
        '$route': {
             async handler(route: any) {
                 if(route.params.patient_id) {
+                    await this.checkBDE()
                     this.patientID = route.params.patient_id;
                     const response = await Patientservice.findByID(this.patientID);
                     this.patient = new Patientservice(response);
@@ -32,11 +39,36 @@ export default defineComponent({
         }
     },
     computed: {
-        cancelDestination(): string{
+        cancelDestination(): string {
             return this.patientDashboardUrl()
         }
     },
     methods: {
+        async checkBDE() {
+            if (ProgramService.isBDE() && !this.bdeChecked) {
+                this.bdeChecked = true
+                this.providers = await UserService.getUsers()
+                const providerNames = this.providers.map((p: any) => `${p.username} \
+                    (${p.person.names[0].given_name} ${p.person.names[0].family_name})`)
+
+                const selection = await this.selectProvider(providerNames)
+                const [ username ] = selection.split(' ')
+                const provider = find(this.providers, { username })
+
+                if (provider) this.providerID = provider.person_id
+            }
+        },
+        async selectProvider(providers: Array<string>) {
+            const modal = await optionsActionSheet(
+                'Please select a provider',
+                `BDE: ${ProgramService.getSessionDate()} | Current: ${ProgramService.getCachedApiDate()}`,
+                providers,
+                [
+                    { name: 'Confirm', slot: 'end', role: 'action' }
+                ]
+            )
+            return modal.selection
+        },
         patientDashboardUrl() {
             return `/patient/dashboard/${this.patientID}`
         },
