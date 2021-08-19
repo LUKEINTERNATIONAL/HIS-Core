@@ -27,8 +27,8 @@ enum StagingCategory {
 export class StagingService extends AppEncounterService {
     age: number
     confirmatoryTest: string | null;
-    constructor(patientID: number, age: number) {
-        super(patientID, 52) //TODO: Use encounter type reference name
+    constructor(patientID: number, age: number, providerID: number) {
+        super(patientID, 52, providerID) //TODO: Use encounter type reference name
         this.age = age
         this.confirmatoryTest = null
     }

@@ -46,7 +46,7 @@ export default defineComponent({
   },
   methods: {
     async init(patient: any) {
-      this.vitals = new VitalsService(patient.getID());
+      this.vitals = new VitalsService(patient.getID(), this.providerID);
 
       this.age = patient.getAge();
       this.gender = patient.getGender();

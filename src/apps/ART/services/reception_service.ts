@@ -4,8 +4,8 @@ import { GlobalPropertyService } from "@/services/global_property_service";
 
 export class ReceptionService extends AppEncounterService {
     sitePrefix: string
-    constructor(patientID: number) {
-        super(patientID, 51) //TODO: Use encounter type reference name'
+    constructor(patientID: number, providerID: number) {
+        super(patientID, 51, providerID) //TODO: Use encounter type reference name'
         this.sitePrefix = ''
     }
 

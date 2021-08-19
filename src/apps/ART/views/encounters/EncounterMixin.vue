@@ -17,7 +17,7 @@ export default defineComponent({
         fields: [] as Array<Field>,
         form: {} as Record<string, Option> | Record<string, null>,
         patientID: '' as any,
-        provider: -1 as number,
+        providerID: -1 as number,
         providers: [] as any,
         ready: false
     }),
@@ -25,6 +25,7 @@ export default defineComponent({
        '$route': {
             async handler(route: any) {
                 if(route.params.patient_id) {
+                    await this.checkBDE()
                     this.patientID = route.params.patient_id;
                     const response = await Patientservice.findByID(this.patientID);
                     this.patient = new Patientservice(response);
@@ -36,9 +37,6 @@ export default defineComponent({
             deep: true
         }
     },
-    async mounted() {
-        await this.checkBDE()
-    },
     computed: {
         cancelDestination(): string {
             return this.patientDashboardUrl()
@@ -48,15 +46,14 @@ export default defineComponent({
         async checkBDE() {
             if (ProgramService.isBDE()) {
                 this.providers = await UserService.getUsers()
-
                 const providerNames = this.providers.map((p: any) => `${p.username} \
                     (${p.person.names[0].given_name} ${p.person.names[0].family_name})`)
-                
+
                 const selection = await this.selectProvider(providerNames)
                 const [ username ] = selection.split(' ')
                 const provider = find(this.providers, { username })
 
-                if (provider) this.provider = provider.person_id
+                if (provider) this.providerID = provider.person_id
             }
         },
         async selectProvider(providers: Array<string>) {

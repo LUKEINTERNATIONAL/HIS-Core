@@ -62,7 +62,7 @@ export default defineComponent({
     watch: {
         patient: {
             async handler(patient: any){
-                this.prescription = new PrescriptionService(patient.getID())
+                this.prescription = new PrescriptionService(patient.getID(), this.providerID)
                 await this.prescription.loadMedicationOrders()
                 await this.prescription.loadFastTrackStatus()
 

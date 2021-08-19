@@ -25,8 +25,8 @@ export default defineComponent({
     watch: {
         patient: {
             async handler(patient: any){
-                this.registration = new ClinicRegistrationService(patient.getID())
-                this.vitals = new VitalsService(patient.getID())
+                this.registration = new ClinicRegistrationService(patient.getID(), this.providerID)
+                this.vitals = new VitalsService(patient.getID(), this.providerID)
                 await this.initStaging(this.patient)
 
                 this.showStagingWeightChart = false

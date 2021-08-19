@@ -23,8 +23,9 @@ export class PrescriptionService extends AppEncounterService {
     sideEffects: Record<string, any>;
     tptPrescriptionCount: number;
     lastSideEffectDate: string;
-    constructor(patientID: number) {
-        super(patientID, 25) //TODO: Use encounter type reference name
+
+    constructor(patientID: number, providerID: number) {
+        super(patientID, 25, providerID) //TODO: Use encounter type reference name
         this.nextVisitInterval = 0
         this.fastTrack = false
         this.regimenExtras = []

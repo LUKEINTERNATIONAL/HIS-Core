@@ -5,8 +5,8 @@ import HisDate from "@/utils/Date"
 export class AdherenceService extends AppEncounterService {
     lastDrugs: Array<DrugInterface>
     lastReceiptDate: string
-    constructor(patientID: number) {
-        super(patientID, 68) //TODO: Use encounter type reference name
+    constructor(patientID: number, providerID: number) {
+        super(patientID, 68, providerID) //TODO: Use encounter type reference name
         this.lastDrugs = []
         this.lastReceiptDate = ''
     }

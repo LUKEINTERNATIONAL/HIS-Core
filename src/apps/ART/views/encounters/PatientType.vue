@@ -25,7 +25,7 @@ export default defineComponent({
   watch: {
     patient: {
       async handler() {
-        this.patientType = new PatientTypeService(this.patientID);
+        this.patientType = new PatientTypeService(this.patientID, this.providerID);
         await this.patientType.loadPatientType()
         this.fields = this.getFields();
       },

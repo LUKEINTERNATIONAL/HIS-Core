@@ -43,8 +43,8 @@ export class DispensationService extends AppEncounterService {
     drugHistory: Array<any>;
     currentDrugOrder: Array<any>;
 
-    constructor(patientID: number) {
-        super(patientID, 54)
+    constructor(patientID: number, providerID: number) {
+        super(patientID, 54, providerID)
         this.drugHistory = []
         this.currentDrugOrder = []
     }

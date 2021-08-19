@@ -54,7 +54,7 @@ export default defineComponent({
       async handler(value: boolean) {
         if (value) {
           this.fields = this.getFields();
-          this.consultation = new ConsultationService(this.patientID);
+          this.consultation = new ConsultationService(this.patientID, this.providerID);
           this.completedTBTherapy();
         }
       },

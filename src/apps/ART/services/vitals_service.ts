@@ -1,8 +1,8 @@
 import { AppEncounterService } from "@/services/app_encounter_service";
 import { isArray } from "lodash";
 export class VitalsService extends AppEncounterService{
-  constructor(patientID: number) {
-    super(patientID, 6);
+  constructor(patientID: number, providerID: number) {
+    super(patientID, 6, providerID);
   }
   isNotEmptyandNumber(vital: any) {
     return `${vital.value}`.match(/^-?\d+\.?\d*$/) ? null : [`Invalid entry for ${vital.label}`]

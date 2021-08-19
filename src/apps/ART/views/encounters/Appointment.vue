@@ -30,7 +30,7 @@ export default defineComponent({
   watch: {
     patient: {
       async handler(patient: any) {
-        this.appointment = new AppointmentService(this.patientID);
+        this.appointment = new AppointmentService(patient.getID(), this.providerID);
         this.init();
       },
       deep: true
