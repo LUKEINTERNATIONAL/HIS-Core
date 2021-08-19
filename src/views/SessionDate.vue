@@ -79,7 +79,7 @@ export default defineComponent({
             if (action === 'Reset Date') {
                 return await this.resetSessionDate()
             }
-            if (action === 'Keep current Date') {
+            if (action === 'Keep BDE Date') {
                 this.exitPage()
             }
         },
