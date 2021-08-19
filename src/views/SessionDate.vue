@@ -71,7 +71,7 @@ export default defineComponent({
                 `BDE Date: ${sessionDate}`,
                 [
                     { name: 'Reset Date', slot: 'start', color: 'success'},
-                    { name: 'Keep current Date', slot: 'end', color: 'danger'},
+                    { name: 'Keep BDE Date', slot: 'end', color: 'danger'},
                     { name: 'New date', slot: 'end'}
                 ],
             )
