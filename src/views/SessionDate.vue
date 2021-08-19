@@ -70,11 +70,18 @@ export default defineComponent({
                 Do you wish to reset the date to ${apiDate}?`,
                 `BDE Date: ${sessionDate}`,
                 [
-                    { name: `Yes, Reset to ${apiDate}`, slot: 'start', color: 'primary'},
-                    { name: `No, keep ${sessionDate}`, slot: 'end', color: 'danger' }
+                    { name: 'Reset Date', slot: 'start', color: 'success'},
+                    { name: 'Keep current Date', slot: 'end', color: 'danger'},
+                    { name: 'New date', slot: 'end'}
                 ],
             )
-            if (action != `No, keep ${sessionDate}`) await this.resetSessionDate()
+
+            if (action === 'Reset Date') {
+                return await this.resetSessionDate()
+            }
+            if (action === 'Keep current Date') {
+                this.exitPage()
+            }
         },
         async resetSessionDate() {
             try {
