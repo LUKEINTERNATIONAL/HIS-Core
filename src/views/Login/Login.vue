@@ -13,6 +13,11 @@
               </span>
             </ion-text>
           </ion-col>
+          <ion-col>
+            <ion-button style="float: right" router-link="/settings/host" v-if="showConfig()">
+              Configuration
+            </ion-button>
+          </ion-col>
         </ion-row>
       </ion-toolbar>
     </ion-header>
@@ -112,6 +117,7 @@ import {
   IonToolbar,
   IonHeader,
   IonPage,
+  IonButton,
   toastController
 } from "@ionic/vue";
 import { defineComponent } from "vue";
@@ -126,7 +132,7 @@ export default defineComponent({
     IonRow,
     IonCol,
     IonItem,
-    // IonButton,
+    IonButton,
     IonInput,
     IonContent,
     IonPage,
@@ -199,6 +205,11 @@ export default defineComponent({
         return this.password;
       }
     },
+    showConfig(): boolean {
+      if(localStorage.getItem('useLocalStorage') === 'true')  return true 
+      return false
+    },
+
     goToNextField() {
       const nextField = this.active === "username" ? "password" : "username";
       this.focusKeyboard(nextField);
