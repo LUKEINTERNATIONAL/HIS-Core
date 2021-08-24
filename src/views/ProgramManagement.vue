@@ -27,6 +27,7 @@ export default defineComponent({
         fields: [] as Array<Field>,
         fieldComponent: '' as string,
         activeField: '' as string,
+        activeProgram: {} as any,
         programSelectionFieldContext: {} as any
     }),
     watch: {
@@ -49,7 +50,14 @@ export default defineComponent({
     },
     methods: {
         async onFinish() {
-            // TODO: do something
+            switch(this.activeField) {
+                case 'program_enrollment':
+                    await this.onEnrollProgram() 
+                    break;
+                case 'program_state':
+                    //TODO: do something
+                    break;
+            }
         },
         async patientPrograms() {
             const programs = await this.patientProgram.getPrograms()
@@ -70,10 +78,10 @@ export default defineComponent({
                                 other: { ...p }
                             }))
         },
-        async programWorkflows(f: any) {
+        async programWorkflows() {
             const workflows = await ProgramService.getProgramWorkflows(this.patientProgram.getProgramId())
             if (!isEmpty(workflows)) {
-                const curStates = f.program_selection.other.patient_states
+                const curStates = this.activeProgram ? this.activeProgram.patient_states : []
                 const activeStates = curStates.filter((s: any) => s.end_date === null).map((s: any) => s.name)
                 return workflows[0].states.map((s: any) => ({
                     label: s.name, 
@@ -88,6 +96,20 @@ export default defineComponent({
                 return toastWarning('Please select a program')
             }
             this.fieldComponent = 'program_state'
+        },
+        async onEnrollProgram() {
+            const programId = this.patientProgram.getProgramId()
+            if (programId === -1) {
+                return toastWarning('Please select a program')
+            }
+            try {
+                this.activeProgram = await this.patientProgram.enrollProgram()
+                this.fieldComponent = 'program_state'
+                toastSuccess('Patient has been enrolled!')
+            }catch(e) {
+                this.activeProgram = {}
+                toastDanger(e)
+            }
         },
         async onVoidProgram() {
             const patientProgramId = this.patientProgram.getPatientProgramId()
@@ -138,10 +160,12 @@ export default defineComponent({
                     onload: (context: any) => {
                         this.programSelectionFieldContext = context
                     },
-                    onValue: async (val: Option) => {
-                        this.patientProgram.setProgramId(val.value)
-                        this.patientProgram.setPatientProgramId(val.other.patient_program_id)
-                        return true
+                    onValue: (val: Option) => {
+                        if (val) {
+                            this.activeProgram = val.other
+                            this.patientProgram.setProgramId(val.value)
+                            this.patientProgram.setPatientProgramId(val.other.patient_program_id)
+                        }
                     },
                     validation: (val: any) => Validation.required(val),
                     options: () => this.patientPrograms(),
@@ -178,6 +202,7 @@ export default defineComponent({
                     helpText: "Please select a programme",
                     type: FieldType.TT_SELECT,
                     condition: () => this.activeField === 'program_enrollment',
+                    unload: (val: Option) => this.patientProgram.setProgramId(val.value),
                     options: () => this.allPrograms(),
                     config: {
                         showKeyboard: true
@@ -192,19 +217,14 @@ export default defineComponent({
                         allowUnknown: true,
                         estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
                     },
-                    computeValue: (date: string, isEstimate: boolean) => {
-                        return {
-                            date,
-                            isEstimate
-                        }
-                    }
+                    computeValue: (date: string) => this.patientProgram.setDate(date),
                 }),
                 {
                     id: "program_state",
                     helpText: "State",
                     type: FieldType.TT_SELECT,
                     condition: () => this.activeField === 'program_state',
-                    options: (f: any) => this.programWorkflows(f),
+                    options: () => this.programWorkflows(),
                 },
                 ...generateDateFields({
                     id: 'state_outcome_date',

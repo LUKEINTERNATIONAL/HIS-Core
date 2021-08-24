@@ -63,6 +63,12 @@ export class ProgramService extends Service {
           'date_enrolled': super.getSessionDate()
       })
     }
+    static enrollProgram(patientId: number, program: number, date: string ) {
+      return super.postJson(`/patients/${patientId}/programs`, {
+        'program_id': program,
+        'date_enrolled': date
+      })
+    }
     static getWeightForHeightValues() {
       return super.getJson('/patient_weight_for_height_values');
     }
