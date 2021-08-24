@@ -17,7 +17,7 @@ import { EstimationFieldType, generateDateFields } from "@/utils/HisFormHelpers/
 import { ProgramService } from "@/services/program_service"
 import { PatientProgramService } from "@/services/patient_program_service"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
-import { findIndex, isEmpty } from 'lodash'
+import { find, findIndex, isEmpty } from 'lodash'
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -27,7 +27,7 @@ export default defineComponent({
         fields: [] as Array<Field>,
         fieldComponent: '' as string,
         activeField: '' as string,
-        programSelectionFieldContext: {} as any,
+        programSelectionFieldContext: {} as any
     }),
     watch: {
         fieldComponent(field: string){
@@ -60,23 +60,28 @@ export default defineComponent({
             }))
         },
         async allPrograms() {
+            const hasPrograms = this.programSelectionFieldContext.listData
             const programs = await ProgramService.getAllPrograms()
-            return programs.map((p: any) => ({
-                label: p.name,
-                value: p.program_id,
-                other: { ...p }
-            }))
+            // Build programs while excluding already existing ones
+            return programs.filter((p: any) => !find(hasPrograms, { value: p.program_id }))
+                           .map((p: any) => ({
+                                label: p.name,
+                                value: p.program_id,
+                                other: { ...p }
+                            }))
         },
-        async programWorkflows() {
-            const workflows = await ProgramService.getProgramWorkflows(
-                this.patientProgram.getProgramId()
-            )
-            if (isEmpty(workflows)) return
-            return workflows[0].states.map((s: any) => ({
-                label: s.name, 
-                value: s.program_workflow_state_id,
-                other: { ...s }
-            }))
+        async programWorkflows(f: any) {
+            const workflows = await ProgramService.getProgramWorkflows(this.patientProgram.getProgramId())
+            if (!isEmpty(workflows)) {
+                const curStates = f.program_selection.other.patient_states
+                const activeStates = curStates.filter((s: any) => s.end_date === null).map((s: any) => s.name)
+                return workflows[0].states.filter((s: any) => !activeStates.includes(s.name))
+                    .map((s: any) => ({
+                        label: s.name, 
+                        value: s.program_workflow_state_id,
+                        other: { ...s }
+                }))
+            }
         },
         onUpdateState() {
             if (this.patientProgram.getProgramId() === -1) {
@@ -90,7 +95,7 @@ export default defineComponent({
             if (patientProgramId === -1) {
                 return toastWarning('Please select a program')
             }
-  
+
             const confirm = await alertConfirmation(`Are you sure you want to void program?`)
 
             if (!confirm) return
@@ -199,7 +204,7 @@ export default defineComponent({
                     helpText: "State",
                     type: FieldType.TT_SELECT,
                     condition: () => this.activeField === 'program_state',
-                    options: () => this.programWorkflows(),
+                    options: (f: any) => this.programWorkflows(f),
                 },
                 ...generateDateFields({
                     id: 'state_outcome_date',
