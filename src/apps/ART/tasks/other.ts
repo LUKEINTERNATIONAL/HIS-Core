@@ -47,10 +47,13 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     icon: img("time.png")
   },
   {
-    id: "programs",
+    id: "program_management",
     name: "Program(s)",
     description: "View / update patient's programs",
-    url: "/",
+    action: ({ patient }: any, router: any) => {
+      console.log(router)
+      router.push({ path: `/patient/programs/${patient.patient_id}`})
+    },
     icon: img("programs.png")
   },
   {
