@@ -5,12 +5,14 @@ export class PatientProgramService extends ProgramService {
     programId: number
     stateId: number
     patientProgramId: number
+    date: string
     constructor(patientId: number) {
         super()
         this.patientId = patientId
         this.patientProgramId = -1
         this.programId = -1
         this.stateId = -1
+        this.date = ''
     }
 
     getProgramId() {
@@ -35,6 +37,14 @@ export class PatientProgramService extends ProgramService {
 
     voidState(reason: string) {
         return ProgramService.voidState(this.patientId, this.programId, this.stateId, reason)
+    }
+
+    enrollProgram() {
+        return ProgramService.enrollProgram(this.patientId, this.programId, this.date)
+    }
+
+    setDate(date: string) {
+        this.date = date
     }
 
     setPatientProgramId(id: number) {
