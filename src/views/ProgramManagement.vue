@@ -222,7 +222,7 @@ export default defineComponent({
                     id: 'program_outcome_date',
                     helpText: 'Outcome',
                     validation: (val: any) => Validation.required(val),
-                    condition: (f: any) => f.program_enrollment,
+                    condition: () => this.activeField === 'program_enrollment',
                     estimation: {
                         allowUnknown: true,
                         estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
