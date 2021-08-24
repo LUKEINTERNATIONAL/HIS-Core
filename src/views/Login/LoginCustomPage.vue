@@ -90,12 +90,7 @@ export default defineComponent({
         on: false,
       },
     };
-  } /*,
-	computed: {
-    computedDisplay(): string {
-      return this.display;
-    }
-  }*/,
+  }, 
   methods: {
     renderKeyBoard(e: any) {
       this.focusInput = e.currentTarget;
@@ -105,7 +100,6 @@ export default defineComponent({
 
       const main = document.getElementsByClassName("main")[0];
       const width = main.getBoundingClientRect().width;
-      //const divPos = ((50 / width)*100);
       let inputPos = e.currentTarget.getBoundingClientRect().top;
       inputPos = parseInt(inputPos);
 
@@ -149,7 +143,7 @@ export default defineComponent({
           ? (this.userInput.username = this.focusInput.value)
           : (this.userInput.password = this.focusInput.value);
       } catch (x) {
-        //
+        console.warn('input error')
       }
     },
     doLogin: async function () {
@@ -160,7 +154,8 @@ export default defineComponent({
         };
         const response = await ApiClient.post("auth/login", params).catch(
           (error) => {
-            console.log(error);
+            toastWarning('log in error');
+            console.warn(error);
           }
         );
         if (response) {
