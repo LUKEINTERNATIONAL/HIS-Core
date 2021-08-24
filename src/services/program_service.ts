@@ -9,6 +9,10 @@ export class ProgramService extends Service {
         super()
     }
 
+    static getAllPrograms() {
+      return super.getJson('programs', { 'page_size': 1000 })
+    }
+
     static getPatientPrograms(patientID: number) {
       return super.getJson(`patients/${patientID}/programs`)
     }

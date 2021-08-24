@@ -59,6 +59,14 @@ export default defineComponent({
                 other: { ...p }
             }))
         },
+        async allPrograms() {
+            const programs = await ProgramService.getAllPrograms()
+            return programs.map((p: any) => ({
+                label: p.name,
+                value: p.program_id,
+                other: { ...p }
+            }))
+        },
         async programWorkflows() {
             const workflows = await ProgramService.getProgramWorkflows(
                 this.patientProgram.getProgramId()
@@ -165,7 +173,10 @@ export default defineComponent({
                     helpText: "Please select a programme",
                     type: FieldType.TT_SELECT,
                     condition: () => this.activeField === 'program_enrollment',
-                    options: () => [],
+                    options: () => this.allPrograms(),
+                    config: {
+                        showKeyboard: true
+                    }
                 },
                 ...generateDateFields({
                     id: 'program_outcome_date',
