@@ -16,6 +16,7 @@ import Configuration from '@/views/Configuration.vue'
 import Settings from '@/components/ART/Settings.vue'
 import HisApps from '@/apps/his_apps';
 import SessionDate from "@/views/SessionDate.vue"
+import ProgramManagement from "@/views/ProgramManagement.vue"
 
 const HIS_APP_ROUTES = (() => {
   let routes: Array<RouteRecordRaw> = []
@@ -98,8 +99,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/patients/confirm',
     name: 'Patient confirmation',
     component: Confirmation
-  }
-  ,
+  },
+  {
+    path: '/patient/programs/:patient_id',
+    name: 'Program(s)',
+    component: ProgramManagement
+  },
   {
     path: '/preferences',
     name: 'Preferences',
