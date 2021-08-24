@@ -174,8 +174,7 @@ export default defineComponent({
       this.activeIndex = index;
       this.activeField = this.fields[this.activeIndex];
       this.emitState()
-
-      if (this.activeField.onload) await this.activeField.onload()
+      this.$nextTick(() => this.activeField.onload ? this.activeField.onload(this): null)
     },
     onValue(value: string | number | Option | Array<Option>) {
       this.setActiveFieldValue(value);
