@@ -6,6 +6,7 @@
                 button v-for="(item, index) in filtered" 
                 :color="item.label === selected ? 'light': ''" 
                 :key="index"
+                :disabled="'disabled' in item && item.disabled ? true: false"
                 @click="onselect(item)"> 
                 <ion-label> {{item.label}} </ion-label>
             </ion-item>

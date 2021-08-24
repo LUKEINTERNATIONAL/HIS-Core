@@ -63,10 +63,10 @@ export default defineComponent({
             const hasPrograms = this.programSelectionFieldContext.listData
             const programs = await ProgramService.getAllPrograms()
             // Build programs while excluding already existing ones
-            return programs.filter((p: any) => !find(hasPrograms, { value: p.program_id }))
-                           .map((p: any) => ({
+            return programs.map((p: any) => ({
                                 label: p.name,
                                 value: p.program_id,
+                                disabled: find(hasPrograms, { value: p.program_id }),
                                 other: { ...p }
                             }))
         },
@@ -75,11 +75,11 @@ export default defineComponent({
             if (!isEmpty(workflows)) {
                 const curStates = f.program_selection.other.patient_states
                 const activeStates = curStates.filter((s: any) => s.end_date === null).map((s: any) => s.name)
-                return workflows[0].states.filter((s: any) => !activeStates.includes(s.name))
-                    .map((s: any) => ({
-                        label: s.name, 
-                        value: s.program_workflow_state_id,
-                        other: { ...s }
+                return workflows[0].states.map((s: any) => ({
+                    label: s.name, 
+                    value: s.program_workflow_state_id,
+                    disabled: activeStates.includes(s.name),
+                    other: { ...s }
                 }))
             }
         },
