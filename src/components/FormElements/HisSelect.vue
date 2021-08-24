@@ -35,8 +35,15 @@ export default defineComponent({
         }
     },
     methods: {
-        onselect(item: Option): void {
+        async onselect(item: Option) {
             this.selected = item.label
+            if (this.onValue) {
+                const ok = await this.onValue(item, this)
+                if (!ok) {
+                    this.selected = ''
+                    return
+                }
+            }
             this.$emit('onValue', item)
         }
     }
