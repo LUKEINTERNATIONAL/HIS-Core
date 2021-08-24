@@ -17,10 +17,9 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     icon: img("barcode.png")
   },
   {
-    id: "lab_activities",
+    id: "lab activities",
     name: "Lab activities",
-    description: "Print Patient Visit Summary",
-    url: "/",
+    description: "Do lab orders",
     icon: img('lab.png')
   },
   {

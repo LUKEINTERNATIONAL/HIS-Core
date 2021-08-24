@@ -110,6 +110,7 @@ export default defineComponent({
     listData: [] as any
   }),
   async activated() {
+    this.$emit('onFieldActivated', this)
     this.listData = await this.options(this.fdata)
   },
   computed: {

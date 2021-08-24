@@ -18,6 +18,9 @@ export default defineComponent({
         value: '',
         keyboard: NUMBERS_ONLY,
     }),
+    activated(){
+        this.$emit('onFieldActivated', this)
+    },
     props: {
         clear: {
             type: Boolean

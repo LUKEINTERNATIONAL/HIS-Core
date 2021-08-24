@@ -17,6 +17,9 @@ export default defineComponent({
         value: '',
         keyboard: MONTHLY_DAYS,
     }),
+    activated(){
+        this.$emit('onFieldActivated', this)
+    },
     props: {
         clear: {
             type: Boolean
