@@ -60,6 +60,7 @@ export default defineComponent({
     },
     async activated() {
         this.init()
+        this.$emit('onFieldActivated', this)
         if (this.activationState === 'next') {
             this.active = {}
             this.clearSelection()

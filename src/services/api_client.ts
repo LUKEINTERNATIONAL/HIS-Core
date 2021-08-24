@@ -1,5 +1,5 @@
 import router from '@/router/index';
-import { toastDanger } from "@/utils/Alerts"
+import { toastDanger, alertConfirmation } from "@/utils/Alerts"
 /** Nprogress */
 import 'nprogress/nprogress.css'
 import nprogress from 'nprogress'
@@ -19,24 +19,29 @@ const ApiClient = (() => {
     }
     async function getConfig(): Promise<{ status: string; data?: Config | undefined; message?: string }> {
         try {
-
-            const response = await fetch('/config.json');
-
-            if (response.status !== 200) {
-                const message = `Looks like there was a problem. Status Code: ${response.status}`;
-                return { status: "error", message:  message};
-            }
             const config: Config = {};
-            const data = await response.json();
-            sessionStorage.setItem("apiURL", data.apiURL);
-            config.host = data.apiURL;
-            sessionStorage.setItem("apiPort", data.apiPort);
-            config.port = data.apiPort;
-            sessionStorage.setItem("apiProtocol", data.apiProtocol);
-            config.protocol = data.apiProtocol;
-            config.version = data.version;
-            config.source = data;
+            if(localStorage.useLocalStorage) {
+                config.host = localStorage.apiURL;
+                config.port = localStorage.apiPort;
+                config.protocol = localStorage.apiProtocol;
+                config.source = JSON.stringify(localStorage);
+            }else {
+                const response = await fetch('/config.json');
 
+                if (response.status !== 200) {
+                    const message = `Looks like there was a problem. Status Code: ${response.status}`;
+                    return { status: "error", message:  message};
+                }
+                const data = await response.json();
+                sessionStorage.setItem("apiURL", data.apiURL);
+                config.host = data.apiURL;
+                sessionStorage.setItem("apiPort", data.apiPort);
+                config.port = data.apiPort;
+                sessionStorage.setItem("apiProtocol", data.apiProtocol);
+                config.protocol = data.apiProtocol;
+                config.version = data.version;
+                config.source = data;
+            }
             return { status: "complete", data: config };
         } catch (err) {
             return { status: "error" };
@@ -65,6 +70,17 @@ const ApiClient = (() => {
             'Authorization': sessionStorage.apiKey,
             'Content-Type': 'application/json'
         };
+    }
+    function setLocalStorage(ipAddress: string, port: string) {
+        localStorage.setItem('useLocalStorage', 'true');
+        localStorage.setItem('apiURL', ipAddress);
+        localStorage.setItem('apiPort', port);
+        localStorage.setItem('apiProtocol', 'http');
+    }
+    function removeOnly(inclusions: string[]) {
+        inclusions.forEach(element => {
+           inclusions.includes(element) && localStorage.removeItem(element)
+        });
     }
 
     async function execFetch(uri: string, params: object, noRedirectCodes: number[] = []) {
@@ -97,8 +113,12 @@ const ApiClient = (() => {
                     return response;
                 }
             } catch (e) {
-                console.error(`Failed to fetch ${url}`, e);
                 toastDanger(`Failed to fetch ${url}`);
+                const confirmation = await alertConfirmation('Can not connect to API, enter manual configuration?') 
+                const path = '/settings/host'
+                if (confirmation) {
+                    !path ? router.back() : router.push({path})
+                }
                 return null;
             }
         }
@@ -122,7 +142,7 @@ const ApiClient = (() => {
     const post = (uri: string, data: object, options = []) => execFetch(uri, { method: 'POST', body: JSON.stringify(data) }, options);
     const remove = (uri: string, data: object, options = []) => execFetch(uri, { method: 'DELETE', body: JSON.stringify(data) }, options);
     const put = (uri: string, data: object, options = []) => execFetch(uri, { method: 'PUT', body: JSON.stringify(data) }, options);
-    return { get, post, put, remove, getConfig };
+    return { get, post, put, remove, getConfig, setLocalStorage, removeOnly };
 })();
 
 export default ApiClient;

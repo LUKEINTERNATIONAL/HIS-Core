@@ -127,6 +127,9 @@ export default defineComponent({
     appointmentLimit: 0 as any,
     sessionDate: null as any
   }),
+  activated(){
+    this.$emit('onFieldActivated', this)
+  },
   async created() {
     const items = await this.options(this.fdata);
     this.sessionDate = AppointmentService.getSessionDate();

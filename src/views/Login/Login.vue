@@ -3,28 +3,61 @@
     <ion-content :fullscreen="true">
       <div id="login" class="container">
         <div class="header">
-          <div id="app-name"><b style="color:#8B4513;">National</b>&nbsp;<b style="color:#CD853F;">EMR</b></div>
-          <span>{{versionDetails.title}}</span>|
-          &nbsp;Series: <span>{{versionDetails.series}}</span>|
-          &nbsp;Version: <span>{{versionDetails.version}}</span>
+          <div id="app-name">
+            <b style="color: #8b4513">National</b>&nbsp;<b
+              style="color: #cd853f"
+              >EMR</b
+            >
+          </div>
+          <span>{{ versionDetails.title }}</span
+          >| &nbsp;Series: <span>{{ versionDetails.series }}</span
+          >| &nbsp;Version: <span>{{ versionDetails.version }}</span>
+          &nbsp;
         </div>
         <Inputs v-bind:keys="keys"></Inputs>
 
-        <img src="../../../public/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png" class="logos" id="mw-img" />
-        <img src="../../../public/assets/images/login-logos/PEPFAR.png" class="logos" id="donor-img" />
+        >
       </div>
     </ion-content>
+    <ion-footer>
+      <span class="" id="coat">
+        <img
+          class="logos"
+          id="mw-img"
+          src="/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png"
+          alt="Malawi Coat of Arms logo"
+        />
+      </span>
+      <span class="" id="pepfar">
+        <img
+          id="donor-img"
+          class="logos"
+          src="/assets/images/login-logos/PEPFAR.png"
+          alt="PEPFAR logo"
+        />
+      </span>
+      <ion-button
+        class="config"
+        router-link="/settings/host"
+        v-if="showConfig()"
+      >
+        Configuration
+      </ion-button>
+    </ion-footer>
   </ion-page>
 </template>
 
 <script lang="ts">
-
 import Inputs from "./LoginCustomPage.vue";
-
+import { IonButton, IonPage, IonContent, IonFooter } from "@ionic/vue";
 export default {
   name: "login",
   components: {
-    Inputs
+    Inputs,
+    IonButton,
+    IonPage,
+    IonContent,
+    IonFooter,
   },
   data() {
     return {
@@ -32,16 +65,22 @@ export default {
         type: String,
         title: "HIS-EMR",
         version: "1.0.0",
-        series: "4"
+        series: "4",
       },
       keys: [
         ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
-        ["q","w","e","r","t","y","u","i","o","p"],
-        ["a","s","d","f","g","h","j","k","l","Del."],
-        ["z","x","c","v","b","n","m", "Caps","Login"]
-      ] 
-    }
-  }
+        ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+        ["a", "s", "d", "f", "g", "h", "j", "k", "l", "Del."],
+        ["z", "x", "c", "v", "b", "n", "m", "Caps", "Login"],
+      ],
+    };
+  },
+  methods: {
+    showConfig(): boolean {
+      if (localStorage.getItem("useLocalStorage") === "true") return true;
+      return false;
+    },
+  },
 };
 </script>
 
@@ -54,26 +93,20 @@ export default {
   height: 95%;
 }
 
-#donor-img {
-  left: 120px;
-}
-
-#mw-img {
-  left: 10px;
-  width: 90px;
-  height: 90px;
-}
-
 .logos {
   bottom: 5px;
-  width: 65px;
-  height: 65px;
+  width: 90px;
+  height: 90px;
   margin-left: 10px;
-  float: left;
-  position: absolute;
+  /* float: left; */
+  /* position: absolute; */
 }
-
-.header span{
+.config {
+  margin: auto;
+  float: right;
+  margin-top: 20px;
+}
+.header span {
   font-weight: bolder;
 }
 
@@ -84,7 +117,7 @@ export default {
   margin: 10px;
   padding-right: 10px;
   border-width: 0px 0px 1px 0px;
-  border-color:  rgb(204, 204, 204);
+  border-color: rgb(204, 204, 204);
 }
 
 #app-name {

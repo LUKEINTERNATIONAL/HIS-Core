@@ -9,6 +9,7 @@ import Staging from "@/apps/ART/views/encounters/Staging.vue"
 import Vitals from "@/apps/ART/views/encounters/Vitals.vue"
 import PatientType from "@/apps/ART/views/encounters/PatientType.vue"
 import FastTrack from "@/apps/ART/views/encounters/FastTrack.vue"
+import LabActivities from "@/apps/ART/views/encounters/LabActivities.vue"
 
 export default [
     {
@@ -70,5 +71,10 @@ export default [
         name: "fast track assesment",
         path: "/art/encounters/fast_track/:patient_id",
         component: FastTrack
+    },
+    {
+        name: "lab activities",
+        path: "/art/encounters/lab/:patient_id",
+        component: LabActivities
     }
 ]

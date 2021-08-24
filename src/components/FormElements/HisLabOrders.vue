@@ -27,6 +27,10 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import ViewPort from "@/components/DataViews/ViewPort.vue";
+import { modalController } from "@ionic/vue";
+import LabOrderModal from "@/components/DataViews/LabOrderModal.vue"
+import { isEmpty } from "lodash";
+
 export default defineComponent({
   components: { ViewPort },
   props: {
@@ -40,8 +44,35 @@ export default defineComponent({
     },
   },
   data: () => ({
-    rows: [],
+    rows: [] as Array<any>,
   }),
+  methods: {
+    formatOrders(rawOrders: Array<any>) {
+      return rawOrders.map((d: any) => ({
+          'accession_number': d.accession_number,
+          'test_name': d.tests[0].name,
+          'specimen': d.specimen.name,
+          'ordered': d.order_date,
+          'result': [],
+          'release': ''
+      }))
+    },
+    async launchOrderSelection() {
+      const modal = await modalController.create({
+        component: LabOrderModal,
+        backdropDismiss: false,
+        cssClass: 'custom-modal'
+      })
+      modal.present()
+      const { data } = await modal.onDidDismiss()
+      if (!isEmpty(data)) {
+        this.rows = [...this.formatOrders(data), ...this.rows]
+      }
+    }
+  },
+  activated() {
+    this.$emit('onFieldActivated', this)
+  },
   async created() {
     const items = await this.options(this.fdata);
     this.rows = items[0].other.values;

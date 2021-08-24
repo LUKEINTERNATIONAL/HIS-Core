@@ -34,6 +34,7 @@ export default defineComponent({
         }
     },
     async activated() {
+        this.$emit('onFieldActivated', this)
         this.listData = this.options(this.fdata, this.cdata)
     }
 })

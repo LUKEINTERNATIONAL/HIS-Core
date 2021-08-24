@@ -120,6 +120,9 @@ export default defineComponent({
       color: "",
     },
   }),
+  activated(){
+    this.$emit('onFieldActivated', this)
+  },
   watch: {
     keys: {
       async handler(params) {
