@@ -15,8 +15,6 @@
           &nbsp;
         </div>
         <Inputs v-bind:keys="keys"></Inputs>
-
-        >
       </div>
     </ion-content>
     <ion-footer>
@@ -50,6 +48,7 @@
 <script lang="ts">
 import Inputs from "./LoginCustomPage.vue";
 import { IonButton, IonPage, IonContent, IonFooter } from "@ionic/vue";
+import {LOGIN_KEYBOARD} from "@/components/Keyboard/KbLayouts";
 export default {
   name: "login",
   components: {
@@ -67,12 +66,7 @@ export default {
         version: "1.0.0",
         series: "4",
       },
-      keys: [
-        ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
-        ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
-        ["a", "s", "d", "f", "g", "h", "j", "k", "l", "Del."],
-        ["z", "x", "c", "v", "b", "n", "m", "Caps", "Login"],
-      ],
+      keys: LOGIN_KEYBOARD,
     };
   },
   methods: {
