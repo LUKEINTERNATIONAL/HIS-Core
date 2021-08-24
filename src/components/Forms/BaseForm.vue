@@ -14,6 +14,7 @@
       :onValueUpdate="activeField.onValueUpdate"
       @onValue="onValue"
       @onClear="isClear=false"
+      @onFieldActivated="onFieldActivated"
     />
   </keep-alive>
 </template>
@@ -47,6 +48,7 @@ export default defineComponent({
   },
   data() {
     return {
+      fieldContext: {} as any,
       isClear: false,
       activeIndex: 0,
       formData: {} as any,
@@ -86,7 +88,7 @@ export default defineComponent({
           } 
         }
         this.onNext();
-        return 
+        return
       }
       this.emitState()
     },
@@ -109,6 +111,9 @@ export default defineComponent({
     this.onNext() //look for a field to mount initially
   },
   methods: {
+    onFieldActivated(fieldContext: any) {
+      if (this.activeField.onload) this.activeField.onload(fieldContext)
+    },
     buildFormData(fields: Array<Field>): void {
       this.formData = {};
       fields.forEach((field) => (this.formData[field.id] = null));
@@ -174,7 +179,6 @@ export default defineComponent({
       this.activeIndex = index;
       this.activeField = this.fields[this.activeIndex];
       this.emitState()
-      this.$nextTick(() => this.activeField.onload ? this.activeField.onload(this): null)
     },
     onValue(value: string | number | Option | Array<Option>) {
       this.setActiveFieldValue(value);
