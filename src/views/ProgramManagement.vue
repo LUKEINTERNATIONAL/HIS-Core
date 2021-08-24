@@ -13,11 +13,11 @@ import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Field, Option } from "@/components/Forms/FieldInterface"
 import { toastWarning, toastSuccess, toastDanger, alertConfirmation } from "@/utils/Alerts"
 import Validation from "@/components/Forms/validations/StandardValidations"
-import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
+import { EstimationFieldType, generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { ProgramService } from "@/services/program_service"
 import { PatientProgramService } from "@/services/patient_program_service"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
-import { findIndex } from 'lodash'
+import { findIndex, isEmpty } from 'lodash'
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -25,10 +25,16 @@ export default defineComponent({
         patient: {} as any,
         patientProgram: {} as any,
         fields: [] as Array<Field>,
-        fieldComponent: '' as any,
+        fieldComponent: '' as string,
+        activeField: '' as string,
         programSelectionFieldContext: {} as any,
     }),
     watch: {
+        fieldComponent(field: string){
+            if (field) {
+                this.activeField = field
+            }
+        },
         '$route': {
             async handler({params}: any) {
                 if (params && params.patient_id) {
@@ -52,6 +58,23 @@ export default defineComponent({
                 value: p.program.program_id,
                 other: { ...p }
             }))
+        },
+        async programWorkflows() {
+            const workflows = await ProgramService.getProgramWorkflows(
+                this.patientProgram.getProgramId()
+            )
+            if (isEmpty(workflows)) return
+            return workflows[0].states.map((s: any) => ({
+                label: s.name, 
+                value: s.program_workflow_state_id,
+                other: { ...s }
+            }))
+        },
+        onUpdateState() {
+            if (this.patientProgram.getProgramId() === -1) {
+                return toastWarning('Please select a program')
+            }
+            this.fieldComponent = 'program_state'
         },
         async onVoidProgram() {
             const patientProgramId = this.patientProgram.getPatientProgramId()
@@ -88,7 +111,7 @@ export default defineComponent({
                 slot: 'end',
                 visible: true,
                 onClick: onClick,
-                visibleOnStageChange: (state: any) => {
+                visibleOnStateChange: (state: any) => {
                     return state.index === fieldIndex
                 }
             }
@@ -103,8 +126,8 @@ export default defineComponent({
                         this.programSelectionFieldContext = context
                     },
                     onValue: async (val: Option) => {
-                        this.patientProgram.setPatientProgramId(val.other.patient_program_id)
                         this.patientProgram.setProgramId(val.value)
+                        this.patientProgram.setPatientProgramId(val.other.patient_program_id)
                         return true
                     },
                     validation: (val: any) => Validation.required(val),
@@ -125,9 +148,7 @@ export default defineComponent({
                            this.programNavButton(
                                'Update state',
                                'primary',
-                               () => {
-                                   this.fieldComponent = 'program_state'
-                               }
+                               this.onUpdateState
                            ),
                            this.programNavButton(
                                'Enroll',
@@ -143,14 +164,17 @@ export default defineComponent({
                     id: "program_enrollment",
                     helpText: "Please select a programme",
                     type: FieldType.TT_SELECT,
+                    condition: () => this.activeField === 'program_enrollment',
                     options: () => [],
                 },
                 ...generateDateFields({
                     id: 'program_outcome_date',
                     helpText: 'Outcome',
                     validation: (val: any) => Validation.required(val),
+                    condition: (f: any) => f.program_enrollment,
                     estimation: {
-                        allowUnknown: false
+                        allowUnknown: true,
+                        estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
                     },
                     computeValue: (date: string, isEstimate: boolean) => {
                         return {
@@ -163,14 +187,17 @@ export default defineComponent({
                     id: "program_state",
                     helpText: "State",
                     type: FieldType.TT_SELECT,
-                    options: () => [],
+                    condition: () => this.activeField === 'program_state',
+                    options: () => this.programWorkflows(),
                 },
                 ...generateDateFields({
                     id: 'state_outcome_date',
                     helpText: 'State',
+                    condition: (f: any) => f.program_state,
                     validation: (val: any) => Validation.required(val),
                     estimation: {
-                        allowUnknown: false
+                        allowUnknown: true,
+                        estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
                     },
                     computeValue: (date: string, isEstimate: boolean) => {
                         return {
