@@ -78,9 +78,9 @@ const ApiClient = (() => {
         localStorage.setItem('apiProtocol', 'http');
     }
     function removeOnly(inclusions: string[]) {
-        for (const key in sessionStorage) {
-           inclusions.includes(key) && localStorage.removeItem(key)
-        }
+        inclusions.forEach(element => {
+           inclusions.includes(element) && localStorage.removeItem(element)
+        });
     }
 
     async function execFetch(uri: string, params: object, noRedirectCodes: number[] = []) {
