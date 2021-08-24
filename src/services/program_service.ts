@@ -9,6 +9,30 @@ export class ProgramService extends Service {
         super()
     }
 
+    static getPatientPrograms(patientID: number) {
+      return super.getJson(`patients/${patientID}/programs`)
+    }
+
+    static getProgramWorkflows(program: number) {
+      return super.getJson(`programs/${program}/workflows`)
+    }
+
+    static getPatientStates(patientId: number, programId: number) {
+      return super.getJson(`programs/${programId}/patients/${patientId}/states`)
+    }
+
+    static voidProgram(patientProgramId: number, reason='') {
+      return super.void(`patient_programs/${patientProgramId}/`, { reason })
+    }
+
+    static createState(patientId: number, programId: number, state: Record<string, any>) {
+      return super.postJson(`programs/${programId}/patients/${patientId}/states`, state) 
+    }
+
+    static voidState(patientId: number, programId: number, stateId: number, reason='') {
+      return super.void(`programs/${programId}/patients/${patientId}/state/${stateId}`, { reason })
+    }
+
     static getProgramInformation(patientID: number) {
         return super.getJson(`/programs/${super.getProgramID()}/patients/${patientID}`);
     }
