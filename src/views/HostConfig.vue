@@ -11,7 +11,7 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import {
-  CHARACTERS_AND_NUMBERS_LO,
+  CHARACTERS_AND_NUMBERS_LO, DEFAULT_KEYPAD
 } from "@/components/Keyboard/KbLayouts";
 import ApiClient from "@/services/api_client";
 import { infoActionSheet } from "@/utils/ActionSheets";
@@ -34,7 +34,7 @@ export default defineComponent({
           config: {
             customKeyboard: [
               CHARACTERS_AND_NUMBERS_LO,
-              [["Unknown", "Delete"]],
+              [[ "Delete"]],
             ],
           },
         },
@@ -45,8 +45,8 @@ export default defineComponent({
           type: FieldType.TT_TEXT,
           config: {
             customKeyboard: [
-              CHARACTERS_AND_NUMBERS_LO,
-              [["Unknown", "Delete"]],
+              DEFAULT_KEYPAD,
+              [],
             ],
           },
         },
