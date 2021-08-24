@@ -48,7 +48,6 @@ export default defineComponent({
   },
   data() {
     return {
-      fieldContext: {} as any,
       isClear: false,
       activeIndex: 0,
       formData: {} as any,

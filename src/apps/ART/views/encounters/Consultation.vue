@@ -28,6 +28,7 @@ export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     fields: [] as any,
+    labOrderFieldContext: {} as any,
     consultation: {} as any,
     hasTBTherapyObs: false,
     allergicToSulphur: false,
@@ -388,6 +389,9 @@ export default defineComponent({
           id: "patient_lab_orders",
           helpText: "Lab orders",
           type: FieldType.TT_LAB_ORDERS,
+          onload: (fieldContext: any) => {
+            this.labOrderFieldContext = fieldContext
+          },
           options: async () => {
             const orders = await OrderService.getOrders(this.patientID);
             const VLOrders = OrderService.formatLabs(orders);
@@ -411,8 +415,9 @@ export default defineComponent({
                 color: "primary",
                 visible: true,
                 onClick: async () => {
-                  const data = await HisApp.makeLabOrders();
-                  // this.fieldComponent = 'custom_regimen'
+                  if (!isEmpty(this.labOrderFieldContext)) {
+                    await this.labOrderFieldContext.launchOrderSelection()
+                  }
                 },
                 visibleOnStateChange: (state: Record<string, any>) => {
                   return state.index === 1;
