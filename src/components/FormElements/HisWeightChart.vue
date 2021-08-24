@@ -112,6 +112,9 @@ export default defineComponent({
         }
       }
     }),
+    activated(){
+        this.$emit('onFieldActivated', this)
+    },
     methods: {
         setStats(data: any) {
             const prevWeight =  data.values[data.values.length - 2]?.y || 0

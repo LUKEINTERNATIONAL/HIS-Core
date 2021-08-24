@@ -26,6 +26,7 @@ export default defineComponent({
         clear(val: boolean){ if (val) this.clearSelection() }
     },
     async activated() {
+        this.$emit('onFieldActivated', this)
         this.listData = await this.options(this.fdata)
         if (this.preset) {
             const found = find(this.listData, {label: this.preset.label})

@@ -63,6 +63,9 @@ export default defineComponent({
 
         this.keyboard = this.config?.customKeyboard || QWERTY
     },
+    activated(){
+        this.$emit('onFieldActivated', this)
+    },
     methods: {
         async emitValue(v: Option) {
             if (this.onValue) {

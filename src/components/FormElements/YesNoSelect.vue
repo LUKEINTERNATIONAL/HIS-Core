@@ -71,6 +71,7 @@ export default defineComponent({
     };
   },
   async activated() {
+    this.$emit('onFieldActivated', this)
     this.listData = await this.options(this.fdata);
   },
   async mounted() {

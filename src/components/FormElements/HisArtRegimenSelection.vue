@@ -32,6 +32,9 @@ export default defineComponent({
     async mounted() {
         this.init()
     },
+    activated() {
+        this.$emit('onFieldActivated', this)
+    },
     methods: {
         async init() {
             const options = await this.options(this.fdata)

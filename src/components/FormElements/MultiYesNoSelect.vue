@@ -73,6 +73,7 @@ export default defineComponent({
     }
   },
   async activated() {
+    this.$emit('onFieldActivated', this)
     const values = this.listData.filter(i => i.value != '')
     this.listData = await this.options(this.fdata, values);
   },
