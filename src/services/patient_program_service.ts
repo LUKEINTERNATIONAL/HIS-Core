@@ -43,6 +43,12 @@ export class PatientProgramService extends ProgramService {
         return ProgramService.enrollProgram(this.patientId, this.programId, this.date)
     }
 
+    updateState() {
+        return ProgramService.createState(this.patientId, this.programId, {
+            state: this.stateId, date: this.date
+        })
+    }
+
     setDate(date: string) {
         this.date = date
     }

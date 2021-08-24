@@ -55,7 +55,7 @@ export default defineComponent({
                     await this.onEnrollProgram() 
                     break;
                 case 'program_state':
-                    //TODO: do something
+                    await this.onProgramState()
                     break;
             }
         },
@@ -96,6 +96,15 @@ export default defineComponent({
                 return toastWarning('Please select a program')
             }
             this.fieldComponent = 'program_state'
+        },
+        async onProgramState() {
+            try {
+                await this.patientProgram.updateState()
+                this.fieldComponent = 'program_selection'
+                toastSuccess('State has been updated')
+            } catch(e) {
+                toastDanger(e)
+            }
         },
         async onEnrollProgram() {
             const programId = this.patientProgram.getProgramId()
@@ -166,6 +175,7 @@ export default defineComponent({
                             this.patientProgram.setProgramId(val.value)
                             this.patientProgram.setPatientProgramId(val.other.patient_program_id)
                         }
+                        return true
                     },
                     validation: (val: any) => Validation.required(val),
                     options: () => this.patientPrograms(),
@@ -223,8 +233,9 @@ export default defineComponent({
                     id: "program_state",
                     helpText: "State",
                     type: FieldType.TT_SELECT,
-                    condition: () => this.activeField === 'program_state',
                     options: () => this.programWorkflows(),
+                    condition: () => this.activeField === 'program_state',
+                    unload: (val: Option) => this.patientProgram.setStateId(val.value)
                 },
                 ...generateDateFields({
                     id: 'state_outcome_date',
@@ -235,12 +246,7 @@ export default defineComponent({
                         allowUnknown: true,
                         estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
                     },
-                    computeValue: (date: string, isEstimate: boolean) => {
-                        return {
-                            date,
-                            isEstimate
-                        }
-                    }
+                    computeValue: (date: string) => this.patientProgram.setDate(date)
                 })
             ]
         }
