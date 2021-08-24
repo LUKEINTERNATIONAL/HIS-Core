@@ -10,13 +10,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { FieldType } from "@/components/Forms/BaseFormElements"
-import { Field } from "@/components/Forms/FieldInterface"
-import { toastWarning, toastSuccess } from "@/utils/Alerts"
+import { Field, Option } from "@/components/Forms/FieldInterface"
+import { toastWarning, toastSuccess, toastDanger, alertConfirmation } from "@/utils/Alerts"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { ProgramService } from "@/services/program_service"
 import { PatientProgramService } from "@/services/patient_program_service"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
+import { findIndex } from 'lodash'
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -52,6 +53,33 @@ export default defineComponent({
                 other: { ...p }
             }))
         },
+        async onVoidProgram() {
+            const patientProgramId = this.patientProgram.getPatientProgramId()
+
+            if (patientProgramId === -1) {
+                return toastWarning('Please select a program')
+            }
+  
+            const confirm = await alertConfirmation(`Are you sure you want to void program?`)
+
+            if (!confirm) return
+
+            try {
+                await this.patientProgram.voidProgram('Will add soon')
+
+                const fieldContext = this.programSelectionFieldContext
+                const programIndex = findIndex(fieldContext.listData, { value: this.patientProgram.getProgramId() })
+
+                fieldContext.listData.splice(programIndex)
+
+                this.patientProgram.setPatientProgramId(-1)
+                this.patientProgram.setProgramId(-1)
+                toastSuccess('Program removed')
+            } catch(e) {
+                console.error(e)
+                toastDanger(e)
+            }
+        },
         programNavButton(name: string, color: string, onClick: Function, fieldIndex=0) {
             return {
                 name,
@@ -74,6 +102,11 @@ export default defineComponent({
                     onload: (context: any) => {
                         this.programSelectionFieldContext = context
                     },
+                    onValue: async (val: Option) => {
+                        this.patientProgram.setPatientProgramId(val.other.patient_program_id)
+                        this.patientProgram.setProgramId(val.value)
+                        return true
+                    },
                     validation: (val: any) => Validation.required(val),
                     options: () => this.patientPrograms(),
                     config: {
@@ -87,10 +120,7 @@ export default defineComponent({
                            this.programNavButton(
                                'Void program',
                                'danger',
-                               () => {
-                                   //TODO: Add void functionality here
-                                   alert('Voided')
-                               }
+                               this.onVoidProgram
                            ),
                            this.programNavButton(
                                'Update state',

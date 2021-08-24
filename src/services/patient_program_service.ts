@@ -13,6 +13,14 @@ export class PatientProgramService extends ProgramService {
         this.stateId = -1
     }
 
+    getProgramId() {
+        return this.programId
+    }
+
+    getPatientProgramId() {
+        return this.patientProgramId
+    }
+
     getPrograms() {
         return ProgramService.getPatientPrograms(this.patientId)
     }
@@ -27,6 +35,10 @@ export class PatientProgramService extends ProgramService {
 
     voidState(reason: string) {
         return ProgramService.voidState(this.patientId, this.programId, this.stateId, reason)
+    }
+
+    setPatientProgramId(id: number) {
+        this.patientProgramId = id
     }
 
     setProgramId(program: number) {
