@@ -120,6 +120,14 @@ export default defineComponent({
                 toastDanger(e)
             }
         },
+        async onVoidState(state: any) {
+            const comfirmation = await alertConfirmation(`Are you sure you want to void ${state.name}?`)
+            if (comfirmation) {
+                this.patientProgram.setStateId(state.patient_state_id)
+                await this.patientProgram.voidState('i Shall add this later')
+            }
+            this.patientProgram.setStateId(-1)
+        },
         async onVoidProgram() {
             const patientProgramId = this.patientProgram.getPatientProgramId()
 
@@ -165,7 +173,7 @@ export default defineComponent({
                 {
                     id: 'program_selection',
                     helpText: 'Programs',
-                    type: FieldType.TT_SELECT,
+                    type: FieldType.TT_PROGRAM_SELECTION,
                     onload: (context: any) => {
                         this.programSelectionFieldContext = context
                     },
@@ -180,6 +188,7 @@ export default defineComponent({
                     validation: (val: any) => Validation.required(val),
                     options: () => this.patientPrograms(),
                     config: {
+                       onVoidState: this.onVoidState,
                        hiddenFooterBtns: [
                            'Clear',
                            'Finish',

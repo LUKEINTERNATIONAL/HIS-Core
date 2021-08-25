@@ -34,7 +34,7 @@ export class ProgramService extends Service {
     }
 
     static voidState(patientId: number, programId: number, stateId: number, reason='') {
-      return super.void(`programs/${programId}/patients/${patientId}/state/${stateId}`, { reason })
+      return super.void(`programs/${programId}/patients/${patientId}/states/${stateId}`, { reason })
     }
 
     static getProgramInformation(patientID: number) {
