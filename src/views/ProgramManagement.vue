@@ -1,10 +1,11 @@
 <template>
-    <his-standard-form 
+    <his-standard-form
         @onIndex="fieldComponent=''"
         :activeField="fieldComponent"
         :skipSummary="true"
         :fields="fields"
         @onFinish="onFinish"
+        :key="hisFormKey"
     />
 </template>
 <script lang="ts">
@@ -22,6 +23,7 @@ import { find, findIndex, isEmpty } from 'lodash'
 export default defineComponent({
     components: { HisStandardForm },
     data: () => ({
+        hisFormKey: 0 as number,
         patient: {} as any,
         patientProgram: {} as any,
         fields: [] as Array<Field>,
@@ -34,6 +36,12 @@ export default defineComponent({
         fieldComponent(field: string){
             if (field) {
                 this.activeField = field
+            }
+        },
+        activeField(field: string) {
+            if (field === 'program_selection') {
+                // Recent hisFormKey to re-render everything
+                this.hisFormKey = Math.floor(Math.random() * 5000)
             }
         },
         '$route': {
@@ -52,7 +60,7 @@ export default defineComponent({
         async onFinish() {
             switch(this.activeField) {
                 case 'program_enrollment':
-                    await this.onEnrollProgram() 
+                    await this.onEnrollProgram()
                     break;
                 case 'program_state':
                     await this.onProgramState()
@@ -175,6 +183,7 @@ export default defineComponent({
                     helpText: 'Programs',
                     type: FieldType.TT_PROGRAM_SELECTION,
                     onload: (context: any) => {
+                        this.activeField = 'program_selection'
                         this.programSelectionFieldContext = context
                     },
                     onValue: (val: Option) => {

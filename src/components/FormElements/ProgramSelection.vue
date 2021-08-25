@@ -28,7 +28,7 @@
                         <tr v-for="(state, sIndex) in states" :key="sIndex"> 
                             <td>{{state.name}}</td>
                             <td>{{state.start_date}}</td>
-                            <td>{{state.end_date}}</td>
+                            <td>{{state.end_date || 'N/A'}}</td>
                             <td><ion-button color="danger" @click="voidState(state, sIndex)"> Void </ion-button></td>
                         </tr>
                     </table>
