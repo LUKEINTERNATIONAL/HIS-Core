@@ -236,6 +236,7 @@ export default defineComponent({
                     condition: () => this.activeField === 'program_enrollment',
                     unload: (val: Option) => this.patientProgram.setProgramId(val.value),
                     options: () => this.allPrograms(),
+                    validation: (val: any) => Validation.required(val),
                     config: {
                         showKeyboard: true
                     }
@@ -243,7 +244,9 @@ export default defineComponent({
                 ...generateDateFields({
                     id: 'program_outcome_date',
                     helpText: 'Outcome',
-                    validation: (val: any) => Validation.required(val),
+                    required: true,
+                    minDate: () => HisDate.estimateDateFromAge(100),
+                    maxDate: () => ProgramService.getSessionDate(),
                     condition: () => this.activeField === 'program_enrollment',
                     estimation: {
                         allowUnknown: true,
@@ -263,7 +266,9 @@ export default defineComponent({
                     id: 'state_outcome_date',
                     helpText: 'State',
                     condition: (f: any) => f.program_state,
-                    validation: (val: any) => Validation.required(val),
+                    required: true,
+                    minDate: () => HisDate.estimateDateFromAge(100),
+                    maxDate: () => this.patientProgram.getProgramDate(),
                     estimation: {
                         allowUnknown: true,
                         estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD

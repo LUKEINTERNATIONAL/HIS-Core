@@ -3,6 +3,7 @@ import MonthOptions from "@/components/FormElements/Presets/MonthOptions"
 import { Field, Option } from "@/components/Forms/FieldInterface"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import HisDate from "@/utils/Date"
+import { isEmpty } from "lodash"
 
 export enum EstimationFieldType {
     AGE_ESTIMATE_FIELD = "age-estimate-field",
@@ -19,10 +20,41 @@ export interface DateFieldInterface {
     helpText: string;
     condition?: Function;
     validation?: Function;
+    required?: boolean;
+    minDate?(): string;
+    maxDate?(): string;
     computeValue: Function;
     appearInSummary?: Function;
     estimation: EstimationInterface;
     config?: any;
+}
+
+function validateFieldParams(field: DateFieldInterface, val: Option) {
+    if (field.required && isEmpty(val)) {
+        return ['Date is required']
+    }
+    if (field.minDate) {
+        const minDate = field.minDate()
+        if (new Date(val.value) < new Date(minDate)) {
+            return [`Date is less than minimum of ${minDate}`]
+        }
+        console.log(new Date(val.value) < new Date(minDate), val.value, minDate)
+    }
+    if (field.maxDate) {
+        const maxDate = field.maxDate()
+        if (new Date(val.value) > new Date(maxDate)) {
+            return [`Date is more than maximum date of ${maxDate}`]
+        }
+    }
+    return null
+}
+
+function runValidations(field: DateFieldInterface, value: Option, formData: any, computedFormData: any) {
+    const paramsValidation = validateFieldParams(field, value)
+    if (paramsValidation) {
+        return paramsValidation
+    } 
+    return field.validation ? field.validation(value, formData, computedFormData) : null
 }
 
 function onValidation(
@@ -32,9 +64,10 @@ function onValidation(
     formData: any,
     computedFormData: any) {
 
-    const validate = (data: any) => field.validation ? field.validation(data, formData, computedFormData) : true
+    const validate = (data: any) => runValidations(field, data, formData, computedFormData)
+
     // Let any custom validation deal with null values
-    if (!val) return validate(val)
+    if (isEmpty(val)) return validate(val)
 
     if (val.value.toString().match(/unknown/i)) {
         if (!field.estimation.allowUnknown) {
