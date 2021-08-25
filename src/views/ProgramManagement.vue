@@ -246,7 +246,7 @@ export default defineComponent({
                         estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
                     },
                     computeValue: (date: string) => this.patientProgram.setDate(date),
-                }),
+                }, ProgramService.getSessionDate()),
                 {
                     id: "program_state",
                     helpText: "State",
@@ -265,7 +265,7 @@ export default defineComponent({
                         estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
                     },
                     computeValue: (date: string) => this.patientProgram.setDate(date)
-                })
+                }, this.patientProgram.date)
             ]
         }
     }
