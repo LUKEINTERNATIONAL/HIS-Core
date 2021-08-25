@@ -267,8 +267,8 @@ export default defineComponent({
                     helpText: 'State',
                     condition: (f: any) => f.program_state,
                     required: true,
-                    minDate: () => HisDate.estimateDateFromAge(100),
-                    maxDate: () => this.patientProgram.getProgramDate(),
+                    minDate: () => this.patientProgram.getProgramDate(),
+                    maxDate: () => ProgramService.getSessionDate(),
                     estimation: {
                         allowUnknown: true,
                         estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
