@@ -19,6 +19,7 @@ import { ProgramService } from "@/services/program_service"
 import { PatientProgramService } from "@/services/patient_program_service"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { find, findIndex, isEmpty } from 'lodash'
+import HisDate from "@/utils/Date"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -191,6 +192,9 @@ export default defineComponent({
                             this.activeProgram = val.other
                             this.patientProgram.setProgramId(val.value)
                             this.patientProgram.setPatientProgramId(val.other.patient_program_id)
+                            this.patientProgram.setProgramDate(
+                                HisDate.toStandardHisFormat(val.other.date_enrolled)
+                            )
                         }
                         return true
                     },
@@ -245,7 +249,7 @@ export default defineComponent({
                         allowUnknown: true,
                         estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
                     },
-                    computeValue: (date: string) => this.patientProgram.setDate(date),
+                    computeValue: (date: string) => this.patientProgram.setProgramDate(date),
                 }, ProgramService.getSessionDate()),
                 {
                     id: "program_state",
@@ -264,8 +268,8 @@ export default defineComponent({
                         allowUnknown: true,
                         estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
                     },
-                    computeValue: (date: string) => this.patientProgram.setDate(date)
-                }, this.patientProgram.date)
+                    computeValue: (date: string) => this.patientProgram.setStateDate(date)
+                }, this.patientProgram.getProgramDate() || ProgramService.getSessionDate())
             ]
         }
     }
