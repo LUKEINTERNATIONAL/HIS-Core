@@ -104,10 +104,11 @@ export default defineComponent({
             textAnchor: 'start',
             formatter: function(firstY: any, opt: any): any {
                 const secondY = opt.w.config.series[0].data[opt.dataPointIndex - 1]?.y
+               
                 if (secondY && secondY > 0) {
                     return (((firstY/secondY)*100)-100).toFixed(2)+' %' 
                 }
-                return ''
+                return '0.0%'
             } 
         }
       }
