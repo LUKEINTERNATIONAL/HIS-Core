@@ -20,6 +20,7 @@ import { PatientProgramService } from "@/services/patient_program_service"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { find, findIndex, isEmpty } from 'lodash'
 import HisDate from "@/utils/Date"
+import popVoidReason from "@/utils/ActionSheetHelpers/VoidReason"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -130,39 +131,33 @@ export default defineComponent({
             }
         },
         async onVoidState(state: any) {
-            const comfirmation = await alertConfirmation(`Are you sure you want to void ${state.name}?`)
-            if (comfirmation) {
-                this.patientProgram.setStateId(state.patient_state_id)
-                await this.patientProgram.voidState('i Shall add this later')
-            }
-            this.patientProgram.setStateId(-1)
+            this.patientProgram.setStateId(state.patient_state_id)
+            await popVoidReason(async (reason: string) => {
+                await this.patientProgram.voidState(reason)
+                this.patientProgram.setStateId(-1)
+            })
         },
         async onVoidProgram() {
             const patientProgramId = this.patientProgram.getPatientProgramId()
-
             if (patientProgramId === -1) {
                 return toastWarning('Please select a program')
             }
+            await popVoidReason(async (reason: string) => {
+                try {
+                    await this.patientProgram.voidProgram(reason)
+                    const fieldContext = this.programSelectionFieldContext
+                    const programIndex = findIndex(fieldContext.listData, { value: this.patientProgram.getProgramId() })
 
-            const confirm = await alertConfirmation(`Are you sure you want to void program?`)
+                    fieldContext.listData.splice(programIndex)
 
-            if (!confirm) return
-
-            try {
-                await this.patientProgram.voidProgram('Will add soon')
-
-                const fieldContext = this.programSelectionFieldContext
-                const programIndex = findIndex(fieldContext.listData, { value: this.patientProgram.getProgramId() })
-
-                fieldContext.listData.splice(programIndex)
-
-                this.patientProgram.setPatientProgramId(-1)
-                this.patientProgram.setProgramId(-1)
-                toastSuccess('Program removed')
-            } catch(e) {
-                console.error(e)
-                toastDanger(e)
-            }
+                    this.patientProgram.setPatientProgramId(-1)
+                    this.patientProgram.setProgramId(-1)
+                    toastSuccess('Program removed')
+                } catch(e) {
+                    console.error(e)
+                    toastDanger(e)
+                }
+            })
         },
         programNavButton(name: string, color: string, onClick: Function, fieldIndex=0) {
             return {
