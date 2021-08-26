@@ -130,12 +130,10 @@ export default defineComponent({
                 toastDanger(e)
             }
         },
-        async onVoidState(state: any) {
+        async onVoidState(state: any, reason: string) {
             this.patientProgram.setStateId(state.patient_state_id)
-            await popVoidReason(async (reason: string) => {
-                await this.patientProgram.voidState(reason)
-                this.patientProgram.setStateId(-1)
-            })
+            await this.patientProgram.voidState(reason)
+            this.patientProgram.setStateId(-1)
         },
         async onVoidProgram() {
             const patientProgramId = this.patientProgram.getPatientProgramId()
