@@ -87,8 +87,8 @@ export default defineComponent({
             const completePack = this.dispensation.calcCompletePack(order, units)
             return completePack < 0 ? 0 : completePack
         },
-        isDoneDispensing(orders: Array<any>) {
-            return orders.filter((o: any) => o.amount_needed > 0).length <= 0
+        isDoneDispensing(orders: Array<Option>) {
+            return orders.map(o => o.value != 0).every(Boolean)
         },
         async isValidDispensation(option: Option) {
             let isOk = true
@@ -111,13 +111,14 @@ export default defineComponent({
                     id: 'dispenses',
                     helpText: 'Dispensation',
                     type: FieldType.TT_DISPENSATION_INPUT,
-                    onValueUpdate: async(i: Option) => {
-                        i.other['amount_needed'] = 0
-                        await this.dispensation.loadCurrentDrugOrder()
-
-                        if (this.isDoneDispensing(this.dispensation.getCurrentOrder())) {
+                    onValueUpdate: async(i: Option, l: Array<Option>) => {
+                        if (i.value != -1 && this.isDoneDispensing(l)) {
                             return this.$router.push({name: 'appointment'})
                         }
+                        i.other['amount_needed'] = 0
+                        
+                        await this.dispensation.loadCurrentDrugOrder()
+
                         return this.buildOrderOptions()
                     },
                     onValue: async (i: Option, isBarcodeScanned: boolean) => {
