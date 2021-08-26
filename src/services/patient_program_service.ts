@@ -1,4 +1,6 @@
 import { ProgramService } from "./program_service";
+import { AppEncounterService } from "./app_encounter_service";
+import { ConceptService } from "./concept_service";
 
 export class PatientProgramService extends ProgramService {
     patientId: number
@@ -51,6 +53,15 @@ export class PatientProgramService extends ProgramService {
 
     enrollProgram() {
         return ProgramService.enrollProgram(this.patientId, this.programId, this.programDate)
+    }
+
+    async transferOutEncounter(facility: any) {
+        const transferOut = new AppEncounterService(this.patientId, 119)
+        const encounter = await transferOut.createEncounter()
+        if (!encounter) {
+            throw 'Unable to transfer out encounter'
+        }
+        return transferOut.saveValueTextObs('Transfer to', facility.name)
     }
 
     updateState() {

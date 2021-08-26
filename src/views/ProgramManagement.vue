@@ -12,13 +12,14 @@
 import { defineComponent } from 'vue'
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Field, Option } from "@/components/Forms/FieldInterface"
-import { toastWarning, toastSuccess, toastDanger, alertConfirmation } from "@/utils/Alerts"
+import { toastWarning, toastSuccess, toastDanger } from "@/utils/Alerts"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { EstimationFieldType, generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { ProgramService } from "@/services/program_service"
 import { PatientProgramService } from "@/services/patient_program_service"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { find, findIndex, isEmpty } from 'lodash'
+import {LocationService} from "@/services/location_service"
 import HisDate from "@/utils/Date"
 import popVoidReason from "@/utils/ActionSheetHelpers/VoidReason"
 
@@ -59,13 +60,13 @@ export default defineComponent({
         }
     },
     methods: {
-        async onFinish() {
+        async onFinish(f: any) {
             switch(this.activeField) {
                 case 'program_enrollment':
                     await this.onEnrollProgram()
                     break;
                 case 'program_state':
-                    await this.onProgramState()
+                    await this.onProgramState(f)
                     break;
             }
         },
@@ -107,10 +108,13 @@ export default defineComponent({
             }
             this.fieldComponent = 'program_state'
         },
-        async onProgramState() {
+        async onProgramState(f: any) {
             try {
                 await this.patientProgram.updateState()
                 this.fieldComponent = 'program_selection'
+                if (f.transfer_out_state) {
+                    await this.patientProgram.transferOutEncounter(f.transfer_out_state.other)
+                } 
                 toastSuccess('State has been updated')
             } catch(e) {
                 toastDanger(e)
@@ -156,6 +160,14 @@ export default defineComponent({
                     toastDanger(e)
                 }
             })
+        },
+        async getFacilities(filter=''): Promise<Option[]> {
+            const facilities = await LocationService.getFacilities({name: filter})
+            return facilities.map((facility: any) => ({
+                label: facility.name,
+                value: facility.location_id,
+                other: facility
+            }))
         },
         programNavButton(name: string, color: string, onClick: Function, fieldIndex=0) {
             return {
@@ -254,6 +266,17 @@ export default defineComponent({
                     options: () => this.programWorkflows(),
                     condition: () => this.activeField === 'program_state',
                     unload: (val: Option) => this.patientProgram.setStateId(val.value)
+                },
+                {
+                    id: "transfer_out_state",
+                    helpText: 'Please Select facility name',
+                    type: FieldType.TT_SELECT,
+                    condition: (f: any) => f.program_state.label === 'Patient transferred out',
+                    options: (_: any, filter='') => this.getFacilities(filter),
+                    config: {
+                        showKeyboard: true,
+                        isFilterDataViaApi: true
+                    }
                 },
                 ...generateDateFields({
                     id: 'state_outcome_date',

@@ -1,5 +1,15 @@
 export default [
-    {
+   {
+      "categories": [],
+      "concept_id": 3003,
+      "name": "Transfer to"
+   },
+   {
+      "categories": [],
+      "concept_id": 1744,
+      "name": "Patient transferred out"
+   },
+   {
       "categories": [],
       "concept_id": 9144,
       "name": "Repeat / Missing"
