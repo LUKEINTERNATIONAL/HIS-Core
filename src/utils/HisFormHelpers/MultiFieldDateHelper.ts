@@ -70,6 +70,10 @@ function buildDate(dateConfig: any) {
                 .join('-')
 }
 
+function formatDigit(s: string) {
+    return parseInt(s) < 10 ? `0${s}` : s
+}
+
 function onValidation(
     datePart: any,
     dateConfig: any,
@@ -80,7 +84,6 @@ function onValidation(
 
     const customValidation = (data: any) => field.validation ? field.validation(data, formData, computedFormData) : null
     
-    const formatDigit = (s: string) => parseInt(s) < 10 ? `0${s}` : s
 
     const getInputDate = (refDate: string) => {
         const {year, day, month} = dateConfig 
@@ -91,12 +94,12 @@ function onValidation(
         if (month.isEstimate) {
             inputDate += `-${refM}`
         } else {
-            inputDate += `-${formatDigit(month.value)}`
+            inputDate += `-${month.value}`
         }
         if (day.isEstimate) {
             inputDate += `-${refD}`
         } else {
-            inputDate += `-${formatDigit(day.value)}`
+            inputDate += `-${day.value}`
         }
         return inputDate
     } 
@@ -104,6 +107,7 @@ function onValidation(
     const validateMinMax = (date: string) => {
         if (field.minDate) {
             const minDate = field.minDate()
+            console.log(minDate, date)
             if (new Date(date) < new Date(minDate)) {
                 return [`Date is less than minimum date of ${HisDate.toStandardHisDisplayFormat(minDate)}`]
             }
@@ -139,18 +143,18 @@ function onValidation(
                 return null
             }
         }
-        if (field.minDate) {
-            const issuesFound = validateMinMax(getInputDate(field.minDate()))
-            if (issuesFound) return issuesFound
-        }
-        if (field.maxDate) {
-            const issuesFound = validateMinMax(getInputDate(field.maxDate()))
-            if (issuesFound) return issuesFound
-        }
-    } else {
-        if (dateConfig.builtDate) {
+        if (isEmpty(datePart)) {
             const issueFound = validateMinMax(dateConfig.builtDate)
             if (issueFound) return issueFound
+        } else {
+            if (field.minDate) {
+                const issuesFound = validateMinMax(getInputDate(field.minDate()))
+                if (issuesFound) return issuesFound
+            }
+            if (field.maxDate) {
+                const issuesFound = validateMinMax(getInputDate(field.maxDate()))
+                if (issuesFound) return issuesFound
+            }
         }
     }
     return customValidation({ label: val.label, value: dateConfig.builtDate })
@@ -202,7 +206,7 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
                 if (v) {
                     dateConfig.day.isEstimate = true
                     if (v.value != 'Unknown') {
-                        dateConfig.month.value = v.value.toString()
+                        dateConfig.month.value = formatDigit(v.value.toString())
                         dateConfig.month.isEstimate = false
                         dateConfig.builtDate = buildDate(dateConfig)
                     } else {
@@ -229,7 +233,7 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             validation: (v: Option, f: any, c: any) => {
                 if (v) {
                     if (v.value != 'Unknown') {
-                        dateConfig.day.value = v.value.toString()
+                        dateConfig.day.value = formatDigit(v.value.toString())
                         dateConfig.builtDate = buildDate(dateConfig)
                         dateConfig.day.isEstimate = false
                     } else {
@@ -240,7 +244,19 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
                 }
                 return onValidation(dateConfig.day, dateConfig, v, f, c, field)
             },
-            computedValue: () => {
+            computedValue: (v: Option) => {
+                /** This duplication is a necessary evil when saving dates */
+                if (v) {
+                    if (v.value != 'Unknown') {
+                        dateConfig.day.value = formatDigit(v.value.toString())
+                        dateConfig.builtDate = buildDate(dateConfig)
+                        dateConfig.day.isEstimate = false
+                    } else {
+                        dateConfig.day.value = '15'
+                        dateConfig.day.isEstimate = true
+                        dateConfig.builtDate = buildDate(dateConfig)
+                    }
+                }
                 return field.computeValue(dateConfig.builtDate, hasEstimates)
             }
         },
@@ -248,14 +264,6 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             id: `estimated_${field.id}`,
             helpText: `${field.helpText} Estimated period`,
             type: FieldType.TT_SELECT,
-            onload: () => dateConfig.builtDate = '',
-            onValue: (val: Option) => {
-                if (val) {
-                    dateConfig.builtDate = HisDate.getDateBeforeByDays(currentDate, parseInt(val.value.toString()))
-                } else {
-                    dateConfig.builtDate = ''
-                }
-            },
             summaryMapValue: ({ label }: Option, f: any, computedValue: any) => ({ 
                 label: `${field.helpText} Date Estimate`,
                 value: `${label} (${computedValue.date})`
@@ -268,7 +276,13 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
                 ]
                 return conditions.every(Boolean)
             },
-            computedValue: () => field.computeValue(dateConfig.builtDate, true),
+            computedValue: (val: any) =>{
+                if (val) {
+                    const [year] = HisDate.getDateBeforeByDays(currentDate, parseInt(val.value.toString())).split('-')
+                    dateConfig.builtDate = `${year}-07-15`
+                }
+                return field.computeValue(dateConfig.builtDate, true)
+            },
             options: () => ([
                 { label: '6 months ago', value: 180 },
                 { label: '12 months ago', value: 365 },
@@ -276,25 +290,29 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
                 { label: '24 months ago', value: 730 },
                 { label: 'Over 2 years ago', value: 730 }
             ]),
-            validation: (v: Option, f: any, c: any) => onValidation({}, dateConfig, v, f, c, field),
+            validation: (v: Option, f: any, c: any) => {
+                if (v) {
+                    const [year] = HisDate.getDateBeforeByDays(currentDate, parseInt(v.value.toString())).split('-')
+                    dateConfig.builtDate = `${year}-07-15`
+                }
+                return onValidation({}, dateConfig, v, f, c, field) 
+            }
         },
         {
             id: `age_estimate_${field.id}`,
             helpText: `${field.helpText} Age Estimate`,
             type: FieldType.TT_NUMBER,
-            onload: () => dateConfig.builtDate = '',
-            onValue: (val: Option) => {
-                if (val) {
-                    dateConfig.builtDate = HisDate.estimateDateFromAge(parseInt(val.value.toString()))
-                } else {
-                    dateConfig.builtDate = ''
-                }
-            },
             summaryMapValue: ({ label }: Option, f: any, computedValue: any) => ({ 
                 label: `${field.helpText} Date Estimate`,
                 value: `${label} (${computedValue.date})`
             }),
-            computedValue: () => field.computeValue(dateConfig.builtDate , true),
+            computedValue: (v: any) => {
+                if (v) {
+                    const [year] = HisDate.estimateDateFromAge(parseInt(v.value.toString())).split('-')
+                    dateConfig.builtDate = `${year}-07-15`
+                    field.computeValue(dateConfig.builtDate , true)
+                }
+            },
             condition: (f: any) => {
                 const conditions = [
                     field.estimation.estimationFieldType === EstimationFieldType.AGE_ESTIMATE_FIELD,
@@ -303,7 +321,13 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
                 ]
                 return conditions.every(Boolean)
             },
-            validation: (v: Option, f: any, c: any) => onValidation({}, dateConfig, v, f, c, field),
+            validation: (v: Option, f: any, c: any) => {
+                if (v) {
+                    const [year] = HisDate.estimateDateFromAge(parseInt(v.value.toString())).split('-')
+                    dateConfig.builtDate = `${year}-07-15`
+                }
+                return onValidation({}, dateConfig, v, f, c, field)
+            },
         }
     ]
 }
