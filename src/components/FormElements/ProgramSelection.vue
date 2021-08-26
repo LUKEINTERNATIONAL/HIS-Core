@@ -27,9 +27,16 @@
                         </tr>
                         <tr v-for="(state, sIndex) in states" :key="sIndex"> 
                             <td>{{state.name}}</td>
-                            <td>{{formatDate(state.start_date)}}</td>
-                            <td>{{formatDate(state.end_date) || 'N/A'}}</td>
-                            <td><ion-button color="danger" @click="voidState(state, sIndex)"> Void </ion-button></td>
+                            <td>{{state.startDate}}</td>
+                            <td>{{state.endDate || 'N/A'}}</td>
+                            <td>
+                                <ion-button 
+                                  v-for="(stateAction, aIndex) in state.actions" :key="aIndex"
+                                  :color="stateAction.color" 
+                                  @click="stateAction.action(activeProgram, sIndex)"> 
+                                  {{stateAction.name}} 
+                                </ion-button>
+                            </td>
                         </tr>
                     </table>
                 </ion-col>
@@ -41,9 +48,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { Option } from '../Forms/FieldInterface'
-import { toastDanger, toastSuccess } from "@/utils/Alerts"
 import { isEmpty } from 'lodash'
-import popVoidReason from "@/utils/ActionSheetHelpers/VoidReason"
 import HisDate from "@/utils/Date"
 
 export default defineComponent({
@@ -82,7 +87,7 @@ export default defineComponent({
     },
     computed: {
         states(): Array<any> {
-            return !isEmpty(this.activeProgram) ? this.activeProgram.other.patient_states : []
+            return !isEmpty(this.activeProgram) ? this.activeProgram.other.programStates : []
         }
     },
     methods: {
@@ -99,20 +104,6 @@ export default defineComponent({
                 }
             }
             this.$emit('onValue', item)
-        },
-        async voidState(state: any, sIndex: number) {
-            await popVoidReason(async (reason: string) => {
-                try {
-                    if (!(this.config && this.config.onVoidState)) {
-                        throw 'Missing onVoid in configuration'
-                    }  
-                    await this.config.onVoidState(state, reason)
-                    this.activeProgram.other.patient_states.splice(sIndex, 1)
-                    toastSuccess('State has been voided')
-                }catch(e) {
-                  toastDanger(e)
-                }
-            })
         }
     }
 })

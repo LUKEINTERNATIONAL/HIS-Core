@@ -1,6 +1,6 @@
 import { ProgramService } from "./program_service";
 import { AppEncounterService } from "./app_encounter_service";
-import { ConceptService } from "./concept_service";
+import { PrintoutService } from "@/services/printout_service"
 
 export class PatientProgramService extends ProgramService {
     patientId: number
@@ -55,6 +55,10 @@ export class PatientProgramService extends ProgramService {
         return ProgramService.enrollProgram(this.patientId, this.programId, this.programDate)
     }
 
+    printTransferout() {
+        const print = new PrintoutService()
+        return print.printLbl(`/programs/${this.programId}/patients/${this.patientId}/labels/transfer_out`)    
+    }
     async transferOutEncounter(facility: any) {
         const transferOut = new AppEncounterService(this.patientId, 119)
         const encounter = await transferOut.createEncounter()

@@ -22,6 +22,7 @@ import { find, findIndex, isEmpty } from 'lodash'
 import {LocationService} from "@/services/location_service"
 import HisDate from "@/utils/Date"
 import popVoidReason from "@/utils/ActionSheetHelpers/VoidReason"
+import { PrintoutService } from "@/services/printout_service"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -75,7 +76,17 @@ export default defineComponent({
             return programs.map((p: any) => ({
                 label: p.program.name,
                 value: p.program.program_id,
-                other: { ...p }
+                other: {
+                    ...p,
+                    programStates: p.patient_states.map((s: any) =>{
+                        return {
+                            name: s.name,
+                            startDate: HisDate.toStandardHisDisplayFormat(s.start_date),
+                            endDate: s.end_date ? HisDate.toStandardHisDisplayFormat(s.end_date): 'N/A',
+                            actions: this.getStateActions(s)
+                        }
+                    }) 
+                }
             }))
         },
         async allPrograms() {
@@ -83,11 +94,11 @@ export default defineComponent({
             const programs = await ProgramService.getAllPrograms()
             // Build programs while excluding already existing ones
             return programs.map((p: any) => ({
-                                label: p.name,
-                                value: p.program_id,
-                                disabled: find(hasPrograms, { value: p.program_id }),
-                                other: { ...p }
-                            }))
+                label: p.name,
+                value: p.program_id,
+                disabled: find(hasPrograms, { value: p.program_id }),
+                other: { ...p }
+            }))
         },
         async programWorkflows() {
             const workflows = await ProgramService.getProgramWorkflows(this.patientProgram.getProgramId())
@@ -101,6 +112,25 @@ export default defineComponent({
                     other: { ...s }
                 }))
             }
+        },
+        getStateActions(s: any) {
+            const actions = [
+                {
+                    name: 'Void',
+                    color: 'danger',
+                    action: async (pg: any, sIndex: number) => {
+                        await this.onVoidState(s.patient_state_id, pg, sIndex)
+                    } 
+                }
+            ]
+            if (s.name === 'Patient transferred out') {
+                actions.push({
+                    name: 'Print',
+                    color: 'primary',
+                    action: async () => await this.patientProgram.printTransferout()
+                })
+            }
+            return actions
         },
         onUpdateState() {
             if (this.patientProgram.getProgramId() === -1) {
@@ -134,10 +164,18 @@ export default defineComponent({
                 toastDanger(e)
             }
         },
-        async onVoidState(state: any, reason: string) {
-            this.patientProgram.setStateId(state.patient_state_id)
-            await this.patientProgram.voidState(reason)
-            this.patientProgram.setStateId(-1)
+        async onVoidState(state: any, activeProgram: any, stateIndex: number) {
+            await popVoidReason(async (reason: string) => {
+                try {
+                    this.patientProgram.setStateId(state)
+                    await this.patientProgram.voidState(reason)
+                    this.patientProgram.setStateId(-1)
+                    activeProgram.other.programStates.splice(stateIndex, 1)
+                    toastSuccess('State has been voided')
+                }catch(e) {
+                  toastDanger(e)
+                }
+            })
         },
         async onVoidProgram() {
             const patientProgramId = this.patientProgram.getPatientProgramId()
