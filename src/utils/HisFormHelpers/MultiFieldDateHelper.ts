@@ -81,10 +81,22 @@ function onValidation(
     formData: any,
     computedFormData: any,
     field: DateFieldInterface) {
-
-    const customValidation = (data: any) => field.validation ? field.validation(data, formData, computedFormData) : null
-    
-
+    /**
+     * Run any custom validations defined in the field
+     * @param data 
+     * @returns 
+     */
+    const customValidation = (data: any) => {
+        return field.validation ? field.validation(data, formData, computedFormData) : null
+    } 
+    /**
+     * Since the date is entered on seperate fields and not
+     * all parts of a date can be available, the function below fills
+     * in the missing parts using a reference date inorder to build 
+     * a complete date.
+     * @param refDate 
+     * @returns 
+     */
     const getInputDate = (refDate: string) => {
         const {year, day, month} = dateConfig 
         const [_, refM, refD] = refDate.split('-')
@@ -107,7 +119,6 @@ function onValidation(
     const validateMinMax = (date: string) => {
         if (field.minDate) {
             const minDate = field.minDate()
-            console.log(minDate, date)
             if (new Date(date) < new Date(minDate)) {
                 return [`Date is less than minimum date of ${HisDate.toStandardHisDisplayFormat(minDate)}`]
             }
@@ -205,15 +216,9 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             validation: (v: Option, f: any, c: any) => {
                 if (v) {
                     dateConfig.day.isEstimate = true
-                    if (v.value != 'Unknown') {
-                        dateConfig.month.value = formatDigit(v.value.toString())
-                        dateConfig.month.isEstimate = false
-                        dateConfig.builtDate = buildDate(dateConfig)
-                    } else {
-                        dateConfig.month.value = '07'
-                        dateConfig.month.isEstimate = true
-                        dateConfig.builtDate = buildDate(dateConfig)
-                    }
+                    dateConfig.month.value = formatDigit(v.value.toString())
+                    dateConfig.month.isEstimate = false
+                    dateConfig.builtDate = buildDate(dateConfig)
                 }
                 return onValidation(dateConfig.month, dateConfig, v, f, c, field)
             }
@@ -232,32 +237,23 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             }),
             validation: (v: Option, f: any, c: any) => {
                 if (v) {
-                    if (v.value != 'Unknown') {
-                        dateConfig.day.value = formatDigit(v.value.toString())
-                        dateConfig.builtDate = buildDate(dateConfig)
-                        dateConfig.day.isEstimate = false
-                    } else {
-                        dateConfig.day.value = '15'
-                        dateConfig.day.isEstimate = true
-                        dateConfig.builtDate = buildDate(dateConfig)
-                    }
+                    dateConfig.day.value = formatDigit(v.value.toString())
+                    dateConfig.builtDate = buildDate(dateConfig)
+                    dateConfig.day.isEstimate = false
                 }
                 return onValidation(dateConfig.day, dateConfig, v, f, c, field)
             },
             computedValue: (v: Option) => {
                 /** This duplication is a necessary evil when saving dates */
                 if (v) {
-                    if (v.value != 'Unknown') {
-                        dateConfig.day.value = formatDigit(v.value.toString())
-                        dateConfig.builtDate = buildDate(dateConfig)
-                        dateConfig.day.isEstimate = false
-                    } else {
-                        dateConfig.day.value = '15'
-                        dateConfig.day.isEstimate = true
-                        dateConfig.builtDate = buildDate(dateConfig)
-                    }
+                    dateConfig.day.value = formatDigit(v.value.toString())
+                    dateConfig.builtDate = buildDate(dateConfig)
+                    dateConfig.day.isEstimate = false
                 }
                 return field.computeValue(dateConfig.builtDate, hasEstimates)
+            },
+            config: {
+                keyboardActions: []
             }
         },
         {

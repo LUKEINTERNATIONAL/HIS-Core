@@ -11,18 +11,30 @@ import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
 import { MONTHLY_DAYS } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from '@/components/DataViews/ViewPort.vue'
+import { MONTHLY_DAYS_LO } from '../Keyboard/KbLayouts'
 export default defineComponent({
     components: { BaseInput, HisKeyboard, ViewPort },
     data: ()=>({ 
         value: '',
         keyboard: MONTHLY_DAYS,
     }),
+    created() {
+        if (this.config  && this.config.keyboardActions) {
+            this.keyboard = [
+                MONTHLY_DAYS_LO,
+                this.config.keyboardActions
+            ]
+        }
+    },
     activated(){
         this.$emit('onFieldActivated', this)
     },
     props: {
         clear: {
             type: Boolean
+        },
+        config: {
+            type: Object
         }
     },
     methods: {

@@ -46,9 +46,5 @@ export default ([
     {
         label: 'Dec',
         value: 12
-    },
-    {
-        label: 'Unknown',
-        value: 'Unknown'
     }
 ])
