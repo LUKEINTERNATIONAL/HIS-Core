@@ -22,7 +22,6 @@ import { find, findIndex, isEmpty } from 'lodash'
 import {LocationService} from "@/services/location_service"
 import HisDate from "@/utils/Date"
 import popVoidReason from "@/utils/ActionSheetHelpers/VoidReason"
-import { PrintoutService } from "@/services/printout_service"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -103,12 +102,9 @@ export default defineComponent({
         async programWorkflows() {
             const workflows = await ProgramService.getProgramWorkflows(this.patientProgram.getProgramId())
             if (!isEmpty(workflows)) {
-                const curStates = this.activeProgram ? this.activeProgram.patient_states : []
-                const activeStates = curStates.filter((s: any) => s.end_date === null).map((s: any) => s.name)
                 return workflows[0].states.map((s: any) => ({
                     label: s.name, 
                     value: s.program_workflow_state_id,
-                    disabled: activeStates.includes(s.name),
                     other: { ...s }
                 }))
             }
