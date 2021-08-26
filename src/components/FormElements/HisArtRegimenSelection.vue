@@ -1,9 +1,21 @@
 <template>
     <view-port> 
         <div class="view-port-content"> 
-            <ion-row v-for="(row, rowIndex) in listData" :key="rowIndex"> 
-                <ion-col size-md="6" size-sm="12" v-for="(item, itemIndex) in row" :key="itemIndex"> 
+            <ion-row>
+                <ion-col size-md="6" size-sm="12"> 
                     <regimen-card
+                        class="regimen-item"
+                        v-for="(item, lIndex) in leftItems" :key="lIndex"
+                        :label="item.label" 
+                        :value="item.value"
+                        @onclick="onselect(item)"
+                        :color="item.label === selected ? 'active-card-color' : 'inactive-card-color'"
+                    />
+                </ion-col>
+                <ion-col size-md="6" size-sm="12"> 
+                    <regimen-card
+                        class="regimen-item"
+                        v-for="(item, rIndex) in rightItems" :key="rIndex"
                         :label="item.label" 
                         :value="item.value"
                         @onclick="onselect(item)"
@@ -19,14 +31,22 @@ import { defineComponent } from 'vue'
 import { Option } from '../Forms/FieldInterface'
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import SelectMixin from "@/components/FormElements/SelectMixin.vue"
-import Transformer from '@/utils/Transformers'
 import RegimenCard from "@/components/DataViews/RegimenCard.vue"
+import { isEmpty } from 'lodash'
 export default defineComponent({
     components: { ViewPort, RegimenCard },
     mixins: [SelectMixin],
     watch: {
         clear(val: boolean){
             if (val) this.clearSelection()
+        }
+    },
+    computed: {
+        leftItems(): any {
+            return !isEmpty(this.listData) ? this.listData[0] : []
+        },
+        rightItems(): any {
+            return !isEmpty(this.listData) ? this.listData[1] : []            
         }
     },
     async mounted() {
@@ -38,7 +58,15 @@ export default defineComponent({
     methods: {
         async init() {
             const options = await this.options(this.fdata)
-            this.listData = Transformer.convertArrayToTurples(options)
+            this.listData = this.buildList(options)
+        },
+        buildList(options: Array<Option>) {
+            const turple: Array<any> = [[], []]
+            options.forEach(o => {
+                const code = parseInt(o.value.toString())
+                code < 10 ? turple[0].push(o) : turple[1].push(o)
+            })
+            return turple
         },
         async onselect(item: Option) {
             this.selected = item.label
@@ -64,5 +92,8 @@ export default defineComponent({
 }
 .view-port-content {
     height: 100%;
+}
+.regimen-item {
+    margin: 3.8%;
 }
 </style>
