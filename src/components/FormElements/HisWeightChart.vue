@@ -143,6 +143,12 @@ export default defineComponent({
                     const dateA: any = new Date(a.x)
                     const dateB: any = new Date(b.x)
                     return dateA - dateB
+                }).map((item: any) => {
+                    const [day, month] = item.x.split('/')
+                    return {
+                        x: `${day}.${month}`,
+                        y: item.y
+                    }
                 })
             }
         ]
