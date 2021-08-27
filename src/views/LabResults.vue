@@ -13,6 +13,7 @@ import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { Field, Option } from '@/components/Forms/FieldInterface'
 import { PatientLabResultService } from "@/services/patient_lab_result_service"
 import Validation from "@/components/Forms/validations/StandardValidations"
+import { toastWarning } from "@/utils/Alerts"
 import { find } from 'lodash';
 
 export default defineComponent({
@@ -57,6 +58,13 @@ export default defineComponent({
             })
             return fields
         },
+        numericValueIsValid(value: string){
+            try {
+                return value.match(/^(=|<|>)([0-9]*)$/m) ? true : false
+            }catch(e) {
+                return false
+            }
+        },
         buildTestIndicatorFields(id: number, name: string, test: number): Array<Field> {
             const condition = (f: any) => [
                     f.test_type.value === test, 
@@ -87,6 +95,13 @@ export default defineComponent({
                     helpText: `Test Result (${name})`,
                     type: FieldType.TT_TEXT,
                     group: `${id}`,
+                    onValue: (v: Option) => {
+                        if (v && v.value && !this.numericValueIsValid(v.value.toString())) {
+                            toastWarning('You must enter a modifer and numbers only. i.e =90 / >19 / < 750')
+                            return false
+                        }
+                        return true
+                    },
                     validation: (v: Option) => Validation.required(v),
                     condition: (f: any) => condition(f) && f[`type_${id}`].value === 'numeric',
                     config: {
