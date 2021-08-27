@@ -20,8 +20,8 @@ export interface DateFieldInterface {
     condition?: Function;
     validation?: Function;
     required?: boolean;
-    minDate?(): string;
-    maxDate?(): string;
+    minDate?(formData: any): string;
+    maxDate?(formData: any): string;
     computeValue: Function;
     appearInSummary?: Function;
     estimation: EstimationInterface;
@@ -118,13 +118,13 @@ function onValidation(
 
     const validateMinMax = (date: string) => {
         if (field.minDate) {
-            const minDate = field.minDate()
+            const minDate = field.minDate(formData)
             if (new Date(date) < new Date(minDate)) {
                 return [`Date is less than minimum date of ${HisDate.toStandardHisDisplayFormat(minDate)}`]
             }
         }
         if (field.maxDate) {
-            const maxDate = field.maxDate()
+            const maxDate = field.maxDate(formData)
             if (new Date(date) > new Date(maxDate)) {
                 return [`Date is greater than max date of ${HisDate.toStandardHisDisplayFormat(maxDate)}`]
             }
@@ -159,11 +159,11 @@ function onValidation(
             if (issueFound) return issueFound
         } else {
             if (field.minDate) {
-                const issuesFound = validateMinMax(getInputDate(field.minDate()))
+                const issuesFound = validateMinMax(getInputDate(field.minDate(formData)))
                 if (issuesFound) return issuesFound
             }
             if (field.maxDate) {
-                const issuesFound = validateMinMax(getInputDate(field.maxDate()))
+                const issuesFound = validateMinMax(getInputDate(field.maxDate(formData)))
                 if (issuesFound) return issuesFound
             }
         }
