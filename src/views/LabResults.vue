@@ -15,6 +15,8 @@ import { PatientLabResultService } from "@/services/patient_lab_result_service"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { toastWarning } from "@/utils/Alerts"
 import { find } from 'lodash';
+import HisDate from "@/utils/Date"
+import { Service } from "@/services/service"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -170,8 +172,10 @@ export default defineComponent({
                     helpText: 'Result',
                     required: true,
                     estimation: {
-                        allowUnknown: false,
+                        allowUnknown: false
                     },
+                    minDate: (f: any) => HisDate.toStandardHisFormat(f.test_type.other.orderDate),
+                    maxDate: () => Service.getSessionDate(),
                     computeValue: (date: string) => date
                 }),
                 {
