@@ -26,7 +26,7 @@ export class PatientLabResultService extends OrderService {
 
     getTestIndicators() {
       return OrderService.getJson(
-        `lab/test_result_indicators?`, {
+        `lab/test_result_indicators`, {
         'test_type_id': this.testTypeID
       })
     }
