@@ -85,10 +85,23 @@ export default defineComponent({
                 {
                     id: `num_${id}`,
                     helpText: `Test Result (${name})`,
-                    type: FieldType.TT_NUMBER,
+                    type: FieldType.TT_TEXT,
                     group: `${id}`,
                     validation: (v: Option) => Validation.required(v),
-                    condition: (f: any) => condition(f) && f[`type_${id}`].value === 'numeric'
+                    condition: (f: any) => condition(f) && f[`type_${id}`].value === 'numeric',
+                    config: {
+                        customKeyboard: [
+                            [
+                                ['1', '2', '3'],
+                                ['4', '5', '6', '=', '<', '>'],
+                                ['7', '8', '9', '.'],
+                                ['',  '0', '']
+                            ],
+                            [
+                                [ 'Delete']
+                            ]
+                        ]
+                    }
                 },
                 {
                     id: `alpha_${id}`,
