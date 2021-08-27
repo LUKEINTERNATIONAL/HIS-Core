@@ -51,7 +51,6 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     name: "Program(s)",
     description: "View / update patient's programs",
     action: ({ patient }: any, router: any) => {
-      console.log(router)
       router.push({ path: `/patient/programs/${patient.patient_id}`})
     },
     icon: img("programs.png")
@@ -87,7 +86,9 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     id: "enter_lab_result",
     name: "Enter Lab Result",
     description: "Enter Lab Test Result",
-    url: "/",
+    action: ({ patient }: any, router: any) => {
+      router.push({ path: `/lab/results/${patient.patient_id}`})
+    },
     icon: img("enter.png")
   },
   {
