@@ -1,11 +1,22 @@
 import { Service } from "./service";
+import { modalController } from "@ionic/vue";
+import ZebraPrinterComponent from "@/components/ZebraPrinterImage.vue"
 
 export class PrintoutService extends Service {
     constructor() {
         super()
     }
 
+    static async showPrinterImage() {
+        const modal = await modalController.create({
+            component: ZebraPrinterComponent,
+            backdropDismiss: false,
+        })
+        modal.present()
+    }
+
     async printLbl(url: string, name=`printout-${Service.getSessionDate()}`) {
+        PrintoutService.showPrinterImage()
         const file = await Service.getText(url)
 
         if (!file) return
@@ -20,6 +31,7 @@ export class PrintoutService extends Service {
 
         link.click()
         document.body.removeChild(link);
+        setTimeout(async () => await modalController.dismiss({}), 3000)
         return true
     }
 }
