@@ -80,6 +80,13 @@ export default defineComponent({
             })
             return fields
         },
+        alphaValueIsValid(value: string) {
+            try {
+                return value.match(/^(>|<|=)(.*)/) ? true : false
+            }catch (e) {
+                return false
+            }
+        },
         numericValueIsValid(value: string){
             try {
                 return value.match(/^(=|<|>)([0-9]*)$/m) ? true : false
@@ -92,6 +99,28 @@ export default defineComponent({
                 this.selectedTest.value === test, 
                 find(f.result_indicators, { label: name}) ? true : false
             ].every(Boolean)
+
+            const computedValue = (v: any, f: any) => {
+                const type = f[`type_${id}`].value
+                const value = v.value.toString()
+                const modifier = value.charAt(0)
+                const result = type === 'numeric' ? parseInt(value.substring(1)) : value.substring(1)
+                const test = f[`result_indicators`].filter((t: any) => t.value === id)[0]
+                return {
+                    tag: 'result_indicator',
+                    measures: {
+                        indicator: {
+                            'concept_id': test.value
+                        },
+                        'value': result,
+                        'value_modifier': modifier,
+                        'value_type': type
+                    },
+                    result,
+                    modifier,
+                    test: test.label
+                }
+            }
             return [
                 {
                     id: `type_${id}`,
@@ -117,26 +146,7 @@ export default defineComponent({
                     helpText: `Test Result (${name})`,
                     type: FieldType.TT_TEXT,
                     group: 'test_indicator',
-                    computedValue: (v: Option, f: any) => {
-                        const value = v.value.toString()
-                        const modifier = value.charAt(0)
-                        const result = parseInt(value.substring(1))
-                        const test = f[`result_indicators`].filter((t: any) => t.value === id)[0]
-                        return {
-                            tag: 'result_indicator',
-                            measures: {
-                                indicator: {
-                                    'concept_id': test.value
-                                },
-                                'value': result,
-                                'value_modifier': modifier,
-                                'value_type': f[`type_${id}`].value
-                            },
-                            result,
-                            modifier,
-                            test: test.label
-                        }
-                    },
+                    computedValue,
                     onValue: (v: Option) => {
                         if (v && v.value && !this.numericValueIsValid(v.value.toString())) {
                             toastWarning('You must enter a modifer and numbers only. i.e =90 / >19 / < 750')
@@ -165,6 +175,14 @@ export default defineComponent({
                     helpText: `Test Result (${name})`,
                     type: FieldType.TT_TEXT,
                     group: 'test_indicator',
+                    onValue: (v: Option) => {
+                        if (v && v.value && !this.alphaValueIsValid(v.value.toString())) {
+                            toastWarning('You must enter a modifier plus result (for example =LDL)')
+                            return false
+                        }
+                        return true
+                    },
+                    computedValue,
                     validation: (v: Option) => Validation.required(v),
                     condition: (f: any) => condition(f) && f[`type_${id}`].value === 'text'
                 }
