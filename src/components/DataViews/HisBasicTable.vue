@@ -6,8 +6,16 @@
             </th>
         </tr>
         <tr  v-for="(dataItems, rIndex) in rows" :key="rIndex">
-            <td :class="getColorCodeClass(rIndex, dIndex)" v-for="(item, dIndex) in dataItems" :key="dIndex"> 
-                {{ item }}
+            <td 
+                :class="getColorCodeClass(rIndex, dIndex)" 
+                v-for="(item, dIndex) in dataItems" :key="dIndex"
+                > 
+                <div v-if="isActionButton(item)"> 
+                    <ion-button @click="item.action(dataItems)">{{ item.name }}</ion-button>
+                </div>
+                <div v-else>
+                    {{ item }}
+                </div>
             </td>
         </tr>
     </table>
@@ -34,6 +42,9 @@ export default defineComponent({
         }
     },
     methods: {
+        isActionButton(item: any) {
+            return typeof item === 'object' && item.type === 'button'
+        },
         getColorCodeClass(rIndex: number, dIndex: number) {
             let styleClass = ''
             if (!isEmpty(this.rowColors)) {
