@@ -175,8 +175,23 @@ export default defineComponent({
                 {
                   id: 'test_type',
                   helpText: 'Tests without results',
-                  type: FieldType.TT_SELECT,
-                  options: () => this.testOptions,
+                  type: FieldType.TT_TABLE_VIEWER,
+                  options: () => {
+                    const rows = this.testOptions.map(({other}: Option) => ([
+                        other.accession, 
+                        other.specimen, 
+                        other.test,
+                        HisDate.toStandardHisDisplayFormat(other.orderDate)
+                    ]))
+                    return [{
+                        label: '',
+                        value: '',
+                        other: {
+                            rows,
+                            columns:[ 'Acession#', 'Specimen', 'Test', 'Order date']
+                        }
+                    }]
+                  },
                   validation: (val: Option) => Validation.required(val)
                 },
                 ...generateDateFields({
