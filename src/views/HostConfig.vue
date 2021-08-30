@@ -11,7 +11,7 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import {
-  CHARACTERS_AND_NUMBERS_LO, DEFAULT_KEYPAD
+  CHARACTERS_AND_NUMBERS_LO, NUMBER_PAD_LO
 } from "@/components/Keyboard/KbLayouts";
 import ApiClient from "@/services/api_client";
 import { infoActionSheet } from "@/utils/ActionSheets";
@@ -45,8 +45,8 @@ export default defineComponent({
           type: FieldType.TT_TEXT,
           config: {
             customKeyboard: [
-              DEFAULT_KEYPAD,
-              [],
+              NUMBER_PAD_LO,
+              [["Delete"]],
             ],
           },
         },
@@ -81,7 +81,7 @@ export default defineComponent({
         'apiPort',
         'apiProtocol'];
       ApiClient.removeOnly(excluions);
-    },
+    }
   },
   data() {
     return {
