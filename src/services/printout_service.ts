@@ -1,6 +1,7 @@
 import { Service } from "./service";
 import { modalController } from "@ionic/vue";
 import ZebraPrinterComponent from "@/components/ZebraPrinterImage.vue"
+import { toastWarning } from "@/utils/Alerts";
 
 export class PrintoutService extends Service {
     constructor() {
@@ -19,7 +20,10 @@ export class PrintoutService extends Service {
         PrintoutService.showPrinterImage()
         const file = await Service.getText(url)
 
-        if (!file) return
+        if (!file) {
+            toastWarning('Unable to print barcode')
+            return await modalController.dismiss({})
+        } 
 
         const fileUrl = window.URL.createObjectURL(new Blob([file]))
 
