@@ -256,9 +256,9 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             id: `estimated_${field.id}`,
             helpText: `${field.helpText} Estimated period`,
             type: FieldType.TT_SELECT,
-            summaryMapValue: ({ label }: Option, f: any, computedValue: any) => ({ 
+            summaryMapValue: ({ label }: Option) => ({ 
                 label: `${field.helpText} Date Estimate`,
-                value: `${label} (${computedValue.date})`
+                value: `${label} (${HisDate.toStandardHisDisplayFormat(dateConfig.builtDate)})`
             }),
             condition: (f: any) => {
                 const conditions = [
@@ -294,9 +294,9 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             id: `age_estimate_${field.id}`,
             helpText: `${field.helpText} Age Estimate`,
             type: FieldType.TT_NUMBER,
-            summaryMapValue: ({ label }: Option, f: any, computedValue: any) => ({ 
+            summaryMapValue: ({ label }: Option) => ({ 
                 label: `${field.helpText} Date Estimate`,
-                value: `${label} (${computedValue.date})`
+                value: `${label} (${HisDate.toStandardHisDisplayFormat(dateConfig.builtDate)})`
             }),
             computedValue: (v: any) => {
                 if (v) {
@@ -308,7 +308,7 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             condition: (f: any) => {
                 const conditions = [
                     field.estimation.estimationFieldType === EstimationFieldType.AGE_ESTIMATE_FIELD,
-                    dateConfig.year.isEstimate,
+                    dateConfig.isUnknown,
                     field.condition ? field.condition(f): true
                 ]
                 return conditions.every(Boolean)
