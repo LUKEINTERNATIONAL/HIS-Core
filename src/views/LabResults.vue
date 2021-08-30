@@ -57,6 +57,8 @@ export default defineComponent({
                 this.labResult.setResultDate(c.result_date)
                 await this.labResult.createEncounter()
                 await this.labResult.createLabResult(measures)
+                this.hisFormKey = Math.floor(Math.random() * 5000)
+                await this.initData()
                 this.fieldComponent = 'test_type'
                 toastSuccess('Lab result saved!')
             }catch(e) {
