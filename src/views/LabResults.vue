@@ -246,7 +246,12 @@ export default defineComponent({
                         }
                     }]
                   },
-                  validation: (val: Option) => Validation.required(val)
+                  validation: (val: Option) => Validation.required(val),
+                  config: {
+                    hiddenFooterBtns: [
+                        'Clear'
+                    ]
+                  }
                 },
                 ...generateDateFields({
                     id: 'result_date',
