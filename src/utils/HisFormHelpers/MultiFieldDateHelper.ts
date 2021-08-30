@@ -144,7 +144,8 @@ function onValidation(
             if ('allowUnknown' in field.estimation){
                 if (!field.estimation.allowUnknown && val.value === 'Unknown') {
                     return ['Unknown is not allowed']
-                } else {
+                } 
+                if (val.value === 'Unknown')  {
                     return null
                 }
             }
