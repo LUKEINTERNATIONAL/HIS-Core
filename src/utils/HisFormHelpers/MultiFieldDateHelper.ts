@@ -142,8 +142,10 @@ function onValidation(
     if (typeof datePart === 'object') {
         if (datePart.type === 'year') {
             if ('allowUnknown' in field.estimation){
-                if (!field.estimation.allowUnknown && val.value.toString().match(/unknown/i)) {
+                if (!field.estimation.allowUnknown && val.value === 'Unknown') {
                     return ['Unknown is not allowed']
+                } else {
+                    return null
                 }
             }
             if (parseInt(datePart.value) < 1900) {
@@ -195,6 +197,7 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
                         dateConfig.isUnknown = false
                         dateConfig.builtDate = buildDate(dateConfig)
                     } else {
+                        dateConfig.year.value = -1
                         dateConfig.isUnknown = true                      
                     }
                 }
