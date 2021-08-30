@@ -9,8 +9,16 @@ import {
     NUMBER_PAD_LO,
     MONTHLY_DAYS_LO,
     ALPHABETICAL_LO,
-    QWERTY_LO
+    QWERTY_LO,
+    SYMBOLS
 } from "@/components/Keyboard/KbLayouts";
+
+export const SYMBOLS_CONFIG = [
+    SYMBOLS,
+    [
+        ['', 'Delete']
+    ]
+]
 
 export const NUMBERS_ONLY = [
     NUMBER_PAD_LO,
@@ -47,7 +55,7 @@ export const QWERTY = [
     [
         ['', 'Delete'],
         ['', '0-9'],
-        ['', 'Unknown']
+        ['?123', 'Unknown']
     ]
 ]
 
@@ -58,6 +66,10 @@ export const KEY_BTN_NAV = [
     {
         btn: '0-9',
         keyboard: NUMBERS
+    },
+    {
+        btn: '?123',
+        keyboard: SYMBOLS_CONFIG
     },
     {   
         btn: 'A-Z',
