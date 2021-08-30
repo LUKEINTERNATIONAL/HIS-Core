@@ -132,26 +132,22 @@ function onValidation(
         return null
     }
 
-    if (isEmpty(val)) { 
+    if (isEmpty(val) || val.value === '') { 
         if (field.required) {
             return ['Date value should not be empty']
         }
         return customValidation(val)
     }
 
-    if ('allowUnknown' in field.estimation && datePart.isEstimate){
-        if (!field.estimation.allowUnknown) {
-            return ['Unknown is not allowed']
-        }
-    }
-
     if (typeof datePart === 'object') {
         if (datePart.type === 'year') {
+            if ('allowUnknown' in field.estimation){
+                if (!field.estimation.allowUnknown && val.value.toString().match(/unknown/i)) {
+                    return ['Unknown is not allowed']
+                }
+            }
             if (parseInt(datePart.value) < 1900) {
                 return ['Invalid Year!']
-            }
-            if (val.value === 'Unknown') {
-                return null
             }
         }
         if (isEmpty(datePart)) {
