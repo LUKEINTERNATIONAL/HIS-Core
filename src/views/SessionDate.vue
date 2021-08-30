@@ -3,10 +3,8 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { Option } from "@/components/Forms/FieldInterface"
 import { Field } from "@/components/Forms/FieldInterface"
 import { Service } from "@/services/service"
-import Validation from "@/components/Forms/validations/StandardValidations"
 import { toastWarning, toastSuccess} from "@/utils/Alerts"
 import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import HisDate from "@/utils/Date"
@@ -24,14 +22,12 @@ export default defineComponent({
         this.fields = generateDateFields({
             id: 'session_date',
             helpText: 'Session Date',
+            required: true,
+            minDate: () => '2000-01-01',
+            maxDate: () => this.apiDate,
             estimation: {
                 allowUnknown: false
             },
-            validation: (v: Option) => Validation.validateSeries([
-                () => Validation.required(v),
-                () => this.dateisTooFar(v.value.toString()),
-                () => this.dateIsTooOld(v.value.toString())
-            ]),
             computeValue: (date: string) => date,
             config: {
                 footerBtns: [
@@ -107,13 +103,6 @@ export default defineComponent({
         },
         formatDate(date: string) {
             return HisDate.toStandardHisDisplayFormat(date)
-        },
-        dateIsTooOld(date: string) {
-            return date > this.apiDate ? [`Date is beyond reference date ${this.formatDate(this.apiDate)}`] : null
-        },
-        dateisTooFar(date: string) {
-            const dateLimit = '2000-01-01'
-            return date < dateLimit ? [`Date less than limit date of ${this.formatDate(dateLimit)}`] : null
         }
     }
 })
