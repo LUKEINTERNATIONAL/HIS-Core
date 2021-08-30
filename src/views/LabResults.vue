@@ -3,8 +3,9 @@
         :key="hisFormKey"
         :fields="fields"
         :activeField="fieldComponent"
+        :skipSummary="true"
         @onIndex="fieldComponent=''" 
-        @onFinish="onSubmit"
+        @onFinish="onFinish"
     />
 </template>
 <script lang='ts'>
@@ -15,7 +16,7 @@ import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { Field, Option } from '@/components/Forms/FieldInterface'
 import { PatientLabResultService } from "@/services/patient_lab_result_service"
 import Validation from "@/components/Forms/validations/StandardValidations"
-import { toastWarning } from "@/utils/Alerts"
+import { toastWarning, toastDanger, toastSuccess } from "@/utils/Alerts"
 import { find } from 'lodash';
 import HisDate from "@/utils/Date"
 import { Service } from "@/services/service"
@@ -47,8 +48,21 @@ export default defineComponent({
         }
     },
     methods: {
-        onSubmit() {
-            //TODO: submit somthing
+        async onFinish(_: any, c: any) {
+            try {
+                const measures = Object.values(c)
+                                    .filter((d: any) => d.tag === 'result_indicator' && d.measures)
+                                    .map((d: any) => d.measures)
+                this.labResult.setTestID(this.selectedTest.value)
+                this.labResult.setResultDate(c.result_date)
+                await this.labResult.createEncounter()
+                await this.labResult.createLabResult(measures)
+                this.fieldComponent = 'test_type'
+                toastSuccess('Lab result saved!')
+            }catch(e) {
+                toastDanger(e)
+                console.error(e)
+            }
         },
         generateTestIndicatorsFields() {
             let fields: Array<Field> = []
@@ -92,7 +106,7 @@ export default defineComponent({
                         },
                         {
                             label: 'Alphanumeric(text/text and numbers)',
-                            value: 'alphanumeric'
+                            value: 'text'
                         }
                     ]
                 },
@@ -108,6 +122,14 @@ export default defineComponent({
                         const test = f[`result_indicators`].filter((t: any) => t.value === id)[0]
                         return {
                             tag: 'result_indicator',
+                            measures: {
+                                indicator: {
+                                    'concept_id': test.value
+                                },
+                                'value': result,
+                                'value_modifier': modifier,
+                                'value_type': f[`type_${id}`].value
+                            },
                             result,
                             modifier,
                             test: test.label
@@ -142,7 +164,7 @@ export default defineComponent({
                     type: FieldType.TT_TEXT,
                     group: 'test_indicator',
                     validation: (v: Option) => Validation.required(v),
-                    condition: (f: any) => condition(f) && f[`type_${id}`].value === 'alphanumeric'
+                    condition: (f: any) => condition(f) && f[`type_${id}`].value === 'text'
                 }
             ]
         },
@@ -182,8 +204,8 @@ export default defineComponent({
                   type: FieldType.TT_TABLE_VIEWER,
                   options: () => {
                     const rows = this.testOptions.map((t: Option) => ([
-                        t.other.accession, 
-                        t.other.specimen, 
+                        t.other.accession,
+                        t.other.specimen,
                         t.other.test,
                         HisDate.toStandardHisDisplayFormat(t.other.orderDate),
                         {
