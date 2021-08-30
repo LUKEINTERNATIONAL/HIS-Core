@@ -1,7 +1,9 @@
 <template>
     <his-standard-form 
-        :key="hisFormKey" 
-        :fields="fields" 
+        :key="hisFormKey"
+        :fields="fields"
+        :activeField="fieldComponent"
+        @onIndex="fieldComponent=''" 
         @onFinish="onSubmit"
     />
 </template>
@@ -21,10 +23,12 @@ import { Service } from "@/services/service"
 export default defineComponent({
     components: { HisStandardForm },
     data: () => ({
+        fieldComponent: '' as string,
         labResult: {} as any,
         hisFormKey: 0 as number,
         patient: {} as any,
         fields: [] as Array<Field>,
+        selectedTest: {} as any,
         testOptions: [] as Array<any>,
         testIndicators: [] as Array<any>
     }),
@@ -52,8 +56,8 @@ export default defineComponent({
                fields = [ 
                    ...fields, 
                    ...this.buildTestIndicatorFields(
-                       i.indicatorId, 
-                       i.indicatorName, 
+                       i.indicatorId,
+                       i.indicatorName,
                        i.testId
                     )
                 ]
@@ -69,8 +73,8 @@ export default defineComponent({
         },
         buildTestIndicatorFields(id: number, name: string, test: number): Array<Field> {
             const condition = (f: any) => [
-                    f.test_type.value === test, 
-                    find(f.result_indicators, { label: name}) ? true : false
+                this.selectedTest.value === test, 
+                find(f.result_indicators, { label: name}) ? true : false
             ].every(Boolean)
             return [
                 {
@@ -177,11 +181,19 @@ export default defineComponent({
                   helpText: 'Tests without results',
                   type: FieldType.TT_TABLE_VIEWER,
                   options: () => {
-                    const rows = this.testOptions.map(({other}: Option) => ([
-                        other.accession, 
-                        other.specimen, 
-                        other.test,
-                        HisDate.toStandardHisDisplayFormat(other.orderDate)
+                    const rows = this.testOptions.map((t: Option) => ([
+                        t.other.accession, 
+                        t.other.specimen, 
+                        t.other.test,
+                        HisDate.toStandardHisDisplayFormat(t.other.orderDate),
+                        {
+                            type: 'button',
+                            name: 'Select',
+                            action: () => {
+                                this.selectedTest = t
+                                this.$nextTick(() => this.fieldComponent = 'year_result_date')
+                            }
+                        }
                     ]))
                     return [{
                         label: '',
@@ -201,7 +213,7 @@ export default defineComponent({
                     estimation: {
                         allowUnknown: false
                     },
-                    minDate: (f: any) => HisDate.toStandardHisFormat(f.test_type.other.orderDate),
+                    minDate: () => HisDate.toStandardHisFormat(this.selectedTest.other.orderDate),
                     maxDate: () => Service.getSessionDate(),
                     computeValue: (date: string) => date
                 }),
@@ -210,8 +222,8 @@ export default defineComponent({
                     helpText: `Select test result indicators`,
                     type: FieldType.TT_MULTIPLE_SELECT,
                     validation: (v: Option) => Validation.required(v),
-                    options: (f: any) => {                       
-                        return f.test_type
+                    options: () => {                       
+                        return this.selectedTest
                                 .other
                                 .testIndicators
                                 .map((i: any) => ({
@@ -225,7 +237,7 @@ export default defineComponent({
                     id: 'entry_confirmation',
                     helpText: 'Confirm entry',
                     type: FieldType.TT_TABLE_VIEWER,
-                    options: (f: any, c: any) => {
+                    options: (_: any, c: any) => {
                         const rows = Object.values(c)
                                            .filter((d: any) => d.tag === 'result_indicator')
                                            .map((d: any) => ([d.test, d.modifier, d.result ]))
