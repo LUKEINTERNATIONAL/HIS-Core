@@ -54,7 +54,7 @@ export default defineComponent({
     },
     doTask(taskItem: TaskInterface) {
       if (taskItem.action) {
-        taskItem.action(this.taskParams)
+        taskItem.action(this.taskParams, this.$router)
       } else if (taskItem.url) {
         this.$router.push({ path: taskItem.url })
       } else {

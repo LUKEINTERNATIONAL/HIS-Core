@@ -28,7 +28,7 @@
     </ion-content>
     <his-footer 
         :btns="footerBtns"
-        :state="{index, totalFields, onNextRequired}">
+        :state="{index, field, totalFields, onNextRequired}">
     </his-footer>
   </ion-page>
 </template>

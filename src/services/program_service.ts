@@ -9,6 +9,34 @@ export class ProgramService extends Service {
         super()
     }
 
+    static getAllPrograms() {
+      return super.getJson('programs', { 'page_size': 1000 })
+    }
+
+    static getPatientPrograms(patientID: number) {
+      return super.getJson(`patients/${patientID}/programs`)
+    }
+
+    static getProgramWorkflows(program: number) {
+      return super.getJson(`programs/${program}/workflows`)
+    }
+
+    static getPatientStates(patientId: number, programId: number) {
+      return super.getJson(`programs/${programId}/patients/${patientId}/states`)
+    }
+
+    static voidProgram(patientProgramId: number, reason='') {
+      return super.void(`patient_programs/${patientProgramId}/`, { reason })
+    }
+
+    static createState(patientId: number, programId: number, state: Record<string, any>) {
+      return super.postJson(`programs/${programId}/patients/${patientId}/states`, state) 
+    }
+
+    static voidState(patientId: number, programId: number, stateId: number, reason='') {
+      return super.void(`programs/${programId}/patients/${patientId}/states/${stateId}`, { reason })
+    }
+
     static getProgramInformation(patientID: number) {
         return super.getJson(`/programs/${super.getProgramID()}/patients/${patientID}`);
     }
@@ -33,6 +61,12 @@ export class ProgramService extends Service {
      return super.postJson(`/patients/${personID}/programs`, {
           'program_id': super.getProgramID(),
           'date_enrolled': super.getSessionDate()
+      })
+    }
+    static enrollProgram(patientId: number, program: number, date: string ) {
+      return super.postJson(`/patients/${patientId}/programs`, {
+        'program_id': program,
+        'date_enrolled': date
       })
     }
     static getWeightForHeightValues() {

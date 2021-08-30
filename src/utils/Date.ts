@@ -53,8 +53,12 @@ function getDateBeforeByDays(date: string, days: number) {
 function stitchDate(year: number | string, month=-1 as number | string, day=-1 as number | string) {
     let fmonth = month.toString()
     let fday = day.toString()
-
+    let fyear = year
     const unknown = (d: number | string) => d.toString().match(/Unknown/i) 
+
+    if (parseInt(fyear.toString()) < 1900) {
+        fyear = '1900'
+    }
 
     if (!month || unknown(month)) {
         fmonth = '07'
@@ -64,7 +68,7 @@ function stitchDate(year: number | string, month=-1 as number | string, day=-1 a
         fday = '15'
     }
 
-    return toStandardHisFormat(`${year}-${fmonth}-${fday}`)
+    return toStandardHisFormat(`${fyear}-${fmonth}-${fday}`)
 }
 
 export default {

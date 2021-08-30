@@ -6,6 +6,7 @@
                 button v-for="(item, index) in filtered" 
                 :color="item.label === selected ? 'light': ''" 
                 :key="index"
+                :disabled="'disabled' in item && item.disabled ? true: false"
                 @click="onselect(item)"> 
                 <ion-label> {{item.label}} </ion-label>
             </ion-item>
@@ -35,8 +36,15 @@ export default defineComponent({
         }
     },
     methods: {
-        onselect(item: Option): void {
+        async onselect(item: Option) {
             this.selected = item.label
+            if (this.onValue) {
+                const ok = await this.onValue(item, this)
+                if (!ok) {
+                    this.selected = ''
+                    return
+                }
+            }
             this.$emit('onValue', item)
         }
     }

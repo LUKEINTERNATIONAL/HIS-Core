@@ -18,6 +18,8 @@ import ArtStagingSummary from "@/components/FormElements/ArtStagingSummary.vue"
 import AdherenceInput from "@/components/FormElements/HisAdherenceInput.vue"
 import LabOrders from "@/components/FormElements/HisLabOrders.vue"
 import DispensationInput from "@/components/FormElements/DrugDispensationSelection.vue"
+import ProgamSelection from "@/components/FormElements/ProgramSelection.vue"
+
 // Reference names for BaseFormComponents
 export enum FieldType {
     TT_MONTHLY_DAYS="monthly-days",
@@ -39,7 +41,8 @@ export enum FieldType {
     TT_ART_STAGING_SUMMARY = "art-staging-summary",
     TT_LAB_ORDERS = "lab-orders",
     TT_APPOINTMENTS_ENTRY = "appointments-entry",
-    TT_DISPENSATION_INPUT = 'dispensation-input'
+    TT_DISPENSATION_INPUT = 'dispensation-input',
+    TT_PROGRAM_SELECTION = 'ProgamSelection'
 }
 // Components to be rendered
 export const BaseFormComponents = {
@@ -61,5 +64,6 @@ export const BaseFormComponents = {
     ArtStagingSummary,
     LabOrders,
     AppointmentsEntry,
-    DispensationInput
+    DispensationInput,
+    ProgamSelection
 }
