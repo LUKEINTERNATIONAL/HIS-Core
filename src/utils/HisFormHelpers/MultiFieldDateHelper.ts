@@ -305,7 +305,7 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
                 if (v) {
                     const [year] = HisDate.estimateDateFromAge(parseInt(v.value.toString())).split('-')
                     dateConfig.builtDate = `${year}-07-15`
-                    field.computeValue(dateConfig.builtDate , true)
+                    return field.computeValue(dateConfig.builtDate , true)
                 }
             },
             condition: (f: any) => {
