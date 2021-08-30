@@ -131,7 +131,7 @@ export default defineComponent({
                     maxDate: () => this.staging.getDate(),
                     condition: (f: any) => f.received_arvs.value === 'Yes',
                     estimation: {
-                        allowUnknown: false
+                        allowUnknown: true
                     },
                     computeValue: (date: string, isEstimate: boolean) => {
                         return {
