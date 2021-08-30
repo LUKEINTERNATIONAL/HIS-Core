@@ -77,7 +77,7 @@ export default defineComponent({
                     id: `type_${id}`,
                     helpText: `Result type (${name})`,
                     type: FieldType.TT_SELECT,
-                    group: `${id}`,
+                    group: 'test_indicator',
                     condition,
                     appearInSummary: () => false,
                     validation: (v: Option) => Validation.required(v),
@@ -96,7 +96,19 @@ export default defineComponent({
                     id: `num_${id}`,
                     helpText: `Test Result (${name})`,
                     type: FieldType.TT_TEXT,
-                    group: `${id}`,
+                    group: 'test_indicator',
+                    computedValue: (v: Option, f: any) => {
+                        const value = v.value.toString()
+                        const modifier = value.charAt(0)
+                        const result = parseInt(value.substring(1))
+                        const test = f[`result_indicators`].filter((t: any) => t.value === id)[0]
+                        return {
+                            tag: 'result_indicator',
+                            result,
+                            modifier,
+                            test: test.label
+                        }
+                    },
                     onValue: (v: Option) => {
                         if (v && v.value && !this.numericValueIsValid(v.value.toString())) {
                             toastWarning('You must enter a modifer and numbers only. i.e =90 / >19 / < 750')
@@ -124,7 +136,7 @@ export default defineComponent({
                     id: `alpha_${id}`,
                     helpText: `Test Result (${name})`,
                     type: FieldType.TT_TEXT,
-                    group: `${id}`,
+                    group: 'test_indicator',
                     validation: (v: Option) => Validation.required(v),
                     condition: (f: any) => condition(f) && f[`type_${id}`].value === 'alphanumeric'
                 }
@@ -193,7 +205,25 @@ export default defineComponent({
                                 }))
                     },
                 },
-                ...this.generateTestIndicatorsFields()
+                ...this.generateTestIndicatorsFields(),
+                {
+                    id: 'entry_confirmation',
+                    helpText: 'Confirm entry',
+                    type: FieldType.TT_TABLE_VIEWER,
+                    options: (f: any, c: any) => {
+                        const rows = Object.values(c)
+                                           .filter((d: any) => d.tag === 'result_indicator')
+                                           .map((d: any) => ([d.test, d.modifier, d.result ]))
+                        return [{
+                            label: '',
+                            value: '',
+                            other: {
+                                rows,
+                                columns:[ 'Test', 'Modifier', 'Result']
+                            }
+                        }]
+                    }
+                }
             ]
         }
     }
