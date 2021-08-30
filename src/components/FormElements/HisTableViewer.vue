@@ -23,6 +23,10 @@ export default defineComponent({
             type: Object,
             required: true
         },
+        cdata: {
+            type: Object,
+            required: true
+        },
         options: {
             type: Function,
             required: true
@@ -30,7 +34,7 @@ export default defineComponent({
     },
     async activated() {
         this.$emit('onFieldActivated', this)
-        const data = await this.options(this.fdata)
+        const data = await this.options(this.fdata, this.cdata)
         if (isEmpty(data)) return
 
         const { other } = data[0]
