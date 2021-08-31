@@ -21,6 +21,15 @@
     color: #aaaaaa;
 }
 
+.vertically-align {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    margin: 0;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
 .disabled-btn {
     cursor: not-allowed;
     filter: alpha(opacity=62);
