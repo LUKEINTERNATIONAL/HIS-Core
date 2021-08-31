@@ -470,7 +470,8 @@ export default defineComponent({
                     options: () => this.getDosageTableOptions(this.drugs),
                     config: {
                         toolbarInfo: this.patientToolbar,
-                        hiddenFooterBtns: [ 'Clear' ]
+                        hiddenFooterBtns: [ 'Clear' ],
+                        styles : ['his-table','table-borders']
                     }
                 },
                 {
