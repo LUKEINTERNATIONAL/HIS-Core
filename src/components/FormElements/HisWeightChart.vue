@@ -91,10 +91,11 @@ export default defineComponent({
             text: 'Weight trail (2 year period)'
         },
         stroke: {
-            curve: 'straight',
+            curve: 'smooth',
         },
         yaxis: {
-            title: { text: "Weight Kg(s)"}
+            title: { text: "Weight Kg(s)"},
+            min: 0,
         },
         xaxis: {
             categories: []
@@ -136,10 +137,11 @@ export default defineComponent({
     async created() {
         const items = await this.options(this.fdata)
         const data = items[0].other
+        const values = data.values
         this.series = [
             {
                 name: 'Weight',
-                data: data.values.sort((a: any, b: any) => {
+                data: values.sort((a: any, b: any) => {
                     const dateA: any = new Date(a.x)
                     const dateB: any = new Date(b.x)
                     return dateA - dateB
@@ -166,7 +168,7 @@ export default defineComponent({
         border-right: #ccc solid 1px;
     }
     .title {
-     font-weight: bold;   
+     font-weight: 500;   
     }
     .his-card {
         padding: 0px!important;
