@@ -251,6 +251,7 @@ export default defineComponent({
                         }
                     }]
                   },
+                  requireNext: false,
                   validation: (val: Option) => Validation.required(val),
                   config: {
                     hiddenFooterBtns: [
