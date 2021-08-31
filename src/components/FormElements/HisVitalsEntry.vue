@@ -16,7 +16,7 @@
             </option-button>
           </ion-col>
           <ion-col size="6">
-            <div class="centered">
+            <div class="centered his-card">
               <ion-input
                 type="text"
                 class='keypad-input'
