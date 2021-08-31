@@ -1,7 +1,7 @@
 <template>
     <action-header :title="title" :subtitle="subtitle" :color="color"> </action-header>
     <ion-content>
-        <ion-row> 
+        <ion-row class="vertically-align" > 
             <ion-col v-for="(label, index) in list" :key="index" size="12"> 
                 <interval-card 
                     @onclick="onclick(label)" 
