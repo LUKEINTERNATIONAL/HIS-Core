@@ -10,18 +10,18 @@
       @click="goPrev">
       <img :src="upbuttonImg" :width="btnSize"/>
     </button>
-
-    <ion-list class="body-section"> 
-      <ion-item
-        v-for="(item, index) in activeListItems" :key="index"
-        @click="onselect(item)"
-        :detail="true"
-        :color="isActive(item) ? 'primary' : ''"
-      > 
-        {{ item.label }}
-      </ion-item>
-    </ion-list>
-
+    <div :class="listAlignmentClass">
+      <ion-list> 
+        <ion-item
+          v-for="(item, index) in activeListItems" :key="index"
+          @click="onselect(item)"
+          :detail="true"
+          :color="isActive(item) ? 'primary' : ''"
+        > 
+          {{ item.label }}
+        </ion-item>
+      </ion-list>
+    </div>
     <div class="bottom-section">
       <button 
           class="nav-btn nav-btn-bottom clickable" 
@@ -57,6 +57,9 @@ export default defineComponent({
     btnSize: 45
   }),
   computed: {
+    listAlignmentClass(): string {
+      return this.activeListItems && this.activeListItems.length === this.perPage ? 'vertically-align' : ''
+    },
     upbuttonImg(): string {
       return '/assets/images/drop-up-arrow.svg'
     },
@@ -126,11 +129,6 @@ button[disabled]{
 
 .body-section {
   position: absolute;
-  width: 96%;
-  top: 50%;
-  margin: 0;
-  -ms-transform: translateY(-50%);
-  transform: translateY(-50%);
 }
 .card {
   position: relative;
