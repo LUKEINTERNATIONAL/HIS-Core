@@ -186,7 +186,6 @@ export default defineComponent({
 </script>
 <style scoped>
     .view-port-content {
-        background: white;
         height: 100%;
     }
     .prescription-tab {

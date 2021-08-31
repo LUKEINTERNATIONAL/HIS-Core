@@ -2,26 +2,26 @@
     <ion-page> 
         <patient-header :appIcon="app.applicationIcon" :patientCardInfo="patientCardInfo" :programCardInfo="programCardInfo" />
         <ion-content>
-            <ion-grid class='grid-custom'>
+            <ion-grid class='grid-custom vertically-align'>
                 <ion-row> 
-                    <ion-col size="2">
+                    <ion-col size="2.4">
                         <visit-dates-card :title="visitDatesTitle" :items="visitDates" @onselect="onActiveVisitDate"> </visit-dates-card>
                     </ion-col>
-                    <ion-col size="10">
+                    <ion-col size="9.6">
                         <div class="his-card"> 
                         <ion-row> 
                            <ion-col size-md="4" size-sm="6"> 
                                <b>Today's Date:</b> {{ currentDate }}
                             </ion-col> 
-                            <ion-col size-md="5" size-sm="6"> 
+                            <ion-col size-md="4" size-sm="6"> 
                                 <span v-if="nextTask.name"> 
-                                    <ion-chip :style="{marginTop: '-8px'}" color="success" @click="$router.push(nextTask)"><b>Next Task: {{ nextTask.name.toUpperCase() }}</b> </ion-chip>
+                                    <ion-chip class="next-task" color="success" @click="$router.push(nextTask)">Next Task: {{ nextTask.name.toUpperCase() }}</ion-chip>
                                 </span>
                                 <span v-else> 
                                     <b> Next Task</b>: NONE
                                 </span>
                             </ion-col>
-                            <ion-col size-md="3" size-sm="12">
+                            <ion-col size-md="4" size-sm="12">
                                 <span v-if="isBDE"> 
                                     <ion-chip :style="{marginTop: '-8px'}" color="danger" @click="$router.push({name: 'Session Date'})"><b> BDE: {{ sessionDate.toUpperCase() }}</b> </ion-chip>
                                 </span>
@@ -54,7 +54,7 @@
         <ion-footer> 
             <ion-toolbar color="dark">
                 <ion-button color="danger" size="large" @click="onCancel"> 
-                    Cancel
+                    Finish
                 </ion-button>
                 <ion-button color="primary" size="large" slot="end" @click="showTasks"> 
                     Tasks
@@ -347,16 +347,30 @@ export default defineComponent({
 })
 </script>
 <style scoped>
+    .next-task {
+        margin-top: -8px;
+        font-weight: 600;
+        font-size: 0.74em;
+    }
     .grid-custom {
         overflow-y: auto;
-        padding: 1%;
+        font-size: 0.9em;
     }
     .his-card {
         height: 100%;
-        padding: 1.8%;
+        padding: 1.0%;
+    }
+    @media (min-width: 1278px) {
+        .next-task {
+            font-size: 1.0em;
+        }
+        .grid-custom {
+            padding: 0.4%;
+            height: 99%;
+        }
     }
     @media only screen and (width: 1024px) {
-         .grid-custom {
+        .grid-custom {
             height: 99%;
             overflow: hidden;
         }   

@@ -34,12 +34,12 @@ export default defineComponent({
 </script>
 <style scoped>
     img {
-        width: 40px;
-        height: 40px;
+        width: 30px;
+        height: 30px;
     }
     .his-card {
         color: black;
-        margin: 10px;
+        margin: 0.4em;
         text-align: center;
         font-weight: bold;
     }

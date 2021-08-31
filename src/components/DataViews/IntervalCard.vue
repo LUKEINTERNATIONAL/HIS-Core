@@ -1,6 +1,7 @@
 <template>
     <div :class="`his-card ${state}`" @click="$emit('onclick')"> 
-        <div> {{ label }} </div>
+      <s v-if="!enabled">{{ label }}</s> 
+      <div v-if="enabled">{{label}}</div>
     </div>
 </template>
 
