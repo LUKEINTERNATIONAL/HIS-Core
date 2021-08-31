@@ -1,5 +1,5 @@
 <template>
-    <his-standard-form @onIndex="fieldComponent=''" :activeField="fieldComponent" :cancelDestinationPath="cancelDestination" :fields="fields" @onFinish="onSubmit"/>
+    <his-standard-form :skipSummary="true" @onIndex="fieldComponent=''" :activeField="fieldComponent" :cancelDestinationPath="cancelDestination" :fields="fields" @onFinish="onSubmit"/>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
@@ -470,7 +470,8 @@ export default defineComponent({
                     options: () => this.getDosageTableOptions(this.drugs),
                     config: {
                         toolbarInfo: this.patientToolbar,
-                        hiddenFooterBtns: [ 'Clear' ]
+                        hiddenFooterBtns: [ 'Clear' ],
+                        styles : ['his-table','table-borders']
                     }
                 },
                 {

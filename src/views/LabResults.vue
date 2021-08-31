@@ -255,7 +255,8 @@ export default defineComponent({
                   validation: (val: Option) => Validation.required(val),
                   config: {
                     hiddenFooterBtns: [
-                        'Clear'
+                        'Clear',
+                        'Next'
                     ]
                   }
                 },

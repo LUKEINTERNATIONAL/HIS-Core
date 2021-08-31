@@ -21,6 +21,15 @@
     color: #aaaaaa;
 }
 
+.vertically-align {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    margin: 0;
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
 .disabled-btn {
     cursor: not-allowed;
     filter: alpha(opacity=62);
@@ -52,17 +61,23 @@
 }
 
 .his-table {
-    border-collapse: collapse;
     width: 100%;
 }
 
-.his-table > tr > td, th {
+.his-table > tr > td, .his-table > tr > th {
     text-align: left;
     padding: 1em;
 }
 
 .his-table > tr:nth-child(even) {
     background-color: #f8f8f8;
+}
+
+.table-borders > tr > td, .table-borders tr > th {
+    border-collapse: collapse;
+    border: 1px solid #c5c5c5;
+    text-align: left;
+    padding: 8px;
 }
 
 .his-card {
@@ -93,6 +108,11 @@
 
 body {
  font-family: "Nimbus Sans L", "Arial Narrow", sans-serif;
+ user-select: none; /* supported by Chrome and Opera */
+ -webkit-user-select: none; /* Safari */
+ -khtml-user-select: none; /* Konqueror HTML */
+ -moz-user-select: none; /* Firefox */
+ -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
 .keypad-modal .modal-wrapper {
