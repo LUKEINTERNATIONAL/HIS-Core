@@ -32,7 +32,7 @@ export default defineComponent({
 <style scoped>
     .title {
         font-size: 0.8em;
-        font-weight: bold;
+        font-weight: 500;
     }
     .task-card {
         padding: 0;

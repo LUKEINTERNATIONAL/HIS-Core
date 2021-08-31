@@ -1,5 +1,5 @@
 <template>
-    <table class="his-table">
+    <table :class="classStyles">
         <tr>
             <th v-for="(column, hIndex) in columns" :key="hIndex"> 
                 {{ column }}
@@ -25,6 +25,9 @@ import { defineComponent, PropType } from 'vue'
 import { isEmpty } from "lodash"
 export default defineComponent({
     props: {
+        styles: {
+            type: Array
+        },
         rowColors: {
             type: Array,
             default: () => []
@@ -39,6 +42,12 @@ export default defineComponent({
         },
         rows: {
             type: Object as PropType<string[]>
+        }
+    },
+    computed: {
+        classStyles(): string {
+            const styles = this.styles ? this.styles.join(' ') : ''
+            return `his-table ${styles}`
         }
     },
     methods: {
