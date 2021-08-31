@@ -17,7 +17,7 @@ import { Field, Option } from '@/components/Forms/FieldInterface'
 import { PatientLabResultService } from "@/services/patient_lab_result_service"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { toastWarning, toastDanger, toastSuccess } from "@/utils/Alerts"
-import { find } from 'lodash';
+import { find, isEmpty } from 'lodash';
 import HisDate from "@/utils/Date"
 import { Service } from "@/services/service"
 
@@ -57,9 +57,11 @@ export default defineComponent({
                 this.labResult.setResultDate(c.result_date)
                 await this.labResult.createEncounter()
                 await this.labResult.createLabResult(measures)
-                this.hisFormKey = Math.floor(Math.random() * 5000)
+                this.testOptions = []
+                this.selectedTest = {}
+                this.testIndicators = []
                 await this.initData()
-                this.fieldComponent = 'test_type'
+                this.hisFormKey = Math.floor(Math.random() * 5000)
                 toastSuccess('Lab result saved!')
             }catch(e) {
                 toastDanger(e)
@@ -194,6 +196,9 @@ export default defineComponent({
                 const orderData = orders[i]
                 for(const testIndex in orderData.tests) {
                     const test = orderData.tests[testIndex]
+                    if (!isEmpty(test.result)) {
+                        continue
+                    }
                     this.labResult.setTestTypeID(test.concept_id)
                     const indicators = await this.labResult.getTestIndicators()
                     const testIndicators = indicators.map((i: any) =>({
