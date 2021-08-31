@@ -408,14 +408,10 @@ export default defineComponent({
                 ...generateDateFields({
                     id: 'cd4_result_date',
                     helpText: 'Cd4 Results',
+                    required: true,
+                    minDate: () => this.patient.getBirthdate(),
+                    maxDate: () => this.staging.getDate(),
                     condition: (f: any) =>  this.hasStaging(f) && f.cd4_available.value === 'Yes',
-                    validation: (val: any) => {
-                        return this.validateSeries([
-                            () => Validation.required(val),
-                            () => this.dateBeforeBirthDate(val.value),
-                            () => this.dateInFuture(val.value)
-                        ])
-                    },
                     estimation: {
                         allowUnknown: false
                     },

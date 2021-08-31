@@ -20,8 +20,8 @@ export interface DateFieldInterface {
     condition?: Function;
     validation?: Function;
     required?: boolean;
-    minDate?(): string;
-    maxDate?(): string;
+    minDate?(formData: any): string;
+    maxDate?(formData: any): string;
     computeValue: Function;
     appearInSummary?: Function;
     estimation: EstimationInterface;
@@ -118,13 +118,13 @@ function onValidation(
 
     const validateMinMax = (date: string) => {
         if (field.minDate) {
-            const minDate = field.minDate()
+            const minDate = field.minDate(formData)
             if (new Date(date) < new Date(minDate)) {
                 return [`Date is less than minimum date of ${HisDate.toStandardHisDisplayFormat(minDate)}`]
             }
         }
         if (field.maxDate) {
-            const maxDate = field.maxDate()
+            const maxDate = field.maxDate(formData)
             if (new Date(date) > new Date(maxDate)) {
                 return [`Date is greater than max date of ${HisDate.toStandardHisDisplayFormat(maxDate)}`]
             }
@@ -132,26 +132,25 @@ function onValidation(
         return null
     }
 
-    if (isEmpty(val)) { 
+    if (isEmpty(val) || val.value === '') { 
         if (field.required) {
             return ['Date value should not be empty']
         }
         return customValidation(val)
     }
 
-    if ('allowUnknown' in field.estimation && datePart.isEstimate){
-        if (!field.estimation.allowUnknown) {
-            return ['Unknown is not allowed']
-        }
-    }
-
     if (typeof datePart === 'object') {
         if (datePart.type === 'year') {
+            if ('allowUnknown' in field.estimation){
+                if (!field.estimation.allowUnknown && val.value === 'Unknown') {
+                    return ['Unknown is not allowed']
+                } 
+                if (val.value === 'Unknown')  {
+                    return null
+                }
+            }
             if (parseInt(datePart.value) < 1900) {
                 return ['Invalid Year!']
-            }
-            if (val.value === 'Unknown') {
-                return null
             }
         }
         if (isEmpty(datePart)) {
@@ -159,11 +158,11 @@ function onValidation(
             if (issueFound) return issueFound
         } else {
             if (field.minDate) {
-                const issuesFound = validateMinMax(getInputDate(field.minDate()))
+                const issuesFound = validateMinMax(getInputDate(field.minDate(formData)))
                 if (issuesFound) return issuesFound
             }
             if (field.maxDate) {
-                const issuesFound = validateMinMax(getInputDate(field.maxDate()))
+                const issuesFound = validateMinMax(getInputDate(field.maxDate(formData)))
                 if (issuesFound) return issuesFound
             }
         }
@@ -199,6 +198,7 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
                         dateConfig.isUnknown = false
                         dateConfig.builtDate = buildDate(dateConfig)
                     } else {
+                        dateConfig.year.value = -1
                         dateConfig.isUnknown = true                      
                     }
                 }
@@ -260,9 +260,9 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             id: `estimated_${field.id}`,
             helpText: `${field.helpText} Estimated period`,
             type: FieldType.TT_SELECT,
-            summaryMapValue: ({ label }: Option, f: any, computedValue: any) => ({ 
+            summaryMapValue: ({ label }: Option) => ({ 
                 label: `${field.helpText} Date Estimate`,
-                value: `${label} (${computedValue.date})`
+                value: `${label} (${HisDate.toStandardHisDisplayFormat(dateConfig.builtDate)})`
             }),
             condition: (f: any) => {
                 const conditions = [
@@ -298,21 +298,21 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             id: `age_estimate_${field.id}`,
             helpText: `${field.helpText} Age Estimate`,
             type: FieldType.TT_NUMBER,
-            summaryMapValue: ({ label }: Option, f: any, computedValue: any) => ({ 
+            summaryMapValue: ({ label }: Option) => ({ 
                 label: `${field.helpText} Date Estimate`,
-                value: `${label} (${computedValue.date})`
+                value: `${label} (${HisDate.toStandardHisDisplayFormat(dateConfig.builtDate)})`
             }),
             computedValue: (v: any) => {
                 if (v) {
                     const [year] = HisDate.estimateDateFromAge(parseInt(v.value.toString())).split('-')
                     dateConfig.builtDate = `${year}-07-15`
-                    field.computeValue(dateConfig.builtDate , true)
+                    return field.computeValue(dateConfig.builtDate , true)
                 }
             },
             condition: (f: any) => {
                 const conditions = [
                     field.estimation.estimationFieldType === EstimationFieldType.AGE_ESTIMATE_FIELD,
-                    dateConfig.year.isEstimate,
+                    dateConfig.isUnknown,
                     field.condition ? field.condition(f): true
                 ]
                 return conditions.every(Boolean)

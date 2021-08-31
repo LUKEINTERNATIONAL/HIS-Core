@@ -126,16 +126,12 @@ export default defineComponent({
                 ...generateDateFields({
                     id: 'date_last_taken_arvs',
                     helpText: 'Last taken ARVS',
+                    required: true,
+                    minDate: () => this.patient.getBirthdate(),
+                    maxDate: () => this.staging.getDate(),
                     condition: (f: any) => f.received_arvs.value === 'Yes',
-                    validation: (val: any) => {
-                        return this.validateSeries([
-                            () => Validation.required(val),
-                            () => this.dateBeforeBirthDate(val.value),
-                            () => this.dateInFuture(val.value)
-                        ])
-                    },
                     estimation: {
-                        allowUnknown: false
+                        allowUnknown: true
                     },
                     computeValue: (date: string, isEstimate: boolean) => {
                         return {
@@ -234,13 +230,9 @@ export default defineComponent({
                     id: 'date_started_art',
                     helpText: 'Started ART',
                     condition: (f: any) => f.ever_registered_at_art_clinic.value === 'Yes',
-                    validation: (val: any) => {
-                        return this.validateSeries([
-                            () => Validation.required(val),
-                            () => this.dateBeforeBirthDate(val.value),
-                            () => this.dateInFuture(val.value)
-                        ])
-                    },
+                    required: true,
+                    minDate: () => this.patient.getBirthdate(),
+                    maxDate: () => this.staging.getDate(),
                     estimation: {
                         allowUnknown: true,
                         estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
@@ -429,13 +421,9 @@ export default defineComponent({
                     id: 'date_of_confirmatory_hiv_test',
                     helpText: 'Confirmatory HIV test',
                     condition: (f: any) => f.confirmatory_hiv_test_location.value,
-                    validation: (val: any) => {
-                        return this.validateSeries([
-                            () => Validation.required(val),
-                            () => this.dateBeforeBirthDate(val.value),
-                            () => this.dateInFuture(val.value)
-                        ])
-                    },
+                    required: true,
+                    minDate: () => this.patient.getBirthdate(),
+                    maxDate: () => this.staging.getDate(),
                     estimation: {
                         allowUnknown: true
                     },

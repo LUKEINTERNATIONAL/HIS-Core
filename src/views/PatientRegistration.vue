@@ -256,12 +256,9 @@ export default defineComponent({
             ...generateDateFields({
                 id: 'birth_date',
                 helpText: 'Birth',
-                validation: (val: any) => {
-                    return Validation.validateSeries([
-                        () => Validation.required(val),
-                        () => HisDate.dateIsAfter(val.value) ? null : ['Date is greater than current date']
-                    ])
-                },
+                required: true,
+                minDate: () => HisDate.estimateDateFromAge(100),
+                maxDate: () => WorkflowService.getSessionDate(),
                 estimation: {
                     allowUnknown: true,
                     estimationFieldType: EstimationFieldType.AGE_ESTIMATE_FIELD
