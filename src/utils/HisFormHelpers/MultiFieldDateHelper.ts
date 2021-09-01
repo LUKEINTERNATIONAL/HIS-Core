@@ -247,8 +247,8 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
                 /** This duplication is a necessary evil when saving dates */
                 if (v) {
                     dateConfig.day.value = formatDigit(v.value.toString())
-                    dateConfig.builtDate = buildDate(dateConfig)
                     dateConfig.day.isEstimate = false
+                    dateConfig.builtDate = buildDate(dateConfig)
                 }
                 return field.computeValue(dateConfig.builtDate, hasEstimates)
             },
