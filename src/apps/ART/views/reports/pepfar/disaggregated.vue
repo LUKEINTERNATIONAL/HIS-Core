@@ -10,13 +10,86 @@ import { defineComponent } from 'vue'
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Field } from "@/components/Forms/FieldInterface"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
+import { DisaggregatedReportService, AGE_GROUPS } from "@/apps/ART/services/reports/pepfar/disaggregated_service"
+import { toastWarning } from '@/utils/Alerts'
+import { isEmpty } from "lodash"
 
 export default defineComponent({
     mixins: [ReportMixin],
+    data: () => ({
+        rows: [] as Array<any>
+    }),
     created() {
         this.fields = this.getFields()
     },
+    watch: {
+        async endDate(endDate: string) {
+            if (endDate) {
+                await this.init(this.startDate, endDate)    
+            }
+        }
+    },
     methods: {
+        async init(startDate: string, endDate: string){
+            this.report = new DisaggregatedReportService(startDate, endDate)
+            const isInit = await this.report.init()
+            if (isInit) {
+                await this.setRows()
+            } else {
+                toastWarning ('Unable to initialise report')
+            }
+        },
+        async setRows() {
+            this.rows = []
+            const data: any = { 'F': AGE_GROUPS, 'M': AGE_GROUPS }
+
+            for (const genderIndex in data) {
+                const ageGroups = data[genderIndex]
+                this.report.setRebuildOutcome(true)
+
+                for (const ageIndex in ageGroups) {
+                    const rowNumber = parseInt(ageIndex)+1
+                    const gender = genderIndex === 'M' ? 'Male' : 'Female'
+                    const ageGroup: any = ageGroups[ageIndex]
+
+                    let row = [rowNumber, ageGroup, gender]
+                    this.report.setGender(gender.toLowerCase())
+                    this.report.setAgeGroup(ageGroup)
+
+                    const res = await this.report.getCohort()
+                    this.report.setRebuildOutcome(false)
+
+                    if (!isEmpty(res)) {
+                        const value = async(prop: string) => {
+                            if (prop === 'tx_given_ipt') {
+                                const req = await this.report.getTxIpt()
+                                if (req) {
+                                    return req.length
+                                }
+                            }
+                            if (prop === 'tx_screened_for_tb') {
+                                const req = await this.report.getTxCurrTB()
+                                if (req) {
+                                    return req.length
+                                }
+                            }
+                            const d = res[ageGroup]
+                            return genderIndex in d ? d[genderIndex][prop].length : 0
+                        }
+                        row = await Promise.all([
+                            ...row, 
+                            value('tx_new'),
+                            value('tx_curr'),
+                            value('tx_given_ipt'),
+                            value('tx_screened_for_tb')
+                        ])
+                    } else {
+                        row = [...row, 0, 0, 0, 0]
+                    }
+                    this.rows.push(row)
+                }
+            }
+        },
         getFields(): Array<Field> {
             return [
                 ...this.getDateDurationFields(),
@@ -29,18 +102,14 @@ export default defineComponent({
                            label: '',
                            value: '',
                            other: {
-                               rows: [
-                                   [0, '0-5 months', 2, 3, 4, 5],
-                                   [2, '6-11 months', 2, 3, 4, 5],
-                                   [3, '12-23 months', 2, 3, 4, 5],
-                                   [4, '5-9 years', 2, 3, 4, 5],
-                               ],
+                               rows: this.rows,
                                columns: [
-                                   '#', 
-                                   'Age group', 
-                                   'Gender', 
-                                   'Tx new (new on ART)', 
-                                   'TX curr (received IPT)', 
+                                   '#',
+                                   'Age group',
+                                   'Gender',
+                                   'Tx new (new on ART)',
+                                   'Tx curr (receiving ART)',
+                                   'TX curr (received IPT)',
                                    'TX curr (screened for TB)'
                                 ]
                            }

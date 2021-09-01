@@ -28,10 +28,10 @@ export class DisaggregatedReportService extends Service {
         this.endDate = endDate
         this.date = Service.getSessionDate()
         this.gender = ''
-        this.ageGroup = AGE_GROUPS[8]
+        this.ageGroup = AGE_GROUPS[0]
         this.quarter = 'pepfar'
         this.initialize = true
-        this.rebuildOutcome = false
+        this.rebuildOutcome = true
         this.outComeTable = 'temp_pepfar_patient_outcomes'
     }
 
@@ -41,6 +41,10 @@ export class DisaggregatedReportService extends Service {
 
     setInitialization(isInit: boolean) {
         this.initialize = isInit
+    }
+
+    setRebuildOutcome(isRebuild: boolean) {
+        this.rebuildOutcome = isRebuild
     }
 
     setGender(gender: string) {
@@ -64,6 +68,7 @@ export class DisaggregatedReportService extends Service {
         const req = await Service.getJson('cohort_disaggregated', this.buildRequest())
         if (req && req.temp_disaggregated === 'created') {
             this.initialize = false
+            this.rebuildOutcome = false
             return true
         }
         return false
@@ -88,6 +93,6 @@ export class DisaggregatedReportService extends Service {
             'gender': this.gender,
             'outcome_table': this.outComeTable
         }
-        return Service.getJson('screen_for_tb', payload)
+        return Service.getJson('screened_for_tb', payload)
     }
 }

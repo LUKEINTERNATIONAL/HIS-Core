@@ -9,6 +9,7 @@ export default defineComponent({
     components: { HisStandardForm },
     data: () => ({
         fields: [] as Array<Field>,
+        report: {} as any,
         startDate: '' as string,
         endDate: '' as string
     }),
