@@ -27,20 +27,27 @@ export default defineComponent({
             this.report = new DisaggregatedReportService(startDate, endDate)
             return this.report.init()
         },
+        buildLink(values: Array<number>) {
+            return {
+                type: 'link',
+                value: values.length,
+                isActive: values.length > 0,
+                action: () => console.log(values) //TODO: Drilldown values here
+            }
+        },
         async getValue(prop: string, gender: string, data: any) {
             if (prop === 'tx_given_ipt') {
                const ipt = await this.report.getTxIpt()
                if (ipt) {
-                   return ipt.length
+                   return this.buildLink(ipt)
                }
-            }
-            if (prop === 'tx_screened_for_tb') {
+            } else if (prop === 'tx_screened_for_tb') {
                 const tb = await this.report.getTxCurrTB()
                 if (tb) {
-                    return tb.length
+                    return this.buildLink(tb)
                 }
-            }
-            return gender in data ? data[gender][prop].length : 0
+            } 
+            return gender in data ? this.buildLink(data[gender][prop]) : this.buildLink([])
         },
         async getRowsByGender(gender: 'F' | 'M') {
             const genderProps: any = { F: 'Female', M: 'Male'}

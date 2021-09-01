@@ -10,7 +10,15 @@
                 :class="getColorCodeClass(rIndex, dIndex)" 
                 v-for="(item, dIndex) in dataItems" :key="dIndex"
                 > 
-                <div v-if="isActionButton(item)"> 
+                <div v-if="isLink(item)">
+                    <div v-if="item.isActive"> 
+                        <a href="#" @click.prevent="item.action(dataItems)">{{ item.name }}</a>
+                    </div>
+                    <div v-else>
+                        {{item.name}}
+                    </div>
+                </div>
+                <div v-else-if="isActionButton(item)">
                     <ion-button @click="item.action(dataItems)">{{ item.name }}</ion-button>
                 </div>
                 <div v-else>
@@ -51,6 +59,9 @@ export default defineComponent({
         }
     },
     methods: {
+        isLink(item: any) {
+            return typeof item === 'object' && item.type === 'link'
+        },
         isActionButton(item: any) {
             return typeof item === 'object' && item.type === 'button'
         },
