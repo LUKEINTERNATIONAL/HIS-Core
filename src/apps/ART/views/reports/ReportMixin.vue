@@ -25,18 +25,23 @@ export default defineComponent({
                     estimation: {
                         allowUnknown: false
                     },
-                    computeValue: (date: string) => this.startDate = date 
+                    computeValue: (date: string) => date 
                 }),
                 ...generateDateFields({
                     id: 'end_date',
                     helpText: 'End',
                     required: true,
+                    unload: (d: any, s: any, f: any, c: any) => {
+                        if (s === 'next') {
+                            this.endDate = c.end_date
+                        }
+                    },
                     minDate: () => this.startDate,
                     maxDate: () => maxDate,
                     estimation: {
                         allowUnknown: false
                     },
-                    computeValue: (date: string) => this.endDate = date
+                    computeValue: (date: string) => date
                 })
             ]
         }

@@ -22,6 +22,7 @@ export interface DateFieldInterface {
     required?: boolean;
     minDate?(formData: any, computeForm: any): string;
     maxDate?(formData: any, computeForm: any): string;
+    unload?(data: any, state: string, formData: any,  computeForm: any): void; 
     computeValue: Function;
     appearInSummary?: Function;
     estimation: EstimationInterface;
@@ -230,6 +231,11 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             id: dateConfig.day.id,
             helpText: `${field.helpText} Day`,
             type: FieldType.TT_MONTHLY_DAYS,
+            unload: (d: any, s: any, f: any, c: any) => {
+                if (field.unload) {
+                    field.unload(d, s, f, c)
+                }
+            },
             condition: (f: any) => onCondition(field, f),
             appearInSummary: (f: any) => {
                 return field.appearInSummary ? field.appearInSummary(f): true

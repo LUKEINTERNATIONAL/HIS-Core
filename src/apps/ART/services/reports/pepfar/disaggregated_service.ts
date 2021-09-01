@@ -35,6 +35,16 @@ export class DisaggregatedReportService extends Service {
         this.outComeTable = 'temp_pepfar_patient_outcomes'
     }
 
+    async init() {
+        const req = await Service.getJson('cohort_disaggregated', this.buildRequest())
+        if (req && req.temp_disaggregated === 'created') {
+            this.initialize = false
+            this.rebuildOutcome = false
+            return true
+        }
+        return false
+    }
+
     setAgeGroup(ageGroup: string) {
         this.ageGroup = ageGroup
     }
@@ -62,16 +72,6 @@ export class DisaggregatedReportService extends Service {
             'initialize': this.initialize,
             'program_id': Service.getProgramID()
         }
-    }
-
-    async init() {
-        const req = await Service.getJson('cohort_disaggregated', this.buildRequest())
-        if (req && req.temp_disaggregated === 'created') {
-            this.initialize = false
-            this.rebuildOutcome = false
-            return true
-        }
-        return false
     }
 
     getCohort() {

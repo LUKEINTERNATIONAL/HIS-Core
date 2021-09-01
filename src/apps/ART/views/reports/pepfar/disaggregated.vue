@@ -17,34 +17,22 @@ import { isEmpty } from "lodash"
 export default defineComponent({
     mixins: [ReportMixin],
     data: () => ({
-        rows: [] as Array<any>
+        cohort: {} as any
     }),
-    created() {
+    async created() {
         this.fields = this.getFields()
-    },
-    watch: {
-        async endDate(endDate: string) {
-            if (endDate) {
-                await this.init(this.startDate, endDate)    
-            }
-        }
     },
     methods: {
         async init(startDate: string, endDate: string){
             this.report = new DisaggregatedReportService(startDate, endDate)
-            const isInit = await this.report.init()
-            if (isInit) {
-                await this.setRows()
-            } else {
-                toastWarning ('Unable to initialise report')
-            }
+            return this.report.init()
         },
         async getValue(prop: string, gender: string, data: any) {
-            if (prop === 'txt_given_ipt') {
+            if (prop === 'tx_given_ipt') {
                const ipt = await this.report.getTxIpt()
                if (ipt) {
                    return ipt.length
-               }  
+               }
             }
             if (prop === 'tx_screened_for_tb') {
                 const tb = await this.report.getTxCurrTB()
@@ -54,41 +42,38 @@ export default defineComponent({
             }
             return gender in data ? data[gender][prop].length : 0
         },
-        async setRows() {
-            this.rows = []
-            const data: any = { 'F': AGE_GROUPS, 'M': AGE_GROUPS }
+        async getRowsByGender(gender: 'F' | 'M') {
+            const genderProps: any = { F: 'Female', M: 'Male'}
+            const strGender = genderProps[gender]
+            const rows = []
+            this.report.setGender(strGender.toLowerCase())
 
-            for (const genderIndex in data) {
-                const ageGroups = data[genderIndex]
-                this.report.setRebuildOutcome(true)
+            for (const i in AGE_GROUPS) {
+                const rowNumber = parseInt(i) + 1
+                const ageGroup: any = AGE_GROUPS[i]
+                this.report.setAgeGroup(ageGroup)
 
-                for (const ageIndex in ageGroups) {
-                    const rowNumber = parseInt(ageIndex)+1
-                    const gender = genderIndex === 'M' ? 'Male' : 'Female'
-                    const ageGroup: any = ageGroups[ageIndex]
+                let row = [rowNumber, ageGroup, strGender]
 
-                    let row = [rowNumber, ageGroup, gender]
-                    this.report.setGender(gender.toLowerCase())
-                    this.report.setAgeGroup(ageGroup)
-
-                    const res = await this.report.getCohort()
-                    this.report.setRebuildOutcome(false)
-
-                    if (!isEmpty(res)) {
-                        const value = (prop: string) => this.getValue(prop, genderIndex, res[ageGroup])
-                        row = await Promise.all([
-                            ...row, 
-                            value('tx_new'),
-                            value('tx_curr'),
-                            value('tx_given_ipt'),
-                            value('tx_screened_for_tb')
-                        ])
-                    } else {
-                        row = [...row, 0, 0, 0, 0]
-                    }
-                    this.rows.push(row)
+                if (!(ageGroup in this.cohort)) {
+                    const req = await this.report.getCohort()
+                    this.cohort[ageGroup] = !isEmpty(req) ? req[ageGroup] : {}
                 }
+                if (!isEmpty(this.cohort[ageGroup])) {
+                    const value = (prop: string) => this.getValue(prop, gender, this.cohort[ageGroup])
+                    row = await Promise.all([
+                        ...row, 
+                        value('tx_new'),
+                        value('tx_curr'),
+                        value('tx_given_ipt'),
+                        value('tx_screened_for_tb')
+                    ])
+                } else {
+                    row = [...row, 0, 0, 0, 0]
+                }
+                rows.push(row)
             }
+            return rows
         },
         getFields(): Array<Field> {
             return [
@@ -97,12 +82,21 @@ export default defineComponent({
                     id: 'report',
                     helpText: 'ART disaggregated report',
                     type: FieldType.TT_TABLE_VIEWER,
-                    options: () => {
+                    options: async (_: any, c: any) => {
+                       this.cohort = {}
+                       const isInit = await this.init(c.start_date, c.end_date)
+                       if (!isInit) {
+                           toastWarning('Unable to initialise report')
+                           return [] 
+                       }
+                       const femaleRows = await this.getRowsByGender('F')
+                       const maleRows = await this.getRowsByGender('M')
+                       const rows = await Promise.all([...femaleRows, ...maleRows])
                        return [{
-                           label: '',
+                           label: '', 
                            value: '',
                            other: {
-                               rows: this.rows,
+                               rows,
                                columns: [
                                    '#',
                                    'Age group',
@@ -113,7 +107,7 @@ export default defineComponent({
                                    'TX curr (screened for TB)'
                                 ]
                            }
-                       }] 
+                       }]
                     },
                     config: {
                         footerBtns: [
