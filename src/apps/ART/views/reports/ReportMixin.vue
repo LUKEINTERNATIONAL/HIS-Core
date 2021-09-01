@@ -14,6 +14,14 @@ export default defineComponent({
         endDate: '' as string
     }),
     methods: {
+        buildDrillableLink(values: Array<number>) {
+            return {
+                type: 'link',
+                value: values.length,
+                isActive: values.length > 0,
+                action: () => console.log(values) //TODO: Drilldown values here
+            }
+        },
         getDateDurationFields(minDate='2001-01-01', maxDate=Service.getSessionDate()): Array<Field> {
             return [
                 ...generateDateFields({
