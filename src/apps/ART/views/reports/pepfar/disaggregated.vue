@@ -39,6 +39,21 @@ export default defineComponent({
                 toastWarning ('Unable to initialise report')
             }
         },
+        async getValue(prop: string, gender: string, data: any) {
+            if (prop === 'txt_given_ipt') {
+               const ipt = await this.report.getTxIpt()
+               if (ipt) {
+                   return ipt.length
+               }  
+            }
+            if (prop === 'tx_screened_for_tb') {
+                const tb = await this.report.getTxCurrTB()
+                if (tb) {
+                    return tb.length
+                }
+            }
+            return gender in data ? data[gender][prop].length : 0
+        },
         async setRows() {
             this.rows = []
             const data: any = { 'F': AGE_GROUPS, 'M': AGE_GROUPS }
@@ -60,22 +75,7 @@ export default defineComponent({
                     this.report.setRebuildOutcome(false)
 
                     if (!isEmpty(res)) {
-                        const value = async(prop: string) => {
-                            if (prop === 'tx_given_ipt') {
-                                const req = await this.report.getTxIpt()
-                                if (req) {
-                                    return req.length
-                                }
-                            }
-                            if (prop === 'tx_screened_for_tb') {
-                                const req = await this.report.getTxCurrTB()
-                                if (req) {
-                                    return req.length
-                                }
-                            }
-                            const d = res[ageGroup]
-                            return genderIndex in d ? d[genderIndex][prop].length : 0
-                        }
+                        const value = (prop: string) => this.getValue(prop, genderIndex, res[ageGroup])
                         row = await Promise.all([
                             ...row, 
                             value('tx_new'),
