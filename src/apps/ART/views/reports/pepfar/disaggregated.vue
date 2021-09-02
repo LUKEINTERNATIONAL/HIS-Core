@@ -19,13 +19,14 @@ export default defineComponent({
     mixins: [ReportMixin],
     data: () => ({
         ageGroupCohort: {} as any,
-        ageGroupTotals: {} as any
+        totalMales: [[], [], [], []] as Array<any>
     }),
     async created() {
         this.fields = this.getFields()
     },
     methods: {
         async init(startDate: string, endDate: string) {
+            this.totalMales = [[], [], [], []]
             this.ageGroupCohort = {}
             this.report = new DisaggregatedReportService(startDate, endDate)
             return this.report.init()
@@ -42,25 +43,25 @@ export default defineComponent({
             ]
         },
         async buildTableRows() {
-            const femaleAgeGroups: Array<any> = await this.buildAgeGroupRows('F')
-            const maleAgeGroups: Array<any> = await this.buildAgeGroupRows('M')
-            const allMale: Array<any> = this.buildAllMaleRow()
-            const femalePregant = await this.buildPregnancyRows('Pregnant', 'FP')
-            const femaleBreastFeeding = await this.buildPregnancyRows('Breastfeeding', 'FBf')
-            const rows = [
-                ...femaleAgeGroups,
-                ...maleAgeGroups,
-                allMale,
-                femalePregant,
-                femaleBreastFeeding
-            ]
-            return rows.map((d: any, i: number) => {
-                d.unshift(i + 1)
-                return d
-            })
+            return [
+                ...(await this.buildFemaleRows()),
+                ...(await this.buildMaleRows()),
+                (await this.buildAllMaleRow()),
+                ...(await this.buildFemalePregnantRows()),
+                ...(await this.buildBreastFeedingRows())
+            ].map((r: any, i: number) => [
+                i+1,
+                r[0],
+                r[1],
+                this.buildDrillableLink(r[2]), //Tx new
+                this.buildDrillableLink(r[3]), //Tx curr
+                this.buildDrillableLink(r[4]), //Tx ipt
+                this.buildDrillableLink(r[5]) //Tx tb
+            ])
         },
         async getValue(prop: string, gender: string, data: any) {
-            let res: any = {}
+            let res: any = []
+            this.report.setGender(gender === 'M' ? 'Male' : 'Female')
             switch(prop) {
                 case 'tx_given_ipt':
                     res = await this.report.getTxIpt()
@@ -70,61 +71,67 @@ export default defineComponent({
                     break;
                 default:
                     res = gender in data ? data[gender][prop] : []
+                    break;
             }
-            return { link: this.buildDrillableLink(res), data: res }
+            return res
         },
         buildAllMaleRow() {
-            const values = this.ageGroupTotals['M'].map((g: any) => this.buildDrillableLink(g))
-            return ['All', 'Male', ...values]
+            return ['All', 'Male', ...this.totalMales]
         },
-        async buildPregnancyRows(ageGroup: 'Pregnant' | 'Breastfeeding', gender: 'FP' | 'FBf') {
-            this.report.setAgeGroup(ageGroup)
-            const res = await this.report.getCohort()
-            const cohort = res[ageGroup]
-            const values = [
-                (await this.getValue('tx_new', 'F', cohort)).link,
-                (await this.getValue('tx_curr', 'F', cohort)).link,
-                (await this.getValue('tx_given_ipt', 'F', cohort)).link,
-                (await this.getValue('tx_screened_for_tb', 'F', cohort)).link
-            ]
-            return ['All', gender, ...values]
+        buildFemaleRows() {
+            return this.buildRows('F', AGE_GROUPS, 
+            (group: string, txNew: any, txCur: any, txIpt: any, txTb: any) => ([
+                group, 'Female', txNew, txCur, txIpt, txTb
+            ]))
         },
-        async buildAgeGroupRows(gender: 'F' | 'M') {
+        buildMaleRows() {
+            return this.buildRows('M', AGE_GROUPS, 
+            (group: string, txNew: any, txCur: any, txIpt: any, txTb: any) => {
+                this.totalMales[0] = [...this.totalMales[0], ...txNew]
+                this.totalMales[1] = [...this.totalMales[1], ...txCur]
+                this.totalMales[2] = [...this.totalMales[2], ...txIpt]
+                this.totalMales[3] = [...this.totalMales[3], ...txTb]
+                return [group, 'Male', txNew, txCur, txIpt, txTb]   
+            })
+        },
+        buildFemalePregnantRows() {
+            return this.buildRows('F', ['Pregnant'], 
+            (_: string, txNew: any, txCur: any, txIpt: any, txTb: any) => ([
+                'All', 'FP', txNew, txCur, txIpt, txTb
+            ]))
+        },
+        buildBreastFeedingRows() {
+            return this.buildRows('F', ['Breastfeeding'], 
+            (_: string, txNew: any, txCur: any, txIpt: any, txTb: any) => ([
+                'All', 'FBf', txNew, txCur, txIpt, txTb
+            ]))
+        },
+        async buildRows(category: string, ageGroups: Array<string>, onFormat: Function) {
             const rows = []
-            const genderProps: any = { F: 'Female', M: 'Male'}
-            const strGender = genderProps[gender]
-            this.report.setGender(strGender.toLowerCase())
+            for(const i in ageGroups) {
+                let txNew = []
+                let txCurr= []
+                let txGivenIpt = []
+                let txScreenTB = []
 
-            if (!(gender in this.ageGroupTotals)) {
-                this.ageGroupTotals[gender] = [[], [], [], []]
+                const group = ageGroups[i]
+                this.report.setAgeGroup(group)
+
+                if (!(group in this.ageGroupCohort)) {
+                    const cohort = await this.report.getCohort()
+                    this.ageGroupCohort[group] = !isEmpty(cohort) ? cohort[group] : {}
+                }
+                if (!isEmpty(this.ageGroupCohort[group])) {
+                    const value = async (prop: string) => this.getValue(
+                        prop, category, this.ageGroupCohort[group]
+                    )
+                    txNew = await value('tx_new')
+                    txCurr= await value('tx_curr')
+                    txGivenIpt = await value('tx_given_ipt')
+                    txScreenTB = await value('tx_screened_for_tb')
+                }
+                rows.push(onFormat(group, txNew, txCurr, txGivenIpt, txScreenTB))
             }
-            for (const i in AGE_GROUPS) {
-                let row: any = [0, 0, 0, 0]
-                const ageGroup: any = AGE_GROUPS[i]
-                this.report.setAgeGroup(ageGroup)
-
-                if (!(ageGroup in this.ageGroupCohort)) {
-                    const req = await this.report.getCohort()
-                    this.ageGroupCohort[ageGroup] = !isEmpty(req) ? req[ageGroup] : {}
-                }
-                if (!isEmpty(this.ageGroupCohort[ageGroup])) {
-                    const value = async (prop: string, i: number) => {
-                        const val = await this.getValue(prop, gender, this.ageGroupCohort[ageGroup])   
-                        this.ageGroupTotals[gender][i] = [
-                            ...this.ageGroupTotals[gender][i], 
-                            ...val.data
-                        ]
-                        return val
-                    }
-                    row = [
-                        (await value('tx_new', 0)).link,
-                        (await value('tx_curr', 1)).link,
-                        (await value('tx_given_ipt', 2)).link,
-                        (await value('tx_screened_for_tb', 3)).link
-                    ]
-                }
-                rows.push([ ageGroup, strGender, ...row ])
-            }                                 
             return rows
         },
         getFields(): Array<Field> {
