@@ -23,35 +23,34 @@ export default defineComponent({
         this.fields = this.getFields()
     },
     methods: {
-        async init(startDate: string, endDate: string){
+        async init(startDate: string, endDate: string) {
             this.report = new DisaggregatedReportService(startDate, endDate)
             return this.report.init()
         },
         async getValue(prop: string, gender: string, data: any) {
-            if (prop === 'tx_given_ipt') {
-               const ipt = await this.report.getTxIpt()
-               if (ipt) {
-                   return this.buildDrillableLink(ipt)
-               }
-            } else if (prop === 'tx_screened_for_tb') {
-                const tb = await this.report.getTxCurrTB()
-                if (tb) {
-                    return this.buildDrillableLink(tb)
-                }
-            } 
-            return gender in data ? this.buildDrillableLink(data[gender][prop]) : this.buildDrillableLink([])
+            let res: any = {}
+            switch(prop) {
+                case 'tx_given_ipt':
+                    res = await this.report.getTxIpt()
+                    break;
+                case 'tx_screened_for_tb':
+                    res = await this.report.getTxCurrTB()
+                    break;
+                default:
+                    res = gender in data ? data[gender][prop] : null
+            }
+            return res ? this.buildDrillableLink(res) : 0
         },
-        async getRowsByGender(gender: 'F' | 'M') {
+        async buildAgeGroupRows(gender: 'F' | 'M') {
+            const rows = []
             const genderProps: any = { F: 'Female', M: 'Male'}
             const strGender = genderProps[gender]
-            const rows = []
             this.report.setGender(strGender.toLowerCase())
 
             for (const i in AGE_GROUPS) {
+                let row: any = [0, 0, 0, 0]
                 const ageGroup: any = AGE_GROUPS[i]
                 this.report.setAgeGroup(ageGroup)
-
-                let row = [ageGroup, strGender]
 
                 if (!(ageGroup in this.cohort)) {
                     const req = await this.report.getCohort()
@@ -60,16 +59,13 @@ export default defineComponent({
                 if (!isEmpty(this.cohort[ageGroup])) {
                     const value = (prop: string) => this.getValue(prop, gender, this.cohort[ageGroup])
                     row = await Promise.all([
-                        ...row, 
                         value('tx_new'),
                         value('tx_curr'),
                         value('tx_given_ipt'),
                         value('tx_screened_for_tb')
                     ])
-                } else {
-                    row = [...row, 0, 0, 0, 0]
                 }
-                rows.push(row)
+                rows.push([ ageGroup, strGender, ...row ])
             }
             return rows
         },
@@ -87,8 +83,8 @@ export default defineComponent({
                            toastWarning('Unable to initialise report')
                            return [] 
                        }
-                       const femaleRows = await this.getRowsByGender('F')
-                       const maleRows = await this.getRowsByGender('M')
+                       const femaleRows = await this.buildAgeGroupRows('F')
+                       const maleRows = await this.buildAgeGroupRows('M')
                        const rows = await Promise.all([
                            ...femaleRows, 
                            ...maleRows
@@ -100,8 +96,7 @@ export default defineComponent({
                            label: '', 
                            value: '',
                            other: {
-                               rows,
-                               columns: [
+                                rows, columns: [
                                    '#',
                                    'Age group',
                                    'Gender',
