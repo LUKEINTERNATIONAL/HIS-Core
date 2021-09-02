@@ -3,6 +3,7 @@
         <ion-content>
             
         <information-header :items="patientCardInfo"></information-header>
+        <visit-information :items="patientCardInfo"></visit-information>
         </ion-content>
         <ion-footer> 
             <ion-toolbar color="dark">
@@ -22,6 +23,7 @@ import { Patient } from "@/interfaces/patient";
 import { Patientservice } from "@/services/patient_service"
 import { ObservationService } from "@/services/observation_service"
 import  InformationHeader from '@/components/InformationHeader.vue'
+import  VisitInformation from '@/components/VisitInformation.vue'
 import _ from "lodash"
 import {
   IonPage,
@@ -41,7 +43,7 @@ export default defineComponent({
         IonContent,
         IonButton,
         IonToolbar,
-
+        VisitInformation,
         InformationHeader
     },
     data: () => ({
