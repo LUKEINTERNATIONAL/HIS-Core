@@ -48,11 +48,10 @@ export default defineComponent({
             this.report.setGender(strGender.toLowerCase())
 
             for (const i in AGE_GROUPS) {
-                const rowNumber = parseInt(i) + 1
                 const ageGroup: any = AGE_GROUPS[i]
                 this.report.setAgeGroup(ageGroup)
 
-                let row = [rowNumber, ageGroup, strGender]
+                let row = [ageGroup, strGender]
 
                 if (!(ageGroup in this.cohort)) {
                     const req = await this.report.getCohort()
@@ -90,7 +89,13 @@ export default defineComponent({
                        }
                        const femaleRows = await this.getRowsByGender('F')
                        const maleRows = await this.getRowsByGender('M')
-                       const rows = await Promise.all([...femaleRows, ...maleRows])
+                       const rows = await Promise.all([
+                           ...femaleRows, 
+                           ...maleRows
+                        ].map((d: any, i: number) => {
+                            d.unshift(i + 1)
+                            return d
+                        }))
                        return [{
                            label: '', 
                            value: '',
