@@ -36,7 +36,15 @@ export default defineComponent({
                 return [
                     patient.getArvNumber(), 
                     patient.getGender(), 
-                    HisDate.toStandardHisDisplayFormat(patient.getBirthdate())
+                    HisDate.toStandardHisDisplayFormat(patient.getBirthdate()),
+                    {
+                        type: 'button',
+                        name: 'Show',
+                        action: async () => {
+                            await modalController.dismiss({})
+                            this.$router.push({ path: `/patient/dashboard/${id}`})
+                        }
+                    }
                 ]
             }))
             return {
