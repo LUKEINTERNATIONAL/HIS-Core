@@ -21,6 +21,7 @@ export default defineComponent({
         async tableDrill(tableData: any){
             const modal = await modalController.create({
                 component: BasicTable,
+                cssClass: 'custom-modal',
                 componentProps: {
                     columns: tableData.columns,
                     rows: tableData.rows
@@ -29,7 +30,7 @@ export default defineComponent({
             modal.present()
         },
         async patientTableColumns(ids: Array<number>) {
-            const columns = ['ARV number', 'Gender', 'Birth Date']
+            const columns = ['ARV number', 'Gender', 'Birth Date', 'actions']
             const rows = await Promise.all(ids.map(async(id: number) => {
                 const data = await Patientservice.findByID(id)
                 const patient = new Patientservice(data)
