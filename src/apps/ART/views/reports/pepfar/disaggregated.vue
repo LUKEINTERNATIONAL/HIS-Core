@@ -44,13 +44,15 @@ export default defineComponent({
         async buildTableRows() {
             const femaleAgeGroups: Array<any> = await this.buildAgeGroupRows('F')
             const maleAgeGroups: Array<any> = await this.buildAgeGroupRows('M')
-            const allMale: Array<any> = this.ageGroupTotals['M'].map((g: any) => this.buildDrillableLink(g))
-            const femalePregant = await this.buildFemalePregnant()
+            const allMale: Array<any> = this.buildAllMaleRow()
+            const femalePregant = await this.buildPregnancyRows('Pregnant', 'FP')
+            const femaleBreastFeeding = await this.buildPregnancyRows('Breastfeeding', 'FBf')
             const rows = [
-                ...femaleAgeGroups, 
+                ...femaleAgeGroups,
                 ...maleAgeGroups,
-                ['All', 'Male', ...allMale],
-                femalePregant
+                allMale,
+                femalePregant,
+                femaleBreastFeeding
             ]
             return rows.map((d: any, i: number) => {
                 d.unshift(i + 1)
@@ -71,17 +73,21 @@ export default defineComponent({
             }
             return { link: this.buildDrillableLink(res), data: res }
         },
-        async buildFemalePregnant() {
-            this.report.setAgeGroup('Pregnant')
+        buildAllMaleRow() {
+            const values = this.ageGroupTotals['M'].map((g: any) => this.buildDrillableLink(g))
+            return ['All', 'Male', ...values]
+        },
+        async buildPregnancyRows(ageGroup: 'Pregnant' | 'Breastfeeding', gender: 'FP' | 'FBf') {
+            this.report.setAgeGroup(ageGroup)
             const res = await this.report.getCohort()
-            const cohort = res['Pregnant']
+            const cohort = res[ageGroup]
             const values = [
                 (await this.getValue('tx_new', 'F', cohort)).link,
                 (await this.getValue('tx_curr', 'F', cohort)).link,
                 (await this.getValue('tx_given_ipt', 'F', cohort)).link,
                 (await this.getValue('tx_screened_for_tb', 'F', cohort)).link
             ]
-            return ['All', 'FP', ...values]
+            return ['All', gender, ...values]
         },
         async buildAgeGroupRows(gender: 'F' | 'M') {
             const rows = []
@@ -92,7 +98,6 @@ export default defineComponent({
             if (!(gender in this.ageGroupTotals)) {
                 this.ageGroupTotals[gender] = [[], [], [], []]
             }
-
             for (const i in AGE_GROUPS) {
                 let row: any = [0, 0, 0, 0]
                 const ageGroup: any = AGE_GROUPS[i]
