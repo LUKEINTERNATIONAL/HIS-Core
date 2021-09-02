@@ -4,6 +4,8 @@ import { defineComponent } from 'vue'
 import { Field } from '@/components/Forms/FieldInterface'
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
+import { Patientservice } from "@/services/patient_service"
+import HisDate from "@/utils/Date"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -14,12 +16,31 @@ export default defineComponent({
         endDate: '' as string
     }),
     methods: {
+        async patientTableColumns(ids: Array<number>) {
+            const columns = ['ARV number', 'Gender', 'Birth Date']
+            const rows = await Promise.all(ids.map(async(id: number) => {
+                const data = await Patientservice.findByID(id)
+                const patient = new Patientservice(data)
+                return [
+                    patient.getArvNumber(), 
+                    patient.getGender(), 
+                    HisDate.toStandardHisDisplayFormat(patient.getBirthdate())
+                ]
+            }))
+            return {
+                rows,
+                columns
+            }
+        },
         buildDrillableLink(values: Array<number>) {
             return {
                 type: 'link',
                 value: values.length,
                 isActive: values.length > 0,
-                action: () => console.log(values) //TODO: Drilldown values here
+                action: async () => {
+                    const x = await this.patientTableColumns(values)
+                    console.log(x)
+                }
             }
         },
         getDateDurationFields(minDate='2001-01-01', maxDate=Service.getSessionDate()): Array<Field> {
