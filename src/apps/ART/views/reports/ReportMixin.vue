@@ -6,6 +6,8 @@ import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
+import { modalController } from "@ionic/vue";
+import BasicTable from "@/components/DataViews/HisBasicTable.vue"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -16,6 +18,16 @@ export default defineComponent({
         endDate: '' as string
     }),
     methods: {
+        async tableDrill(tableData: any){
+            const modal = await modalController.create({
+                component: BasicTable,
+                componentProps: {
+                    columns: tableData.columns,
+                    rows: tableData.rows
+                }
+            })
+            modal.present()
+        },
         async patientTableColumns(ids: Array<number>) {
             const columns = ['ARV number', 'Gender', 'Birth Date']
             const rows = await Promise.all(ids.map(async(id: number) => {
@@ -38,8 +50,8 @@ export default defineComponent({
                 value: values.length,
                 isActive: values.length > 0,
                 action: async () => {
-                    const x = await this.patientTableColumns(values)
-                    console.log(x)
+                    const tableData = await this.patientTableColumns(values)
+                    await this.tableDrill(tableData)
                 }
             }
         },
