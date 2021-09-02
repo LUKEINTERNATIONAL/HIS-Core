@@ -45,10 +45,12 @@ export default defineComponent({
             const femaleAgeGroups: Array<any> = await this.buildAgeGroupRows('F')
             const maleAgeGroups: Array<any> = await this.buildAgeGroupRows('M')
             const allMale: Array<any> = this.ageGroupTotals['M'].map((g: any) => this.buildDrillableLink(g))
+            const femalePregant = await this.buildFemalePregnant()
             const rows = [
                 ...femaleAgeGroups, 
                 ...maleAgeGroups,
-                ['All', 'Male', ...allMale]
+                ['All', 'Male', ...allMale],
+                femalePregant
             ]
             return rows.map((d: any, i: number) => {
                 d.unshift(i + 1)
@@ -68,6 +70,18 @@ export default defineComponent({
                     res = gender in data ? data[gender][prop] : []
             }
             return { link: this.buildDrillableLink(res), data: res }
+        },
+        async buildFemalePregnant() {
+            this.report.setAgeGroup('Pregnant')
+            const res = await this.report.getCohort()
+            const cohort = res['Pregnant']
+            const values = [
+                (await this.getValue('tx_new', 'F', cohort)).link,
+                (await this.getValue('tx_curr', 'F', cohort)).link,
+                (await this.getValue('tx_given_ipt', 'F', cohort)).link,
+                (await this.getValue('tx_screened_for_tb', 'F', cohort)).link
+            ]
+            return ['All', 'FP', ...values]
         },
         async buildAgeGroupRows(gender: 'F' | 'M') {
             const rows = []
@@ -92,7 +106,8 @@ export default defineComponent({
                     const value = async (prop: string, i: number) => {
                         const val = await this.getValue(prop, gender, this.ageGroupCohort[ageGroup])   
                         this.ageGroupTotals[gender][i] = [
-                            ...this.ageGroupTotals[gender][i], ...val.data
+                            ...this.ageGroupTotals[gender][i], 
+                            ...val.data
                         ]
                         return val
                     }
