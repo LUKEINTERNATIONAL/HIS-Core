@@ -18,6 +18,9 @@ export default defineComponent({
         endDate: '' as string
     }),
     methods: {
+        toDate(date: string) {
+            return HisDate.toStandardHisDisplayFormat(date)
+        },
         async tableDrill(tableData: any){
             const modal = await modalController.create({
                 component: BasicTable,
