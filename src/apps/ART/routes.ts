@@ -11,6 +11,7 @@ import PatientType from "@/apps/ART/views/encounters/PatientType.vue"
 import FastTrack from "@/apps/ART/views/encounters/FastTrack.vue"
 import LabActivities from "@/apps/ART/views/encounters/LabActivities.vue"
 import PepFarDiaggregated from "@/apps/ART/views/reports/pepfar/disaggregated.vue"
+import PepFarDefaulters from "@/apps/ART/views/reports/pepfar/defaulters.vue"
 
 export default [
     {
@@ -82,5 +83,10 @@ export default [
         name: 'disaggregated',
         path: "/art/reports/pepfar/disaggregated",
         component: PepFarDiaggregated
+    },
+    {
+        name: 'defaulters',
+        path: "/art/reports/pepfar/defaulters",
+        component: PepFarDefaulters
     }
 ]
