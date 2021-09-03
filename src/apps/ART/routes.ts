@@ -10,8 +10,9 @@ import Vitals from "@/apps/ART/views/encounters/Vitals.vue"
 import PatientType from "@/apps/ART/views/encounters/PatientType.vue"
 import FastTrack from "@/apps/ART/views/encounters/FastTrack.vue"
 import LabActivities from "@/apps/ART/views/encounters/LabActivities.vue"
-import PepFarDiaggregated from "@/apps/ART/views/reports/pepfar/disaggregated.vue"
-import PepFarDefaulters from "@/apps/ART/views/reports/pepfar/defaulters.vue"
+import PepFarDiaggregatedReport from "@/apps/ART/views/reports/pepfar/disaggregated.vue"
+import PepFarDefaultersReport from "@/apps/ART/views/reports/pepfar/defaulters.vue"
+import PepFarRegimenReport from "@/apps/ART/views/reports/pepfar/regimen.vue"
 
 export default [
     {
@@ -82,11 +83,16 @@ export default [
     {
         name: 'disaggregated',
         path: "/art/reports/pepfar/disaggregated",
-        component: PepFarDiaggregated
+        component: PepFarDiaggregatedReport
     },
     {
         name: 'defaulters',
         path: "/art/reports/pepfar/defaulters",
-        component: PepFarDefaulters
+        component: PepFarDefaultersReport
+    },
+    {
+        name: 'regimen',
+        path: "/art/reports/pepfar/regimen",
+        component: PepFarRegimenReport
     }
 ]
