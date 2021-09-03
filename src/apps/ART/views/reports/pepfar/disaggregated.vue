@@ -52,8 +52,6 @@ export default defineComponent({
             const female = await this.buildFemaleRows()
             const male = await this.buildMaleRows()
             const pregnant = await this.buildFemalePregnantRows()
-            this.report.setGender('breastfeeding')
-            this.report.setAgeGroup('all')
             const breastFeeding = await this.buildBreastFeedingRows()
             const totalMale = this.buildAllMaleRow()
             const totalNotPregnant = this.buildFemaleNotPregnantRow()
