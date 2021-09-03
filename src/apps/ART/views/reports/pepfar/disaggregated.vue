@@ -21,7 +21,6 @@ export default defineComponent({
         ageGroupCohort: {} as any,
         totalFemale: [[], [], [], []] as Array<any>,
         totalMales: [[], [], [], []] as Array<any>,
-        totalPregnant: [[], [], [], []] as Array<any>,
         totalAbsolutePregnant: [] as Array<number>,
     }),
     async created() {
@@ -63,7 +62,6 @@ export default defineComponent({
         },
         async getValue(prop: string, gender: string, data: any) {
             let res: any = []
-            this.report.setGender(gender === 'M' ? 'Male' : 'Female')
             switch(prop) {
                 case 'tx_given_ipt':
                     res = await this.report.getTxIpt()
@@ -133,6 +131,7 @@ export default defineComponent({
         },
         async buildRows(category: string, ageGroups: Array<string>, onFormat: Function) {
             const rows = []
+            this.report.setGender(category === 'M' ? 'Male' : 'Female')
             for(const i in ageGroups) {
                 let txNew = []
                 let txCurr= []
