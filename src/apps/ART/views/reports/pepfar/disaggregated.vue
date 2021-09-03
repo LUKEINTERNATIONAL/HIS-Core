@@ -19,15 +19,16 @@ export default defineComponent({
     mixins: [ReportMixin],
     data: () => ({
         ageGroupCohort: {} as any,
-        totalMales: [[], [], [], []] as Array<any>
+        totalFemale: [[], [], [], []] as Array<any>,
+        totalMales: [[], [], [], []] as Array<any>,
+        totalPregnant: [[], [], [], []] as Array<any>,
+        totalAbsolutePregnant: [] as Array<number>,
     }),
     async created() {
         this.fields = this.getFields()
     },
     methods: {
         async init(startDate: string, endDate: string) {
-            this.totalMales = [[], [], [], []]
-            this.ageGroupCohort = {}
             this.report = new DisaggregatedReportService(startDate, endDate)
             return this.report.init()
         },
@@ -46,8 +47,9 @@ export default defineComponent({
             return [
                 ...(await this.buildFemaleRows()),
                 ...(await this.buildMaleRows()),
-                (await this.buildAllMaleRow()),
+                this.buildAllMaleRow(),
                 ...(await this.buildFemalePregnantRows()),
+                this.buildFemaleNotPregnantRow(),
                 ...(await this.buildBreastFeedingRows())
             ].map((r: any, i: number) => [
                 i+1,
@@ -75,36 +77,59 @@ export default defineComponent({
             }
             return res
         },
+        setTotalFemale(index: number, data: Array<any>) {
+            this.totalFemale[index] = [...this.totalFemale[index], ...data]
+        },
+        setTotalMale(index: number, data: Array<any>) {
+            this.totalMales[index] = [...this.totalMales[index], ...data]
+        },
+        setTotalPregnant(data: any) {
+            this.totalAbsolutePregnant = [...this.totalAbsolutePregnant, ...data]
+        },
         buildAllMaleRow() {
             return ['All', 'Male', ...this.totalMales]
         },
+        buildFemaleNotPregnantRow() {
+            const row = this.totalFemale.map((females: any) => {
+                return females.filter((f: number) => !this.totalAbsolutePregnant.includes(f))
+            })
+            return ['All', 'FNP', ...row]
+        },
         buildFemaleRows() {
             return this.buildRows('F', AGE_GROUPS, 
-            (group: string, txNew: any, txCur: any, txIpt: any, txTb: any) => ([
-                group, 'Female', txNew, txCur, txIpt, txTb
-            ]))
+            (group: string, txNew: any, txCur: any, txIpt: any, txTb: any) => {
+                this.setTotalFemale(0, txNew)
+                this.setTotalFemale(1, txCur)
+                this.setTotalFemale(2, txIpt)
+                this.setTotalFemale(3, txTb)
+                return [group, 'Female', txNew, txCur, txIpt, txTb]
+            })
         },
         buildMaleRows() {
             return this.buildRows('M', AGE_GROUPS, 
             (group: string, txNew: any, txCur: any, txIpt: any, txTb: any) => {
-                this.totalMales[0] = [...this.totalMales[0], ...txNew]
-                this.totalMales[1] = [...this.totalMales[1], ...txCur]
-                this.totalMales[2] = [...this.totalMales[2], ...txIpt]
-                this.totalMales[3] = [...this.totalMales[3], ...txTb]
+                this.setTotalMale(0, txNew)
+                this.setTotalMale(1, txCur)
+                this.setTotalMale(2, txIpt)
+                this.setTotalMale(3, txTb)
                 return [group, 'Male', txNew, txCur, txIpt, txTb]   
             })
         },
         buildFemalePregnantRows() {
             return this.buildRows('F', ['Pregnant'], 
-            (_: string, txNew: any, txCur: any, txIpt: any, txTb: any) => ([
-                'All', 'FP', txNew, txCur, txIpt, txTb
-            ]))
+                (_: string, txNew: any, txCur: any, txIpt: any, txTb: any) => {
+                this.setTotalPregnant(txNew)
+                this.setTotalPregnant(txCur)
+                this.setTotalPregnant(txIpt)
+                this.setTotalPregnant(txTb)
+                return [ 'All', 'FP', txNew, txCur, txIpt, txTb]
+            })
         },
         buildBreastFeedingRows() {
             return this.buildRows('F', ['Breastfeeding'], 
-            (_: string, txNew: any, txCur: any, txIpt: any, txTb: any) => ([
-                'All', 'FBf', txNew, txCur, txIpt, txTb
-            ]))
+            (_: string, txNew: any, txCur: any, txIpt: any, txTb: any) => {
+                return ['All', 'FBf', txNew, txCur, txIpt, txTb]
+            })
         },
         async buildRows(category: string, ageGroups: Array<string>, onFormat: Function) {
             const rows = []
@@ -145,10 +170,10 @@ export default defineComponent({
                        const isInit = await this.init(c.start_date, c.end_date)
                        if (!isInit) {
                            toastWarning('Unable to initialise report')
-                           return [] 
+                           return []
                        }
-                       const columns = this.getColumns()
                        const rows = await this.buildTableRows()
+                       const columns = this.getColumns()
                        return [{
                            label: '', 
                            value: '',
@@ -172,7 +197,8 @@ export default defineComponent({
                         ],
                         hiddenFooterBtns: [
                             'Cancel',
-                            'Clear'
+                            'Clear',
+                            'Back'
                         ],
                         styles: ['his-table', 'table-borders']
                     }
