@@ -13,6 +13,7 @@ import LabActivities from "@/apps/ART/views/encounters/LabActivities.vue"
 import PepFarDiaggregatedReport from "@/apps/ART/views/reports/pepfar/disaggregated.vue"
 import PepFarDefaultersReport from "@/apps/ART/views/reports/pepfar/defaulters.vue"
 import PepFarRegimenReport from "@/apps/ART/views/reports/pepfar/regimen.vue"
+import PepFarRegimenSwitchReport from "@/apps/ART/views/reports/pepfar/RegimenSwitch.vue"
 
 export default [
     {
@@ -94,5 +95,10 @@ export default [
         name: 'regimen',
         path: "/art/reports/pepfar/regimen",
         component: PepFarRegimenReport
+    },
+    {
+        name: 'regimen switch',
+        path: "/art/reports/pepfar/regimen_switch",
+        component: PepFarRegimenSwitchReport
     }
 ]

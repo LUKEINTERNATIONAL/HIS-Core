@@ -22,4 +22,13 @@ export class RegimenReportService extends Service {
             'type': this.type
         })
     }
+
+    getRegimenSwitchReport() {
+        return Service.getJson(`regimen_switch`, {
+            'start_date': this.startDate,
+            'end_date': this.endDate,
+            'date': this.date,
+            'program_id': Service.getProgramID()
+        })
+    }
 }

@@ -23,7 +23,7 @@ export default defineComponent({
             this.report = new RegimenReportService(startDate, endDate)
         },
         getColumns() {
-            return  ['ARV#','Gender','DOB','Curr.Reg','ARVs', 'Curr.reg dispensed']
+            return  ['ARV#','Patient type','Gender','DOB','Prev.Reg','Curr.Reg','ARVs', 'Curr.reg dispensed date']
         },
         async buildTableRows() {
             const rows = await this.report.getRegimenSwitchReport()
@@ -35,8 +35,10 @@ export default defineComponent({
                 })
                 return [
                     data.arv_number,
+                    data.patient_type,
                     data.gender,
                     this.toDate(data.birthdate),
+                    data.previous_regimen,
                     data.current_regimen,
                     medications.join(', '),
                     lastDispenseDate
@@ -48,7 +50,7 @@ export default defineComponent({
                 ...this.getDateDurationFields(),
                 {
                     id: 'report',
-                    helpText: 'Regimen Report',
+                    helpText: 'Switch Regimen Report',
                     type: FieldType.TT_TABLE_VIEWER,
                     options: async (_: any, c: any) => {
                        this.init(c.start_date, c.end_date)

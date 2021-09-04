@@ -65,10 +65,18 @@ export default defineComponent({
   },
   methods: {
     isLink(item: any) {
-      return typeof item === "object" && item.type === "link";
+      try {
+        return typeof item === "object" && item.type === "link";
+      }catch(e) {
+        return item
+      }
     },
     isActionButton(item: any) {
-      return typeof item === "object" && item.type === "button";
+      try {
+        return typeof item === "object" && item.type === "button";
+      }catch(e) {
+        return item
+      }
     },
     getColorCodeClass(rIndex: number, dIndex: number) {
       let styleClass = "";
