@@ -1,80 +1,72 @@
 <template>
-    <his-standard-form 
-        :skipSummary="true" 
-        :fields="fields" 
-        @onFinish="onSubmit"
-    />
+    <report-template
+        :title="title"
+        :period="period"
+        :totalClients="totalClients"
+        > 
+        <report-table :rows="rows" :columns="columns"> </report-table>
+    </report-template>
 </template>
 
 <script lang='ts'>
 import { defineComponent } from 'vue'
-import { FieldType } from "@/components/Forms/BaseFormElements"
-import { Field } from "@/components/Forms/FieldInterface"
 import { DefaulterReportService } from "@/apps/ART/services/reports/pepfar/defaulters_report_service"
+import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
+import ReportTemplate from "@/apps/ART/views/reports/pepfar/DefaultTemplate.vue"
+import HisDate from "@/utils/Date"
 
 export default defineComponent({
+    components: { ReportTable, ReportTemplate },
     mixins: [ReportMixin],
-    async created() {
-        this.fields = this.getFields()
+    data: () => ({
+        title: 'PEPFAR Defaulters report',
+        totalClients: [],
+        period: '',
+        rows: [] as Array<any>,
+        columns: [
+            'ARV#',
+            'First name',
+            'Last name',
+            'Gender',
+            'birthdate',
+            'Date defaulted',
+            'Address'
+        ]
+    }),
+    watch: {
+        '$route': {
+            async handler({query}: any){
+                if(query && query.start && query.end) {
+                    this.setPeriod(query.start, query.end)
+                    await this.init(query.start, query.end)
+                }
+            },
+            deep: true,
+            immediate: true
+        }
     },
     methods: {
         async init(startDate: string, endDate: string) {
             this.report = new DefaulterReportService(startDate, endDate)
+            const data = await this.report.getDefaulters()
+            this.setRows(data)
         },
-        getColumns() {
-            return  [
-                'ARV#',
-                'First name',
-                'Last name',
-                'Gender',
-                'birthdate',
-                'Date defaulted',
-                'Address'
-            ]
+        setPeriod(startDate: string, endDate: string) {
+            this.period = `${HisDate.toStandardHisDisplayFormat(startDate)} - ${HisDate.toStandardHisDisplayFormat(endDate)}`
         },
-        async buildTableRows() {
-            const rows = await this.report.getDefaulters()
-            return rows.map((data: any) => ([
-                data.arv_number,
-                data.given_name,
-                data.family_name,
-                data.gender,
-                this.toDate(data.birthdate),
-                this.toDate(data.defaulter_date),
-                `${data.village} ${data.district} ${data.ta}`
-            ]))
-        },
-        getFields(): Array<Field> {
-            return [
-                ...this.getDateDurationFields(),
-                {
-                    id: 'report',
-                    helpText: 'Defaulters List',
-                    type: FieldType.TT_TABLE_VIEWER,
-                    options: async (_: any, c: any) => {
-                       await this.init(c.start_date, c.end_date)
-                       const rows = await this.buildTableRows()
-                       const columns = this.getColumns()
-                       return [{
-                           label: '', 
-                           value: '',
-                           other: {
-                                rows, 
-                                columns
-                           }
-                       }]
-                    },
-                    config: {
-                        hiddenFooterBtns: [
-                            'Cancel',
-                            'Clear',
-                            'Back'
-                        ],
-                        styles: ['his-table', 'table-borders']
-                    }
-                }
-            ]
+        async setRows(data: Array<any>) {
+            data.forEach((data: any) => {
+                this.rows.push([
+                    data.arv_number,
+                    data.given_name,
+                    data.family_name,
+                    data.gender,
+                    this.toDate(data.birthdate),
+                    this.toDate(data.defaulter_date),
+                    `${data.village} ${data.district} ${data.ta}`
+                ])
+            })
         }
     }
 })
