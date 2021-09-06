@@ -117,7 +117,7 @@ export default [
     },
     {
         name: 'tx ml',
-        path: "/art/reports/pepfar/tx/mmd",
+        path: "/art/reports/pepfar/tx/ml",
         component: TXCurrMl
     },
     {
