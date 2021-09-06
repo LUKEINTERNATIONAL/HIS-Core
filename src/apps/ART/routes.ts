@@ -18,6 +18,7 @@ import TBPrevReport from "@/apps/ART/views/reports/pepfar/TBPrev.vue"
 import TXCurrMMD from "@/apps/ART/views/reports/pepfar/TxCurrMMD.vue"
 import TXCurrMl from "@/apps/ART/views/reports/pepfar/TxCurrMl.vue"
 import TXRtt from "@/apps/ART/views/reports/pepfar/TxRtt.vue"
+import PepfarReportIndex from "@/apps/ART/views/reports/pepfar/Index.vue"
 
 export default [
     {
@@ -86,43 +87,49 @@ export default [
         component: LabActivities
     },
     {
-        name: 'disaggregated',
-        path: "/art/reports/pepfar/disaggregated",
-        component: PepFarDiaggregatedReport
-    },
-    {
-        name: 'defaulters',
-        path: "/art/reports/pepfar/defaulters",
-        component: PepFarDefaultersReport
-    },
-    {
-        name: 'regimen',
-        path: "/art/reports/pepfar/regimen",
-        component: PepFarRegimenReport
-    },
-    {
-        name: 'regimen switch',
-        path: "/art/reports/pepfar/regimen/switch",
-        component: PepFarRegimenSwitchReport
-    },
-    {
-        name: 'tb prev',
-        path: "/art/reports/pepfar/tb/prev",
-        component: TBPrevReport
-    },
-    {
-        name: 'tx curr mmd',
-        path: "/art/reports/pepfar/tx/mmd",
-        component: TXCurrMMD
-    },
-    {
-        name: 'tx ml',
-        path: "/art/reports/pepfar/tx/ml",
-        component: TXCurrMl
-    },
-    {
-        name: 'tx rtt',
-        path: "/art/reports/pepfar/tx/rtt",
-        component: TXRtt
+        path: '/art/report/pepfar',
+        component: PepfarReportIndex,
+        children: [
+            {
+                name: "pepfar_disaggregated_report",
+                path: "/disaggregated",
+                component: PepFarDiaggregatedReport
+            },
+            {
+                name: "pepfar_defaulters_report",
+                path: "/defaulters",
+                component: PepFarDefaultersReport
+            },
+            {
+                name: "pepfar_regimen_report",
+                path: "/regimen",
+                component: PepFarRegimenReport
+            },
+            {
+                name: "pepfar_regimen_switch_report",
+                path: "/regimen/switch",
+                component: PepFarRegimenSwitchReport
+            },
+            {
+                name: "pepfar_tb_prev_report",
+                path: "/tb/prev",
+                component: TBPrevReport
+            },
+            {
+                name: "pepfar_tx_curr_mmd_report",
+                path: "/tx/mmd",
+                component: TXCurrMMD
+            },
+            {
+                name: "pepfar_tx_ml_report",
+                path: "/tx/ml",
+                component: TXCurrMl
+            },
+            {
+                name: "pepfar_tx_rtt_report",
+                path: "/tx/rtt",
+                component: TXRtt
+            }
+        ]
     }
 ]
