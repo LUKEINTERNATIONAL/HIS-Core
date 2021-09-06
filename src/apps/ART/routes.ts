@@ -14,6 +14,7 @@ import PepFarDiaggregatedReport from "@/apps/ART/views/reports/pepfar/disaggrega
 import PepFarDefaultersReport from "@/apps/ART/views/reports/pepfar/defaulters.vue"
 import PepFarRegimenReport from "@/apps/ART/views/reports/pepfar/regimen.vue"
 import PepFarRegimenSwitchReport from "@/apps/ART/views/reports/pepfar/RegimenSwitch.vue"
+import TBPrevReport from "@/apps/ART/views/reports/pepfar/TBPrev.vue"
 
 export default [
     {
@@ -98,7 +99,12 @@ export default [
     },
     {
         name: 'regimen switch',
-        path: "/art/reports/pepfar/regimen_switch",
+        path: "/art/reports/pepfar/regimen/switch",
         component: PepFarRegimenSwitchReport
+    },
+    {
+        name: 'tb prev',
+        path: "/art/reports/pepfar/tb/prev",
+        component: TBPrevReport
     }
 ]
