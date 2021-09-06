@@ -14,9 +14,25 @@ export default defineComponent({
     data: () => ({
         fields: [] as Array<Field>,
         report: {} as any,
+        period: '' as string,
         startDate: '' as string,
-        endDate: '' as string
+        endDate: '' as string,
+        isReady: false as boolean,
     }),
+    watch: {
+        '$route': {
+            async handler({query}: any){
+                if(query && query.start && query.end) {
+                    this.startDate = query.start
+                    this.endDate = query.end
+                    this.period = `${this.toDate(this.startDate)}-${this.toDate(this.endDate)}`
+                    this.isReady = true
+                }
+            },
+            deep: true,
+            immediate: true
+        }
+    },
     methods: {
         toDate(date: string) {
             return HisDate.toStandardHisDisplayFormat(date)

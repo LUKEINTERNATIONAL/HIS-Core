@@ -1,23 +1,37 @@
 <template>
-    <his-standard-form 
-        :skipSummary="true" 
-        :fields="fields" 
-        @onFinish="onSubmit"
-    />
+    <report-template
+        :title="title"
+        :period="period"
+        :totalClients="totalClients"
+        > 
+        <report-table :rows="rows" :columns="columns"> </report-table>
+    </report-template>
 </template>
 
 <script lang='ts'>
 import { defineComponent } from 'vue'
-import { FieldType } from "@/components/Forms/BaseFormElements"
-import { Field } from "@/components/Forms/FieldInterface"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { DisaggregatedReportService, AGE_GROUPS } from "@/apps/ART/services/reports/pepfar/disaggregated_service"
 import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
+import ReportTemplate from "@/apps/ART/views/reports/pepfar/DefaultTemplate.vue"
+import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
 
 export default defineComponent({
+    components: { ReportTable, ReportTemplate },
     mixins: [ReportMixin],
     data: () => ({
+        title: 'PEPFAR Diseggregated Report',
+        period: '',
+        rows: [] as Array<any>,
+        columns: [
+            'Age group',
+            'Gender',
+            'Tx new (new on ART)',
+            'Tx curr (receiving ART)',
+            'TX curr (received IPT)',
+            'TX curr (screened for TB)'
+        ],
         ageGroupCohort: {} as any,
         totalNewF: [] as Array<any>,
         totalCurF: [] as Array<any>,
@@ -29,33 +43,33 @@ export default defineComponent({
         totalTbM:  [] as Array<any>,
         pregnantF: [] as Array<any>
     }),
-    async created() {
-        this.fields = this.getFields()
+    watch: {
+        isReady: {
+            async handler(y: boolean) {
+                if (y) {
+                    await this.init(this.startDate, this.endDate)
+                }
+            },
+            immediate: true
+        }
     },
     methods: {
         async init(startDate: string, endDate: string) {
             this.report = new DisaggregatedReportService(startDate, endDate)
-            return this.report.init()
+            const isInit = this.report.init()
+            if (!isInit) {
+                return toastWarning('Unable to initialise report')
+            }
+            await this.setTableRows()
         },
-        getColumns() {
-            return  [
-                '#',
-                'Age group',
-                'Gender',
-                'Tx new (new on ART)',
-                'Tx curr (receiving ART)',
-                'TX curr (received IPT)',
-                'TX curr (screened for TB)'
-            ]
-        },
-        async buildTableRows() {
+        async setTableRows() {
             const female = await this.buildFemaleRows()
             const male = await this.buildMaleRows()
             const pregnant = await this.buildFemalePregnantRows()
             const breastFeeding = await this.buildBreastFeedingRows()
             const totalMale = this.buildAllMaleRow()
             const totalNotPregnant = this.buildFemaleNotPregnantRow()
-            return [
+            this.rows = [
                 ...female,
                 ...male,
                 totalMale,
@@ -63,8 +77,7 @@ export default defineComponent({
                 totalNotPregnant,
                 ...breastFeeding,
  
-            ].map((r: any, i: number) => [
-                i+1,
+            ].map((r: any) => [
                 r[0],
                 r[1],
                 this.buildDrillableLink(r[2]), //Tx new
@@ -178,52 +191,6 @@ export default defineComponent({
                 rows.push(onFormat(group, txNew, txCurr, txGivenIpt, txScreenTB))
             }
             return rows
-        },
-        getFields(): Array<Field> {
-            return [
-                ...this.getDateDurationFields(),
-                {
-                    id: 'report',
-                    helpText: 'ART disaggregated report',
-                    type: FieldType.TT_TABLE_VIEWER,
-                    options: async (_: any, c: any) => {
-                       const isInit = await this.init(c.start_date, c.end_date)
-                       if (!isInit) {
-                           toastWarning('Unable to initialise report')
-                           return []
-                       }
-                       const rows = await this.buildTableRows()
-                       const columns = this.getColumns()
-                       return [{
-                           label: '', 
-                           value: '',
-                           other: {
-                                rows, 
-                                columns
-                           }
-                       }]
-                    },
-                    config: {
-                        footerBtns: [
-                            {
-                                name: 'Rebuild Outcomes',
-                                size: 'large',
-                                slot: 'start',
-                                color: 'success',
-                                visibleOnStateChange: (state: any) => {
-                                    return state.field.id === 'report'
-                                }
-                            }
-                        ],
-                        hiddenFooterBtns: [
-                            'Cancel',
-                            'Clear',
-                            'Back'
-                        ],
-                        styles: ['his-table', 'table-borders']
-                    }
-                }
-            ]
         }
     }
 })
