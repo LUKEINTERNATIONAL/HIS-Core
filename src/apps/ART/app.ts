@@ -55,37 +55,42 @@ const ART: AppInterface = {
                 {
                     name: 'Defaulter list',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/pepfar?report=pepfar_defaulters_report'
+                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_defaulters_report'
                 },
                 {
                     name: 'Disaggregated',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/pepfar?report=pepfar_disaggregated_report'
+                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_disaggregated_report'
                 },
                 {
                     name: 'Regimen Report',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/pepfar?report=pepfar_regimen_report'
+                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_regimen_report'
+                },
+                {
+                    name: 'Regimen Switch',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_regimen_switch'
                 },
                 {
                     name: 'TB PREV',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/pepfar?report=pepfar_tb_prev_report'
+                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_tb_prev_report'
                 },
                 {
                     name: 'TX CURR MMD',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/pepfar?report=pepfar_tx_curr_mmd_report'
+                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_tx_curr_mmd_report'
                 },
                 {
                     name: 'TX ML',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/pepfar?report=pepfar_tx_ml_report'
+                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_tx_ml_report'
                 },
                 {
                     name: 'TX RTT',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/pepfar?report=pepfar_tx_rtt_report'
+                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_tx_rtt'
                 }
             ]
         }
