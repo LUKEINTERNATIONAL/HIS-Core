@@ -15,6 +15,9 @@ import PepFarDefaultersReport from "@/apps/ART/views/reports/pepfar/defaulters.v
 import PepFarRegimenReport from "@/apps/ART/views/reports/pepfar/regimen.vue"
 import PepFarRegimenSwitchReport from "@/apps/ART/views/reports/pepfar/RegimenSwitch.vue"
 import TBPrevReport from "@/apps/ART/views/reports/pepfar/TBPrev.vue"
+import TXCurrMMD from "@/apps/ART/views/reports/pepfar/TxCurrMMD.vue"
+import TXCurrMl from "@/apps/ART/views/reports/pepfar/TxCurrMl.vue"
+import TXRtt from "@/apps/ART/views/reports/pepfar/TxRtt.vue"
 
 export default [
     {
@@ -106,5 +109,20 @@ export default [
         name: 'tb prev',
         path: "/art/reports/pepfar/tb/prev",
         component: TBPrevReport
+    },
+    {
+        name: 'tx curr mmd',
+        path: "/art/reports/pepfar/tx/curr",
+        component: TXCurrMMD
+    },
+    {
+        name: 'tx ml',
+        path: "/art/reports/pepfar/tx/mmd",
+        component: TXCurrMl
+    },
+    {
+        name: 'tx rtt',
+        path: "/art/reports/pepfar/tx/rtt",
+        component: TXRtt
     }
 ]
