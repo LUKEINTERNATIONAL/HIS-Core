@@ -112,7 +112,7 @@ export default [
     },
     {
         name: 'tx curr mmd',
-        path: "/art/reports/pepfar/tx/curr",
+        path: "/art/reports/pepfar/tx/mmd",
         component: TXCurrMMD
     },
     {
