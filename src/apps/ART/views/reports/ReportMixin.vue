@@ -8,9 +8,11 @@ import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import { modalController } from "@ionic/vue";
 import BasicTable from "@/components/DataViews/HisBasicTable.vue"
+import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
+import ReportTemplate from "@/apps/ART/views/reports/pepfar/DefaultTemplate.vue"
 
 export default defineComponent({
-    components: { HisStandardForm },
+    components: { HisStandardForm, ReportTable, ReportTemplate },
     data: () => ({
         fields: [] as Array<Field>,
         report: {} as any,

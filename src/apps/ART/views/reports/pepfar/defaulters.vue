@@ -11,12 +11,9 @@
 <script lang='ts'>
 import { defineComponent } from 'vue'
 import { DefaulterReportService } from "@/apps/ART/services/reports/pepfar/defaulters_report_service"
-import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
-import ReportTemplate from "@/apps/ART/views/reports/pepfar/DefaultTemplate.vue"
 
 export default defineComponent({
-    components: { ReportTable, ReportTemplate },
     mixins: [ReportMixin],
     data: () => ({
         title: 'PEPFAR Defaulters report',

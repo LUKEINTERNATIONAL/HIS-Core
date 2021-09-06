@@ -1,41 +1,48 @@
 <template>
-    <his-standard-form 
-        :skipSummary="true" 
-        :fields="fields" 
-        @onFinish="onSubmit"
-    />
+    <report-template
+        :title="title"
+        :period="period"
+        :totalClients="totalClients"
+        > 
+        <report-table :rows="rows" :columns="columns"> </report-table>
+    </report-template>
 </template>
 
 <script lang='ts'>
 import { defineComponent } from 'vue'
-import { FieldType } from "@/components/Forms/BaseFormElements"
-import { Field } from "@/components/Forms/FieldInterface"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { TxReportService, OTHER_AGE_GROUPS } from '@/apps/ART/services/reports/pepfar/tx_report_service'
 
 export default defineComponent({
     mixins: [ReportMixin],
-    async created() {
-        this.fields = this.getFields()
-    },
     data: () => ({
+        title: 'PEPFAR TX Curr MMD Report',
         cohort: {} as any,
         malesData: {} as any,
-        femaleData: {} as any
+        femaleData: {} as any,
+        rows: [] as Array<any>,
+        columns:  [
+            'Age group',
+            'Gender',
+            '# of clients on < 3 months of ARVs',
+            '# of clients on 3 - 5 months of ARVs',
+            '# of clients on  >= 6 months of ARVs'
+        ]
     }),
+    watch: {
+        isReady: {
+            async handler(y: boolean) {
+                if (y) {
+                    await this.init(this.startDate, this.endDate)
+                }
+            },
+            immediate: true
+        }
+    },
     methods: {
-        init(startDate: string, endDate: string) {
+        async init(startDate: string, endDate: string) {
             this.report = new TxReportService(startDate, endDate)
-        },
-        getColumns() {
-            return  [
-                '#',
-                'Age group',
-                'Gender',
-                '# of clients on < 3 months of ARVs',
-                '# of clients on 3 - 5 months of ARVs',
-                '# of clients on  >= 6 months of ARVs'
-            ]
+            this.rows = await this.buildTableRows()
         },
         getValues(patients: Record<string, Array<any>>) {
             const underThreeMonths: Array<any> = []
@@ -99,53 +106,7 @@ export default defineComponent({
                     maleRows.push([group, 'Male', 0, 0, 0])
                 }
             }
-            return [...femaleRows, ...maleRows].map(
-                (d: any, i: number) => {
-                    d.unshift(1+i)
-                    return d
-                })
-        },
-        getFields(): Array<Field> {
-            return [
-                ...this.getDateDurationFields(),
-                {
-                    id: 'report',
-                    helpText: 'PEPFAR TX CURR MMD report',
-                    type: FieldType.TT_TABLE_VIEWER,
-                    options: async (_: any, c: any) => {
-                       this.init(c.start_date, c.end_date)
-                       const rows = await this.buildTableRows()
-                       const columns = this.getColumns()
-                       return [{
-                           label: '', 
-                           value: '',
-                           other: {
-                                rows, 
-                                columns
-                           }
-                       }]
-                    },
-                    config: {
-                        footerBtns: [
-                            {
-                                name: 'Rebuild Outcomes',
-                                size: 'large',
-                                slot: 'start',
-                                color: 'success',
-                                visibleOnStateChange: (state: any) => {
-                                    return state.field.id === 'report'
-                                }
-                            }
-                        ],
-                        hiddenFooterBtns: [
-                            'Cancel',
-                            'Clear',
-                            'Back'
-                        ],
-                        styles: ['his-table', 'table-borders']
-                    }
-                }
-            ]
+            return [...femaleRows, ...maleRows]
         }
     }
 })
