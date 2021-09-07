@@ -14,6 +14,14 @@ export class PatientReportService extends ArtReportService {
         super()
     }
 
+    getViralLoadResults(range: string) {
+        return this.getReport(`/programs/${this.programID}/reports/high_vl_patients`, { range })
+    }
+
+    getOtherOutcome(outcome: string) {
+        return this.getReport('patient_outcome_list', { outcome })
+    }
+
     getClientsDueForVl() {
         return this.getReport('clients_due_vl')
     }

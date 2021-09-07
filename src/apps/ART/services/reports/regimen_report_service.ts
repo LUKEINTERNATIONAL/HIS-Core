@@ -11,6 +11,10 @@ export class RegimenReportService extends ArtReportService {
         this.type = type
     }
 
+    getRegimenFormulationReport(regimen: string, formulation: string) {
+        return this.getReport('regimens_and_formulations', { regimen, formulation })
+    }
+
     getRegimenReport() {
         return this.getReport('regimen_report', { type: this.type})
     }
