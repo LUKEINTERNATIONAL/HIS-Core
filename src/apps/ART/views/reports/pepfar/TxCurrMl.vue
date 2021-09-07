@@ -46,33 +46,24 @@ export default defineComponent({
             this.report.setStartDate(startDate)
             this.report.setEndDate(endDate)
             this.cohort = await this.report.getTxMlReport()
-            await this.setRows()
+            await this.setRows('F')
+            await this.setRows('M')
         },
-        async setRows() {
-            const femaleRows = await this.buildRows('F')
-            const maleRows = await this.buildRows('M')
-            this.rows = femaleRows.concat(maleRows)
-        },
-        async buildRows(gender: string) {
-            const rows = []
-            let counter = 1
+        async setRows(gender: string) {
             for(const i in AGE_GROUPS) {
                 const group = AGE_GROUPS[i]
                 try {
                     const cohortData = this.cohort[group][gender]
                     const drillable = cohortData.map((d: Array<number>) => this.buildDrillableLink(d))
-                    rows.push([
-                        counter,
+                    this.rows.push([
                         group,
                         gender,
                         ...drillable
                     ])
                 }catch(e) {
-                    rows.push([counter, group, gender, 0, 0, 0, 0, 0, 0])
+                    this.rows.push([group, gender, 0, 0, 0, 0, 0, 0])
                 }
-                ++counter
             }
-            return rows
         }
     }
 })
