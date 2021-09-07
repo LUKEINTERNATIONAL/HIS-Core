@@ -1,26 +1,26 @@
 <template>
-    <report-template
+    <clinic-report-template
         :title="title"
         :period="period"
         :totalClients="totalClients"
         > 
         <report-table :rows="rows" :columns="columns"> </report-table>
-    </report-template>
+    </clinic-report-template>
 </template>
 
 <script lang='ts'>
 import { defineComponent } from 'vue'
-// import { DefaulterReportService } from "@/apps/ART/services/reports/defaulters_report_service"
+import { PatientReportService } from "@/apps/ART/services/reports/patient_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
     data: () => ({
-        title: '',
+        title: 'Clinic Pregnant patients report',
         totalClients: [],
         rows: [] as Array<any>,
         columns: [
-        
+            'ARV#','First name','Last name', 'birthdate'
         ]
     }),
     watch: {
@@ -36,14 +36,20 @@ export default defineComponent({
     },
     methods: {
         async init(startDate: string, endDate: string) {
-            // this.report = new DefaulterReportService()
-            // this.report.setStartDate(startDate)
-            // this.report.setEndDate(endDate)
-            // const data = await this.report.getDefaulters()
-            // this.setRows(data)
+            this.report = new PatientReportService()
+            this.report.setStartDate(startDate)
+            this.report.setEndDate(endDate)
+            this.setRows((await this.report.getPregnantWomen()))
         },
         async setRows(data: Array<any>) {
-            // TODO : create some rows
+            data.forEach((d: any) => {
+               this.rows.push([
+                    d.arv_number,
+                    d.given_name,
+                    d.family_name,
+                    this.toDate(d.birthdate)
+               ])
+            })
         }
     }
 })
