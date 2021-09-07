@@ -24,6 +24,8 @@ import ClinicRegimenReport from "@/apps/ART/views/reports/clinic/ClinicRegimenRe
 import ClinicRegimenSwitchReport from "@/apps/ART/views/reports/clinic/ClinicRegimenSwitchReport.vue"
 import ClinicPregnantPatientsReport from "@/apps/ART/views/reports/clinic/ClinicPregnantPatientsReport.vue"
 import ClinicClientsDueForViralLoad from "@/apps/ART/views/reports/clinic/ClinicDueForViralLoad.vue"
+import ClinicRetentionReport from "@/apps/ART/views/reports/clinic/ClinicRetentionReport.vue"
+import ClinicExternalConsultationReport from "@/apps/ART/views/reports/clinic/ClinicExternalConsultation.vue"
 import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
 import ReportDatePicker from "@/apps/ART/views/reports/DateIntervalLauncher.vue"
 
@@ -102,6 +104,16 @@ export default [
         path: '/art/report/clinic',
         component: ReportTemplate,
         children: [
+            {
+                name: 'clinic_retention_report',
+                path: "clinic_retention_report",
+                component: ClinicRetentionReport
+            },
+            {
+                name: 'clinic_external_consultation_report',
+                path: "clinic_external_consultation_report",
+                component: ClinicExternalConsultationReport
+            },
             {
                 name: 'clinic_due_viral_load_report',
                 path: "clinic_due_viral_load_report",

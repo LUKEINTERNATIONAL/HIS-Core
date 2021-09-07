@@ -73,6 +73,16 @@ const ART: AppInterface = {
                     pathUrl: '/art/report/launcher/dateinterval?report=clinic_due_viral_load_report'
                 },
                 {
+                    name: 'External consultation clients',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_external_consultation_report'
+                },
+                {
+                    name: 'Retention report',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_retention_report'
+                },
+                {
                     name: 'Pregnant Patient',
                     icon: img('reports.png'),
                     pathUrl: '/art/report/launcher/dateinterval?report=clinic_pregnant_patients'
