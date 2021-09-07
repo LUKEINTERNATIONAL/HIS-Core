@@ -49,6 +49,37 @@ const ART: AppInterface = {
     ],
     reports:[
         {
+            name: 'Clinic',
+            icon: img('reports.png'),
+            files: [
+                {
+                    name: 'Defaulter list',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_defaulters_report'
+                },
+                {
+                    name: 'Regimen report',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_regimen_report'
+                },
+                {
+                    name: 'Regimen switch',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_regimen_switch'
+                },
+                {
+                    name: 'Pregnant Patient',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_pregnant_patients'
+                },
+                {
+                    name: 'Missed Appointment',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_missed_appointments'
+                }
+            ]
+        },
+        {
             name: 'PEPFAR',
             icon: img('login-logos/PEPFAR.png'),
             files: [

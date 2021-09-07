@@ -18,6 +18,11 @@ import TBPrevReport from "@/apps/ART/views/reports/pepfar/TBPrev.vue"
 import TXCurrMMD from "@/apps/ART/views/reports/pepfar/TxCurrMMD.vue"
 import TXCurrMl from "@/apps/ART/views/reports/pepfar/TxCurrMl.vue"
 import TXRtt from "@/apps/ART/views/reports/pepfar/TxRtt.vue"
+import ClinicMissedAppointmentsReport from "@/apps/ART/views/reports/clinic/ClinicMissedAppointments.vue"
+import ClinicDefaultersReport from "@/apps/ART/views/reports/clinic/ClinicDefaulters.vue"
+import ClinicRegimenReport from "@/apps/ART/views/reports/clinic/ClinicRegimenReport.vue"
+import ClinicRegimenSwitchReport from "@/apps/ART/views/reports/clinic/ClinicRegimenSwitchReport.vue"
+import ClinicPregnantPatientsReport from "@/apps/ART/views/reports/clinic/ClinicPregnantPatientsReport.vue"
 import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
 import ReportDatePicker from "@/apps/ART/views/reports/DateIntervalLauncher.vue"
 
@@ -91,6 +96,37 @@ export default [
         name: 'Report date launcher',
         path: '/art/report/launcher/dateinterval',
         component: ReportDatePicker
+    },
+    {
+        path: '/art/report/clinic',
+        component: ReportTemplate,
+        children: [
+            {
+                name: 'clinic_missed_appointments',
+                path: "clinic_missed_appointments",
+                component: ClinicMissedAppointmentsReport
+            },
+            {
+                name: "clinic_defaulters_report",
+                path: "clinic_defaulters",
+                component: ClinicDefaultersReport
+            },
+            {
+                name: "clinic_regimen_report",
+                path: "clinic_regimen_report",
+                component: ClinicRegimenReport
+            },
+            {
+                name: "clinic_regimen_switch",
+                path: "clinic_regimen_report",
+                component: ClinicRegimenSwitchReport
+            },
+            {
+                name: "clinic_pregnant_patients",
+                path: "clinic_pregnant_patients",
+                component: ClinicPregnantPatientsReport
+            },
+        ]
     },
     {
         path: '/art/report/pepfar',
