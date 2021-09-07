@@ -5,6 +5,10 @@ export class PatientReportService extends ArtReportService {
         super()
     }
 
+    getMissedAppointments() {
+        return this.getReport('missed_appointments')
+    }
+
     getPregnantWomen() {
         return this.getReport(`/programs/${this.programID}/reports/pregnant_patients`)
     }
