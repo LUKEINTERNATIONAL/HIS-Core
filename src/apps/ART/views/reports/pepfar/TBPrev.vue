@@ -48,25 +48,18 @@ export default defineComponent({
             this.report.setStartDate(startDate)
             this.report.setEndDate(endDate)
             this.cohort = await this.report.getTBPrevReport()
-            await this.setRows()
+            this.setRows('F')
+            this.setRows('M')
         },
         makeDrilldown(data: Array<any>) {
             const values = data.map(p => p.patient_id)
             return this.buildDrillableLink(values)
         },
-        async setRows() {
-            const femaleRows = await this.buildRows('F')
-            const maleRows = await this.buildRows('M')
-            this.rows = femaleRows.concat(maleRows)
-        },
-        async buildRows(gender: string) {
-            const rows = []
-            let counter = 1
+        async setRows(gender: string) {
             for(const i in AGE_GROUPS) {
                 const group = AGE_GROUPS[i]
                 const cohortData = this.cohort[group][gender]
-                rows.push([
-                    counter,
+                this.rows.push([
                     group,
                     gender,
                     this.makeDrilldown(cohortData['3HP']['started_new_on_art']),
@@ -78,9 +71,7 @@ export default defineComponent({
                     this.makeDrilldown(cohortData['3HP']['completed_previously_on_art']),
                     this.makeDrilldown(cohortData['6H']['completed_previously_on_art'])
                 ])
-                ++counter
             }
-            return rows
         }
     }
 })

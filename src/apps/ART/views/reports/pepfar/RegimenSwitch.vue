@@ -31,9 +31,7 @@ export default defineComponent({
     watch: {
         isReady: {
             async handler(y: boolean) {
-                if (y) {
-                    await this.init(this.startDate, this.endDate)
-                }
+                if (y) await this.init(this.startDate, this.endDate)
             },
             immediate: true
         }
@@ -43,26 +41,25 @@ export default defineComponent({
             this.report = new RegimenReportService()
             this.report.setStartDate(startDate)
             this.report.setEndDate(endDate)
-            const data = await this.report.getRegimenSwitchReport()
-            this.setRows(data)
+            this.setRows((await this.report.getRegimenSwitchReport()))
         },
-        async setRows(rowData: any) {
-            this.rows = Object.values(rowData).map((data: any) => {
+        async setRows(data: any) {
+            Object.values(data).forEach((d: any) => {
                 let lastDispenseDate = ''
-                const medications = data.medication.map((m: any) => {
+                const medications = d.medication.map((m: any) => {
                     lastDispenseDate = this.toDate(m.start_date)
                     return `${m.medication} (${m.quantity})`
                 })
-                return [
-                    data.arv_number,
-                    data.patient_type,
-                    data.gender,
-                    this.toDate(data.birthdate),
-                    data.previous_regimen,
-                    data.current_regimen,
+                this.rows.push([
+                    d.arv_number,
+                    d.patient_type,
+                    d.gender,
+                    this.toDate(d.birthdate),
+                    d.previous_regimen,
+                    d.current_regimen,
                     medications.join(', '),
                     lastDispenseDate
-                ]
+                ])
             })
         }
     }

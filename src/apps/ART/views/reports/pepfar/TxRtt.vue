@@ -28,9 +28,7 @@ export default defineComponent({
     watch: {
         isReady: {
             async handler(y: boolean) {
-                if (y) {
-                    await this.init(this.startDate, this.endDate)
-                }
+                if (y) await this.init(this.startDate, this.endDate)
             },
             immediate: true
         }
@@ -41,31 +39,23 @@ export default defineComponent({
             this.report.setStartDate(startDate)
             this.report.setEndDate(endDate)
             this.cohort = await this.report.getTxRttReport()
-            await this.setRows()
+            await this.setRows('F')
+            await this.setRows('M')
         },
-        async setRows() {
-            const femaleRows = await this.buildRows('F')
-            const maleRows = await this.buildRows('M')
-            this.rows = femaleRows.concat(maleRows)
-        },
-        async buildRows(gender: string) {
-            const rows = []
+        async setRows(gender: string) {
             for(const i in AGE_GROUPS) {
                 const group = AGE_GROUPS[i]
-
                 if (group in this.cohort) {
                     const cohortData = this.cohort[group][gender]
-    
-                    rows.push([
+                    this.rows.push([
                         group,
                         gender,
                         this.buildDrillableLink(cohortData)
                     ])
                 } else {
-                    rows.push([group, gender, 0])
+                    this.rows.push([group, gender, 0])
                 }
             }
-            return rows
         }
     }
 })

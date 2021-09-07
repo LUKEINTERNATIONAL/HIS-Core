@@ -18,8 +18,6 @@ export default defineComponent({
     data: () => ({
         title: 'PEPFAR TX Curr MMD Report',
         cohort: {} as any,
-        malesData: {} as any,
-        femaleData: {} as any,
         rows: [] as Array<any>,
         columns:  [
             'Age group',
@@ -44,7 +42,7 @@ export default defineComponent({
             this.report = new TxReportService()
             this.report.setStartDate(startDate)
             this.report.setEndDate(endDate)
-            this.rows = await this.buildTableRows()
+            await this.setRows()
         },
         getValues(patients: Record<string, Array<any>>) {
             const underThreeMonths: Array<any> = []
@@ -73,11 +71,9 @@ export default defineComponent({
                 this.buildDrillableLink(overSixMonths)
             ]
         },
-        async buildTableRows() {
+        async setRows() {
             let minAge = 0
             let maxAge = 0
-            const femaleRows = []
-            const maleRows = []
             for(const i in OTHER_AGE_GROUPS) {
                 const group = OTHER_AGE_GROUPS[i]
                 if (group === '<1 year') {
@@ -93,22 +89,21 @@ export default defineComponent({
                 }
                 const res = await this.report.getTxCurrMMDReport(minAge, maxAge)
                 if (res) {
-                    femaleRows.push([
+                    this.rows.push([
                         group,
                         'Female',
                         ...this.getValues(res['Female'])
                     ])
-                    maleRows.push([
+                    this.rows.push([
                         group,
                         'Male',
                         ...this.getValues(res['Male'])
                     ])
                 } else {
-                    femaleRows.push([group, 'Female', 0, 0, 0])
-                    maleRows.push([group, 'Male', 0, 0, 0])
+                    this.rows.push([group, 'Female', 0, 0, 0])
+                    this.rows.push([group, 'Male', 0, 0, 0])
                 }
             }
-            return [...femaleRows, ...maleRows]
         }
     }
 })

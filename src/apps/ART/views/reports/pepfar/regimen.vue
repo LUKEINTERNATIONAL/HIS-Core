@@ -42,24 +42,23 @@ export default defineComponent({
             this.report = new RegimenReportService()
             this.report.setStartDate(startDate)
             this.report.setEndDate(endDate)
-            const rowData = await this.report.getRegimenReport()
-            this.setRows(rowData)
+            this.setRows((await this.report.getRegimenReport()))
         },
-        setRows(rowData: any) {
-            this.rows = Object.values(rowData).map((data: any) => {
+        setRows(data: any) {
+            Object.values(data).forEach((d: any) => {
                 let lastDispenseDate = ''
-                const medications = data.medication.map((m: any) => {
+                const medications = d.medication.map((m: any) => {
                     lastDispenseDate = this.toDate(m.start_date)
                     return `${m.medication} (${m.quantity})`
                 })
-                return [
-                    data.arv_number,
-                    data.gender,
-                    this.toDate(data.birthdate),
-                    data.current_regimen,
+                this.rows.push([
+                    d.arv_number,
+                    d.gender,
+                    this.toDate(d.birthdate),
+                    d.current_regimen,
                     medications.join(', '),
                     lastDispenseDate
-                ]
+                ])
             })
         }
     }
