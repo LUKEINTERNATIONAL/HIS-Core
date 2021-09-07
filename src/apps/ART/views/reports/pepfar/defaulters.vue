@@ -10,7 +10,7 @@
 
 <script lang='ts'>
 import { defineComponent } from 'vue'
-import { DefaulterReportService } from "@/apps/ART/services/reports/pepfar/defaulters_report_service"
+import { DefaulterReportService } from "@/apps/ART/services/reports/defaulters_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 
 export default defineComponent({
@@ -42,7 +42,9 @@ export default defineComponent({
     },
     methods: {
         async init(startDate: string, endDate: string) {
-            this.report = new DefaulterReportService(startDate, endDate)
+            this.report = new DefaulterReportService()
+            this.report.setStartDate(startDate)
+            this.report.setEndDate(endDate)
             const data = await this.report.getDefaulters()
             this.setRows(data)
         },

@@ -1,4 +1,4 @@
-import { Service } from "@/services/service";
+import { ArtReportService } from "./art_report_service";
 
 export const AGE_GROUPS = [
     '0-5 months', '6-11 months',
@@ -11,10 +11,7 @@ export const AGE_GROUPS = [
     '50 plus years'
 ]
 
-export class DisaggregatedReportService extends Service {
-    startDate: string;
-    endDate: string;
-    date: string;
+export class DisaggregatedReportService extends ArtReportService {
     quarter: string;
     ageGroup: string;
     rebuildOutcome: boolean;
@@ -22,11 +19,8 @@ export class DisaggregatedReportService extends Service {
     outComeTable: string;
     gender: string;
 
-    constructor(startDate: string, endDate: string) {
+    constructor() {
         super()
-        this.startDate = startDate
-        this.endDate = endDate
-        this.date = Service.getSessionDate()
         this.gender = ''
         this.ageGroup = AGE_GROUPS[0]
         this.quarter = 'pepfar'
@@ -36,7 +30,7 @@ export class DisaggregatedReportService extends Service {
     }
 
     async init() {
-        const req = await Service.getJson('cohort_disaggregated', this.buildRequest())
+        const req = await this.getReport('cohort_disaggregated', this.getRequestParams())
         if (req && req.temp_disaggregated === 'created') {
             this.initialize = false
             this.rebuildOutcome = false
@@ -61,38 +55,31 @@ export class DisaggregatedReportService extends Service {
         this.gender = gender
     }
 
-    buildRequest() {
-        return {
-            'date': this.date,
+    getRequestParams(params={}) {
+        return this.buildRequest({
             'quarter': this.quarter,
-            'start_date': this.startDate,
-            'end_date': this.endDate,
             'age_group': this.ageGroup,
             'rebuild_outcome': this.rebuildOutcome,
             'initialize': this.initialize,
-            'program_id': Service.getProgramID()
-        }
+            ...params
+        })
     }
 
     getCohort() {
-        return Service.getJson('cohort_disaggregated', this.buildRequest())
+        return this.getReport('cohort_disaggregated', this.getRequestParams())
     }
 
     getTxIpt() {
-        const payload = { 
-            ...this.buildRequest(),
+        return this.getReport('clients_given_ipt', this.getRequestParams({
             'gender': this.gender,
-            'outcome_table': this.outComeTable
-        }
-        return Service.getJson('clients_given_ipt', payload)
+            'outcome_table': this.outComeTable      
+        }))
     }
 
     getTxCurrTB() {
-        const payload = { 
-            ...this.buildRequest(),
+        return this.getReport('screened_for_tb', this.getRequestParams({
             'gender': this.gender,
             'outcome_table': this.outComeTable
-        }
-        return Service.getJson('screened_for_tb', payload)
+        }))
     }
 }

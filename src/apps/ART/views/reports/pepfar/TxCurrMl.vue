@@ -11,7 +11,7 @@
 <script lang='ts'>
 import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
-import { TxReportService, AGE_GROUPS } from '@/apps/ART/services/reports/pepfar/tx_report_service'
+import { TxReportService, AGE_GROUPS } from '@/apps/ART/services/reports/tx_report_service'
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -42,7 +42,9 @@ export default defineComponent({
     },
     methods: {
         async init(startDate: string, endDate: string) {
-            this.report = new TxReportService(startDate, endDate)
+            this.report = new TxReportService()
+            this.report.setStartDate(startDate)
+            this.report.setEndDate(endDate)
             this.cohort = await this.report.getTxMlReport()
             await this.setRows()
         },

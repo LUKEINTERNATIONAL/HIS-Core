@@ -10,7 +10,7 @@
 
 <script lang='ts'>
 import { defineComponent } from 'vue'
-import { RegimenReportService } from "@/apps/ART/services/reports/pepfar/regimen_report_service"
+import { RegimenReportService } from "@/apps/ART/services/reports/regimen_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 export default defineComponent({
     mixins: [ReportMixin],
@@ -40,7 +40,9 @@ export default defineComponent({
     },
     methods: {
         async init(startDate: string, endDate: string) {
-            this.report = new RegimenReportService(startDate, endDate)
+            this.report = new RegimenReportService()
+            this.report.setStartDate(startDate)
+            this.report.setEndDate(endDate)
             const data = await this.report.getRegimenSwitchReport()
             this.setRows(data)
         },

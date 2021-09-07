@@ -11,7 +11,7 @@
 <script lang='ts'>
 import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
-import { DisaggregatedReportService, AGE_GROUPS } from "@/apps/ART/services/reports/pepfar/disaggregated_service"
+import { DisaggregatedReportService, AGE_GROUPS } from "@/apps/ART/services/reports/disaggregated_service"
 import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
 
@@ -51,7 +51,9 @@ export default defineComponent({
     },
     methods: {
         async init(startDate: string, endDate: string) {
-            this.report = new DisaggregatedReportService(startDate, endDate)
+            this.report = new DisaggregatedReportService()
+            this.report.setStartDate(startDate)
+            this.report.setEndDate(endDate)
             const isInit = this.report.init()
             if (!isInit) {
                 return toastWarning('Unable to initialise report')
