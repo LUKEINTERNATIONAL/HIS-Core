@@ -10,9 +10,10 @@ import { modalController } from "@ionic/vue";
 import BasicTable from "@/components/DataViews/HisBasicTable.vue"
 import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
 import ReportTemplate from "@/apps/ART/views/reports/pepfar/DefaultTemplate.vue"
+import ClinicReportTemplate from "@/apps/ART/views/reports/clinic/ClinicReportTemplate.vue"
 
 export default defineComponent({
-    components: { HisStandardForm, ReportTable, ReportTemplate },
+    components: { HisStandardForm, ReportTable, ReportTemplate, ClinicReportTemplate },
     data: () => ({
         fields: [] as Array<Field>,
         report: {} as any,
