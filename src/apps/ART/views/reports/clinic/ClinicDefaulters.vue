@@ -1,26 +1,32 @@
 <template>
-    <report-template
+    <clinic-report-template
         :title="title"
         :period="period"
         :totalClients="totalClients"
         > 
         <report-table :rows="rows" :columns="columns"> </report-table>
-    </report-template>
+    </clinic-report-template>
 </template>
 
 <script lang='ts'>
 import { defineComponent } from 'vue'
-// import { DefaulterReportService } from "@/apps/ART/services/reports/defaulters_report_service"
+import { DefaulterReportService } from "@/apps/ART/services/reports/defaulters_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
     data: () => ({
-        title: '',
+        title: 'Clinic Defaulters report',
         totalClients: [],
         rows: [] as Array<any>,
         columns: [
-        
+            'ARV#',
+            'First name',
+            'Last name',
+            'Gender',
+            'birthdate',
+            'Date defaulted',
+            'Address'
         ]
     }),
     watch: {
@@ -36,14 +42,25 @@ export default defineComponent({
     },
     methods: {
         async init(startDate: string, endDate: string) {
-            // this.report = new DefaulterReportService()
-            // this.report.setStartDate(startDate)
-            // this.report.setEndDate(endDate)
-            // const data = await this.report.getDefaulters()
-            // this.setRows(data)
+            this.report = new DefaulterReportService()
+            this.report.setIsPepfar(false)
+            this.report.setStartDate(startDate)
+            this.report.setEndDate(endDate)
+            const data = await this.report.getDefaulters()
+            this.setRows(data)
         },
         async setRows(data: Array<any>) {
-            // TODO : create some rows
+            data.forEach((data: any) => {
+                this.rows.push([
+                    data.arv_number,
+                    data.given_name,
+                    data.family_name,
+                    data.gender,
+                    this.toDate(data.birthdate),
+                    this.toDate(data.defaulter_date),
+                    `${data.village} ${data.district} ${data.ta}`
+                ])
+            })
         }
     }
 })
