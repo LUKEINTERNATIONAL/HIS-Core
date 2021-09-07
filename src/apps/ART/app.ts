@@ -68,6 +68,11 @@ const ART: AppInterface = {
                     pathUrl: '/art/report/launcher/dateinterval?report=clinic_regimen_switch'
                 },
                 {
+                    name: 'Clients due for VL',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_due_viral_load_report'
+                },
+                {
                     name: 'Pregnant Patient',
                     icon: img('reports.png'),
                     pathUrl: '/art/report/launcher/dateinterval?report=clinic_pregnant_patients'
