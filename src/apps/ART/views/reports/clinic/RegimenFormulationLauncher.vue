@@ -56,8 +56,8 @@ export default defineComponent({
                 query: {
                     start: c.start_date,
                     end: c.end_date,
-                    'regimen': f.regimen,
-                    'formulation': f.formulation
+                    'regimen': f.regimen.value,
+                    'formulation': f.formulation.value
                 } 
             })
         }

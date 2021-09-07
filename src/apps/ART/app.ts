@@ -91,6 +91,21 @@ const ART: AppInterface = {
                     name: 'Missed Appointment',
                     icon: img('reports.png'),
                     pathUrl: '/art/report/launcher/dateinterval?report=clinic_missed_appointments'
+                },
+                {
+                    name: 'VL results',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/vl?report=clinic_viral_load'
+                },
+                {
+                    name: 'Other outcome list',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/outcome?report=clinic_other_outcome_list'
+                },
+                {
+                    name: 'Regimns and Formulation',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/regimen_formulation?report=clinic_regimen_formulation'
                 }
             ]
         },

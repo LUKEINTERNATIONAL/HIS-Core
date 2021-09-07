@@ -61,7 +61,7 @@ export default defineComponent({
                 query: {
                     start: c.start_date,
                     end: c.end_date,
-                    outcome: f.outcome
+                    outcome: f.outcome.value
                 } 
             })
         }

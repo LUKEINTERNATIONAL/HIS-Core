@@ -16,7 +16,7 @@ import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 export default defineComponent({
     mixins: [ReportMixin],
     data: () => ({
-        title: 'Other outcome report',
+        title: '',
         totalClients: [],
         rows: [] as Array<any>,
         outcome: '' as string,
@@ -42,6 +42,7 @@ export default defineComponent({
             this.report.setStartDate(startDate)
             this.report.setEndDate(endDate)
             this.outcome  = outcome.toString()
+            this.title = `${outcome} Report`
             this.setRows((await this.report.getOtherOutcome(this.outcome)))
         },
         async setRows(data: Array<any>) {

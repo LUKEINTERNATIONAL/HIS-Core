@@ -21,7 +21,7 @@ export class RegimenReportService extends ArtReportService {
     }
 
     getRegimenFormulationReport(regimen: string, formulation: string) {
-        return this.getReport('regimens_and_formulations', { regimen, formulation })
+        return this.getReport(`programs/${this.programID}/reports/regimens_and_formulations`, { regimen, formulation })
     }
 
     getRegimenReport() {

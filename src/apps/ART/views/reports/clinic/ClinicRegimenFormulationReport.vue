@@ -10,13 +10,13 @@
 
 <script lang='ts'>
 import { defineComponent } from 'vue'
-import { PatientReportService } from "@/apps/ART/services/reports/patient_report_service"
+import { RegimenReportService } from "@/apps/ART/services/reports/regimen_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
     data: () => ({
-        title: 'Other outcome report',
+        title: 'Regimen Formulation: Patient level report',
         totalClients: [],
         rows: [] as Array<any>,
         columns: [
@@ -37,10 +37,10 @@ export default defineComponent({
     },
     methods: {
         async init(startDate: string, endDate: string, regimen: any, formulation: any) {
-            this.report = new PatientReportService()
+            this.report = new RegimenReportService()
             this.report.setStartDate(startDate)
             this.report.setEndDate(endDate)
-            this.setRows((await this.report.getOtherOutcome(regimen, formulation)))
+            this.setRows((await this.report.getRegimenFormulationReport(regimen, formulation)))
         },
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {

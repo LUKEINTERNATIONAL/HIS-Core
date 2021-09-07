@@ -26,8 +26,15 @@ import ClinicPregnantPatientsReport from "@/apps/ART/views/reports/clinic/Clinic
 import ClinicClientsDueForViralLoad from "@/apps/ART/views/reports/clinic/ClinicDueForViralLoad.vue"
 import ClinicRetentionReport from "@/apps/ART/views/reports/clinic/ClinicRetentionReport.vue"
 import ClinicExternalConsultationReport from "@/apps/ART/views/reports/clinic/ClinicExternalConsultation.vue"
+
+import ClinicViralLoadReport from "@/apps/ART/views/reports/clinic/ClinicViralLoadReport.vue"
+import ClinicOtherOutcomeReport from "@/apps/ART/views/reports/clinic/ClinicOtherOutcomeReport.vue"
+import ClinicRegimenFormulationReport from "@/apps/ART/views/reports/clinic/ClinicRegimenFormulationReport.vue"
 import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
 import ReportDatePicker from "@/apps/ART/views/reports/DateIntervalLauncher.vue"
+import ViralLoadLauncher from "@/apps/ART/views/reports/clinic/ViralLoadLauncher.vue"
+import RegimenFormulationLauncher from "@/apps/ART/views/reports/clinic/RegimenFormulationLauncher.vue"
+import OtherOutcomeLauncher from "@/apps/ART/views/reports/clinic/OtherOutcomeLauncher.vue"
 
 export default [
     {
@@ -101,6 +108,21 @@ export default [
         component: ReportDatePicker
     },
     {
+        name: 'Report viral results launcher',
+        path: '/art/report/launcher/vl',
+        component: ViralLoadLauncher
+    },
+    {
+        name: 'Report other outcome launcher',
+        path: '/art/report/launcher/outcome',
+        component: OtherOutcomeLauncher
+    },
+    {
+        name: 'Report regimen formulation launcher',
+        path: '/art/report/launcher/regimen_formulation',
+        component: RegimenFormulationLauncher
+    },
+    {
         path: '/art/report/clinic',
         component: ReportTemplate,
         children: [
@@ -143,6 +165,22 @@ export default [
                 name: "clinic_pregnant_patients",
                 path: "clinic_pregnant_patients",
                 component: ClinicPregnantPatientsReport
+            },
+            
+            {
+                name: "clinic_viral_load",
+                path: "clinic_viral_load",
+                component: ClinicViralLoadReport
+            },
+            {
+                name: "clinic_other_outcome_list",
+                path: "clinic_other_outcome_list",
+                component: ClinicOtherOutcomeReport
+            },
+            {
+                name: "clinic_regimen_formulation",
+                path: "clinic_regimen_formulation",
+                component: ClinicRegimenFormulationReport
             },
         ]
     },

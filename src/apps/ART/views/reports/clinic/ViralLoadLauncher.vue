@@ -61,7 +61,8 @@ export default defineComponent({
                 query: {
                     start: c.start_date,
                     end: c.end_date,
-                    'result_type': f.result_type
+                    'result_type': f.result_type.value,
+                    'result_title': f.result_type.label
                 } 
             })
         }
