@@ -19,6 +19,8 @@
     "apexcharts": "^3.26.1",
     "core-js": "^3.6.5",
     "dayjs": "^1.10.4",
+    "jspdf": "^2.3.1",
+    "jspdf-autotable": "^3.5.20",
     "lodash": "^4.17.21",
     "nprogress": "^0.2.0",
     "v-calendar": "^3.0.0-alpha.5",

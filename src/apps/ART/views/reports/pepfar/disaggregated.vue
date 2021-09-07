@@ -3,6 +3,8 @@
         :title="title"
         :period="period"
         :totalClients="totalClients"
+        :columns="columns"
+        :rows="rows"
         > 
         <report-table :rows="rows" :columns="columns"> </report-table>
     </report-template>

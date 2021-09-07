@@ -3,6 +3,7 @@
         :title="title"
         :period="period"
         :totalClients="totalClients"
+        :rows="rows" :columns="columns"
         > 
         <report-table :rows="rows" :columns="columns"> </report-table>
     </clinic-report-template>
