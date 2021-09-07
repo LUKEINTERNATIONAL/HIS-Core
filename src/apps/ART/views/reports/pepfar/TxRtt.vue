@@ -16,7 +16,7 @@ import { TxReportService, AGE_GROUPS } from '@/apps/ART/services/reports/tx_repo
 export default defineComponent({
     mixins: [ReportMixin],
     data: () => ({
-        Title: 'PEPFAR TX RTT Report',
+        title: 'PEPFAR TX RTT Report',
         cohort: {} as any,
         rows: [] as Array<any>,
         columns: [
