@@ -42,9 +42,7 @@ export default defineComponent({
     watch: {
         isReady: {
             async handler(y: boolean) {
-                if (y) {
-                    await this.init(this.startDate, this.endDate)
-                }
+                if (y) await this.init(this.startDate, this.endDate)
             },
             immediate: true
         }
@@ -60,29 +58,16 @@ export default defineComponent({
             }
             await this.setTableRows()
         },
+        drill(data: Array<any>) {
+            return this.buildDrillableLink(data)
+        },
         async setTableRows() {
-            const female = await this.buildFemaleRows()
-            const male = await this.buildMaleRows()
-            const pregnant = await this.buildFemalePregnantRows()
-            const breastFeeding = await this.buildBreastFeedingRows()
-            const totalMale = this.buildAllMaleRow()
-            const totalNotPregnant = this.buildFemaleNotPregnantRow()
-            this.rows = [
-                ...female,
-                ...male,
-                totalMale,
-                ...pregnant,
-                totalNotPregnant,
-                ...breastFeeding,
- 
-            ].map((r: any) => [
-                r[0],
-                r[1],
-                this.buildDrillableLink(r[2]), //Tx new
-                this.buildDrillableLink(r[3]), //Tx curr
-                this.buildDrillableLink(r[4]), //Tx ipt
-                this.buildDrillableLink(r[5]) //Tx tb
-            ])
+            await this.setFemaleRows()
+            await this.setMaleRows()
+            await this.setFemalePregnantRows()
+            await this.setFemaleBreastFeedingRows()
+            this.setTotalMalesRow()
+            this.setFemaleNotPregnantRows()
         },
         async getValue(prop: string, gender: string, data: any) {
             let res: any = []
@@ -99,71 +84,70 @@ export default defineComponent({
             }
             return res
         },
-        buildAllMaleRow() {
-            return [
+        setTotalMalesRow() {
+            this.rows.push([
                 'All', 
                 'Male', 
-                this.totalNewM,
-                this.totalCurM,
-                this.totalIptM,
-                this.totalTbM
-            ]
+                this.drill(this.totalNewM),
+                this.drill(this.totalCurM),
+                this.drill(this.totalIptM),
+                this.drill(this.totalTbM)
+            ])
         },
-        buildFemaleNotPregnantRow() {
+        setFemaleNotPregnantRows() {
             const row = [ 
                 this.totalNewF, 
                 this.totalCurF, 
                 this.totalIptF,
                 this.totalTbF
-            ].map((data: any) => data.filter((i: any) => !this.pregnantF.includes(i)))
-            return [ 'All', 'FNP', ...row ]
+            ].map((data: any) => this.drill(data.filter((i: any) => !this.pregnantF.includes(i))))
+            this.rows.push([ 'All', 'FNP', ...row ])
         },
-        buildFemaleRows() {
+        setFemaleRows() {
             this.report.setGender('female')
-            return this.buildRows('F', AGE_GROUPS, 
+            return this.setRows('F', AGE_GROUPS, 
             (group: string, txNew: any, txCur: any, txIpt: any, txTb: any) => {
                 this.totalNewF = uniq(this.totalNewF.concat(txNew))
                 this.totalCurF = uniq(this.totalCurF.concat(txCur))
                 this.totalIptF = uniq(this.totalIptF.concat(txIpt))
                 this.totalTbF  = uniq(this.totalTbF.concat(txTb))
-                return [ group, 'Female', txNew, txCur, txIpt, txTb ]
+                return [ group, 'Female', this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
             })
         },
-        buildMaleRows() {
+        setMaleRows() {
             this.report.setGender('male')
-            return this.buildRows('M', AGE_GROUPS, 
+            return this.setRows('M', AGE_GROUPS, 
             (group: string, txNew: any, txCur: any, txIpt: any, txTb: any) => {
                 this.totalNewM = uniq(this.totalNewM.concat(txNew))
                 this.totalCurM = uniq(this.totalCurM.concat(txCur))
                 this.totalIptM = uniq(this.totalIptM.concat(txIpt))
                 this.totalTbM  = uniq(this.totalTbM.concat(txTb))
-                return [ group, 'Male', txNew, txCur, txIpt, txTb ]   
+                return [ group, 'Male', this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]   
             })
         },
-        buildFemalePregnantRows() {
+        setFemalePregnantRows() {
             this.report.setGender('pregnant')
-            return this.buildRows('F', ['Pregnant'], 
+            return this.setRows('F', ['Pregnant'], 
                 (_: string, txNew: any, txCur: any, txIpt: any, txTb: any) => {
                 this.pregnantF = uniq(this.pregnantF.concat(txNew))
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
-                return [ 'All', 'FP', txNew, txCur, txIpt, txTb]
+                return [ 'All', 'FP', this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
             })
         },
-        buildBreastFeedingRows() {
+        setFemaleBreastFeedingRows() {
             this.report.setGender('breastfeeding')
-            return this.buildRows('F', ['Breastfeeding'], 
+            return this.setRows('F', ['Breastfeeding'], 
             (_: string, txNew: any, txCur: any, txIpt: any, txTb: any) => {
                 this.pregnantF = uniq(this.pregnantF.concat(txNew))
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
-                return ['All', 'FBf', txNew, txCur, txIpt, txTb]
+                return ['All', 'FBf', this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
             })
         },
-        async buildRows(category: string, ageGroups: Array<string>, onFormat: Function) {
-            const rows = []
+        async setRows(category: string, ageGroups: Array<string>, onFormat: Function) {
             for(const i in ageGroups) {
                 let txNew = []
                 let txCurr= []
@@ -186,9 +170,8 @@ export default defineComponent({
                     txGivenIpt = await value('tx_given_ipt')
                     txScreenTB = await value('tx_screened_for_tb')
                 }
-                rows.push(onFormat(group, txNew, txCurr, txGivenIpt, txScreenTB))
+                this.rows.push(onFormat(group, txNew, txCurr, txGivenIpt, txScreenTB))
             }
-            return rows
         }
     }
 })
