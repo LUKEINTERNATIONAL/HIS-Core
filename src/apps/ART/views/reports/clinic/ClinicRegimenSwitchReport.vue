@@ -1,26 +1,31 @@
 <template>
-    <report-template
+    <clinic-report-template
         :title="title"
         :period="period"
         :totalClients="totalClients"
         > 
         <report-table :rows="rows" :columns="columns"> </report-table>
-    </report-template>
+    </clinic-report-template>
 </template>
 
 <script lang='ts'>
 import { defineComponent } from 'vue'
-// import { DefaulterReportService } from "@/apps/ART/services/reports/defaulters_report_service"
+import { RegimenReportService } from "@/apps/ART/services/reports/regimen_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
-
 export default defineComponent({
     mixins: [ReportMixin],
     data: () => ({
-        title: '',
-        totalClients: [],
+        title: 'Clinic Regimen Switch Report', 
         rows: [] as Array<any>,
-        columns: [
-        
+        columns:  [
+            'ARV#',
+            'Patient type',
+            'Gender',
+            'DOB',
+            'Prev.Reg',
+            'Curr.Reg',
+            'ARVs', 
+            'Curr.reg dispensed date'
         ]
     }),
     watch: {
@@ -30,20 +35,35 @@ export default defineComponent({
                     await this.init(this.startDate, this.endDate)
                 }
             },
-            immediate: true,
-            deep: true
+            immediate: true
         }
     },
     methods: {
         async init(startDate: string, endDate: string) {
-            // this.report = new DefaulterReportService()
-            // this.report.setStartDate(startDate)
-            // this.report.setEndDate(endDate)
-            // const data = await this.report.getDefaulters()
-            // this.setRows(data)
+            this.report = new RegimenReportService()
+            this.report.setStartDate(startDate)
+            this.report.setEndDate(endDate)
+            const data = await this.report.getRegimenSwitchReport()
+            this.setRows(data)
         },
-        async setRows(data: Array<any>) {
-            // TODO : create some rows
+        async setRows(rowData: any) {
+            this.rows = Object.values(rowData).map((data: any) => {
+                let lastDispenseDate = ''
+                const medications = data.medication.map((m: any) => {
+                    lastDispenseDate = this.toDate(m.start_date)
+                    return `${m.medication} (${m.quantity})`
+                })
+                return [
+                    data.arv_number,
+                    data.patient_type,
+                    data.gender,
+                    this.toDate(data.birthdate),
+                    data.previous_regimen,
+                    data.current_regimen,
+                    medications.join(', '),
+                    lastDispenseDate
+                ]
+            })
         }
     }
 })

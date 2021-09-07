@@ -118,7 +118,7 @@ export default [
             },
             {
                 name: "clinic_regimen_switch",
-                path: "clinic_regimen_report",
+                path: "clinic_regimen_switch",
                 component: ClinicRegimenSwitchReport
             },
             {
