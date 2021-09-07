@@ -17,7 +17,7 @@ import { isEmpty } from 'lodash'
 export default defineComponent({
     mixins: [ReportMixin],
     data: () => ({
-        title: 'Clinic Defaulters report',
+        title: 'Clinic Retention report',
         totalClients: [],
         rows: [] as Array<any>,
         cohort: {} as any,
