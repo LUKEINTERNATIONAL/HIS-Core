@@ -1,5 +1,14 @@
 import { ArtReportService } from "./art_report_service";
 
+export const REGIMENS = [
+    '0A', '2A', '4A', '5A', '6A', '7A', '8A', '9A', '10A', '11A', '12A', '13A', '14A', '15A', '16A', '17A'
+]
+export const FORMULATIONS = [
+    'pellets',
+    'tablets',
+    'granules'
+]
+
 export class RegimenReportService extends ArtReportService {
     type: string;
     constructor() {
