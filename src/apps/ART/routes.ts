@@ -26,11 +26,15 @@ import ClinicPregnantPatientsReport from "@/apps/ART/views/reports/clinic/Clinic
 import ClinicClientsDueForViralLoad from "@/apps/ART/views/reports/clinic/ClinicDueForViralLoad.vue"
 import ClinicRetentionReport from "@/apps/ART/views/reports/clinic/ClinicRetentionReport.vue"
 import ClinicExternalConsultationReport from "@/apps/ART/views/reports/clinic/ClinicExternalConsultation.vue"
-
 import ClinicViralLoadReport from "@/apps/ART/views/reports/clinic/ClinicViralLoadReport.vue"
 import ClinicOtherOutcomeReport from "@/apps/ART/views/reports/clinic/ClinicOtherOutcomeReport.vue"
 import ClinicRegimenFormulationReport from "@/apps/ART/views/reports/clinic/ClinicRegimenFormulationReport.vue"
+import MohDisaggregatedReport from "@/apps/ART/views/reports/moh/MohDisaggregatedReport.vue"
+import MohSurvivalAnalysisReport from "@/apps/ART/views/reports/moh/MohSurvivalAnalysisReport.vue"
+import MohTptInitiationsReport from "@/apps/ART/views/reports/moh/MohTptInitiationsReport.vue"
+import MohTxCurrMMD from "@/apps/ART/views/reports/moh/MohTxCurrMMD.vue"
 import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
+import QuarteryReportLauncher from "@/apps/ART/views/reports/QuarteryLauncher.vue"
 import ReportDatePicker from "@/apps/ART/views/reports/DateIntervalLauncher.vue"
 import ViralLoadLauncher from "@/apps/ART/views/reports/clinic/ViralLoadLauncher.vue"
 import RegimenFormulationLauncher from "@/apps/ART/views/reports/clinic/RegimenFormulationLauncher.vue"
@@ -121,6 +125,37 @@ export default [
         name: 'Report regimen formulation launcher',
         path: '/art/report/launcher/regimen_formulation',
         component: RegimenFormulationLauncher
+    },
+    {
+        name: 'Quartery Report Launcher',
+        path: '/art/report/launcher/quarterly',
+        component: QuarteryReportLauncher
+    },
+    {
+        path: '/art/report/moh',
+        component: ReportTemplate,
+        children: [
+            {
+                name: 'moh_disaggregated',
+                path: 'moh_disaggregated',
+                component: MohDisaggregatedReport
+            }, 
+            {
+                name: 'moh_survial_analysis',
+                path: 'moh_survial_analysis',
+                component: MohSurvivalAnalysisReport
+            }, 
+            {
+                name: 'moh_tpt_new_initiations',
+                path: 'moh_tpt_new_initiations',
+                component: MohTptInitiationsReport
+            }, 
+            {
+                name: 'moh_tx_curr_mmd',
+                path: 'moh_tx_curr_mmd',
+                component: MohTxCurrMMD
+            }
+        ]
     },
     {
         path: '/art/report/clinic',

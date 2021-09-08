@@ -49,6 +49,32 @@ const ART: AppInterface = {
     ],
     reports:[
         {
+            name: 'MoH',
+            icon: img('login-logos/Malawi-Coat_of_arms_of_arms.png'),
+            files: [
+                {
+                    name: 'Cohort / disaggregated',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/quarterly?report=moh_disaggregated'
+                },
+                {
+                    name: 'Survival analysis',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/dateinterval?report=moh_survial_analysis' 
+                },
+                {
+                    name: 'TPT new initiations',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/dateinterval?report=moh_tpt_new_initiations'
+                },
+                {
+                    name: 'TX CURR MMD',
+                    icon: img('reports.png'),
+                    pathUrl: '/art/report/launcher/dateinterval?report=moh_tx_curr_mmd'
+                }
+            ]
+        },
+        {
             name: 'Clinic',
             icon: img('reports.png'),
             files: [
