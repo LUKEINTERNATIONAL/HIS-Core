@@ -24,7 +24,7 @@
         <slot> </slot>
       </div>
     </ion-content>
-    <his-footer color="light" :btns="btns"> </his-footer>
+    <his-footer color="dark" :btns="btns"> </his-footer>
   </ion-page>
 </template>
 
