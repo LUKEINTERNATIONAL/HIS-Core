@@ -31,9 +31,7 @@ export default defineComponent({
     watch: {
         isReady: {
             async handler(y: boolean) {
-                if (y) {
-                    await this.init(this.startDate, this.endDate)
-                }
+                if (y) await this.init(this.startDate, this.endDate)
             },
             immediate: true
         }
@@ -75,6 +73,9 @@ export default defineComponent({
         async setRows() {
             let minAge = 0
             let maxAge = 0
+            const males = []
+            const females = []
+
             for(const i in OTHER_AGE_GROUPS) {
                 const group = OTHER_AGE_GROUPS[i]
                 if (group === '<1 year') {
@@ -90,20 +91,21 @@ export default defineComponent({
                 }
                 const res = await this.report.getTxCurrMMDReport(minAge, maxAge)
                 if (res) {
-                    this.rows.push([
+                    females.push([
                         group,
                         'Female',
                         ...this.getValues(res['Female'])
                     ])
-                    this.rows.push([
+                    males.push([
                         group,
                         'Male',
                         ...this.getValues(res['Male'])
                     ])
                 } else {
-                    this.rows.push([group, 'Female', 0, 0, 0])
-                    this.rows.push([group, 'Male', 0, 0, 0])
+                    females.push([group, 'Female', 0, 0, 0])
+                    males.push([group, 'Male', 0, 0, 0])
                 }
+                this.rows = [...females, ...males]
             }
         }
     }
