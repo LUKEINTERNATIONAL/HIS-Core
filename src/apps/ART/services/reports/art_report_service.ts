@@ -1,16 +1,17 @@
 import { Service } from "@/services/service";
 
 export class ArtReportService extends Service {
+    programID: number;
     startDate: string;
     endDate: string;
-    programID: number;
     date: string;
+
     constructor() {
         super()
-        this.startDate = ''
         this.endDate = ''
-        this.programID = Service.getProgramID()
+        this.startDate = ''
         this.date = Service.getSessionDate()
+        this.programID = Service.getProgramID()
     }
 
     setStartDate(startDate: string) {

@@ -17,6 +17,7 @@ export default defineComponent({
     data: () => ({
         fields: [] as Array<Field>,
         report: {} as any,
+        quarter: '' as string,
         period: '' as string,
         startDate: '' as string,
         endDate: '' as string,
@@ -24,7 +25,11 @@ export default defineComponent({
     }),
     watch: {
         '$route': {
-            async handler({query}: any){
+            async handler({query}: any) {
+                if(query.quarter) {
+                    this.quarter = query.quarter
+                    this.isReady = true
+                }
                 if(query && query.start && query.end) {
                     this.startDate = query.start
                     this.endDate = query.end
