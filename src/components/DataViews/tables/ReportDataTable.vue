@@ -81,8 +81,9 @@ export default defineComponent({
         top: 0;
     }
     th, td {
-        padding: 1.1em;
-        text-align: left;
+        width: 3%;
+        padding: 0.6em;
+        text-align: center;
     }
     td {
         border-collapse: collapse;
