@@ -21,13 +21,19 @@ export const AGE_GROUPS = [
 ]
 
 export class TxReportService extends ArtReportService {
+    org: string
     constructor() {
         super()
+        this.org = 'pepfar'
+    }
+
+    setOrg(org: string) {
+        this.org = org
     }
 
     getTxCurrMMDReport(minAge: number, maxAge: number) {
         return this.getReport('arv_refill_periods', {
-            'org': 'pepfar',
+            'org': this.org,
             'min_age': minAge,
             'max_age': maxAge
         })
