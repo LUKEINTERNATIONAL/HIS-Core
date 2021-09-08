@@ -93,7 +93,7 @@ export default defineComponent({
     this.btns = [
       ...this.customBtns,
       {
-        name: "Print Csv",
+        name: "CSV",
         size: "large",
         slot: "start",
         color: "primary",
@@ -101,7 +101,7 @@ export default defineComponent({
         onClick: async () => this.$router.back()
       },
       {
-        name: "Print PDF",
+        name: "PDF",
         size: "large",
         slot: "start",
         color: "primary",
