@@ -20,6 +20,10 @@ export class RegimenReportService extends ArtReportService {
         this.type = type
     }
 
+    getTptNewInitiations() {
+        return this.getReport(`programs/${this.programID}/reports/tpt_newly_initiated`)
+    }
+
     getRegimenFormulationReport(regimen: string, formulation: string) {
         return this.getReport(`programs/${this.programID}/reports/regimens_and_formulations`, { regimen, formulation })
     }
