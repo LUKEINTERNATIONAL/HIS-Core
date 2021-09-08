@@ -43,6 +43,7 @@ export default defineComponent({
             this.report.setReportType('moh')
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
+            this.period = this.report.getDateIntervalPeriod()
             this.setRows((await this.report.getRegimenReport()))
         },
         setRows(data: any) {

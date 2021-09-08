@@ -45,6 +45,7 @@ export default defineComponent({
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
+            this.period = this.report.getDateIntervalPeriod()
             const data = await this.report.getClientsDueForVl()
             this.setRows(data)
         },

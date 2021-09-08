@@ -43,6 +43,7 @@ export default defineComponent({
             this.report = new DefaulterReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
+            this.period = this.report.getDateIntervalPeriod()
             const data = await this.report.getDefaulters()
             this.setRows(data)
         },

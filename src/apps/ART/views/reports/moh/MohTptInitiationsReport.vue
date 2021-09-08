@@ -43,6 +43,7 @@ export default defineComponent({
             this.report = new RegimenReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
+            this.period = this.report.getDateIntervalPeriod()
             this.cohort = await this.report.getTptNewInitiations()
             this.setRows('F')
             this.setRows('M')

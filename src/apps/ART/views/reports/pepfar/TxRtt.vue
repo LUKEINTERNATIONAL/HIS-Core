@@ -40,6 +40,7 @@ export default defineComponent({
             this.report = new TxReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
+            this.period = this.report.getDateIntervalPeriod()
             this.cohort = await this.report.getTxRttReport()
             await this.setRows('F')
             await this.setRows('M')

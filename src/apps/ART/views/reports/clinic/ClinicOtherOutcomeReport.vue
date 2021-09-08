@@ -65,6 +65,7 @@ export default defineComponent({
             this.report.setEndDate(config.end_date)
             this.outcome  = outcome.value.toString()
             this.title = `${this.outcome} Report`
+            this.period = this.report.getDateIntervalPeriod()
             this.setRows((await this.report.getOtherOutcome(this.outcome)))
         },
         async setRows(data: Array<any>) {
