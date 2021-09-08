@@ -3,7 +3,10 @@
         :title="title"
         :period="period"
         :rows="rows" 
+        :fields="fields"
         :columns="columns"
+        :reportReady="reportReady"
+        :onReportConfiguration="onPeriod"
         > 
     </report-template>
 </template>
@@ -13,6 +16,9 @@ import { defineComponent } from 'vue'
 import { PatientReportService } from "@/apps/ART/services/reports/patient_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import { FieldType } from '@/components/Forms/BaseFormElements'
+import { Option } from '@/components/Forms/FieldInterface'
+import Validation from "@/components/Forms/validations/StandardValidations"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -26,25 +32,39 @@ export default defineComponent({
             'ARV#','First name','Last name', 'birthdate', 'Gender', 'Outcome date'
         ]
     }),
-    watch: {
-        isReady: {
-            async handler(y: boolean) {
-                const { query } = this.$route
-                if (y && query.outcome) {
-                    await this.init(this.startDate, this.endDate, query.outcome)
-                }
-            },
-            immediate: true,
-            deep: true
-        }
+    created() {
+        this.fields = [
+            ...this.getDateDurationFields(),
+            {
+                id: 'outcome',
+                helpText: 'Select outcome',
+                type: FieldType.TT_SELECT,
+                validation: (val: Option) => Validation.required(val),
+                options: () => [
+                    {
+                        label: 'Transfer Out',
+                        value: 'Transfer Out'
+                    },
+                    {
+                        label: 'Died',
+                        value: 'Died'
+                    },
+                    {
+                        label: 'Stopped',
+                        value: 'Stopped'
+                    }
+                ]
+            }
+        ]
     },
     methods: {
-        async init(startDate: string, endDate: string, outcome: any) {
+        async onPeriod({outcome}: any, config: any) {
+            this.reportReady = true
             this.report = new PatientReportService()
-            this.report.setStartDate(startDate)
-            this.report.setEndDate(endDate)
-            this.outcome  = outcome.toString()
-            this.title = `${outcome} Report`
+            this.report.setStartDate(config.start_date)
+            this.report.setEndDate(config.end_date)
+            this.outcome  = outcome.value.toString()
+            this.title = `${this.outcome} Report`
             this.setRows((await this.report.getOtherOutcome(this.outcome)))
         },
         async setRows(data: Array<any>) {

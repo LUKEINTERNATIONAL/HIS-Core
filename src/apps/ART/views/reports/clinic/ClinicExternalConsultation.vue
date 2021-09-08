@@ -3,7 +3,10 @@
         :title="title"
         :period="period"
         :rows="rows" 
+        :fields="fields"
         :columns="columns"
+        :reportReady="reportReady"
+        :onReportConfiguration="onPeriod"
         > 
     </report-template>
 </template>
@@ -21,26 +24,20 @@ export default defineComponent({
         title: 'Clinic External consultation clients',
         totalClients: [],
         rows: [] as Array<any>,
+        reportReady: false,
         columns: [
             'ARV#','NPID', 'First name','Last name', 'Gender','DOB','Date set'
         ]
     }),
-    watch: {
-        isReady: {
-            async handler(y: boolean) {
-                if (y) {
-                    await this.init(this.startDate, this.endDate)
-                }
-            },
-            immediate: true,
-            deep: true
-        }
+    created() {
+        this.fields = this.getDateDurationFields()
     },
     methods: {
-        async init(startDate: string, endDate: string) {
+        async onPeriod(_: any, config: any) {
+            this.reportReady = true
             this.report = new PatientReportService()
-            this.report.setStartDate(startDate)
-            this.report.setEndDate(endDate)
+            this.report.setStartDate(config.start_date)
+            this.report.setEndDate(config.end_date)
             this.setRows((await this.report.getExternalConsultationClients()))
         },
         async setRows(data: Array<any>) {

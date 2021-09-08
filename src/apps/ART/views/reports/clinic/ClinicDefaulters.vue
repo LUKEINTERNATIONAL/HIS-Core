@@ -3,7 +3,10 @@
         :title="title"
         :period="period"
         :rows="rows" 
+        :fields="fields"
         :columns="columns"
+        :reportReady="reportReady"
+        :onReportConfiguration="onPeriod"
         > 
     </report-template>
 </template>
@@ -13,14 +16,13 @@ import { defineComponent } from 'vue'
 import { DefaulterReportService } from "@/apps/ART/services/reports/defaulters_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
-
 export default defineComponent({
     mixins: [ReportMixin],
     components: { ReportTemplate },
     data: () => ({
         title: 'Clinic Defaulters report',
-        totalClients: [],
         rows: [] as Array<any>,
+        reportReady: false as boolean,
         columns: [
             'ARV#',
             'First name',
@@ -31,21 +33,16 @@ export default defineComponent({
             'Address'
         ]
     }),
-    watch: {
-        isReady: {
-            async handler(y: boolean) {
-                if (y) await this.init(this.startDate, this.endDate)
-            },
-            immediate: true,
-            deep: true
-        }
+    created() {
+        this.fields = this.getDateDurationFields()
     },
     methods: {
-        async init(startDate: string, endDate: string) {
+        async onPeriod(_: any, config: any) {
+            this.reportReady = true
             this.report = new DefaulterReportService()
             this.report.setIsPepfar(false)
-            this.report.setStartDate(startDate)
-            this.report.setEndDate(endDate)
+            this.report.setStartDate(config.start_date)
+            this.report.setEndDate(config.end_date)
             const data = await this.report.getDefaulters()
             this.setRows(data)
         },

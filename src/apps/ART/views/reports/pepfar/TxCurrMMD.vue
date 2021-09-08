@@ -3,7 +3,10 @@
         :title="title"
         :period="period"
         :rows="rows" 
+        :fields="fields"
         :columns="columns"
+        :reportReady="reportReady"
+        :onReportConfiguration="onPeriod"
         > 
     </report-template>
 </template>
@@ -21,6 +24,7 @@ export default defineComponent({
         title: 'PEPFAR TX Curr MMD Report',
         cohort: {} as any,
         rows: [] as Array<any>,
+        reportReady: false as boolean,
         columns:  [
             'Age group',
             'Gender',
@@ -29,19 +33,15 @@ export default defineComponent({
             '# of clients on  >= 6 months of ARVs'
         ]
     }),
-    watch: {
-        isReady: {
-            async handler(y: boolean) {
-                if (y) await this.init(this.startDate, this.endDate)
-            },
-            immediate: true
-        }
+    created() {
+        this.fields = this.getDateDurationFields()
     },
     methods: {
-        async init(startDate: string, endDate: string) {
+        async onPeriod(_: any, config: any) {
+            this.reportReady = true
             this.report = new TxReportService()
-            this.report.setStartDate(startDate)
-            this.report.setEndDate(endDate)
+            this.report.setStartDate(config.start_date)
+            this.report.setEndDate(config.end_date)
             await this.setRows()
         },
         getValues(patients: Record<string, Array<any>>) {

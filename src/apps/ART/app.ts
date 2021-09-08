@@ -55,22 +55,22 @@ const ART: AppInterface = {
                 {
                     name: 'Cohort / disaggregated',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/quarterly?report=moh_disaggregated'
+                    pathName: 'moh_disaggregated'
                 },
                 {
                     name: 'Survival analysis',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=moh_survial_analysis' 
+                    pathName: 'moh_survial_analysis' 
                 },
                 {
                     name: 'TPT new initiations',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=moh_tpt_new_initiations'
+                    pathName: 'moh_tpt_new_initiations'
                 },
                 {
                     name: 'TX CURR MMD',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=moh_tx_curr_mmd'
+                    pathName: 'moh_tx_curr_mmd'
                 }
             ]
         },
@@ -81,57 +81,57 @@ const ART: AppInterface = {
                 {
                     name: 'Defaulter list',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_defaulters_report'
+                    pathName: 'clinic_defaulters_report'
                 },
                 {
                     name: 'Regimen report',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_regimen_report'
+                    pathName: 'clinic_regimen_report'
                 },
                 {
                     name: 'Regimen switch',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_regimen_switch'
+                    pathName: 'clinic_regimen_switch'
                 },
                 {
                     name: 'Clients due for VL',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_due_viral_load_report'
+                    pathName: 'clinic_due_viral_load_report'
                 },
                 {
                     name: 'External consultation clients',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_external_consultation_report'
+                    pathName: 'clinic_external_consultation_report'
                 },
                 {
                     name: 'Retention report',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_retention_report'
+                    pathName: 'clinic_retention_report'
                 },
                 {
                     name: 'Pregnant Patient',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_pregnant_patients'
+                    pathName: 'clinic_pregnant_patients'
                 },
                 {
                     name: 'Missed Appointment',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=clinic_missed_appointments'
+                    pathName: 'clinic_missed_appointments'
                 },
                 {
                     name: 'VL results',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/vl?report=clinic_viral_load'
+                    pathName: 'clinic_viral_load'
                 },
                 {
                     name: 'Other outcome list',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/outcome?report=clinic_other_outcome_list'
+                    pathName: 'clinic_other_outcome_list'
                 },
                 {
                     name: 'Regimns and Formulation',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/regimen_formulation?report=clinic_regimen_formulation'
+                    pathName: 'clinic_regimen_formulation'
                 }
             ]
         },
@@ -142,42 +142,42 @@ const ART: AppInterface = {
                 {
                     name: 'Defaulter list',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_defaulters_report'
+                    pathName: 'pepfar_defaulters_report'
                 },
                 {
                     name: 'Disaggregated',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_disaggregated_report'
+                    pathName: 'pepfar_disaggregated_report'
                 },
                 {
                     name: 'Regimen Report',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_regimen_report'
+                    pathName: 'pepfar_regimen_report'
                 },
                 {
                     name: 'Regimen Switch',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_regimen_switch'
+                    pathName: 'pepfar_regimen_switch'
                 },
                 {
                     name: 'TB PREV',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_tb_prev_report'
+                    pathName: 'pepfar_tb_prev_report'
                 },
                 {
                     name: 'TX CURR MMD',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_tx_curr_mmd_report'
+                    pathName: 'pepfar_tx_curr_mmd_report'
                 },
                 {
                     name: 'TX ML',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_tx_ml_report'
+                    pathName: 'pepfar_tx_ml_report'
                 },
                 {
                     name: 'TX RTT',
                     icon: img('reports.png'),
-                    pathUrl: '/art/report/launcher/dateinterval?report=pepfar_tx_rtt'
+                    pathName: 'pepfar_tx_rtt'
                 }
             ]
         }

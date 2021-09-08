@@ -2,7 +2,6 @@
 import { Service } from "@/services/service"
 import { defineComponent } from 'vue'
 import { Field } from '@/components/Forms/FieldInterface'
-import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
@@ -10,34 +9,14 @@ import { modalController } from "@ionic/vue";
 import BasicTable from "@/components/DataViews/HisBasicTable.vue"
 
 export default defineComponent({
-    components: { HisStandardForm },
     data: () => ({
         fields: [] as Array<Field>,
         report: {} as any,
-        quarter: '' as string,
+        reportReady: false as boolean,
         period: '' as string,
         startDate: '' as string,
         endDate: '' as string,
-        isReady: false as boolean,
     }),
-    watch: {
-        '$route': {
-            async handler({query}: any) {
-                if(query.quarter) {
-                    this.quarter = query.quarter
-                    this.isReady = true
-                }
-                if(query && query.start && query.end) {
-                    this.startDate = query.start
-                    this.endDate = query.end
-                    this.period = `${this.toDate(this.startDate)}-${this.toDate(this.endDate)}`
-                    this.isReady = true
-                }
-            },
-            deep: true,
-            immediate: true
-        }
-    },
     methods: {
         toDate(date: string) {
             return HisDate.toStandardHisDisplayFormat(date)

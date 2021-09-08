@@ -3,7 +3,10 @@
         :title="title"
         :period="period"
         :rows="rows" 
+        :fields="fields"
         :columns="columns"
+        :reportReady="reportReady"
+        :onReportConfiguration="onPeriod"
         > 
     </report-template>
 </template>
@@ -20,6 +23,7 @@ export default defineComponent({
     data: () => ({
         title: 'Clinic Clients due for VL',
         totalClients: [],
+        reportReady: false,
         rows: [] as Array<any>,
         columns: [
             'ARV#',
@@ -32,20 +36,15 @@ export default defineComponent({
             "Released"
         ]
     }),
-    watch: {
-        isReady: {
-            async handler(y: boolean) {
-                if (y) await this.init(this.startDate, this.endDate)
-            },
-            immediate: true,
-            deep: true
-        }
+    created() {
+        this.fields = this.getDateDurationFields()
     },
     methods: {
-        async init(startDate: string, endDate: string) {
+        async onPeriod(_: any, config: any) {
+            this.reportReady = true
             this.report = new PatientReportService()
-            this.report.setStartDate(startDate)
-            this.report.setEndDate(endDate)
+            this.report.setStartDate(config.start_date)
+            this.report.setEndDate(config.end_date)
             const data = await this.report.getClientsDueForVl()
             this.setRows(data)
         },

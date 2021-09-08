@@ -3,7 +3,10 @@
         :title="title"
         :period="period"
         :rows="rows" 
+        :fields="fields"
         :columns="columns"
+        :reportReady="reportReady"
+        :onReportConfiguration="onPeriod"
         > 
     </report-template>
 </template>
@@ -22,6 +25,7 @@ export default defineComponent({
         title: 'Clinic Retention report',
         totalClients: [],
         rows: [] as Array<any>,
+        reportReady: false as boolean,
         cohort: {} as any,
         columns: [
             'Age group',
@@ -34,22 +38,15 @@ export default defineComponent({
             'Completed Six months'
         ]
     }),
-    watch: {
-        isReady: {
-            async handler(y: boolean) {
-                if (y) {
-                    await this.init(this.startDate, this.endDate)
-                }
-            },
-            immediate: true,
-            deep: true
-        }
+    created() {
+        this.fields = this.getDateDurationFields()
     },
     methods: {
-        async init(startDate: string, endDate: string) {
+        async onPeriod(_: any, config: any) {
+            this.reportReady = true
             this.report = new PatientReportService()
-            this.report.setStartDate(startDate)
-            this.report.setEndDate(endDate)
+            this.report.setStartDate(config.start_date)
+            this.report.setEndDate(config.end_date)
             this.cohort = await this.report.getClientRentention()
             this.setRows('F')
             this.setRows('M')

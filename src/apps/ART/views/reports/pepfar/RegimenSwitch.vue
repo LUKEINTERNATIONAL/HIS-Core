@@ -3,7 +3,10 @@
         :title="title"
         :period="period"
         :rows="rows" 
+        :fields="fields"
         :columns="columns"
+        :reportReady="reportReady"
+        :onReportConfiguration="onPeriod"
         > 
     </report-template>
 </template>
@@ -20,6 +23,7 @@ export default defineComponent({
     data: () => ({
         title: 'PEPFAR Regimen Switch Report', 
         rows: [] as Array<any>,
+        reportReady: false as boolean,
         columns:  [
             'ARV#',
             'Patient type',
@@ -31,19 +35,15 @@ export default defineComponent({
             'Curr.reg dispensed date'
         ]
     }),
-    watch: {
-        isReady: {
-            async handler(y: boolean) {
-                if (y) await this.init(this.startDate, this.endDate)
-            },
-            immediate: true
-        }
+    created() {
+        this.fields = this.getDateDurationFields()
     },
     methods: {
-        async init(startDate: string, endDate: string) {
+        async onPeriod(_: any, config: any) {
+            this.reportReady = true
             this.report = new RegimenReportService()
-            this.report.setStartDate(startDate)
-            this.report.setEndDate(endDate)
+            this.report.setStartDate(config.start_date)
+            this.report.setEndDate(config.end_date)
             this.setRows((await this.report.getRegimenSwitchReport()))
         },
         async setRows(data: any) {

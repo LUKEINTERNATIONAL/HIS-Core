@@ -2,8 +2,11 @@
     <report-template
         :title="title"
         :period="period"
+        :rows="rows" 
+        :fields="fields"
         :columns="columns"
-        :rows="rows"
+        :reportReady="reportReady"
+        :onReportConfiguration="onPeriod"
         > 
     </report-template>
 </template>
@@ -22,6 +25,7 @@ export default defineComponent({
     data: () => ({
         title: 'PEPFAR Diseggregated Report',
         rows: [] as Array<any>,
+        reportReady: false as boolean,
         columns: [
             'Age group',
             'Gender',
@@ -41,19 +45,15 @@ export default defineComponent({
         totalTbM:  [] as Array<any>,
         pregnantF: [] as Array<any>
     }),
-    watch: {
-        isReady: {
-            async handler(y: boolean) {
-                if (y) await this.init(this.startDate, this.endDate)
-            },
-            immediate: true
-        }
+    created() {
+        this.fields = this.getDateDurationFields()
     },
     methods: {
-        async init(startDate: string, endDate: string) {
+        async onPeriod(_: any, config: any) {
+            this.reportReady = true
             this.report = new DisaggregatedReportService()
-            this.report.setStartDate(startDate)
-            this.report.setEndDate(endDate)
+            this.report.setStartDate(config.start_date)
+            this.report.setEndDate(config.end_date)
             const isInit = this.report.init()
             if (!isInit) {
                 return toastWarning('Unable to initialise report')

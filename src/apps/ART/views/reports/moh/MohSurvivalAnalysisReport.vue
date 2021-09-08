@@ -3,7 +3,11 @@
         :title="title"
         :period="period"
         :rows="rows" 
-        :columns="columns"> 
+        :fields="fields"
+        :columns="columns"
+        :reportReady="reportReady"
+        :onReportConfiguration="onPeriod"
+        > 
     </report-template>
 </template>
 
@@ -34,14 +38,8 @@ export default defineComponent({
             'Unknown'
         ]
     }),
-    watch: {
-        '$route': {
-            async handler({ query }: any) {
-                if (query.quarter) this.init(query.quarter.toString())
-            },
-            immediate: true,
-            deep: true
-        }
+    created() {
+        this.fields = this.getDateDurationFields()
     },
     methods: {
         async init(quarter: string) {

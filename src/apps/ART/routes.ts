@@ -34,10 +34,6 @@ import MohSurvivalAnalysisReport from "@/apps/ART/views/reports/moh/MohSurvivalA
 import MohTptInitiationsReport from "@/apps/ART/views/reports/moh/MohTptInitiationsReport.vue"
 import MohTxCurrMMD from "@/apps/ART/views/reports/moh/MohTxCurrMMD.vue"
 import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
-import QuarteryReportLauncher from "@/apps/ART/views/reports/QuarteryLauncher.vue"
-import ReportDatePicker from "@/apps/ART/views/reports/DateIntervalLauncher.vue"
-import ViralLoadLauncher from "@/apps/ART/views/reports/clinic/ViralLoadLauncher.vue"
-import RegimenFormulationLauncher from "@/apps/ART/views/reports/clinic/RegimenFormulationLauncher.vue"
 import OtherOutcomeLauncher from "@/apps/ART/views/reports/clinic/OtherOutcomeLauncher.vue"
 
 export default [
@@ -105,31 +101,6 @@ export default [
         name: "lab activities",
         path: "/art/encounters/lab/:patient_id",
         component: LabActivities
-    },
-    {
-        name: 'Report date launcher',
-        path: '/art/report/launcher/dateinterval',
-        component: ReportDatePicker
-    },
-    {
-        name: 'Report viral results launcher',
-        path: '/art/report/launcher/vl',
-        component: ViralLoadLauncher
-    },
-    {
-        name: 'Report other outcome launcher',
-        path: '/art/report/launcher/outcome',
-        component: OtherOutcomeLauncher
-    },
-    {
-        name: 'Report regimen formulation launcher',
-        path: '/art/report/launcher/regimen_formulation',
-        component: RegimenFormulationLauncher
-    },
-    {
-        name: 'Quartery Report Launcher',
-        path: '/art/report/launcher/quarterly',
-        component: QuarteryReportLauncher
     },
     {
         path: '/art/report/moh',
