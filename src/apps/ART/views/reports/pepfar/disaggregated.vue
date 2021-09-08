@@ -2,11 +2,9 @@
     <report-template
         :title="title"
         :period="period"
-        :totalClients="totalClients"
         :columns="columns"
         :rows="rows"
         > 
-        <report-table :rows="rows" :columns="columns"> </report-table>
     </report-template>
 </template>
 
@@ -16,9 +14,11 @@ import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { DisaggregatedReportService, AGE_GROUPS } from "@/apps/ART/services/reports/disaggregated_service"
 import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
+import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
+    components: { ReportTemplate },
     data: () => ({
         title: 'PEPFAR Diseggregated Report',
         rows: [] as Array<any>,

@@ -17,9 +17,6 @@ export default defineComponent({
       type: String,
       required: true,
     },
-    totalClients: {
-      type: Object
-    },
     columns: {
       type: Object as PropType<string[]>,
       required: true

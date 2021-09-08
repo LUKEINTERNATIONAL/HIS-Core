@@ -2,10 +2,8 @@
     <report-template
         :title="title"
         :period="period"
-        :totalClients="totalClients"
         :rows="rows" 
         :columns="columns"> 
-        <report-table :rows="rows" :columns="columns"> </report-table>
     </report-template>
 </template>
 
@@ -14,9 +12,11 @@ import { defineComponent } from 'vue'
 import { SurvivalAnalysisReportService } from "@/apps/ART/services/reports/survival_analysis_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { isEmpty } from 'lodash'
+import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
+    components: { ReportTemplate },
     data: () => ({
         title: 'ART survival analysis report',
         totalClients: [],

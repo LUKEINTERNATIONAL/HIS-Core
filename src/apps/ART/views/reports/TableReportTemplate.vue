@@ -21,18 +21,21 @@
     </ion-header>
     <ion-content>
       <div class="report-content">
-        <slot> </slot>
+        <report-table :rows="rows" :columns="columns"></report-table>
       </div>
     </ion-content>
-    <his-footer color="dark" :btns="btns"> </his-footer>
+    <his-footer :btns="btns"></his-footer>
   </ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import TemplateMixinVue from "../TemplateMixin.vue";
+import TemplateMixinVue from "./TemplateMixin.vue";
+import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
+
 export default defineComponent({
-  mixins: [TemplateMixinVue],
+  mixins: [ TemplateMixinVue ],
+  components: { ReportTable },
   data: () => ({
     logo: "/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png" as string
   })
@@ -43,4 +46,3 @@ export default defineComponent({
   width: 100px;
 }
 </style>
-

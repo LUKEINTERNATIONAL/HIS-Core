@@ -2,10 +2,9 @@
     <report-template
         :title="title"
         :period="period"
-        :totalClients="totalClients"
-        :rows="rows" :columns="columns"
+        :rows="rows" 
+        :columns="columns"
         > 
-        <report-table :rows="rows" :columns="columns"> </report-table>
     </report-template>
 </template>
 
@@ -13,9 +12,11 @@
 import { defineComponent } from 'vue'
 import { RegimenReportService } from "@/apps/ART/services/reports/regimen_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
+import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
+    components: { ReportTemplate },
     data: () => ({
         title: 'PEPFAR Regimen Report',
         rows: [] as Array<any>,

@@ -2,10 +2,9 @@
     <report-template
         :title="title"
         :period="period"
-        :totalClients="totalClients"
-        :rows="rows" :columns="columns"
+        :rows="rows" 
+        :columns="columns"
         > 
-        <report-table :rows="rows" :columns="columns"> </report-table>
     </report-template>
 </template>
 
@@ -13,9 +12,11 @@
 import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { TxReportService, AGE_GROUPS } from '@/apps/ART/services/reports/tx_report_service'
+import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
+    components: { ReportTemplate },
     data: () => ({
         title: 'PEPFAR TX RTT Report',
         cohort: {} as any,

@@ -2,10 +2,8 @@
     <report-template
         :title="title"
         :period="period"
-        :totalClients="totalClients"
         :rows="rows" 
         :columns="columns"> 
-        <report-table :rows="rows" :columns="columns"> </report-table>
     </report-template>
 </template>
 
@@ -15,9 +13,11 @@ import { AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
 import { RegimenReportService } from "@/apps/ART/services/reports/regimen_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { isEmpty } from 'lodash'
+import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
+    components: { ReportTemplate },
     data: () => ({
         title: 'MoH TPT new initiations report',
         totalClients: [],

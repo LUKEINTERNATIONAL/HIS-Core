@@ -1,12 +1,11 @@
 <template>
-    <clinic-report-template
+    <report-template
         :title="title"
         :period="period"
-        :totalClients="totalClients"
-        :rows="rows" :columns="columns"
+        :rows="rows" 
+        :columns="columns"
         > 
-        <report-table :rows="rows" :columns="columns"> </report-table>
-    </clinic-report-template>
+    </report-template>
 </template>
 
 <script lang='ts'>
@@ -14,9 +13,11 @@ import { defineComponent } from 'vue'
 import { PatientReportService, OTHER_AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { isEmpty } from 'lodash'
+import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
+    components: { ReportTemplate },
     data: () => ({
         title: 'Clinic Retention report',
         totalClients: [],
