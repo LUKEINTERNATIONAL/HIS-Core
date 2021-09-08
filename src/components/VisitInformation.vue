@@ -8,19 +8,18 @@
       <ion-col size="2" class="headers">Out</ion-col>
       <ion-col size="2" class="headers">Act</ion-col>
     </ion-row>
-    <ion-row>
-      <ion-col size="2"><ion-button> 22/Jan/2021 </ion-button></ion-col>
-      <ion-col size="2"><p>13</p> </ion-col>
-      <ion-col size="2"><p>13A</p> </ion-col>
-      <ion-col size="2"><p>89%</p></ion-col>
-      <ion-col size="2"><p>Defaulted</p></ion-col>
+    <ion-row v-for="(item, index) in items" :key="index">
+      <ion-col size="2"><ion-button @click="printLabel(item.value)"> {{item.label}} </ion-button></ion-col>
+      <ion-col size="2"><p>{{item.data.weight}}</p> </ion-col>
+      <ion-col size="2"><p>{{item.data.regimen}}</p> </ion-col>
+      <ion-col size="2"><p>0%</p></ion-col>
+      <ion-col size="2"><p>{{item.data.outcome}}</p></ion-col>
       <ion-col size="2"><ion-button color="success">show more</ion-button></ion-col>
     </ion-row>
   </ion-grid>
 </template>
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { Option } from "@/components/Forms/FieldInterface";
 import { IonGrid, IonRow, IonCol, IonButton } from "@ionic/vue";
 export default defineComponent({
   name: "HisResultCard",
@@ -35,9 +34,14 @@ export default defineComponent({
       required: false,
     },
     items: {
-      type: Object as PropType<Option[]>,
+      type: Object as PropType<any[]>,
       required: true,
     },
+  },
+  methods: {
+    printLabel(date: any) {
+      this.$emit("onPrint", date);
+    }
   },
 });
 </script>
