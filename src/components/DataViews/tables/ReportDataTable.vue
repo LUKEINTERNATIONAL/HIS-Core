@@ -81,7 +81,7 @@ export default defineComponent({
         top: 0;
     }
     th, td {
-        padding: 1.4em;
+        padding: 1.1em;
         text-align: left;
     }
     td {
