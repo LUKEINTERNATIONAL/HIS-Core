@@ -7,6 +7,7 @@ import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import { modalController } from "@ionic/vue";
 import BasicTable from "@/components/DataViews/HisBasicTable.vue"
+import { ArtReportService } from "@/apps/ART/services/reports/art_report_service"
 
 export default defineComponent({
     data: () => ({
@@ -66,6 +67,12 @@ export default defineComponent({
                     await this.tableDrill(tableData)
                 }
             }
+        },
+        getQuaterOptions() {
+            const quarters = ArtReportService.getReportQuarters()
+            return quarters.map((q: any) => ({
+                label: q.quarter, value: q.start
+            }))
         },
         getDateDurationFields(minDate='2001-01-01', maxDate=Service.getSessionDate()): Array<Field> {
             return [

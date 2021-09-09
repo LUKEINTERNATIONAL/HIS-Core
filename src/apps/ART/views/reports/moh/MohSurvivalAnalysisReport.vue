@@ -17,6 +17,9 @@ import { SurvivalAnalysisReportService } from "@/apps/ART/services/reports/survi
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { isEmpty } from 'lodash'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import Validation from "@/components/Forms/validations/StandardValidations"
+import { Option } from '@/components/Forms/FieldInterface'
+import { FieldType } from "@/components/Forms/BaseFormElements"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -25,6 +28,7 @@ export default defineComponent({
         title: 'ART survival analysis report',
         totalClients: [],
         rows: [] as Array<any>,
+        reportReady: false as boolean,
         columns: [
             'Reg cohort',
             'Interval (months)',
@@ -39,12 +43,22 @@ export default defineComponent({
         ]
     }),
     created() {
-        this.fields = this.getDateDurationFields()
+        this.fields = [
+            {
+                id: 'quarter',
+                helpText: 'Select Quarter',
+                type: FieldType.TT_SELECT,
+                validation: (val: Option) => Validation.required(val),
+                options: () => this.getQuaterOptions()
+            }
+        ]
     },
     methods: {
-        async init(quarter: string) {
+        async onPeriod({ quarter }: any) {
+            this.reportReady = true
+            this.period = quarter.label
             this.report = new SurvivalAnalysisReportService()
-            this.report.setQuarter(quarter)
+            this.report.setQuarter(quarter.label)
             this.setRows((await this.report.getSurvivalAnalysis()))
         },
         setRows(quarterList: any) {

@@ -40,4 +40,17 @@ export class ArtReportService extends Service {
             ...payload
         }
     }
+
+    static getReportQuarters(minDuration= 4) {
+        const quarters = []
+        let year = HisDate.getCurrentYear()
+        for(let i=0; i < minDuration; ++i) {
+            quarters.push({ quarter: `Q4 ${year}`, start: `${year}-10-01` })
+            quarters.push({ quarter: `Q3 ${year}`, start: `${year}-07-01` })
+            quarters.push({ quarter: `Q2 ${year}`, start: `${year}-04-01` })
+            quarters.push({ quarter: `Q1 ${year}`, start: `${year}-01-01` })
+            --year
+        }
+        return quarters
+    }
 }
