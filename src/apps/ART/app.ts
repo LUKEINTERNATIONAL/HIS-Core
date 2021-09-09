@@ -89,6 +89,11 @@ const ART: AppInterface = {
                     pathName: 'clinic_regimen_report'
                 },
                 {
+                    name: 'Lab results',
+                    icon: img('reports.png'),
+                    pathName: 'clinic_lab_results'
+                },
+                {
                     name: 'Regimen switch',
                     icon: img('reports.png'),
                     pathName: 'clinic_regimen_switch'

@@ -29,12 +29,12 @@ import ClinicExternalConsultationReport from "@/apps/ART/views/reports/clinic/Cl
 import ClinicViralLoadReport from "@/apps/ART/views/reports/clinic/ClinicViralLoadReport.vue"
 import ClinicOtherOutcomeReport from "@/apps/ART/views/reports/clinic/ClinicOtherOutcomeReport.vue"
 import ClinicRegimenFormulationReport from "@/apps/ART/views/reports/clinic/ClinicRegimenFormulationReport.vue"
+import ClinicLabResultsReport from "@/apps/ART/views/reports/clinic/ClinicLabResultsReport.vue"
 import MohDisaggregatedReport from "@/apps/ART/views/reports/moh/MohDisaggregatedReport.vue"
 import MohSurvivalAnalysisReport from "@/apps/ART/views/reports/moh/MohSurvivalAnalysisReport.vue"
 import MohTptInitiationsReport from "@/apps/ART/views/reports/moh/MohTptInitiationsReport.vue"
 import MohTxCurrMMD from "@/apps/ART/views/reports/moh/MohTxCurrMMD.vue"
 import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
-import OtherOutcomeLauncher from "@/apps/ART/views/reports/clinic/OtherOutcomeLauncher.vue"
 
 export default [
     {
@@ -146,6 +146,11 @@ export default [
                 name: 'clinic_due_viral_load_report',
                 path: "clinic_due_viral_load_report",
                 component: ClinicClientsDueForViralLoad
+            },
+            {
+                name: "clinic_lab_results",
+                path: "clinic_lab_results",
+                component: ClinicLabResultsReport
             },
             {
                 name: 'clinic_missed_appointments',

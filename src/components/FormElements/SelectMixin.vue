@@ -22,6 +22,10 @@ export default defineComponent({
             type: Object,
             required: true
         },
+        cdata: {
+            type: Object,
+            required: true
+        },
         clear: {
             type: Boolean
         },
