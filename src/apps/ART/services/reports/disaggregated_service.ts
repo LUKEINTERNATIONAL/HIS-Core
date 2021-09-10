@@ -64,6 +64,10 @@ export class DisaggregatedReportService extends ArtReportService {
         this.gender = gender
     }
 
+    getGender() {
+        return this.gender
+    }
+
     getRequestParams(params={}) {
         return this.buildRequest({
             'age_group': this.ageGroup,

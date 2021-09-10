@@ -119,6 +119,15 @@ export default defineComponent({
             this.setFemaleNotPregnantRows()
         },
         async appendRegimensToRow(curRow: Array<any>) {
+            this.report.setAgeGroup('All')
+            switch(this.report.getGender()) {
+                case 'breastfeeding':
+                    this.report.setGender('Fbf')
+                    break;
+                case 'pregnant':
+                    this.report.setGender('FP')
+                    break;
+            }
             const regimens = await this.report.getRegimenDistribution()
             const row: Array<any> = [...curRow, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
             let totals: any = []
