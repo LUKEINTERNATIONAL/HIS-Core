@@ -34,6 +34,7 @@ export default defineComponent({
             'Interval (months)',
             'Sub group',
             'Total Reg (database)',
+            'Total Reg (Confirmed)',
             'Alive',
             'Died',
             'Defaulted',
@@ -76,17 +77,16 @@ export default defineComponent({
                 }
 
                 if (isEmpty(quarterOutcomes)) continue
-
                 for(const outcome in quarterOutcomes) {
-                    const outcomeIntervals =  quarterOutcomes[outcome] 
+                    const outcomeIntervals =  quarterOutcomes[outcome]
                     for (const interval in outcomeIntervals) {
                         qInterval = parseInt(interval)
                         const count = outcomeIntervals[interval]
                         totalRegInQuarter += count
                         if (outcome in outcomeRef) {
-                            outcomeRef[outcome] += count
+                            outcomeRef[outcome] = count
                         } else {
-                            outcomeRef['unknown'] += count
+                            outcomeRef['unknown'] = count
                         }
                     }
                 }
@@ -95,6 +95,7 @@ export default defineComponent({
                     qInterval,
                     this.report.getAgeGroup(),
                     totalRegInQuarter,
+                    0, // This column is there for show according to Mwatha
                     outcomeRef['On antiretrovirals'],
                     outcomeRef['Patient died'],
                     outcomeRef['Defaulted'],
