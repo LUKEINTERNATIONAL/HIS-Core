@@ -171,14 +171,17 @@ export default defineComponent({
             ])
             this.rows.push(row)
         },
-        setFemaleNotPregnantRows() {
+        async setFemaleNotPregnantRows() {
             const row = [ 
                 this.totalNewF, 
                 this.totalCurF, 
                 this.totalIptF,
                 this.totalTbF
             ].map((data: any) => this.drill(data.filter((i: any) => !this.pregnantF.includes(i))))
-            this.rows.push([ 'All', 'FNP', ...row ])
+            this.report.setGender('FNP')
+            this.report.setAgeGroup('All')
+            const r = await this.appendRegimensToRow([ 'All', 'FNP', ...row ])
+            this.rows.push(r)
         },
         setFemaleRows() {
             this.report.setGender('female')
