@@ -12,24 +12,23 @@ export const AGE_GROUPS = [
 ]
 
 export class DisaggregatedReportService extends ArtReportService {
-    quarter: string;
     ageGroup: string;
     rebuildOutcome: boolean;
     initialize: boolean;
     outComeTable: string;
     gender: string;
-
     constructor() {
         super()
         this.gender = ''
         this.ageGroup = AGE_GROUPS[0]
-        this.quarter = 'pepfar'
         this.initialize = true
         this.rebuildOutcome = true
         this.outComeTable = 'temp_pepfar_patient_outcomes'
     }
 
     async init() {
+        this.initialize = true
+        this.rebuildOutcome = true
         const req = await this.getReport('cohort_disaggregated', this.getRequestParams())
         if (req && req.temp_disaggregated === 'created') {
             this.initialize = false
@@ -57,7 +56,6 @@ export class DisaggregatedReportService extends ArtReportService {
 
     getRequestParams(params={}) {
         return this.buildRequest({
-            'quarter': this.quarter,
             'age_group': this.ageGroup,
             'rebuild_outcome': this.rebuildOutcome,
             'initialize': this.initialize,

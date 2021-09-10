@@ -71,7 +71,7 @@ export default defineComponent({
         getQuaterOptions() {
             const quarters = ArtReportService.getReportQuarters()
             return quarters.map((q: any) => ({
-                label: q.quarter, value: q.start
+                label: q.name, value: q.start, other: q
             }))
         },
         getDateDurationFields(minDate='2001-01-01', maxDate=Service.getSessionDate()): Array<Field> {
