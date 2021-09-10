@@ -13,7 +13,7 @@
 
 <script lang='ts'>
 import { defineComponent } from 'vue'
-import { SurvivalAnalysisReportService } from "@/apps/ART/services/reports/survival_analysis_report_service"
+import { SurvivalAnalysisReportService, AGE_GROUP } from "@/apps/ART/services/reports/survival_analysis_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { isEmpty } from 'lodash'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
@@ -51,22 +51,43 @@ export default defineComponent({
                 type: FieldType.TT_SELECT,
                 validation: (val: Option) => Validation.required(val),
                 options: () => this.getQuaterOptions()
+            },
+            {
+                id: 'group',
+                helpText: 'Select sub-group',
+                type: FieldType.TT_SELECT,
+                validation: (val: Option) => Validation.required(val),
+                options: () => [
+                    {
+                        label: 'General',
+                        value: AGE_GROUP.GENERAL
+                    },
+                    {
+                        label: 'Children',
+                        value: AGE_GROUP.CHILDREN
+                    },
+                    {
+                        label: 'Option B+',
+                        value: AGE_GROUP.WOMEN
+                    }
+                ]
             }
         ]
     },
     methods: {
-        async onPeriod({ quarter }: any) {
+        async onPeriod({ quarter, group }: any) {
             this.reportReady = true
             this.period = quarter.label
             this.report = new SurvivalAnalysisReportService()
             this.report.setQuarter(quarter.label)
+            this.report.setAgeGroup(group.value)
             this.setRows((await this.report.getSurvivalAnalysis()))
         },
         setRows(quarterList: any) {
             for(const quarterIndex in quarterList) {
                 const quarterOutcomes = quarterList[quarterIndex]
-                let totalRegInQuarter = 0
                 let qInterval = 0
+                let totalRegInQuarter = 0
                 const outcomeRef: any = {
                     'On antiretrovirals': 0,
                     'Defaulted': 0,
