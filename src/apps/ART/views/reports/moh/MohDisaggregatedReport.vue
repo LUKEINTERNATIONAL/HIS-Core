@@ -115,7 +115,7 @@ export default defineComponent({
             await this.setMaleRows()
             await this.setFemalePregnantRows()
             await this.setFemaleBreastFeedingRows()
-            this.setTotalMalesRow()
+            await this.setTotalMalesRow()
             this.setFemaleNotPregnantRows()
         },
         async appendRegimensToRow(curRow: Array<any>) {
@@ -158,8 +158,10 @@ export default defineComponent({
             }
             return res
         },
-        setTotalMalesRow() {
-            this.rows.push([
+        async setTotalMalesRow() {
+            this.report.setGender('Male')
+            this.report.setAgeGroup('All')
+            const row = await this.appendRegimensToRow([
                 'All', 
                 'Male', 
                 this.drill(this.totalNewM),
@@ -167,6 +169,7 @@ export default defineComponent({
                 this.drill(this.totalIptM),
                 this.drill(this.totalTbM)
             ])
+            this.rows.push(row)
         },
         setFemaleNotPregnantRows() {
             const row = [ 
