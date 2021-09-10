@@ -45,10 +45,10 @@ export class ArtReportService extends Service {
         const quarters = []
         let year = HisDate.getCurrentYear()
         for(let i=0; i < minDuration; ++i) {
-            quarters.push({ quarter: `Q4 ${year}`, start: `${year}-10-01` })
-            quarters.push({ quarter: `Q3 ${year}`, start: `${year}-07-01` })
-            quarters.push({ quarter: `Q2 ${year}`, start: `${year}-04-01` })
-            quarters.push({ quarter: `Q1 ${year}`, start: `${year}-01-01` })
+            quarters.push({ quarter: `Q4 ${year}`, start: `${year}-10-01`, end: `${year}-12-31` })
+            quarters.push({ quarter: `Q3 ${year}`, start: `${year}-07-01`, end: `${year}-09-30` })
+            quarters.push({ quarter: `Q2 ${year}`, start: `${year}-04-01`, end: `${year}-06-30` })
+            quarters.push({ quarter: `Q1 ${year}`, start: `${year}-01-01`, end: `${year}-03-31` })
             --year
         }
         return quarters
