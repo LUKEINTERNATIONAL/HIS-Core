@@ -101,7 +101,7 @@ export default defineComponent({
                 this.report.setEndDate(config.end_date)
                 this.period = this.report.getDateIntervalPeriod()
             }
-            const isInit = this.report.init()
+            const isInit = await this.report.init()
             if (!isInit) {
                 return toastWarning('Unable to initialise report')
             }
