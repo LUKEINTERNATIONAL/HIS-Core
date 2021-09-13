@@ -5,6 +5,7 @@
       <visit-information
         :items="visitDates"
         @onPrint="printLabel"
+        @onDetails="showMore"
       ></visit-information>
     </ion-content>
     <ion-footer>
@@ -26,6 +27,7 @@ import { Patientservice } from "@/services/patient_service";
 import { ObservationService } from "@/services/observation_service";
 import InformationHeader from "@/components/InformationHeader.vue";
 import VisitInformation from "@/components/VisitInformation.vue";
+import MastercardDetails from "@/components/MastercardDetails.vue";
 import _ from "lodash";
 import {
   IonPage,
@@ -48,7 +50,7 @@ export default defineComponent({
     IonButton,
     IonToolbar,
     VisitInformation,
-    InformationHeader,
+    InformationHeader
   },
   data: () => ({
     isBDE: false as boolean,
@@ -247,6 +249,28 @@ export default defineComponent({
     printLabel(date: any) {
       new PatientPrintoutService(this.patientId).printVisitSummaryLbl(date);
     },
+    FormData(data: any) {
+      return Object.keys(data).map(d => {
+        return  {
+          label: d,
+          value: data[d]
+        }
+      })
+    },
+    async showMore(date: any) {
+          const title = 'Visit details for'
+          const data = await this.getExtras(date);
+          const modal = await modalController.create({
+              component: MastercardDetails,
+              backdropDismiss: false,
+              cssClass: "custom-modal",
+              componentProps: {
+                  title: `${title}: ${date}`,
+                  visitData: this.FormData(data)
+              }
+            })
+            modal.present()
+    }
   },
 });
 </script>

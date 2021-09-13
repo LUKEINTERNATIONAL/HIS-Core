@@ -43,6 +43,9 @@ export class ProgramService extends Service {
     static getCurrentProgramInformation(patientID: number, visitDate: any) {
         return super.getJson(`/programs/${super.getProgramID()}/patients/${patientID}/visit?date=${visitDate}`);
     }
+    static getMastercardDrugInformation(patientID: number, visitDate: any) {
+        return super.getJson(`/programs/${super.getProgramID()}/patients/${patientID}/mastercard_data?date=${visitDate}`);
+    }
     static getNextTask(patientID: number) {
         return super.getJson(`/workflows/${super.getProgramID()}/${patientID}`, {date: super.getSessionDate()});
     }

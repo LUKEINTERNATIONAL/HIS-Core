@@ -8,13 +8,13 @@
       <ion-col size="2" class="headers">Out</ion-col>
       <ion-col size="2" class="headers">Act</ion-col>
     </ion-row>
-    <ion-row v-for="(item, index) in items" :key="index">
+    <ion-row v-for="(item, index) in items" :key="index" class="data-row">
       <ion-col size="2"><ion-button @click="printLabel(item.value)"> {{item.label}} </ion-button></ion-col>
       <ion-col size="2"><p>{{item.data.weight}}</p> </ion-col>
       <ion-col size="2"><p>{{item.data.regimen}}</p> </ion-col>
       <ion-col size="2"><p>0%</p></ion-col>
       <ion-col size="2"><p>{{item.data.outcome}}</p></ion-col>
-      <ion-col size="2"><ion-button color="success">show more</ion-button></ion-col>
+      <ion-col size="2"><ion-button color="success" @click="showMore(item.value)">show more</ion-button></ion-col>
     </ion-row>
   </ion-grid>
 </template>
@@ -41,6 +41,9 @@ export default defineComponent({
   methods: {
     printLabel(date: any) {
       this.$emit("onPrint", date);
+    },
+    showMore(date: any) {
+      this.$emit("onDetails", date);
     }
   },
 });
@@ -49,13 +52,17 @@ export default defineComponent({
 .data {
   border-bottom: solid 1px black;
 }
-p {
-}
 .val {
   font-weight: bold;
 }
 .headers {
   border: 1px solid black;
+  border-right-style: none;
+  background-color: #ccccff;
+}
+.data-row {
+  border-bottom-style: 1px black;
+
 }
 ion-col {
   text-align: center;
