@@ -119,12 +119,13 @@ export default defineComponent({
             this.setFemaleNotPregnantRows()
         },
         async appendRegimensToRow(curRow: Array<any>) {
-            this.report.setAgeGroup('All')
             switch(this.report.getGender()) {
                 case 'breastfeeding':
+                    this.report.setAgeGroup('All')
                     this.report.setGender('Fbf')
                     break;
                 case 'pregnant':
+                    this.report.setAgeGroup('All')
                     this.report.setGender('FP')
                     break;
             }
