@@ -32,12 +32,21 @@
 
 <script>
 export default {
+  props: {
+    clinicName: {
+      type: String,
+      default: ''
+    },
+    reportparams: {
+      type: Object,
+      required: true
+    }
+  },
   data: function(){
     return {
       items: ['3.','4.','5.','6.','7.','8.','9.'],
       quarterStr: null,
       quarterYr: null,
-      clinicName: 'Hello world'
     }
   },
   methods: {
@@ -49,7 +58,6 @@ export default {
       this.quarterYr  = quarter.split(" ")[1];
     }
   },
-  props: ["reportparams"],
   watch: {
     reportparams: {
       immediate: true,

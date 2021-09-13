@@ -8,7 +8,7 @@
   <ion-page v-if="reportReady">
     <ion-content>
       <div class="report-content">
-        <cohort-h :reportparams="period"></cohort-h>
+        <cohort-h :reportparams="period" :clinicName="clinicName"></cohort-h>
         <cohort-v :dataparams="vCohort"> </cohort-v>
         <cohort-ft :params="cohort" :reportid="reportID" :quarter="period" ref="rep"> </cohort-ft>
       </div>
@@ -39,6 +39,7 @@ export default defineComponent({
     btns: [] as Array<any>,
     fields: [] as Array<Field>,
     reportID: -1 as any,
+    clinicName: MohCohortReportService.getUserLocation(),
     reportReady: false as boolean
   }),
   created() {
