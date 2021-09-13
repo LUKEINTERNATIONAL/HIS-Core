@@ -8,8 +8,8 @@
   <ion-page v-if="reportReady">
     <ion-content>
       <div class="report-content">
-        <cohort-h :reportparams="period" :clinicName="clinicName"></cohort-h>
         <cohort-v :dataparams="vCohort"> </cohort-v>
+        <cohort-h :reportparams="period" :clinicName="clinicName"></cohort-h>
         <cohort-ft :params="cohort" :reportid="reportID" :quarter="period" ref="rep"> </cohort-ft>
       </div>
     </ion-content>
