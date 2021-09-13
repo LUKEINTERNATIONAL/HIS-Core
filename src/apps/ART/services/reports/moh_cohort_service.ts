@@ -11,6 +11,14 @@ export class MohCohortReportService extends ArtReportService {
         return `programs/${this.programID}/reports/cohort`
     }
 
+    getCohortDrillDown(resourceId: string) {
+        return ArtReportService.getJson('cohort_report_drill_down', {
+            id: resourceId,
+            date: this.date,
+            'program_id': this.programID
+        })
+    }
+
     getCohortByQuarter() {
         return ArtReportService.getJson(this.cohortUrl(), { name: this.quarter })
     }

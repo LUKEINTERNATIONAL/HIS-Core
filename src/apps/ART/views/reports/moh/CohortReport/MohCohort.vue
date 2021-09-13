@@ -10,7 +10,7 @@
       <div id="report-content">
         <cohort-v :dataparams="vCohort"> </cohort-v>
         <cohort-h :reportparams="period" :clinicName="clinicName"></cohort-h>
-        <cohort-ft :params="cohort" :reportid="reportID" :quarter="period" ref="rep"> </cohort-ft>
+        <cohort-ft :onDrillDown="onDrillDown" :params="cohort" :reportid="reportID" :quarter="period" ref="rep"> </cohort-ft>
       </div>
     </ion-content>
     <his-footer :btns="btns"></his-footer>
@@ -29,6 +29,8 @@ import CohortH from "@/apps/ART/views/reports/moh/CohortReport/CohortHeader.vue"
 import CohortV from "@/apps/ART/views/reports/moh/CohortReport/CohortValidation.vue"
 import CohortFt from "@/apps/ART/views/reports/moh/CohortReport/CohortFT.vue"
 import { toastWarning } from '@/utils/Alerts'
+import HisDate from "@/utils/Date"
+import { modalController } from "@ionic/vue";
 
 export default defineComponent({
   mixins: [ReportMixinVue],
@@ -40,7 +42,7 @@ export default defineComponent({
     fields: [] as Array<Field>,
     reportID: -1 as any,
     clinicName: MohCohortReportService.getUserLocation(),
-    reportReady: false as boolean
+    reportReady: false as boolean,
   }),
   created() {
     this.btns = this.getBtns()
@@ -48,27 +50,51 @@ export default defineComponent({
   },
   methods: {
     async onPeriod(form: any, config: any) {
-        this.reportReady = true 
-        this.report = new MohCohortReportService()
-        let data: any = {}
+      this.reportReady = true 
+      this.report = new MohCohortReportService()
+      let data: any = {}
 
-        if (form.quarter.value === 'custom_period') {
-            this.report.setStartDate(config.start_date)
-            this.report.setEndDate(config.end_date)
-            this.period = `Custom ${this.report.getDateIntervalPeriod()}`
-            data = await this.report.getCohortByDates()
-        } else {
-            this.report.setQuarter(form.quarter.label)
-            data = await this.report.getCohortByQuarter()
-            this.period = form.quarter.label
-        }
-        if (data) {
-            this.reportID = data.id
-            this.vCohort = data.values
-            this.cohort = data.values
-        } else {
-            toastWarning('Unable to render report')
-        }
+      if (form.quarter.value === 'custom_period') {
+          this.report.setStartDate(config.start_date)
+          this.report.setEndDate(config.end_date)
+          this.period = `Custom ${this.report.getDateIntervalPeriod()}`
+          data = await this.report.getCohortByDates()
+      } else {
+          this.report.setQuarter(form.quarter.label)
+          data = await this.report.getCohortByQuarter()
+          this.period = form.quarter.label
+      }
+      if (data) {
+          this.reportID = data.id
+          this.vCohort = data.values
+          this.cohort = data.values
+      } else {
+          toastWarning('Unable to render report')
+      }
+    },
+    async onDrillDown(resourceId: string) {
+      const columns = [
+        'ARV number', 'Name', 'Gender', 'Birth Date', 'Action'
+      ]
+      const onRows = async () => {
+        const persons = await this.report.getCohortDrillDown(resourceId)
+        return persons.map((person: any) => ([
+          person['arv_number'],
+          `${person['given_name']} ${person['family_name']}`,
+          person['gender'],
+          HisDate.getAgeInYears(person['birthdate']),
+          person['outcome'] || 'N/A',
+          {
+            type: 'button',
+            name: 'Select',
+            action: async () => {
+              await modalController.dismiss({})
+              this.$router.push({ path: `/patient/dashboard/${person.person_id}`})
+            }
+          }
+        ]))
+      }
+      await this.tableDrill({ columns, onRows })
     },
     getBtns() {
         return  [
