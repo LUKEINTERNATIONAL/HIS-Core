@@ -34,6 +34,7 @@ import MohDisaggregatedReport from "@/apps/ART/views/reports/moh/MohDisaggregate
 import MohSurvivalAnalysisReport from "@/apps/ART/views/reports/moh/MohSurvivalAnalysisReport.vue"
 import MohTptInitiationsReport from "@/apps/ART/views/reports/moh/MohTptInitiationsReport.vue"
 import MohTxCurrMMD from "@/apps/ART/views/reports/moh/MohTxCurrMMD.vue"
+import MohCohort from "@/apps/ART/views/reports/moh/CohortReport/MohCohort.vue"
 import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
 
 export default [
@@ -106,6 +107,11 @@ export default [
         path: '/art/report/moh',
         component: ReportTemplate,
         children: [
+            {
+                name: 'moh_cohort',
+                path: 'moh_cohort',
+                component: MohCohort
+            },
             {
                 name: 'moh_disaggregated',
                 path: 'moh_disaggregated',

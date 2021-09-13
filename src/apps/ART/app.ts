@@ -53,6 +53,11 @@ const ART: AppInterface = {
             icon: img('login-logos/Malawi-Coat_of_arms_of_arms.png'),
             files: [
                 {
+                    name: 'Cohort',
+                    icon: img('reports.png'),
+                    pathName: 'moh_cohort'
+                },
+                {
                     name: 'Cohort / disaggregated',
                     icon: img('reports.png'),
                     pathName: 'moh_disaggregated'
