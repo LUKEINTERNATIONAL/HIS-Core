@@ -97,40 +97,44 @@ export default defineComponent({
       await this.tableDrill({ columns, onRows })
     },
     getBtns() {
-        return  [
-            {
-                name: "CSV",
-                size: "large",
-                slot: "start",
-                color: "primary",
-                visible: true,
-                onClick: async () => alert('Csv printed')
-            },
-            {
-                name: "PDF",
-                size: "large",
-                slot: "start",
-                color: "primary",
-                visible: true,
-                onClick: async () => alert('PDF printed')
-            },
-            {
-                name: "Disaggregeted",
-                size: "large",
-                slot: "end",
-                color: "primary",
-                visible: true,
-                onClick: async () => this.$router.push({ path:'/' })
-            },
-            {
-                name: "Finish",
-                size: "large",
-                slot: "end",
-                color: "success",
-                visible: true,
-                onClick: async () => this.$router.push({ path:'/' })
-            }
-        ]   
+      
+      return  [
+        {
+          name: "CSV",
+          size: "large",
+          slot: "start",
+          color: "primary",
+          visible: true,
+          onClick: async () => {
+            const rep = this.$refs.rep as any
+            rep.onDownload()
+          }
+        },
+        {
+          name: "PDF",
+          size: "large",
+          slot: "start",
+          color: "primary",
+          visible: true,
+          onClick: async () => alert('PDF printed')
+        },
+        {
+          name: "Disaggregeted",
+          size: "large",
+          slot: "end",
+          color: "primary",
+          visible: true,
+          onClick: async () => this.$router.push({ path:'/' })
+        },
+        {
+          name: "Finish",
+          size: "large",
+          slot: "end",
+          color: "success",
+          visible: true,
+          onClick: async () => this.$router.push({ path:'/' })
+        }
+      ]   
     }
   }
 })
