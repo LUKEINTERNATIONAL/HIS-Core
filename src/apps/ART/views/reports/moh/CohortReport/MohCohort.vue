@@ -49,15 +49,18 @@ export default defineComponent({
     async onPeriod(form: any, config: any) {
         this.reportReady = true 
         this.report = new MohCohortReportService()
-        if (form.quarter === 'custom_period') {
-            const { start, end } = form.quarter.other
-            this.report.setStartDate(start)
-            this.report.setEndDate(end)
-        } else {
+        let data: any = {}
+
+        if (form.quarter.value === 'custom_period') {
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
+            this.period = form.quarter.label
+            data = await this.report.getCohortByDates()
+        } else {
+            this.report.setQuarter(form.quarter.label)
+            data = await this.report.getCohortByQuarter()
+            this.period = ''
         }
-        const data = await this.report.getCohort()
         if (data) {
             this.reportID = data.id
             this.vCohort = data.values
