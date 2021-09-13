@@ -7,7 +7,7 @@
   </his-standard-form>
   <ion-page v-if="reportReady">
     <ion-content>
-      <div class="report-content">
+      <div id="report-content">
         <cohort-v :dataparams="vCohort"> </cohort-v>
         <cohort-h :reportparams="period" :clinicName="clinicName"></cohort-h>
         <cohort-ft :params="cohort" :reportid="reportID" :quarter="period" ref="rep"> </cohort-ft>
@@ -109,3 +109,12 @@ export default defineComponent({
   }
 })
 </script>
+<style>
+  #report-content {
+    padding: 2em;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #333;
+ }
+</style>

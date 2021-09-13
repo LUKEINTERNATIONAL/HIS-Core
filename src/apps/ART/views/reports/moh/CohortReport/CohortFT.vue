@@ -1,6 +1,5 @@
 <template>
   <table>
-    
     <tr class="section-description">
       <td class="numbers">&nbsp;</td>
       <td style="font-weight: bold;" colspan="2">ART Clinic</td>
@@ -1741,6 +1740,10 @@ export default {
 </script>
 
 <style scoped>
+a {
+    color: #337ab7;
+    text-decoration: none;
+}
 table {
   width: 100%;
   border-collapse: collapse;
@@ -1755,7 +1758,9 @@ tr {
 td {
   border-style: solid;
   border-width: 1px;
+  text-align: center;
 }
+
 .section-description td {
   border-width: 0px;
 }
