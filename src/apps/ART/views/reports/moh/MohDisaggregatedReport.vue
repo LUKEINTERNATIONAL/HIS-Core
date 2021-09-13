@@ -18,9 +18,6 @@ import { DisaggregatedReportService, AGE_GROUPS, TEMP_OUTCOME_TABLE } from "@/ap
 import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
-import Validation from "@/components/Forms/validations/StandardValidations"
-import { Option } from '@/components/Forms/FieldInterface'
-import { FieldType } from "@/components/Forms/BaseFormElements"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -76,15 +73,7 @@ export default defineComponent({
         pregnantF: [] as Array<any>
     }),
     created() {
-        this.fields = [
-            {
-                id: 'quarter',
-                helpText: 'Select Quarter',
-                type: FieldType.TT_SELECT,
-                validation: (val: Option) => Validation.required(val),
-                options: () => this.getQuaterOptions()
-            }
-        ]
+        this.fields = this.getDateDurationFields(true, false)
     },
     methods: {
         async onPeriod(form: any, config: any) {

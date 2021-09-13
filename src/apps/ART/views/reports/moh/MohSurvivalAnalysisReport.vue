@@ -45,13 +45,7 @@ export default defineComponent({
     }),
     created() {
         this.fields = [
-            {
-                id: 'quarter',
-                helpText: 'Select Quarter',
-                type: FieldType.TT_SELECT,
-                validation: (val: Option) => Validation.required(val),
-                options: () => this.getQuaterOptions()
-            },
+            ...this.getDateDurationFields(true),
             {
                 id: 'group',
                 helpText: 'Select sub-group',
