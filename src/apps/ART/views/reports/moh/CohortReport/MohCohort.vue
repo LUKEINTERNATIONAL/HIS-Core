@@ -54,12 +54,12 @@ export default defineComponent({
         if (form.quarter.value === 'custom_period') {
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
-            this.period = form.quarter.label
+            this.period = `Custom ${this.report.getDateIntervalPeriod()}`
             data = await this.report.getCohortByDates()
         } else {
             this.report.setQuarter(form.quarter.label)
             data = await this.report.getCohortByQuarter()
-            this.period = ''
+            this.period = form.quarter.label
         }
         if (data) {
             this.reportID = data.id
