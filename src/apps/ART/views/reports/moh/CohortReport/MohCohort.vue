@@ -1,4 +1,9 @@
 <template>
+  <ion-loading
+    :is-open="isLoading"
+    message="Please wait..."
+  >
+  </ion-loading>
   <his-standard-form
     v-if="!reportReady"
     @onFinish="onPeriod"
@@ -20,7 +25,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import HisFooter from "@/components/HisDynamicNavFooter.vue";
-import { IonPage, IonContent } from "@ionic/vue"
+import { IonPage, IonContent, IonLoading } from "@ionic/vue"
 import { Field } from '@/components/Forms/FieldInterface'
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import ReportMixinVue from "../../ReportMixin.vue";
@@ -34,11 +39,12 @@ import { modalController } from "@ionic/vue";
 
 export default defineComponent({
   mixins: [ReportMixinVue],
-  components: { CohortH, CohortV, CohortFt, HisStandardForm, HisFooter, IonPage, IonContent },
+  components: { IonLoading, CohortH, CohortV, CohortFt, HisStandardForm, HisFooter, IonPage, IonContent },
   data: () => ({
     cohort: {} as any,
     vCohort: {} as any,
     btns: [] as Array<any>,
+    isLoading: false as boolean,
     fields: [] as Array<Field>,
     reportID: -1 as any,
     clinicName: MohCohortReportService.getUserLocation(),
@@ -51,26 +57,28 @@ export default defineComponent({
   methods: {
     async onPeriod(form: any, config: any) {
       this.reportReady = true 
+      this.isLoading = true
       this.report = new MohCohortReportService()
       let data: any = {}
 
       if (form.quarter.value === 'custom_period') {
-          this.report.setStartDate(config.start_date)
-          this.report.setEndDate(config.end_date)
-          this.period = `Custom ${this.report.getDateIntervalPeriod()}`
-          data = await this.report.getCohortByDates()
+        this.report.setStartDate(config.start_date)
+        this.report.setEndDate(config.end_date)
+        this.period = `Custom ${this.report.getDateIntervalPeriod()}`
+        data = await this.report.getCohortByDates()
       } else {
-          this.report.setQuarter(form.quarter.label)
-          data = await this.report.getCohortByQuarter()
-          this.period = form.quarter.label
+        this.report.setQuarter(form.quarter.label)
+        data = await this.report.getCohortByQuarter()
+        this.period = form.quarter.label
       }
       if (data) {
-          this.reportID = data.id
-          this.vCohort = data.values
-          this.cohort = data.values
+        this.reportID = data.id
+        this.vCohort = data.values
+        this.cohort = data.values
       } else {
-          toastWarning('Unable to render report')
+        toastWarning('Unable to render report')
       }
+      this.isLoading = false
     },
     async onDrillDown(resourceId: string) {
       const columns = [
