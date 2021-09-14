@@ -142,6 +142,11 @@ const ART: AppInterface = {
                     name: 'Regimns and Formulation',
                     icon: img('reports.png'),
                     pathName: 'clinic_regimen_formulation'
+                },
+                {
+                    name: 'Stock card report',
+                    icon: img('reports.png'),
+                    pathName: 'stock_card_report'
                 }
             ]
         },
