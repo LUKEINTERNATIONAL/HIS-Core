@@ -124,7 +124,7 @@ export default defineComponent({
           slot: "end",
           color: "primary",
           visible: true,
-          onClick: async () => this.$router.push({ path:'/' })
+          onClick: async () => this.$router.push({ name:'moh_disaggregated' })
         },
         {
           name: "Finish",
