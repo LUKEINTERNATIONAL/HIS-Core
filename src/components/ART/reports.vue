@@ -1,26 +1,21 @@
 <template>
   <div>
-    <div v-show="activeReports.length == 0">
+    <div v-show="activeReports.length <= 0">
       <ion-grid>
         <ion-row>
-          <ion-col
-            size="6"
-            v-for="(report, index) in Object.keys(reports)"
-            :key="index"
-          >
+          <ion-col size="6" v-for="(group, index) in reportGroups" :key="index">
             <task-card
-              @click="showReports(report)"
+              @click="activeReports = group.files"
               :key="index"
-              :title="report"
-              :description="report"
-              :icon="'/assets/images/folder.png'"
+              :title="group.name"
+              :icon="group.icon"
             >
             </task-card>
           </ion-col>
         </ion-row>
       </ion-grid>
     </div>
-    <div v-if="activeReports.length > 0">
+    <div v-if="activeReports.length >= 1">
       <ion-button @click="activeReports = []" color="danger">back</ion-button>
       <br />
       <ion-grid>
@@ -31,10 +26,10 @@
             :key="idx"
           >
             <task-card
+              @click="gotoReport(innerreport)"
               :key="index"
               :title="innerreport.name"
-              :description="innerreport.name"
-              :icon="'/assets/images/folder.png'"
+              :icon="innerreport.icon"
             >
             </task-card>
           </ion-col>
@@ -44,74 +39,31 @@
   </div>
 </template>
 
-<script>
+<script lang='ts'>
 import { defineComponent } from "vue";
 import { IonButton } from "@ionic/vue";
+import ART from "@/apps/ART/app"
+import { ReportInterface, ReportGroupInterface } from "@/apps/interfaces/AppInterface"
 import TaskCard from "@/components/DataViews/TaskCard.vue";
+
 export default defineComponent({
   components: {
     IonButton,
     "task-card": TaskCard,
   },
-  data() {
-    return {
-      reports: {
-        clinic: [
-          {
-            name: "Cohort / disaggregated",
-            route: "/",
-          },
-          {
-            name: "Survival analysis",
-            route: "/",
-          },
-          {
-            name: "TPT new initiations",
-            route: "/",
-          },
-        ],
-        MoH: [
-          {
-            name: "Cohort / disaggregated",
-            route: "/",
-          },
-          {
-            name: "Survival analysis",
-            route: "/",
-          },
-          {
-            name: "TPT new initiations",
-            route: "/",
-          },
-        ],
-        PEPFAR: [
-          {
-            name: "Cohort / disaggregated",
-            route: "/",
-          },
-          {
-            name: "Survival analysis",
-            route: "/",
-          },
-          {
-            name: "TPT new initiations",
-            route: "/",
-          },
-        ],
-      },
-      activeReports: [],
-    };
-  },
+  data: () => ({
+    reportGroups: ART.reports as Array<ReportGroupInterface>,
+    activeReports: [] as Array<ReportInterface>
+  }),
   methods: {
-    showReports(report) {
-      this.activeReports = [...this.reports[report]];
-    },
-  },
-  mounted() {
-    //
-  },
-});
+    gotoReport(reportFile: ReportInterface){
+      if (reportFile.pathName) {
+        return this.$router.push({name: reportFile.pathName})
+      }
+      if (reportFile.pathUrl) {
+        this.$router.push(reportFile.pathUrl)
+      }
+    }
+  }
+})
 </script>
-
-<style>
-</style>

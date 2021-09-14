@@ -16,6 +16,18 @@ interface PatientDashboarInterface {
     readonly tasks: Record<string, TaskInterface[]>;
 }
 
+export interface ReportGroupInterface {
+    name: string;
+    icon: string;
+    files: Array<ReportInterface>;
+}
+export interface ReportInterface {
+    name: string;
+    icon?: string;
+    pathName?: string;
+    pathUrl?: string;    
+}
+
 export interface ActivityInterface {
     readonly value: string;
     selected: boolean;
@@ -34,6 +46,7 @@ export interface AppInterface {
     readonly applicationDescription: string;
     readonly appRoutes: Array<RouteRecordRaw>;
     readonly patientDashboard: PatientDashboarInterface;
+    readonly reports: Array<ReportGroupInterface>;
     activities: Array<ActivityInterface>;
     preferences: { [key: string]: Array<PreferenceInterface>};
     preferenceComponents?: any;

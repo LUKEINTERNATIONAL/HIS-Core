@@ -10,6 +10,34 @@ import Vitals from "@/apps/ART/views/encounters/Vitals.vue"
 import PatientType from "@/apps/ART/views/encounters/PatientType.vue"
 import FastTrack from "@/apps/ART/views/encounters/FastTrack.vue"
 import LabActivities from "@/apps/ART/views/encounters/LabActivities.vue"
+import PepFarDiaggregatedReport from "@/apps/ART/views/reports/pepfar/disaggregated.vue"
+import PepFarDefaultersReport from "@/apps/ART/views/reports/pepfar/defaulters.vue"
+import PepFarRegimenReport from "@/apps/ART/views/reports/pepfar/regimen.vue"
+import PepFarRegimenSwitchReport from "@/apps/ART/views/reports/pepfar/RegimenSwitch.vue"
+import TBPrevReport from "@/apps/ART/views/reports/pepfar/TBPrev.vue"
+import TXCurrMMD from "@/apps/ART/views/reports/pepfar/TxCurrMMD.vue"
+import TXCurrMl from "@/apps/ART/views/reports/pepfar/TxCurrMl.vue"
+import TXRtt from "@/apps/ART/views/reports/pepfar/TxRtt.vue"
+import ClinicMissedAppointmentsReport from "@/apps/ART/views/reports/clinic/ClinicMissedAppointments.vue"
+import ClinicDefaultersReport from "@/apps/ART/views/reports/clinic/ClinicDefaulters.vue"
+import ClinicRegimenReport from "@/apps/ART/views/reports/clinic/ClinicRegimenReport.vue"
+import ClinicRegimenSwitchReport from "@/apps/ART/views/reports/clinic/ClinicRegimenSwitchReport.vue"
+import ClinicPregnantPatientsReport from "@/apps/ART/views/reports/clinic/ClinicPregnantPatientsReport.vue"
+import ClinicClientsDueForViralLoad from "@/apps/ART/views/reports/clinic/ClinicDueForViralLoad.vue"
+import ClinicRetentionReport from "@/apps/ART/views/reports/clinic/ClinicRetentionReport.vue"
+import ClinicExternalConsultationReport from "@/apps/ART/views/reports/clinic/ClinicExternalConsultation.vue"
+import ClinicViralLoadReport from "@/apps/ART/views/reports/clinic/ClinicViralLoadReport.vue"
+import ClinicOtherOutcomeReport from "@/apps/ART/views/reports/clinic/ClinicOtherOutcomeReport.vue"
+import ClinicRegimenFormulationReport from "@/apps/ART/views/reports/clinic/ClinicRegimenFormulationReport.vue"
+import ClinicLabResultsReport from "@/apps/ART/views/reports/clinic/ClinicLabResultsReport.vue"
+import MohDisaggregatedReport from "@/apps/ART/views/reports/moh/MohDisaggregatedReport.vue"
+import MohSurvivalAnalysisReport from "@/apps/ART/views/reports/moh/MohSurvivalAnalysisReport.vue"
+import MohTptInitiationsReport from "@/apps/ART/views/reports/moh/MohTptInitiationsReport.vue"
+import MohTxCurrMMD from "@/apps/ART/views/reports/moh/MohTxCurrMMD.vue"
+import MohCohort from "@/apps/ART/views/reports/moh/CohortReport/MohCohort.vue"
+import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
+import StockCardReport from "@/apps/ART/views/reports/clinic/ClinicStockCardReport.vue"
+import ClinicAppointments from "@/apps/ART/views/reports/clinic/ClinicAppointments.vue"
 
 export default [
     {
@@ -76,5 +104,158 @@ export default [
         name: "lab activities",
         path: "/art/encounters/lab/:patient_id",
         component: LabActivities
+    },
+    {
+        path: '/art/report/moh',
+        component: ReportTemplate,
+        children: [
+            {
+                name: 'moh_cohort',
+                path: 'moh_cohort',
+                component: MohCohort
+            },
+            {
+                name: 'moh_disaggregated',
+                path: 'moh_disaggregated',
+                component: MohDisaggregatedReport
+            }, 
+            {
+                name: 'moh_survial_analysis',
+                path: 'moh_survial_analysis',
+                component: MohSurvivalAnalysisReport
+            }, 
+            {
+                name: 'moh_tpt_new_initiations',
+                path: 'moh_tpt_new_initiations',
+                component: MohTptInitiationsReport
+            }, 
+            {
+                name: 'moh_tx_curr_mmd',
+                path: 'moh_tx_curr_mmd',
+                component: MohTxCurrMMD
+            }
+        ]
+    },
+    {
+        path: '/art/report/clinic',
+        component: ReportTemplate,
+        children: [
+            {
+                name: 'clinic_retention_report',
+                path: "clinic_retention_report",
+                component: ClinicRetentionReport
+            },
+            {
+                name: 'clinic_external_consultation_report',
+                path: "clinic_external_consultation_report",
+                component: ClinicExternalConsultationReport
+            },
+            {
+                name: 'clinic_due_viral_load_report',
+                path: "clinic_due_viral_load_report",
+                component: ClinicClientsDueForViralLoad
+            },
+            {
+                name: "clinic_lab_results",
+                path: "clinic_lab_results",
+                component: ClinicLabResultsReport
+            },
+            {
+                name: 'clinic_missed_appointments',
+                path: "clinic_missed_appointments",
+                component: ClinicMissedAppointmentsReport
+            },
+            {
+                name: "clinic_defaulters_report",
+                path: "clinic_defaulters",
+                component: ClinicDefaultersReport
+            },
+            {
+                name: "clinic_regimen_report",
+                path: "clinic_regimen_report",
+                component: ClinicRegimenReport
+            },
+            {
+                name: "clinic_regimen_switch",
+                path: "clinic_regimen_switch",
+                component: ClinicRegimenSwitchReport
+            },
+            {
+                name: "clinic_pregnant_patients",
+                path: "clinic_pregnant_patients",
+                component: ClinicPregnantPatientsReport
+            },
+            {
+                name: "clinic_appointments",
+                path: "clinic_appointments",
+                component: ClinicAppointments
+            },
+            {
+                name: "stock_card_report",
+                path: "stock_card_report",
+                component: StockCardReport
+            },
+            {
+                name: "clinic_viral_load",
+                path: "clinic_viral_load",
+                component: ClinicViralLoadReport
+            },
+            {
+                name: "clinic_other_outcome_list",
+                path: "clinic_other_outcome_list",
+                component: ClinicOtherOutcomeReport
+            },
+            {
+                name: "clinic_regimen_formulation",
+                path: "clinic_regimen_formulation",
+                component: ClinicRegimenFormulationReport
+            },
+        ]
+    },
+    {
+        path: '/art/report/pepfar',
+        component: ReportTemplate,
+        children: [
+            {
+                name: 'pepfar_disaggregated_report',
+                path: "disaggregated",
+                component: PepFarDiaggregatedReport
+            },
+            {
+                name: "pepfar_defaulters_report",
+                path: "defaulters",
+                component: PepFarDefaultersReport
+            },
+            {
+                name: "pepfar_regimen_report",
+                path: "regimens",
+                component: PepFarRegimenReport
+            },
+            {
+                name: "pepfar_regimen_switch",
+                path: "regimen_switch",
+                component: PepFarRegimenSwitchReport
+            },
+            {
+                name: "pepfar_tb_prev_report",
+                path: "tb_prev",
+                component: TBPrevReport
+            },
+            {
+                name: "pepfar_tx_curr_mmd_report",
+                path: "tx_cur_mmd",
+                component: TXCurrMMD
+            },
+            {
+                name: "pepfar_tx_ml_report",
+                path: "tx_ml",
+                component: TXCurrMl
+            },
+            {
+                name: "pepfar_tx_rtt",
+                path: "tx_rtt",
+                component: TXRtt
+            }
+        ]
     }
 ]
