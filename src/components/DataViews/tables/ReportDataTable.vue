@@ -80,6 +80,9 @@ export default defineComponent({
         position: sticky;
         top: 0;
     }
+    th {
+        background: rgb(233, 233, 233);
+    }
     th, td {
         width: 3%;
         padding: 0.6em;
