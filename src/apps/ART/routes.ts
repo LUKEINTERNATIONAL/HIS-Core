@@ -37,6 +37,7 @@ import MohTxCurrMMD from "@/apps/ART/views/reports/moh/MohTxCurrMMD.vue"
 import MohCohort from "@/apps/ART/views/reports/moh/CohortReport/MohCohort.vue"
 import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
 import StockCardReport from "@/apps/ART/views/reports/clinic/ClinicStockCardReport.vue"
+import ClinicAppointments from "@/apps/ART/views/reports/clinic/ClinicAppointments.vue"
 
 export default [
     {
@@ -183,6 +184,11 @@ export default [
                 name: "clinic_pregnant_patients",
                 path: "clinic_pregnant_patients",
                 component: ClinicPregnantPatientsReport
+            },
+            {
+                name: "clinic_appointments",
+                path: "clinic_appointments",
+                component: ClinicAppointments
             },
             {
                 name: "stock_card_report",

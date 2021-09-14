@@ -25,6 +25,10 @@ export class PatientReportService extends ArtReportService {
         super()
     }
     
+    getBookedAppointments(date: string) {
+        return ArtReportService.getJson(`programs/${this.programID}/scheduled_appointments`, { date })
+    }
+
     getViralLoadResults(range: string) {
         return this.getReport(`/programs/${this.programID}/reports/high_vl_patients`, { range })
     }

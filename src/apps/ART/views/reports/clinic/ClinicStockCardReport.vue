@@ -28,7 +28,6 @@ export default defineComponent({
         this.report = new StockReportService()
         await this.report.loadStock()
         const stock  = this.report.groupStock()
-        console.log(stock)
         stock.forEach((s: any) => {
             this.rows.push([
                 s.drugName,
