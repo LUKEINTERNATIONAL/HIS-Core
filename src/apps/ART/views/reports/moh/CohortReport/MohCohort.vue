@@ -7,9 +7,9 @@
   </his-standard-form>
   <ion-page v-if="reportReady">
     <ion-content>
-      <div id="report-content">
-        <cohort-v :dataparams="vCohort"> </cohort-v>
-        <cohort-h :reportparams="period" :clinicName="clinicName"></cohort-h>
+      <div class="report-content" ref="cohort">
+        <cohort-v :dataparams="vCohort" ref="validation"> </cohort-v>
+        <cohort-h :reportparams="period" ref="header" :clinicName="clinicName"></cohort-h>
         <cohort-ft :onDrillDown="onDrillDown" :params="cohort" :reportid="reportID" :quarter="period" ref="rep"> </cohort-ft>
       </div>
     </ion-content>
@@ -116,7 +116,7 @@ export default defineComponent({
           slot: "start",
           color: "primary",
           visible: true,
-          onClick: async () => alert('PDF printed')
+          onClick: async () => print(),
         },
         {
           name: "Disaggregeted",
@@ -140,11 +140,16 @@ export default defineComponent({
 })
 </script>
 <style>
-  #report-content {
-    padding: 2em;
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-    font-size: 14px;
-    line-height: 1.42857143;
-    color: #333;
- }
+.report-content {
+  padding: 2em;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #333;
+}
+@media print {
+  ion-footer {
+    display: none;
+  }
+}
 </style>
