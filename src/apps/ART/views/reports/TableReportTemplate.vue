@@ -80,6 +80,14 @@ export default defineComponent({
       required: true,
       default: false
     },
+    canExportPDf: {
+      type: Boolean,
+      default: true
+    },
+    canExportCsv: {
+      type: Boolean,
+      default: true
+    },
     onReportConfiguration: {
       type: Function,
       required: true
@@ -90,17 +98,19 @@ export default defineComponent({
     logo: "/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png" as string
   }),
   created() {
-    this.btns = [
-      ...this.customBtns,
-      {
+    this.btns = this.customBtns
+    if (this.canExportPDf) {
+      this.btns.push({
         name: "CSV",
         size: "large",
         slot: "start",
         color: "primary",
         visible: true,
         onClick: async () => this.$router.back()
-      },
-      {
+      })
+    }
+    if (this.canExportCsv) {
+      this.btns.push({
         name: "PDF",
         size: "large",
         slot: "start",
@@ -115,16 +125,16 @@ export default defineComponent({
           })
           doc.save(`${this.title}-${this.period}.pdf`)
         }
-      },
-      {
-        name: "Finish",
-        size: "large",
-        slot: "end",
-        color: "primary",
-        visible: true,
-        onClick: async () => this.$router.push({ path:'/' })
-      }
-    ]
+      })
+    }
+    this.btns.push({
+      name: "Finish",
+      size: "large",
+      slot: "end",
+      color: "primary",
+      visible: true,
+      onClick: async () => this.$router.push({ path:'/' })
+    })
   }
 })
 </script>

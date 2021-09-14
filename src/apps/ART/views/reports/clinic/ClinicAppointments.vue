@@ -6,6 +6,8 @@
         :fields="fields"
         :columns="columns"
         :reportReady="reportReady"
+        :canExportCsv="false"
+        :canExportPDf="false"
         :onReportConfiguration="onPeriod"> 
     </report-template>
 </template>
