@@ -6,6 +6,7 @@
         :fields="fields"
         :columns="columns"
         :reportReady="reportReady"
+        :isLoading="isLoading"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>
@@ -29,6 +30,7 @@ export default defineComponent({
         totalClients: [],
         rows: [] as Array<any>,
         reportReady: false as boolean,
+        isLoading: false as boolean,
         columns: [
             'Reg cohort',
             'Interval (months)',
@@ -71,11 +73,13 @@ export default defineComponent({
     methods: {
         async onPeriod({ quarter, group }: any) {
             this.reportReady = true
+            this.isLoading = true
             this.period = quarter.label
             this.report = new SurvivalAnalysisReportService()
             this.report.setQuarter(quarter.label)
             this.report.setAgeGroup(group.value)
             this.setRows((await this.report.getSurvivalAnalysis()))
+            this.isLoading = false
         },
         setRows(quarterList: any) {
             for(const quarterIndex in quarterList) {

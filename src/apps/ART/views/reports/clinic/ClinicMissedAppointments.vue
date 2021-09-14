@@ -7,6 +7,7 @@
         :columns="columns"
         :canExportCsv="false"
         :canExportPDf="false"
+        :isLoading="isLoading"
         :reportReady="reportReady"
         :onReportConfiguration="onPeriod"
         > 
@@ -25,6 +26,7 @@ export default defineComponent({
     data: () => ({
         title: 'Clinic Missed Appointments',
         totalClients: [],
+        isLoading: false as boolean,
         rows: [] as Array<any>,
         reportReady: false as boolean,
         columns: [
@@ -37,11 +39,13 @@ export default defineComponent({
     methods: {
         async onPeriod(_: any, config: any) {
             this.reportReady = true
+            this.isLoading = true
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
             this.period = this.report.getDateIntervalPeriod()
             this.setRows((await this.report.getMissedAppointments()))
+            this.isLoading = false
         },
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {

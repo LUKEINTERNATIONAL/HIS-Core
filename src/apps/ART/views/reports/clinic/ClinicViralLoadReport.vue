@@ -6,6 +6,7 @@
         :fields="fields"
         :columns="columns"
         :reportReady="reportReady"
+        :isLoading="isLoading"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>
@@ -28,6 +29,7 @@ export default defineComponent({
         totalClients: [],
         rows: [] as Array<any>,
         reportReady: false as boolean,
+        isLoading: false as boolean,
         columns: [
             'ARV#', 'Gender', 'Birthdate', 'Specimen', 'Ordered', 'Result', 'Released'
         ]
@@ -61,12 +63,14 @@ export default defineComponent({
         async onPeriod(form: any, config: any) {
             const resultType = form.result_type
             this.reportReady = true
+            this.isLoading = true
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
             this.title = `${resultType.label} Report`
             this.period = this.report.getDateIntervalPeriod()
             this.setRows((await this.report.getViralLoadResults(resultType.value.toLowerCase())))
+            this.isLoading = false
         },
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {

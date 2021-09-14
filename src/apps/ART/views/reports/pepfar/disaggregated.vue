@@ -5,6 +5,7 @@
         :rows="rows" 
         :fields="fields"
         :columns="columns"
+        :isLoading="isLoading"
         :reportReady="reportReady"
         :onReportConfiguration="onPeriod"
         > 
@@ -26,6 +27,7 @@ export default defineComponent({
         title: 'PEPFAR Diseggregated Report',
         rows: [] as Array<any>,
         reportReady: false as boolean,
+        isLoading: false as boolean,
         columns: [
             'Age group',
             'Gender',
@@ -51,6 +53,7 @@ export default defineComponent({
     methods: {
         async onPeriod(_: any, config: any) {
             this.reportReady = true
+            this.isLoading = true
             this.report = new DisaggregatedReportService()
             this.report.setQuarter('pepfar')
             this.report.setStartDate(config.start_date)
@@ -58,9 +61,11 @@ export default defineComponent({
             this.period = this.report.getDateIntervalPeriod()
             const isInit = await this.report.init()
             if (!isInit) {
+                this.isLoading = false
                 return toastWarning('Unable to initialise report')
             }
             await this.setTableRows()
+            this.isLoading = false
         },
         drill(data: Array<any>) {
             return this.buildDrillableLink(data)

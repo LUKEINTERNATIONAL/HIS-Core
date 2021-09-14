@@ -6,6 +6,7 @@
         :fields="fields"
         :columns="columns"
         :reportReady="reportReady"
+        :isLoading="isLoading"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>
@@ -26,6 +27,7 @@ export default defineComponent({
         reportReady: false as boolean,
         rows: [] as Array<any>,
         title: 'ART disaggregated report',
+        isLoading: false as boolean,
         columns: [
             'Age group',
             'Gender',
@@ -78,6 +80,7 @@ export default defineComponent({
     methods: {
         async onPeriod(form: any, config: any) {
             this.reportReady = true
+            this.isLoading=true
             this.report = new DisaggregatedReportService()
             this.report.setOutcomeTable(TEMP_OUTCOME_TABLE.PATIENT_OUTCOME_TEMP)
             if (form.quarter) {
@@ -92,9 +95,11 @@ export default defineComponent({
             }
             const isInit = await this.report.init()
             if (!isInit) {
+                this.isLoading = false
                 return toastWarning('Unable to initialise report')
             }
             await this.setTableRows()
+            this.isLoading = false
         },
         drill(data: Array<any>) {
             return this.buildDrillableLink(data)

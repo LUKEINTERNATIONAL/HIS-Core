@@ -8,6 +8,7 @@
         :canExportCsv="false"
         :canExportPDf="false"
         :reportReady="reportReady"
+        :isLoading="isLoading"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>
@@ -30,6 +31,7 @@ export default defineComponent({
         totalClients: [],
         rows: [] as Array<any>,
         outcome: '' as string,
+        isLoading: false as boolean,
         columns: [
             'ARV#','First name','Last name', 'birthdate', 'Gender', 'Outcome date'
         ]
@@ -62,6 +64,7 @@ export default defineComponent({
     methods: {
         async onPeriod({outcome}: any, config: any) {
             this.reportReady = true
+            this.isLoading = true
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
@@ -69,6 +72,7 @@ export default defineComponent({
             this.title = `${this.outcome} Report`
             this.period = this.report.getDateIntervalPeriod()
             this.setRows((await this.report.getOtherOutcome(this.outcome)))
+            this.isLoading = false
         },
         async setRows(data: Array<any>) {
             const isTransferOut = this.outcome.match(/trans/i)

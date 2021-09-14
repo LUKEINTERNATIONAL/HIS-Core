@@ -6,6 +6,7 @@
         :fields="fields"
         :columns="columns"
         :reportReady="reportReady"
+        :isLoading="isLoading"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>
@@ -25,6 +26,7 @@ export default defineComponent({
         totalClients: [],
         reportReady: false,
         rows: [] as Array<any>,
+        isLoading: false as boolean,
         columns: [
             'ARV#',
             'App.',
@@ -42,12 +44,14 @@ export default defineComponent({
     methods: {
         async onPeriod(_: any, config: any) {
             this.reportReady = true
+            this.isLoading = true
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
             this.period = this.report.getDateIntervalPeriod()
             const data = await this.report.getClientsDueForVl()
             this.setRows(data)
+            this.isLoading = false
         },
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {

@@ -6,6 +6,7 @@
         :fields="fields"
         :columns="columns"
         :reportReady="reportReady"
+        :isLoading="isLoading"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>
@@ -25,6 +26,7 @@ export default defineComponent({
         cohort: {} as any,
         rows: [] as Array<any>,
         reportReady: false as boolean,
+        isLoading: false as boolean,
         columns: [
             'Age group',
             'Gender',
@@ -37,6 +39,7 @@ export default defineComponent({
     methods: {
         async onPeriod(_: any, config: any) {
             this.reportReady = true
+            this.isLoading = true
             this.report = new TxReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
@@ -44,6 +47,7 @@ export default defineComponent({
             this.cohort = await this.report.getTxRttReport()
             await this.setRows('F')
             await this.setRows('M')
+            this.isLoading = false
         },
         async setRows(gender: string) {
             for(const i in AGE_GROUPS) {

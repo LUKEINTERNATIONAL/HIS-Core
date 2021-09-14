@@ -6,6 +6,7 @@
         :fields="fields"
         :columns="columns"
         :reportReady="reportReady"
+        :isLoading="isLoading"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>
@@ -28,6 +29,7 @@ export default defineComponent({
         title: 'Regimen Formulation: Patient level report',
         totalClients: [],
         rows: [] as Array<any>,
+        isLoading: false as boolean,
         reportReady: false as boolean,
         columns: [
             'ARV#', 'Gender', 'DOB'
@@ -55,11 +57,13 @@ export default defineComponent({
     methods: {
         async onPeriod({regimen, formulation}: any, config: any) {
             this.reportReady = true
+            this.isLoading = true
             this.report = new RegimenReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
             this.period = this.report.getDateIntervalPeriod()
             this.setRows((await this.report.getRegimenFormulationReport(regimen.value, formulation.value)))
+            this.isLoading = false
         },
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {

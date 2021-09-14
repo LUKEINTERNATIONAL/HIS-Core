@@ -6,6 +6,7 @@
         :fields="fields"
         :columns="columns"
         :reportReady="reportReady"
+        :isLoading="isLoading"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>
@@ -24,6 +25,7 @@ export default defineComponent({
         title: 'PEPFAR Regimen Report',
         rows: [] as Array<any>,
         reportReady: false as boolean,
+        isLoading: false as boolean,
         columns: [
             'ARV#',
             'Gender',
@@ -39,11 +41,13 @@ export default defineComponent({
     methods: {
         async onPeriod(_: any, config: any) {
             this.reportReady = true
+            this.isLoading = true
             this.report = new RegimenReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
             this.period = this.report.getDateIntervalPeriod()
             this.setRows((await this.report.getRegimenReport()))
+            this.isLoading = false
         },
         setRows(data: any) {
             Object.values(data).forEach((d: any) => {

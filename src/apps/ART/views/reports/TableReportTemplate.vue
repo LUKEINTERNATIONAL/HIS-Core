@@ -1,4 +1,9 @@
 <template>
+  <ion-loading
+    :is-open="isLoading"
+    message="Please wait..."
+  >
+  </ion-loading>
   <his-standard-form
     v-if="!reportReady"
     @onFinish="onReportConfiguration"
@@ -41,7 +46,7 @@
 import { defineComponent, PropType } from "vue";
 import HisFooter from "@/components/HisDynamicNavFooter.vue";
 import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
-import { IonPage, IonContent, IonToolbar, IonRow, IonCol} from "@ionic/vue"
+import { IonLoading, IonPage, IonContent, IonToolbar, IonRow, IonCol} from "@ionic/vue"
 import { Field } from '@/components/Forms/FieldInterface'
 import jsPDF from "jspdf"
 import autoTable from 'jspdf-autotable'
@@ -49,7 +54,7 @@ import { isPlainObject } from "lodash"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 
 export default defineComponent({
-  components: { HisStandardForm, ReportTable, HisFooter, IonPage, IonContent, IonToolbar, IonRow, IonCol},
+  components: { IonLoading, HisStandardForm, ReportTable, HisFooter, IonPage, IonContent, IonToolbar, IonRow, IonCol},
   props: {
     title: {
       type: String,
@@ -74,6 +79,10 @@ export default defineComponent({
     customBtns: {
       type: Array,
       default: () => []
+    },
+    isLoading: {
+      type: Boolean,
+      default: false
     },
     reportReady: {
       type: Boolean,

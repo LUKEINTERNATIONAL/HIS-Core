@@ -7,6 +7,7 @@
         :columns="columns"
         :canExportCsv="false"
         :canExportPDf="false"
+        :isLoading="isLoading"
         :reportReady="reportReady"
         :onReportConfiguration="onPeriod"
         > 
@@ -26,6 +27,7 @@ export default defineComponent({
         title: 'PEPFAR Defaulters report',
         rows: [] as Array<any>,
         reportReady: false as boolean,
+        isLoading: false as boolean,
         columns: [
             'ARV#',
             'First name',
@@ -42,12 +44,14 @@ export default defineComponent({
     methods: {
         async onPeriod(_: any, config: any) {
             this.reportReady = true
+            this.isLoading = true
             this.report = new DefaulterReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
             this.period = this.report.getDateIntervalPeriod()
             const data = await this.report.getDefaulters()
             this.setRows(data)
+            this.isLoading = false
         },
         async setRows(data: Array<any>) {
             data.forEach((data: any) => {

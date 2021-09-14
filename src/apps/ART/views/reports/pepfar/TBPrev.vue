@@ -6,6 +6,7 @@
         :fields="fields"
         :columns="columns"
         :reportReady="reportReady"
+        :isLoading="isLoading"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>
@@ -25,6 +26,7 @@ export default defineComponent({
         cohort: {} as any,
         rows: [] as Array<any>,
         reportReady: false as boolean,
+        isLoading: false as boolean,
         columns: [
             'Age group',
             'Gender',
@@ -44,6 +46,7 @@ export default defineComponent({
     methods: {
         async onPeriod(_: any, config: any) {
             this.reportReady = true
+            this.isLoading = true
             this.report = new TbPrevReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
@@ -51,6 +54,7 @@ export default defineComponent({
             this.cohort = await this.report.getTBPrevReport()
             this.setRows('F')
             this.setRows('M')
+            this.isLoading = false
         },
         makeDrilldown(data: Array<any>) {
             const values = data.map(p => p.patient_id)
