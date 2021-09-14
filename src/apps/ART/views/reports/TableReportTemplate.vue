@@ -142,4 +142,10 @@ export default defineComponent({
 .logo {
   width: 100px;
 }
+.report-content {
+  margin: auto;
+  width: 99.9%;
+  height: 99%;
+  overflow: auto;
+}
 </style>

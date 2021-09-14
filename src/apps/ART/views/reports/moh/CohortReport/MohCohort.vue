@@ -139,7 +139,7 @@ export default defineComponent({
   }
 })
 </script>
-<style>
+<style scoped>
 .report-content {
   padding: 2em;
   font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
