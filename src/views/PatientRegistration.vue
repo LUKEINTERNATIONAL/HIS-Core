@@ -1,5 +1,10 @@
 <template>
-  <his-standard-form @onIndex="activeField=''" :activeField="activeField" :fields="fields" @onFinish="onFinish"/>
+  <his-standard-form 
+    @onIndex="fieldComponent=''" 
+    :activeField="fieldComponent" 
+    :fields="fields" 
+    @onFinish="onFinish"
+ />
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
@@ -31,6 +36,7 @@ export default defineComponent({
   data: () => ({
     editPerson: -1 as number,
     activeField: '' as string,
+    fieldComponent: '' as string,
     fields: [] as Array<Field>,
     isMilitarySite: false,
     presets: {} as any,
@@ -89,6 +95,12 @@ export default defineComponent({
       }catch(e) {
         toastWarning('Unable to create record')
       } 
+    },
+    editConditionCheck(attributes=[] as Array<string>): boolean {
+        if (this.editPerson > 0 && !attributes.includes(this.activeField)) {
+            return false
+        }
+        return true
     },
     resolvePersonAttributes(form: Record<string, Option> | Record<string, null>, personId: number) {
         const data: Record<string, string> = this.resolveData(form, 'person_attributes')
@@ -238,6 +250,7 @@ export default defineComponent({
                         type: 'button',
                         action: () => {
                             this.activeField = attribute
+                            this.fieldComponent = this.activeField
                         }
                     })
                     const rows = [
@@ -252,16 +265,13 @@ export default defineComponent({
                         ['Current T/A', currentTA, editButton('current_traditional_authority')],
                         ['Cell Phone Number', patient.getPhoneNumber(), editButton('cell_phone_number')],
                     ]
-                    return [
-                        {
-                            label: '',
-                            value: '',
-                            other: {
-                                columns,
-                                rows
-                            }
+                    return [{
+                        label: '',
+                        value: '',
+                        other: {
+                            columns, rows
                         }
-                    ]
+                    }]
                 }
             },
             {
@@ -270,6 +280,7 @@ export default defineComponent({
                 type: FieldType.TT_TEXT,
                 group: 'person',
                 preset: this.getFieldPreset('given_name'),
+                condition: () => this.editConditionCheck(['given_name']),
                 validation: (val: any) => Validation.isName(val),
                 options: async (form: any) => {
                     if (!form.given_name || form.given_name.value === null) return []
@@ -284,10 +295,12 @@ export default defineComponent({
                 type: FieldType.TT_TEXT,
                 group: 'person',
                 preset: this.getFieldPreset('family_name'),
+                condition: () => this.editConditionCheck(['family_name']),
                 validation: (val: any) => Validation.isName(val),
                 options: async (form: any) => {
-                    if (!form.family_name || form.family_name.value === null) return []
-
+                    if (!form.family_name || form.family_name.value === null) {
+                        return []
+                    } 
                     const names = await PersonService.searchFamilyName(form.family_name.value)
                     return this.mapToOption(names)
                 }
@@ -299,6 +312,7 @@ export default defineComponent({
                 group: 'person',
                 requireNext: false,
                 preset: this.getFieldPreset('gender'),
+                condition: () => this.editConditionCheck(['gender']),
                 validation: (val: any) => Validation.required(val),
                 options: () => ([
                     { 
@@ -315,6 +329,9 @@ export default defineComponent({
                 id: 'birth_date',
                 helpText: 'Birth',
                 required: true,
+                condition: () => this.editConditionCheck([
+                    'year_birth_date', 'month_birth_date', 'day_birth_date'
+                ]),
                 minDate: () => HisDate.estimateDateFromAge(100),
                 maxDate: () => WorkflowService.getSessionDate(),
                 estimation: {
@@ -338,6 +355,7 @@ export default defineComponent({
                 type: FieldType.TT_SELECT,
                 group: 'person',
                 requireNext: false,
+                condition: () => this.editConditionCheck(['home_region']),
                 validation: (val: any) => Validation.required(val),
                 options: () => this.getRegions()
             },
@@ -347,7 +365,7 @@ export default defineComponent({
                 type: FieldType.TT_SELECT,
                 group: 'person',
                 requireNext: false,
-                condition: (form: any) => !form.home_region.label.match(/foreign/i),
+                condition: (form: any) => this.editConditionCheck(['home_district']) && !form.home_region.label.match(/foreign/i),
                 options: (form: any) => this.getDistricts(form.home_region.other.id)
             },
             {
@@ -359,7 +377,7 @@ export default defineComponent({
                     showKeyboard: true
                 },
                 group: 'person',
-                condition: (form: any) => !form.home_region.label.match(/foreign/i),
+                condition: (form: any) => this.editConditionCheck(['home_traditional_authority']) && !form.home_region.label.match(/foreign/i),
                 validation: (val: any) => Validation.required(val),
                 options: (form: any) => this.getTraditionalAuthorities(form.home_district.other.id)
             },
@@ -373,7 +391,7 @@ export default defineComponent({
                 },
                 requireNext: false,
                 validation: (val: any) => Validation.required(val),
-                condition: (form: any) => !form.home_region.label.match(/foreign/i),
+                condition: (form: any) => this.editConditionCheck(['home_village']) && !form.home_region.label.match(/foreign/i),
                 options: (form: any) => this.getVillages(form.home_traditional_authority.other.id)
             },
             {
@@ -383,6 +401,7 @@ export default defineComponent({
                 group: 'person',
                 type: FieldType.TT_SELECT,
                 validation: (val: any) => Validation.required(val),
+                condition: () => this.editConditionCheck(['current_region']),
                 options: () => this.getRegions()
             },
             {
@@ -392,6 +411,7 @@ export default defineComponent({
                 group: 'person',
                 type: FieldType.TT_SELECT,
                 validation: (val: any) => Validation.required(val),
+                condition: () => this.editConditionCheck(['current_district']),
                 options: (form: any) => this.getDistricts(form.current_region.other.id)
             },
             {
@@ -400,6 +420,7 @@ export default defineComponent({
                 requireNext: false,
                 group: 'person',
                 type: FieldType.TT_SELECT,
+                condition: () => this.editConditionCheck(['current_traditional_authority']),
                 validation: (val: any) => Validation.required(val),
                 options: (form: any) => this.getTraditionalAuthorities(form.current_district.other.id)
             },
@@ -409,6 +430,7 @@ export default defineComponent({
                 group: 'person',
                 requireNext: false,
                 type: FieldType.TT_SELECT,
+                condition: () => this.editConditionCheck(['current_village']),
                 validation: (val: any) => Validation.required(val),
                 options: (form: any) => this.getVillages(form.current_traditional_authority.other.id)
             },
@@ -417,6 +439,7 @@ export default defineComponent({
                 helpText: 'Closest Landmark or Plot Number',
                 group: 'person',
                 type: FieldType.TT_SELECT,
+                condition: () => this.editConditionCheck(),
                 validation: (val: any) => Validation.required(val),
                 options: () => this.mapToOption([
                     'Catholic Church',
@@ -437,6 +460,7 @@ export default defineComponent({
                 helpText: 'Cell phone number',
                 group: 'person',
                 type: FieldType.TT_NUMBER,
+                condition: () => this.editConditionCheck(['cell_phone_number']),
                 validation: (val: any) => {
                     if (val && val.value.match(/Unknown/i)) return
 
@@ -448,7 +472,7 @@ export default defineComponent({
                 helpText: 'Type of patient',
                 group: 'person',
                 type: FieldType.TT_SELECT,
-                condition: () => this.showPatientType,
+                condition: () => this.editConditionCheck(['patient_type']) && this.showPatientType,
                 validation: (val: any) => Validation.required(val),
                 options: () => this.mapToOption([
                     'New patient',
@@ -461,7 +485,7 @@ export default defineComponent({
                 type: FieldType.TT_SELECT,
                 group: 'person',
                 validation: (val: any) => Validation.required(val),
-                condition: (form: any) => this.showPatientType && form.patient_type.label === 'External consultation',  
+                condition: (form: any) => this.editConditionCheck(['location']) && this.showPatientType && form.patient_type.label === 'External consultation',  
                 options: (_, filter='') => this.getFacilities(filter),
                 config: {
                     showKeyboard: true,
@@ -473,7 +497,7 @@ export default defineComponent({
                 helpText: 'Occupation',
                 type: FieldType.TT_SELECT,
                 group: 'person_attributes',
-                condition: () => this.isMilitarySite,
+                condition: () => this.editConditionCheck(['occupation']) && this.isMilitarySite,
                 validation: (val: any) => Validation.required(val),
                 options: () => this.mapToOption([
                     'MDF Reserve',
@@ -486,7 +510,7 @@ export default defineComponent({
                 helpText: 'Regiment ID',
                 type: FieldType.TT_NUMBER,
                 group: 'person_attributes',
-                condition: (form: any) => form.occupation && form.occupation.value.match(/MDF/i),
+                condition: (form: any) => this.editConditionCheck(['person_regiment_id']) && form.occupation && form.occupation.value.match(/MDF/i),
                 validation: (val: any) => Validation.required(val), 
             },
             {
@@ -494,7 +518,7 @@ export default defineComponent({
                 helpText: 'Date joined MDF',
                 type: FieldType.TT_TEXT,
                 group: 'person_attributes',
-                condition: (form: any) => form.occupation && form.occupation.value.match(/MDF/i),
+                condition: (form: any) => this.editConditionCheck(['person_date_joined_military']) && form.occupation && form.occupation.value.match(/MDF/i),
                 validation: (val: any) => Validation.required(val)
             },
             {
@@ -503,7 +527,7 @@ export default defineComponent({
                 type: FieldType.TT_SELECT,
                 group: 'person_attributes',
                 validation: (val: any) => Validation.required(val),
-                condition: (form: any) => form.occupation && form.occupation.value.match(/MDF/i),
+                condition: (form: any) => this.editConditionCheck(['rank']) && form.occupation && form.occupation.value.match(/MDF/i),
                 options: () => this.mapToOption([
                     'First Lieutenant',
                     'Captain',
@@ -527,6 +551,7 @@ export default defineComponent({
                 helpText: 'Register guardian?',
                 type: FieldType.TT_SELECT,
                 group: 'person',
+                condition: () => this.editConditionCheck(),
                 validation: (val: any) => Validation.required(val),
                 options: () => this.mapToOption(['Yes', 'No'])
             }
