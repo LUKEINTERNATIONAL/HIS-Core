@@ -4,53 +4,51 @@
       <ion-title>Lab orders</ion-title>
     </ion-toolbar>
   </ion-header>
-  <ion-content class="ion-padding" >
+  <ion-content :style="{ overflowY: 'hidden', background: 'grey' }" >
   <ion-grid>
   <ion-row>
-    <ion-col  size="6" style="height: 90%; ">
-  <ion-list> 
+  <ion-col size="4">
+  <ion-list :style="{overflowY: 'auto', height:'78vh'}"> 
       <ion-item
-         v-for="(data, index) in testTypes" :key="data"
-         @click="getSpecimens(data.name, index)"
+        v-for="(data, index) in testTypes" :key="data"
+        @click="getSpecimens(data.name, index)"
+        :detail="true"
       > 
         <ion-label> {{ data.name }} </ion-label>
         <ion-checkbox v-model="data.isChecked" slot="start"/>
       </ion-item>
     </ion-list>
     </ion-col>
-    <ion-col v-if="activeIndex != null && selectedOrders.length > 0">
-      <div style="">
+    <ion-col 
+      :style="{overflowY: 'auto', height:'78vh'}"
+      v-if="activeIndex != null && selectedOrders.length > 0">
+    <div style="">
       <ion-list> 
       
     <ion-radio-group v-model="testTypes[activeIndex]['specimen']">
-      <ion-list-header>
-        <ion-label>Select specimen</ion-label>
-      </ion-list-header>
+      <div class="side-title">
+        Select specimen
+      </div>
         <!-- :color="isActive(item) ? 'primary' : ''" -->
-        <ion-item
-         v-for="data in specimens" :key="data" 
-        :detail="true"
-      > 
+        <ion-item v-for="data in specimens" :key="data" > 
       <ion-label>{{data.name}}</ion-label>
         <ion-radio slot="start" :value="data.name" @click="addSpecimen(data)"></ion-radio>
       </ion-item>
     </ion-radio-group>
     </ion-list>
     <ion-radio-group v-model="testTypes[activeIndex]['reason']">
-      <ion-list-header>
-        <ion-label>Select Reason</ion-label>
-      </ion-list-header>
+      <div class="side-title">
+        Main test(s) reason
+      </div>
         <!-- :color="isActive(item) ? 'primary' : ''" -->
-        <ion-item
-          v-for="data in reasons" :key="data"
-        :detail="true"
-      > 
+        <ion-item v-for="data in reasons" :key="data"> 
       <ion-label>{{data}}</ion-label>
         <ion-radio slot="start" :value="data" ></ion-radio>
       </ion-item>
     </ion-radio-group>
       </div>
-       <div>
+      <p/>
+       <div :style="{background: 'lightyellow', height: '200px'}">
          <table>
            <thead>
              <tr>
@@ -218,7 +216,16 @@ table {
   border-collapse: collapse;
   width: 100%;
 }
-
+ion-col {
+  border-right: solid 1px #ccc;
+}
+.side-title {
+  width: 100%;
+  padding: 0.5em;
+  text-align: center;
+  background: rgb(233, 232, 232);
+  font-size: 1.2em;
+}
 td,
 th {
   border: 1px solid #dddddd;
