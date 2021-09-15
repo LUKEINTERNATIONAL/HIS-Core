@@ -1,6 +1,7 @@
 <template>
   <his-standard-form 
     @onIndex="fieldComponent=''" 
+    :skipSummary="skipSummary"
     :activeField="fieldComponent" 
     :fields="fields" 
     @onFinish="onFinish"
@@ -34,6 +35,7 @@ import { isEmpty } from "lodash"
 export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
+    skipSummary: false,
     addressAttributes: [
         'home_region', 
         'home_district', 
@@ -65,6 +67,7 @@ export default defineComponent({
         handler({query}: any) {
             if (query.edit_person) {
                 this.editPerson = query.edit_person
+                this.skipSummary = true
             } else {
                 this.presets = query
             }
