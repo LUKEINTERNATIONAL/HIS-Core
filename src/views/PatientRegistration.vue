@@ -34,7 +34,16 @@ import { isEmpty } from "lodash"
 export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
+    addressAttributes: [
+        'home_region', 
+        'home_district', 
+        'home_traditional_authority', 
+        'home_village',
+        'current_district',
+        'current_traditional_authority',
+    ] as Array<string>,  
     editPerson: -1 as number,
+    editPersonData: {} as any, 
     activeField: '' as string,
     fieldComponent: '' as string,
     fields: [] as Array<Field>,
@@ -236,14 +245,14 @@ export default defineComponent({
                     if (!person) {
                         return []
                     } 
-                    const patient = new Patientservice(person)
+                    this.editPersonData = new Patientservice(person)
                     const { 
                         ancestryDistrict, 
                         ancestryTA, 
                         ancestryVillage,
                         currentDistrict,
                         currentTA
-                    } = patient.getAddresses()
+                    } = this.editPersonData.getAddresses()
                     const columns = ['Attributes', 'values', 'actions']
                     const editButton = (attribute: string) => ({ 
                         name: 'Edit', 
@@ -254,16 +263,16 @@ export default defineComponent({
                         }
                     })
                     const rows = [
-                        ['Given Name', patient.getGivenName(), editButton('given_name')],
-                        ['Family Name', patient.getFamilyName(), editButton('family_name')],
-                        ['Gender', patient.getGender(),  editButton('gender')],
-                        ['Birthdate', patient.getBirthdate(),  editButton('year_birth_date')],
-                        ['Home district', ancestryDistrict,  editButton('home_district')],
-                        ['Home TA', ancestryTA,  editButton('home_traditional_authority')],
-                        ['Home Village', ancestryVillage,  editButton('home_village')],
-                        ['Current district', currentDistrict, editButton('current_district')],
-                        ['Current T/A', currentTA, editButton('current_traditional_authority')],
-                        ['Cell Phone Number', patient.getPhoneNumber(), editButton('cell_phone_number')],
+                        ['Given Name', this.editPersonData.getGivenName(), editButton('given_name')],
+                        ['Family Name', this.editPersonData.getFamilyName(), editButton('family_name')],
+                        ['Gender', this.editPersonData.getGender(),  editButton('gender')],
+                        ['Birthdate', this.editPersonData.getBirthdate(),  editButton('year_birth_date')],
+                        ['Home district', ancestryDistrict,  editButton('home_region')],
+                        ['Home TA', ancestryTA,  editButton('home_region')],
+                        ['Home Village', ancestryVillage,  editButton('home_region')],
+                        ['Current district', currentDistrict, editButton('home_region')],
+                        ['Current T/A', currentTA, editButton('home_region')],
+                        ['Cell Phone Number', this.editPersonData.getPhoneNumber(), editButton('cell_phone_number')],
                     ]
                     return [{
                         label: '',
@@ -355,7 +364,7 @@ export default defineComponent({
                 type: FieldType.TT_SELECT,
                 group: 'person',
                 requireNext: false,
-                condition: () => this.editConditionCheck(['home_region']),
+                condition: () => this.editConditionCheck(this.addressAttributes),
                 validation: (val: any) => Validation.required(val),
                 options: () => this.getRegions()
             },
@@ -365,7 +374,7 @@ export default defineComponent({
                 type: FieldType.TT_SELECT,
                 group: 'person',
                 requireNext: false,
-                condition: (form: any) => this.editConditionCheck(['home_district']) && !form.home_region.label.match(/foreign/i),
+                condition: (form: any) => this.editConditionCheck(this.addressAttributes) && !form.home_region.label.match(/foreign/i),
                 options: (form: any) => this.getDistricts(form.home_region.other.id)
             },
             {
@@ -377,7 +386,7 @@ export default defineComponent({
                     showKeyboard: true
                 },
                 group: 'person',
-                condition: (form: any) => this.editConditionCheck(['home_traditional_authority']) && !form.home_region.label.match(/foreign/i),
+                condition: (form: any) => this.editConditionCheck(this.addressAttributes) && !form.home_region.label.match(/foreign/i),
                 validation: (val: any) => Validation.required(val),
                 options: (form: any) => this.getTraditionalAuthorities(form.home_district.other.id)
             },
@@ -391,7 +400,7 @@ export default defineComponent({
                 },
                 requireNext: false,
                 validation: (val: any) => Validation.required(val),
-                condition: (form: any) => this.editConditionCheck(['home_village']) && !form.home_region.label.match(/foreign/i),
+                condition: (form: any) => this.editConditionCheck(this.addressAttributes) && !form.home_region.label.match(/foreign/i),
                 options: (form: any) => this.getVillages(form.home_traditional_authority.other.id)
             },
             {
@@ -401,7 +410,7 @@ export default defineComponent({
                 group: 'person',
                 type: FieldType.TT_SELECT,
                 validation: (val: any) => Validation.required(val),
-                condition: () => this.editConditionCheck(['current_region']),
+                condition: () => this.editConditionCheck(this.addressAttributes),
                 options: () => this.getRegions()
             },
             {
@@ -411,7 +420,7 @@ export default defineComponent({
                 group: 'person',
                 type: FieldType.TT_SELECT,
                 validation: (val: any) => Validation.required(val),
-                condition: () => this.editConditionCheck(['current_district']),
+                condition: () => this.editConditionCheck(this.addressAttributes),
                 options: (form: any) => this.getDistricts(form.current_region.other.id)
             },
             {
@@ -420,7 +429,7 @@ export default defineComponent({
                 requireNext: false,
                 group: 'person',
                 type: FieldType.TT_SELECT,
-                condition: () => this.editConditionCheck(['current_traditional_authority']),
+                condition: () => this.editConditionCheck(this.addressAttributes),
                 validation: (val: any) => Validation.required(val),
                 options: (form: any) => this.getTraditionalAuthorities(form.current_district.other.id)
             },
@@ -430,7 +439,7 @@ export default defineComponent({
                 group: 'person',
                 requireNext: false,
                 type: FieldType.TT_SELECT,
-                condition: () => this.editConditionCheck(['current_village']),
+                condition: () => this.editConditionCheck(this.addressAttributes),
                 validation: (val: any) => Validation.required(val),
                 options: (form: any) => this.getVillages(form.current_traditional_authority.other.id)
             },
