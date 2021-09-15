@@ -33,7 +33,7 @@ export default defineComponent({
         outcome: '' as string,
         isLoading: false as boolean,
         columns: [
-            'ARV#','First name','Last name', 'birthdate', 'Gender', 'Outcome date'
+            'ARV#','First name','Last name', 'Birthdate', 'Gender', 'Outcome date'
         ]
     }),
     created() {
@@ -77,20 +77,23 @@ export default defineComponent({
         async setRows(data: Array<any>) {
             const isTransferOut = this.outcome.match(/trans/i)
             if (isTransferOut) {
-                this.columns.push('Location')
+                this.columns.push('TO Location')
             }
+            this.columns.push('Action')
             data.forEach((d: any) => {
-               const row = [
-                    d.identifier,
-                    d.given_name,
-                    d.family_name,
-                    this.toDate(d.birthdate),
-                    d.gender,
-                    this.toDate(d.start_date)
-               ]
-               if (isTransferOut) {
-                   row.push(d.transferred_out_to)
-               }
+               const row = []
+               row.push(d.identifier)
+               row.push(d.given_name)
+               row.push(d.family_name)
+               row.push(this.toDate(d.birthdate))
+               row.push(d.gender)
+               row.push(this.toDate(d.start_date))
+               if (isTransferOut) row.push(d.transferred_out_to)
+               row.push({
+                   type: "button",
+                   name: "View",
+                   action: () => this.$router.push({ path: `/patient/dashboard/${d.patient_id}`})
+               })
                this.rows.push(row)
             })
         }
