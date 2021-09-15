@@ -157,7 +157,15 @@ export class Patientservice extends Service {
     }
 
     getNationalID() {
-        const ids = this.patient.patient_identifiers.filter(item => item.type.name === 'National id')
+        return this.findIdentifierByType('National id')
+    }
+    
+    getArvNumber() {
+        return this.findIdentifierByType('ARV Number')
+    }
+
+    private findIdentifierByType(type: string) {
+        const ids = this.patient.patient_identifiers.filter((i: any) => i.type.name === type )
         return ids.length >= 1 ? ids[0].identifier : 'Unknown'
     }
 

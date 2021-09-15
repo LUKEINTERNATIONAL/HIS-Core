@@ -31,7 +31,7 @@ export interface Field {
     unload?: Function;
     summaryMapValue?: Function;
     appearInSummary?: Function;
-    options?(fdata?: any, cdata?: any): Promise<Option[]> | Array<Option>;
+    options?(fdata?: any, cdata?: any, other?: any): Promise<Option[]> | Array<Option>;
     requireNext?: boolean;
     config?: Record<string, any>;
 }

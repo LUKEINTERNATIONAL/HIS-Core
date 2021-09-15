@@ -92,7 +92,7 @@ export default defineComponent({
   },
   async activated() {
     this.$emit('onFieldActivated', this)
-    const data = await this.options(this.fdata, this.getChecked(this.listData))
+    const data = await this.options(this.fdata, this.getChecked(this.listData), this.cdata)
     this.listData = data
     this.$emit('onValue', this.getChecked(this.listData))
   }

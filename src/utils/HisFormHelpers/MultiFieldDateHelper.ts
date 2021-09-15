@@ -20,8 +20,9 @@ export interface DateFieldInterface {
     condition?: Function;
     validation?: Function;
     required?: boolean;
-    minDate?(formData: any): string;
-    maxDate?(formData: any): string;
+    minDate?(formData: any, computeForm: any): string;
+    maxDate?(formData: any, computeForm: any): string;
+    unload?(data: any, state: string, formData: any,  computeForm: any): void; 
     computeValue: Function;
     appearInSummary?: Function;
     estimation: EstimationInterface;
@@ -117,16 +118,19 @@ function onValidation(
     } 
 
     const validateMinMax = (date: string) => {
+        const strInputDate  = HisDate.toStandardHisDisplayFormat(date)
         if (field.minDate) {
-            const minDate = field.minDate(formData)
+            const minDate = field.minDate(formData, computedFormData)
+            const strMinDate = HisDate.toStandardHisDisplayFormat(minDate)
             if (new Date(date) < new Date(minDate)) {
-                return [`Date is less than minimum date of ${HisDate.toStandardHisDisplayFormat(minDate)}`]
+                return [`${strInputDate} is less than minimum date of ${strMinDate}`]
             }
         }
         if (field.maxDate) {
-            const maxDate = field.maxDate(formData)
+            const maxDate = field.maxDate(formData, computedFormData)
+            const strMaxDate = HisDate.toStandardHisDisplayFormat(maxDate)
             if (new Date(date) > new Date(maxDate)) {
-                return [`Date is greater than max date of ${HisDate.toStandardHisDisplayFormat(maxDate)}`]
+                return [`${strInputDate} is greater than max date of ${strMaxDate}`]
             }
         }
         return null
@@ -158,11 +162,11 @@ function onValidation(
             if (issueFound) return issueFound
         } else {
             if (field.minDate) {
-                const issuesFound = validateMinMax(getInputDate(field.minDate(formData)))
+                const issuesFound = validateMinMax(getInputDate(field.minDate(formData, computedFormData)))
                 if (issuesFound) return issuesFound
             }
             if (field.maxDate) {
-                const issuesFound = validateMinMax(getInputDate(field.maxDate(formData)))
+                const issuesFound = validateMinMax(getInputDate(field.maxDate(formData, computedFormData)))
                 if (issuesFound) return issuesFound
             }
         }
@@ -227,6 +231,11 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             id: dateConfig.day.id,
             helpText: `${field.helpText} Day`,
             type: FieldType.TT_MONTHLY_DAYS,
+            unload: (d: any, s: any, f: any, c: any) => {
+                if (field.unload) {
+                    field.unload(d, s, f, c)
+                }
+            },
             condition: (f: any) => onCondition(field, f),
             appearInSummary: (f: any) => {
                 return field.appearInSummary ? field.appearInSummary(f): true
@@ -238,8 +247,8 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             validation: (v: Option, f: any, c: any) => {
                 if (v) {
                     dateConfig.day.value = formatDigit(v.value.toString())
-                    dateConfig.builtDate = buildDate(dateConfig)
                     dateConfig.day.isEstimate = false
+                    dateConfig.builtDate = buildDate(dateConfig)
                 }
                 return onValidation(dateConfig.day, dateConfig, v, f, c, field)
             },
@@ -247,8 +256,8 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
                 /** This duplication is a necessary evil when saving dates */
                 if (v) {
                     dateConfig.day.value = formatDigit(v.value.toString())
-                    dateConfig.builtDate = buildDate(dateConfig)
                     dateConfig.day.isEstimate = false
+                    dateConfig.builtDate = buildDate(dateConfig)
                 }
                 return field.computeValue(dateConfig.builtDate, hasEstimates)
             },

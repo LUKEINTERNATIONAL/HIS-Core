@@ -61,7 +61,7 @@ export default defineComponent({
       const modal = await modalController.create({
         component: LabOrderModal,
         backdropDismiss: false,
-        cssClass: 'custom-modal'
+        cssClass: 'large-modal'
       })
       modal.present()
       const { data } = await modal.onDidDismiss()
