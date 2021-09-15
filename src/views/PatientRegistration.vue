@@ -1,5 +1,5 @@
 <template>
-  <his-standard-form :fields="fields" @onFinish="onFinish"/>
+  <his-standard-form @onIndex="activeField=''" :activeField="activeField" :fields="fields" @onFinish="onFinish"/>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
@@ -13,6 +13,7 @@ import {PersonService, NewPerson} from "@/services/person_service"
 import {Person} from "@/interfaces/person"
 import {PersonAttribute} from "@/interfaces/personAttribute"
 import {PersonAttributeService, NewAttribute} from '@/services/person_attributes_service'
+import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import { GlobalPropertyService } from "@/services/global_property_service" 
 import { ProgramService } from "@/services/program_service";
@@ -28,6 +29,8 @@ import { isEmpty } from "lodash"
 export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
+    editPerson: -1 as number,
+    activeField: '' as string,
     fields: [] as Array<Field>,
     isMilitarySite: false,
     presets: {} as any,
@@ -45,7 +48,11 @@ export default defineComponent({
   watch: {
     '$route': {
         handler({query}: any) {
-            this.presets = query
+            if (query.edit_person) {
+                this.editPerson = query.edit_person
+            } else {
+                this.presets = query
+            }
         },
         immediate: true,
         deep: true
@@ -206,6 +213,57 @@ export default defineComponent({
     },
     getFields: function(): Array<Field> {
         return [
+            {
+                id: 'edit_user',
+                helpText: 'Edit Demographics',
+                type: FieldType.TT_TABLE_VIEWER,
+                requireNext: false,
+                condition: () => this.editPerson != -1,
+                options: async () => {
+                    const person = await Patientservice.findByID(this.editPerson)
+                    if (!person) {
+                        return []
+                    } 
+                    const patient = new Patientservice(person)
+                    const { 
+                        ancestryDistrict, 
+                        ancestryTA, 
+                        ancestryVillage,
+                        currentDistrict,
+                        currentTA
+                    } = patient.getAddresses()
+                    const columns = ['Attributes', 'values', 'actions']
+                    const editButton = (attribute: string) => ({ 
+                        name: 'Edit', 
+                        type: 'button',
+                        action: () => {
+                            this.activeField = attribute
+                        }
+                    })
+                    const rows = [
+                        ['Given Name', patient.getGivenName(), editButton('given_name')],
+                        ['Family Name', patient.getFamilyName(), editButton('family_name')],
+                        ['Gender', patient.getGender(),  editButton('gender')],
+                        ['Birthdate', patient.getBirthdate(),  editButton('year_birth_date')],
+                        ['Home district', ancestryDistrict,  editButton('home_district')],
+                        ['Home TA', ancestryTA,  editButton('home_traditional_authority')],
+                        ['Home Village', ancestryVillage,  editButton('home_village')],
+                        ['Current district', currentDistrict, editButton('current_district')],
+                        ['Current T/A', currentTA, editButton('current_traditional_authority')],
+                        ['Cell Phone Number', patient.getPhoneNumber(), editButton('cell_phone_number')],
+                    ]
+                    return [
+                        {
+                            label: '',
+                            value: '',
+                            other: {
+                                columns,
+                                rows
+                            }
+                        }
+                    ]
+                }
+            },
             {
                 id: 'given_name',
                 helpText: 'First name',
