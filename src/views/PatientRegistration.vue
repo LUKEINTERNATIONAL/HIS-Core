@@ -267,7 +267,7 @@ export default defineComponent({
                         currentDistrict,
                         currentTA
                     } = patient.getAddresses()
-                    const columns = ['Attributes', 'values', 'actions']
+                    const columns = ['Attributes', 'Values', 'Edit']
                     const editButton = (attribute: string) => ({ 
                         name: 'Edit', 
                         type: 'button',
@@ -295,6 +295,11 @@ export default defineComponent({
                             columns, rows
                         }
                     }]
+                },
+                config: {
+                    hiddenFooterBtns: [
+                        'Clear'
+                    ]
                 }
             },
             {
