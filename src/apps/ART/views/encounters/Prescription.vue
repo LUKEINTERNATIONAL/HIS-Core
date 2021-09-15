@@ -25,7 +25,6 @@ export default defineComponent({
     mixins: [EncounterMixinVue],
     data: () => ({
         drugs: [] as Array<RegimenInterface>,
-        nextInterval: 0,
         prescription: {} as any,
         patientToolbar: [] as Array<Option>,
         fieldComponent: '' as string,
@@ -118,10 +117,10 @@ export default defineComponent({
             this.facts.currentDate = PrescriptionService.getSessionDate()
             this.facts.isChildBearing = patient.isChildBearing()
         },
-        async onSubmit() {
+        async onSubmit(form: any) {
             const encounter = await this.prescription.createEncounter()
 
-            this.prescription.setNextVisitInterval(this.nextInterval)
+            this.prescription.setNextVisitInterval(form[Target.INTERVAL_SELECTION].value)
 
             const payload = this.mapOrder(this.drugs)
 
@@ -479,7 +478,6 @@ export default defineComponent({
                     helpText: 'Interval to next visit',
                     type: FieldType.TT_NEXT_VISIT_INTERVAL_SELECTION,
                     validation: (val: Option) => Validation.required(val),
-                    unload: async (data: any) => this.nextInterval = data.value,
                     options: () => this.buildIntervalOptions(),
                     onValue: () => this.onEvent(Target.INTERVAL_SELECTION, TargetEvent.ON_VALUE),
                     beforeNext: () => this.onEvent(Target.INTERVAL_SELECTION, TargetEvent.BEFORE_NEXT), 
