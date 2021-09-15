@@ -107,6 +107,11 @@ export default [
         component: LabActivities
     },
     {
+       name: "patient mstercard",
+        path: "/art/mastercard/:patient_id",
+        component: Mastercard
+    },
+    {
         path: '/art/report/moh',
         component: ReportTemplate,
         children: [
