@@ -28,7 +28,7 @@ import { ObservationService } from "@/services/observation_service";
 import InformationHeader from "@/components/InformationHeader.vue";
 import VisitInformation from "@/components/VisitInformation.vue";
 import MastercardDetails from "@/components/MastercardDetails.vue";
-import _ from "lodash";
+import _, { isArray, reduce } from "lodash";
 import {
   IonPage,
   IonContent,
@@ -50,7 +50,7 @@ export default defineComponent({
     IonButton,
     IonToolbar,
     VisitInformation,
-    InformationHeader
+    InformationHeader,
   },
   data: () => ({
     isBDE: false as boolean,
@@ -250,27 +250,55 @@ export default defineComponent({
       new PatientPrintoutService(this.patientId).printVisitSummaryLbl(date);
     },
     FormData(data: any) {
-      return Object.keys(data).map(d => {
-        return  {
-          label: d,
-          value: data[d]
-        }
-      })
+      return Object.keys(data).map((d) => {
+        const display: any = data[d];
+
+        const formatD: any = (vals: any) => {
+          if (isArray(vals)) {
+            const f = [...vals];
+            if (isArray(f)) {
+              let j = "";
+              f.forEach((element) => {
+                j += `${element.join(":")}, `;
+              });
+              return j;
+            }
+            return f;
+          } else {
+            return vals;
+          }
+        };
+        return {
+          label: this.camelCase(d),
+          value: formatD(display),
+        };
+      });
+    },
+    camelCase(val: string) {
+      const label = val.split("_");
+      return `${this.capitalize(label[0])} ${this.capitalize(label[1])}`;
+    },
+    capitalize(val: string) {
+      try {
+        return val.charAt(0).toUpperCase() + val.slice(1);
+      } catch (error) {
+        return "";
+      }
     },
     async showMore(date: any) {
-          const title = 'Visit details for'
-          const data = await this.getExtras(date);
-          const modal = await modalController.create({
-              component: MastercardDetails,
-              backdropDismiss: false,
-              cssClass: "custom-modal",
-              componentProps: {
-                  title: `${title}: ${date}`,
-                  visitData: this.FormData(data)
-              }
-            })
-            modal.present()
-    }
+      const title = "Visit details for";
+      const data = await this.getExtras(date);
+      const modal = await modalController.create({
+        component: MastercardDetails,
+        backdropDismiss: false,
+        cssClass: "custom-modal",
+        componentProps: {
+          title: `${title}: ${date}`,
+          visitData: this.FormData(data),
+        },
+      });
+      modal.present();
+    },
   },
 });
 </script>

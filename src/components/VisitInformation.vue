@@ -61,7 +61,7 @@ export default defineComponent({
   background-color: #ccccff;
 }
 .data-row {
-  border-bottom-style: 1px black;
+  border-bottom: solid 1px black;
 
 }
 ion-col {
