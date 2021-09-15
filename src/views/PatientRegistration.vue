@@ -28,7 +28,7 @@ import { Encounter } from "@/interfaces/encounter";
 import { ConceptService } from "@/services/concept_service";
 import { ObservationService } from "@/services/observation_service";
 import { PatientPrintoutService } from "@/services/patient_printout_service";
-import { toastWarning, toastSuccess } from "@/utils/Alerts"
+import { toastWarning } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
 import { isEmpty } from "lodash"
 
