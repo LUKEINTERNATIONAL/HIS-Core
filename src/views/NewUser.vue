@@ -14,6 +14,7 @@ import Validation from "@/components/Forms/validations/StandardValidations"
 import { UserService } from "@/services/user_service"
 import { PersonService } from "@/services/person_service"
 import HisDate from "@/utils/Date"
+import { toastWarning } from "@/utils/Alerts"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -32,14 +33,37 @@ export default defineComponent({
     this.fields = this.getFields()
   },
   methods: {
-    async onFinish(form: Record<string, Option> | Record<string, null>, computedData: any) {
-        //TODO: DO something
+    async onFinish(form: Record<string, Option> | Record<string, null>) {
+        try {
+            if (this.activity === 'editing' || this.activity === 'view') {
+                return this.update(form)
+            } else {
+                return this.create(form)
+            }
+        } catch (e) {
+            toastWarning(e)
+        }
     },
-    create() {
-        //TODO: Handle user creation
+    async create(form: Record<string, Option> | Record<string, null>) {
+        const data = this.resolveData(form, 'data_field')
+        const newPerson = await UserService.createUser(data)
+        if (newPerson) {
+            this.userData = this.toUserData(newPerson)
+            this.fieldComponent = 'user_info'
+            this.activeField = this.fieldComponent
+        }
+        throw 'Unable to create new user, Possibly the user already exists or incorrect info was entered'
     },
-    update() {
-        //TODO: Handle user update
+    async update(form: Record<string, Option> | Record<string, null>) {
+        const data = this.resolveData(form, 'data_field')
+        const updatePerson = await UserService.updateUser(this.userData.id, data)
+        if (updatePerson) {
+            this.userData = this.toUserData(updatePerson)
+            this.fieldComponent = 'user_info'
+            this.activeField = this.fieldComponent
+        }
+        throw 'Unable to update user, possibly server error or incorrect information entered'
+
     },
     onChangeUserStatus() {
         //TODO: Handle user status logic
@@ -53,6 +77,20 @@ export default defineComponent({
     deactivateButton(name: 'Deactivate') {
         //TODO: move activation logic here
     },
+    resolveData(form: Record<string, Option> | Record<string, null>, group: string) {
+        const output: any = {} 
+        for(const name in form) {
+            const data = form[name]
+            const filter = this.fields.filter(item => {
+                return item.id === name && item.group === group
+            })
+
+            if (filter.length <= 0) continue 
+
+            if (data && data.value != null) output[name] = data.value
+        }
+        return output
+    },
     async getRoles() {
         const roles = await UserService.getAllRoles()
         return roles.map((r: any) => ({
@@ -64,6 +102,7 @@ export default defineComponent({
     toUserData(userObj: any) {
         const names = userObj.names[0]
         return {
+            'id': userObj.user_id,
             'given_name': names.given_name,
             'family_name': names.family_name,
             'username': userObj.username,
@@ -141,6 +180,7 @@ export default defineComponent({
                 id: 'given_name',
                 helpText: 'First name',
                 type: FieldType.TT_TEXT,
+                group: 'data_field',
                 condition: () => this.editConditionCheck(['given_name']),
                 validation: (val: any) => Validation.isName(val),
                 options: async (form: any) => {
@@ -154,6 +194,7 @@ export default defineComponent({
                 id: 'family_name',
                 helpText: "Last name",
                 type: FieldType.TT_TEXT,
+                group: 'data_field',
                 validation: (val: any) => Validation.isName(val),
                 condition: () => this.editConditionCheck(['given_name']),
                 options: async (form: any) => {
@@ -167,6 +208,7 @@ export default defineComponent({
                 id: 'role',
                 helpText: "Role",
                 type: FieldType.TT_SELECT,
+                group: 'data_field',
                 condition: () => this.editConditionCheck(['role']),
                 validation: (val: any) => Validation.required(val),
                 options: () => this.userRoles
@@ -175,6 +217,7 @@ export default defineComponent({
                 id: 'username',
                 helpText: "Username",
                 type: FieldType.TT_TEXT,
+                group: 'data_field',
                 condition: () => this.editConditionCheck(['']),
                 validation: (val: any) => Validation.required(val)
             },
@@ -182,6 +225,7 @@ export default defineComponent({
                 id: 'new_password',
                 helpText: "Password",
                 type: FieldType.TT_TEXT,
+                group: 'data_field',
                 condition: () => this.editConditionCheck(['new_password']),
                 validation: (val: any) => Validation.required(val),
             },
@@ -189,6 +233,7 @@ export default defineComponent({
                 id: 'confirm_password',
                 helpText: "Confirm Password",
                 type: FieldType.TT_TEXT,
+                group: 'data_field',
                 condition: () => this.editConditionCheck(['new_password']),
                 validation: (val: any) => Validation.required(val),
             },

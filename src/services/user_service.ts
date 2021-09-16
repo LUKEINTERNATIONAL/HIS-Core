@@ -5,6 +5,15 @@ export class UserService extends Service {
 	constructor() {
 		super()
 	}
+  
+  static createUser(data: Record<string, any>) {
+    return this.postJson(`users`, data)
+  }
+
+  static updateUser(id: number, data: Record<string, any>) {
+    return this.putJson(`users/${id}`, data)
+  }
+
 	static isAdmin() {
     const roles = super.getUserRoles().filter(
         (role: Role) => {
