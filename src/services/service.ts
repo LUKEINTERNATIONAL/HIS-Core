@@ -25,6 +25,14 @@ export class Service {
         throw genericError
     }
 
+    static async putJson(url: string, data: Record<string, any>, genericError='Unable to update record') {
+        const req = await ApiClient.put(url, data)
+
+        if (req && req.ok) return req?.json()
+
+        throw genericError
+    }
+
     static async void(url: string, reason: Record<string, string>) {
         const req = await ApiClient.remove(url, reason)
    

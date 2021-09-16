@@ -36,7 +36,12 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     id: "demographics_edit",
     name: "Demographics (Edit)",
     description: "Edit Patient Demographics",
-    url: "/",
+    action: ({ patient }: any, router: any) => {
+      router.push({
+        path: '/patient/registration', 
+        query: { 'edit_person': patient.patient_id }
+      })
+    },
     icon: img("print.png")
   },
   {
