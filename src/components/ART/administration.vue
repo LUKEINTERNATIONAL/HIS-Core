@@ -80,8 +80,10 @@ export default defineComponent({
             property: preference.value,
           },
         });
-      } else {
+      } else if (preference.component) {
         this.$router.push(`/settings?name=${preference.component}`);
+      } else {
+        this.$router.push(preference.route);      
       }
     },
     async init() {
