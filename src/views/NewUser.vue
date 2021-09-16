@@ -1,9 +1,10 @@
 <template>
-  <his-standard-form 
-    :activeField="fieldComponent"
-    :skipSummary="true"
-    @onIndex="fieldComponent=''" 
+  <his-standard-form
+    :key="formKey"
     :fields="fields" 
+    :skipSummary="true"
+    :activeField="fieldComponent"
+    @onIndex="fieldComponent=''" 
     @onFinish="onFinish"/>
 </template>
 <script lang="ts">
@@ -20,8 +21,9 @@ import { toastWarning, toastSuccess } from "@/utils/Alerts"
 export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
+    formKey: 0 as number,
     fields: [] as Array<Field>,
-    activity: 'registration' as 'registration' | 'editing' | 'view',
+    activity: '' as 'edit' | 'add',
     presets: {} as any,
     userData: {} as any,
     fieldComponent: '' as string,
@@ -30,47 +32,53 @@ export default defineComponent({
   }),
   watch: {
     '$route': {
-        async handler({query}: any) {
-            if (query && ['view', 'editing', 'registration'].includes(query.activity)) {
-                this.activity = query.activity
+        async handler(route: any) {
+            if (!route) {
+                return
             }
+            const { query } = route
+            if (['edit', 'add'].includes(query.activity)) {
+                this.activity = query.activity
+            } else {
+                this.activity = 'add'
+            }
+            this.fields = this.getFields()
         },
         immediate: true,
         deep: true
     }
   },
-  async created() {
-    this.fields = this.getFields()
-  },
   methods: {
     async onFinish(form: Record<string, Option> | Record<string, null>, computeValues: any) {
         const data = {...this.resolveData(form, 'data_field'), ...computeValues}
         try {
-            if (['editing', 'view'].includes(this.activity)) {
-                await this.update(data)
-            } else {
-                await this.create(data)
+            switch(this.activity) {
+                case 'add':
+                    this.activity = 'edit'
+                    await this.create(data)
+                    break;
+                case 'edit':
+                    await this.update(data)
+                    break;
             }
-            this.fieldComponent = 'user_info'
-            this.activeField = this.fieldComponent
+            this.formKey += 1
+            this.activeField = 'user_info'
+            this.$nextTick(() => this.fieldComponent = this.activeField)
         } catch (e) {
             toastWarning(e)
         }
-
     },
     async create(data: any) {
-        const newPerson = await UserService.createUser(data)
-        if (newPerson) {
-            this.userData = this.toUserData(newPerson.user)
-            return
+        const { user } = await UserService.createUser(data)
+        if (user) {
+            return this.userData = this.toUserData(user)
         }
         throw 'Unable to create new user, Possibly the user already exists or incorrect info was entered'
     },
     async update(data: any) {
-        const updatePerson = await UserService.updateUser(this.userData.id, data)
-        if (updatePerson) {
-            this.userData = this.toUserData(updatePerson)
-            return
+        const person = await UserService.updateUser(this.userData.id, data)
+        if (person) {
+            return this.userData = this.toUserData(person)
         }
         throw 'Unable to update user, possibly server error or incorrect information entered'
     },
@@ -112,9 +120,8 @@ export default defineComponent({
         }
     },
     editConditionCheck(attributes=[] as Array<string>): boolean {
-        if (['editing', 'view'].includes(this.activity) 
-            && !attributes.includes(this.activeField)) {
-            return false
+        if (this.activity === 'edit') {
+            return attributes.includes(this.activeField) 
         }
         return true
     },
@@ -124,7 +131,7 @@ export default defineComponent({
                 id: 'select_user',
                 helpText: "Select Username",
                 type: FieldType.TT_SELECT,
-                condition: () => this.activity === 'view',
+                condition: () => this.activity === 'edit',
                 validation: (val: any) => Validation.required(val),
                 unload: ({other}: Option) => this.userData = this.toUserData(other),
                 options: async () => {
@@ -141,8 +148,7 @@ export default defineComponent({
                 helpText: 'User information',
                 type: FieldType.TT_TABLE_VIEWER,
                 requireNext: false,
-                onload: () => this.activity != 'view' ? this.activity = 'editing': null,
-                condition: (f: any) => this.activeField === 'user_info' || f.select_user.value,
+                condition: () => this.activity === 'edit',
                 options: async (f: any, c: any, table: any) => {
                     const columns = ['Attributes', 'Values', 'Actions']
                     const deactivateButton = (status: string) => ({
@@ -152,15 +158,15 @@ export default defineComponent({
                             try {
                                 if (status === 'Active') {
                                     await UserService.deactivateUser(this.userData.id)
-                                    toastSuccess('User has been deactivated')
-                                    table.rows[5] = ['Status', 'Inactive', deactivateButton('Inactive')],
                                     this.userData.status = 'Inactive'
+                                    table.rows[5] = ['Status', 'Inactive', deactivateButton('Inactive')],
+                                    toastSuccess('User has been deactivated', 400)
                                 }
                                 if (status === 'Inactive') {
                                     await UserService.activateUser(this.userData.id)
-                                    toastSuccess('User has been activated')
-                                    table.rows[5] = ['Status', 'Active', deactivateButton('Active')],
                                     this.userData.status = 'Active'
+                                    table.rows[5] = ['Status', 'Active', deactivateButton('Active')],
+                                    toastSuccess('User has been activated', 400)
                                 }
                             } catch(e) {
                                 toastWarning(e)
@@ -176,7 +182,7 @@ export default defineComponent({
                         }
                     })
                     const rows = [
-                        ['Username', this.userData.given_name, navButton('Edit','given_name')],
+                        ['Username', this.userData.username, ''],
                         ['Role', this.userData.role, navButton('Edit', 'roles')],
                         ['First name', this.userData.given_name, navButton('Edit','given_name')],
                         ['Last Name', this.userData.family_name, navButton('Edit', 'given_name')],
@@ -234,7 +240,7 @@ export default defineComponent({
                 type: FieldType.TT_SELECT,
                 group: 'data_field',
                 computedValue: (val: Option) => val.label === 'Yes' ? true : false,
-                condition: (f: any) =>  f.roles.value  && ['view', 'editing'].includes(this.activity) && this.editConditionCheck(['roles']),
+                condition: () => this.activity === 'edit' && this.editConditionCheck(['roles']),
                 validation: (val: any) => Validation.required(val),
                 options: () => [
                     {
