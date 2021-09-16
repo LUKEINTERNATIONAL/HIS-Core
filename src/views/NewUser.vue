@@ -7,12 +7,7 @@ import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Field, Option } from "@/components/Forms/FieldInterface"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations"
-import {PersonService} from "@/services/person_service"
-import {Person} from "@/interfaces/person"
-import {PersonAttribute} from "@/interfaces/personAttribute"
-import {PersonAttributeService, NewAttribute} from '@/services/person_attributes_service'
-import HisDate from "@/utils/Date"
-import { isEmpty } from "lodash"
+import { UserService } from "@/services/user_service"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -57,7 +52,12 @@ export default defineComponent({
                 type: FieldType.TT_SELECT,
                 validation: (val: any) => Validation.required(val),
                 options: async () => {
-                    return []
+                    const users: any = await UserService.getAllUsers()
+                    return users.map((u: any) => ({
+                        label: u.username,
+                        value: u.user_id,
+                        other: u
+                    }))
                 }
             },
             {
@@ -104,7 +104,6 @@ export default defineComponent({
                 id: 'given_name',
                 helpText: 'First name',
                 type: FieldType.TT_TEXT,
-                group: 'person',
                 validation: (val: any) => Validation.isName(val),
                 options: async (form: any) => {
                     if (!form.given_name || form.given_name.value === null) return []
@@ -117,7 +116,6 @@ export default defineComponent({
                 id: 'family_name',
                 helpText: "Last name",
                 type: FieldType.TT_TEXT,
-                group: 'person',
                 validation: (val: any) => Validation.isName(val),
                 options: async (form: any) => {
                     if (!form.family_name || form.family_name.value === null) return []
@@ -140,7 +138,6 @@ export default defineComponent({
                 id: 'username',
                 helpText: "Username",
                 type: FieldType.TT_TEXT,
-                group: 'user',
                 validation: (val: any) => Validation.required(val),
                 options: async () => {
                     return []
@@ -150,14 +147,12 @@ export default defineComponent({
                 id: 'new_password',
                 helpText: "Password",
                 type: FieldType.TT_TEXT,
-                group: 'user',
                 validation: (val: any) => Validation.required(val),
             },
             {
                 id: 'confirm_password',
                 helpText: "Confirm Password",
                 type: FieldType.TT_TEXT,
-                group: 'user',
                 validation: (val: any) => Validation.required(val),
             },
         ]
