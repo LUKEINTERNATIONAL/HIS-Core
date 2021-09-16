@@ -1,5 +1,9 @@
 <template>
-  <his-standard-form :activeField="activeField" @onIndex="activeField=''" :fields="fields" @onFinish="onFinish"/>
+  <his-standard-form 
+    :activeField="activeField" 
+    @onIndex="activeField=''" 
+    :fields="fields" 
+    @onFinish="onFinish"/>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
@@ -107,10 +111,10 @@ export default defineComponent({
                         }
                     })
                     const rows = [
-                        ['Username', this.userData.given_name, navButton('Change','username')],
-                        ['Role', this.userData.given_name, navButton('Change', 'role')],
+                        ['Username', this.userData.given_name, navButton('Edit','given_name')],
+                        ['Role', this.userData.role, navButton('Change', 'role')],
                         ['First name', this.userData.given_name, navButton('Edit','given_name')],
-                        ['Last Name', this.userData.family_name, navButton('Edit', 'family_name')],
+                        ['Last Name', this.userData.family_name, navButton('Edit', 'given_name')],
                         ['Authentication', '*******', navButton('Change Password', 'new_password')],
                         ['Status', this.userData.status,  deactivateButton()],
                         ['Date created', this.userData.created, ''],
