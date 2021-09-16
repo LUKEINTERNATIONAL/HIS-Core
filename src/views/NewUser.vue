@@ -19,9 +19,11 @@ export default defineComponent({
     userData: {} as any,
     fieldComponent: '' as string,
     activeField: '' as string,
+    userRoles: [] as Array<any>,
     form: {} as Record<string, Option> | Record<string, null>
   }),
   async created(){
+    this.userRoles = await this.getRoles()
     this.fields = this.getFields()
   },
   methods: {
@@ -45,6 +47,14 @@ export default defineComponent({
     },
     deactivateButton(name: 'Deactivate') {
         //TODO: move activation logic here
+    },
+    async getRoles() {
+        const roles = await UserService.getAllRoles()
+        return roles.map((r: any) => ({
+            label: r.role,
+            value: r.uuid,
+            other: r
+        }))
     },
     toUserData(userObj: any) {
         const names = userObj.names[0]
@@ -144,18 +154,13 @@ export default defineComponent({
                 type: FieldType.TT_SELECT,
                 group: 'user',
                 validation: (val: any) => Validation.required(val),
-                options: async () => {
-                    return []
-                }
+                options: () => this.userRoles
             },
             {
                 id: 'username',
                 helpText: "Username",
                 type: FieldType.TT_TEXT,
-                validation: (val: any) => Validation.required(val),
-                options: async () => {
-                    return []
-                }
+                validation: (val: any) => Validation.required(val)
             },
             {
                 id: 'new_password',

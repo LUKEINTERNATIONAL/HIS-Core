@@ -26,6 +26,10 @@ export class UserService extends Service {
     return this.getJson('users', { 'page_size': 100})
   }
 
+  static getAllRoles() {
+    return this.getJson('roles', { 'page_size': 100 })
+  }
+
   static getUsers() {
     return super.getJson('users', { role: 'Superuser' })
   }
