@@ -149,7 +149,9 @@ export default defineComponent({
         this.patientId,
         "Confirmatory HIV test date"
       );
-      dateOfTest = toStandardHisDisplayFormat(dateOfTest[0].value_datetime);
+      if(dateOfTest) {
+        dateOfTest = toStandardHisDisplayFormat(dateOfTest[0].value_datetime);
+      }
       const placeOfTest = await ObservationService.getFirstValueText(
         this.patientId,
         "Confirmatory HIV test location"
@@ -203,7 +205,7 @@ export default defineComponent({
         { label: "Reason for starting", value: reasonForStarting },
         {
           label: "Date + place of HIV test",
-          value: `${dateOfTest} ${placeOfTest}`,
+          value: `${dateOfTest ? dateOfTest  : ''} ${placeOfTest? placeOfTest : ''}`,
         },
         { label: "Date of starting first line ART", value: startDate },
       ];
