@@ -141,6 +141,9 @@ export default defineComponent({
                         value: u.user_id,
                         other: u
                     }))
+                },
+                config: {
+                    showKeyboard: true
                 }
             },
             {
@@ -237,7 +240,10 @@ export default defineComponent({
                 computedValue: (val: Option) => [val.value],
                 condition: () => this.editConditionCheck(['roles']),
                 validation: (val: any) => Validation.required(val),
-                options: async() => await this.getRoles()
+                options: async() => await this.getRoles(),
+                config: {
+                    showKeyboard: true
+                }
             },
             {
                 id: 'must_append_roles',
