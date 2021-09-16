@@ -38,9 +38,9 @@ export default defineComponent({
         const data = {...this.resolveData(form, 'data_field'), ...computeValues}
         try {
             if (this.activity === 'editing' || this.activity === 'view') {
-                this.update(data)
+                await this.update(data)
             } else {
-                this.create(data)
+                await this.create(data)
             }
             this.fieldComponent = 'user_info'
             this.activeField = this.fieldComponent
@@ -165,7 +165,7 @@ export default defineComponent({
                     })
                     const rows = [
                         ['Username', this.userData.given_name, navButton('Edit','given_name')],
-                        ['Role', this.userData.role, navButton('Edit', 'role')],
+                        ['Role', this.userData.role, navButton('Edit', 'roles')],
                         ['First name', this.userData.given_name, navButton('Edit','given_name')],
                         ['Last Name', this.userData.family_name, navButton('Edit', 'given_name')],
                         ['Password', '*******', navButton('Edit', 'new_password')],
@@ -208,13 +208,29 @@ export default defineComponent({
                 }
             },
             {
-                id: 'role',
+                id: 'roles',
                 helpText: "Role",
                 type: FieldType.TT_SELECT,
                 computedValue: (val: Option) => [val.value],
-                condition: () => this.editConditionCheck(['role']),
+                condition: () => this.editConditionCheck(['roles']),
                 validation: (val: any) => Validation.required(val),
                 options: () => this.userRoles
+            },
+            {
+                id: 'must_append_roles',
+                helpText: "Do you want to append role?",
+                type: FieldType.TT_SELECT,
+                group: 'data_field',
+                condition: (f: any) =>  f.roles.value  && ['view', 'editing'].includes(this.activity) && this.editConditionCheck(['roles']),
+                validation: (val: any) => Validation.required(val),
+                options: () => [
+                    {
+                        label: 'Yes', value: 'true'
+                    },
+                    {
+                        label: 'No', value: 'false'
+                    }
+                ]
             },
             {
                 id: 'username',
