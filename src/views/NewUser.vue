@@ -8,6 +8,8 @@ import { Field, Option } from "@/components/Forms/FieldInterface"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { UserService } from "@/services/user_service"
+import { PersonService } from "@/services/person_service"
+import HisDate from "@/utils/Date"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -44,6 +46,17 @@ export default defineComponent({
     deactivateButton(name: 'Deactivate') {
         //TODO: move activation logic here
     },
+    toUserData(userObj: any) {
+        const names = userObj.names[0]
+        return {
+            'given_name': names.given_name,
+            'family_name': names.family_name,
+            'username': userObj.username,
+            'role': userObj.roles.map((r: any) => r.role).split(', '),
+            'created': userObj.date_created,
+            'status': userObj.deactivated_on ? 'Deactivated' : 'Activated'
+        }
+    },
     getFields: function(): Array<Field> {
         return [
             {
@@ -51,6 +64,7 @@ export default defineComponent({
                 helpText: "Select Username",
                 type: FieldType.TT_SELECT,
                 validation: (val: any) => Validation.required(val),
+                unload: ({other}: Option) => this.userData = this.toUserData(other),
                 options: async () => {
                     const users: any = await UserService.getAllUsers()
                     return users.map((u: any) => ({
@@ -88,8 +102,8 @@ export default defineComponent({
                         ['First name', this.userData.given_name, navButton('Edit','given_name')],
                         ['Last Name', this.userData.family_name, navButton('Edit', 'family_name')],
                         ['Authentication', '*******', navButton('Change Password', 'new_password')],
-                        ['Status', this.userData.home_district,  deactivateButton()],
-                        ['Date created', this.userData.birthdate, ''],
+                        ['Status', this.userData.status,  deactivateButton()],
+                        ['Date created', this.userData.created, ''],
                     ]
                     return [{
                         label: '',
