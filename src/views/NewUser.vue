@@ -256,6 +256,9 @@ export default defineComponent({
                 type: FieldType.TT_TEXT,
                 condition: () => this.editConditionCheck(['new_password']),
                 validation: (val: any) => Validation.required(val),
+                config: {
+                    inputType: 'password'
+                }
             },
             {
                 id: 'password',
@@ -263,7 +266,10 @@ export default defineComponent({
                 type: FieldType.TT_TEXT,
                 group: 'data_field',
                 condition: () => this.editConditionCheck(['new_password']),
-                validation: (val: any, f: any) => Validation.required(val) || f.new_password.value != val.value ? ['Confirm password doesnt match previous password']: null
+                validation: (val: any, f: any) => Validation.required(val) || f.new_password.value != val.value ? ['Confirm password doesnt match previous password']: null,
+                config: {
+                    inputType: 'password'
+                }
             },
         ]
     }
