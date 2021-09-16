@@ -107,7 +107,7 @@ export default defineComponent({
             'family_name': names.family_name,
             'username': userObj.username,
             'role': userObj.roles.map((r: any) => r.role).split(', '),
-            'created': userObj.date_created,
+            'created': HisDate.toStandardHisDisplayFormat(userObj.date_created),
             'status': userObj.deactivated_on ? 'Deactivated' : 'Activated'
         }
     },
