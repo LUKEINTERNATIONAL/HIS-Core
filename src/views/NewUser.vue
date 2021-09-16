@@ -21,23 +21,32 @@ export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     fields: [] as Array<Field>,
-    activity: 'view' as 'registration' | 'editing' | 'view',
+    activity: 'registration' as 'registration' | 'editing' | 'view',
     presets: {} as any,
     userData: {} as any,
     fieldComponent: '' as string,
     activeField: '' as string,
-    userRoles: [] as Array<any>,
     form: {} as Record<string, Option> | Record<string, null>
   }),
+  watch: {
+    '$route': {
+        async handler({query}: any) {
+            if (query && ['view', 'editing', 'registration'].includes(query.activity)) {
+                this.activity = query.activity
+            }
+        },
+        immediate: true,
+        deep: true
+    }
+  },
   async created() {
-    this.userRoles = await this.getRoles()
     this.fields = this.getFields()
   },
   methods: {
     async onFinish(form: Record<string, Option> | Record<string, null>, computeValues: any) {
         const data = {...this.resolveData(form, 'data_field'), ...computeValues}
         try {
-            if (this.activity === 'editing' || this.activity === 'view') {
+            if (['editing', 'view'].includes(this.activity)) {
                 await this.update(data)
             } else {
                 await this.create(data)
@@ -214,7 +223,7 @@ export default defineComponent({
                 computedValue: (val: Option) => [val.value],
                 condition: () => this.editConditionCheck(['roles']),
                 validation: (val: any) => Validation.required(val),
-                options: () => this.userRoles
+                options: async() => await this.getRoles()
             },
             {
                 id: 'must_append_roles',
