@@ -143,21 +143,24 @@ export default defineComponent({
                 requireNext: false,
                 onload: () => this.activity != 'view' ? this.activity = 'editing': null,
                 condition: (f: any) => this.activeField === 'user_info' || f.select_user.value,
-                options: async () => {
-                    const status = this.userData.status === 'Active' ? 'Deactivate' : 'Activate'
+                options: async (f: any, c: any, table: any) => {
                     const columns = ['Attributes', 'Values', 'Actions']
-                    const deactivateButton = () => ({
-                        name: status ,
+                    const deactivateButton = (status: string) => ({
+                        name: status === 'Active' ? 'Deactivate' : 'Activate' ,
                         type: 'button',
                         action: async () => {
                             try {
-                                if (status === 'Deactivate') {
+                                if (status === 'Active') {
                                     await UserService.deactivateUser(this.userData.id)
                                     toastSuccess('User has been deactivated')
+                                    table.rows[5] = ['Status', 'Inactive', deactivateButton('Inactive')],
+                                    this.userData.status = 'Inactive'
                                 }
-                                if (status === 'Activate') {
+                                if (status === 'Inactive') {
                                     await UserService.activateUser(this.userData.id)
                                     toastSuccess('User has been activated')
+                                    table.rows[5] = ['Status', 'Active', deactivateButton('Active')],
+                                    this.userData.status = 'Active'
                                 }
                             } catch(e) {
                                 toastWarning(e)
@@ -178,7 +181,7 @@ export default defineComponent({
                         ['First name', this.userData.given_name, navButton('Edit','given_name')],
                         ['Last Name', this.userData.family_name, navButton('Edit', 'given_name')],
                         ['Password', '*******', navButton('Edit', 'new_password')],
-                        ['Status', this.userData.status,  deactivateButton()],
+                        ['Status', this.userData.status,  deactivateButton(this.userData.status)],
                         ['Date created', this.userData.created, ''],
                     ]
                     return [{

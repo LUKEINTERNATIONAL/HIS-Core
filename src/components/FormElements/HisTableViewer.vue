@@ -38,7 +38,7 @@ export default defineComponent({
     },
     async activated() {
         this.$emit('onFieldActivated', this)
-        const data = await this.options(this.fdata, this.cdata)
+        const data = await this.options(this.fdata, this.cdata, this)
         if (isEmpty(data)) return
 
         const { other } = data[0]
