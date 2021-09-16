@@ -218,9 +218,10 @@ export default defineComponent({
             },
             {
                 id: 'must_append_roles',
-                helpText: "Do you want to append role?",
+                helpText: "Would you like to append role?",
                 type: FieldType.TT_SELECT,
                 group: 'data_field',
+                computedValue: (val: Option) => val.label === 'Yes' ? true : false,
                 condition: (f: any) =>  f.roles.value  && ['view', 'editing'].includes(this.activity) && this.editConditionCheck(['roles']),
                 validation: (val: any) => Validation.required(val),
                 options: () => [
