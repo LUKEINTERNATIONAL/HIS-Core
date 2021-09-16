@@ -268,14 +268,20 @@ export default defineComponent({
                 type: FieldType.TT_TEXT,
                 group: 'data_field',
                 condition: () => this.editConditionCheck(['nothing to see here']),
-                validation: (val: any) => Validation.required(val)
+                validation: (val: any) => Validation.validateSeries([
+                    () => Validation.required(val),
+                    () => Validation.hasLengthRangeOf(val, 4, 15)
+                ]) 
             },
             {
                 id: 'new_password',
                 helpText: "New Password",
                 type: FieldType.TT_TEXT,
                 condition: () => this.editConditionCheck(['new_password']),
-                validation: (val: any) => Validation.required(val),
+                validation: (val: any) => Validation.validateSeries([
+                    () => Validation.required(val),
+                    () => Validation.hasLengthRangeOf(val, 4, 15)
+                ]),
                 config: {
                     inputType: 'password'
                 }
@@ -286,7 +292,14 @@ export default defineComponent({
                 type: FieldType.TT_TEXT,
                 group: 'data_field',
                 condition: () => this.editConditionCheck(['new_password']),
-                validation: (val: any, f: any) => Validation.required(val) || f.new_password.value != val.value ? ['Confirm password doesnt match previous password']: null,
+                validation: (val: any, f: any) => Validation.validateSeries([
+                    () => Validation.required(val),
+                    () => {
+                        if (f.new_password.value != val.value ) {
+                            return ['Confirm password doesnt match previous password']
+                        }
+                    }
+                ]),
                 config: {
                     inputType: 'password'
                 }
