@@ -65,17 +65,8 @@ export default defineComponent({
         throw 'Unable to update user, possibly server error or incorrect information entered'
 
     },
-    onChangeUserStatus() {
-        //TODO: Handle user status logic
-    },
     mapToOption(listOptions: Array<string>): Array<Option> {
         return listOptions.map((item: any) => ({ label: item, value: item })) 
-    },
-    navToFieldButton(name: string, target: string) {
-        //TODO: move nav button logic here
-    },
-    deactivateButton(name: 'Deactivate') {
-        //TODO: move activation logic here
     },
     resolveData(form: Record<string, Option> | Record<string, null>, group: string) {
         const output: any = {} 
@@ -95,7 +86,7 @@ export default defineComponent({
         const roles = await UserService.getAllRoles()
         return roles.map((r: any) => ({
             label: r.role,
-            value: r.uuid,
+            value: r.role,
             other: r
         }))
     },
@@ -248,7 +239,7 @@ export default defineComponent({
                 type: FieldType.TT_TEXT,
                 group: 'data_field',
                 condition: () => this.editConditionCheck(['new_password']),
-                validation: (val: any) => Validation.required(val),
+                validation: (val: any, f: any) => Validation.required(val) && f.new_password.value === val.value
             },
         ]
     }
