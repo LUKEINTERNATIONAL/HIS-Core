@@ -1,6 +1,7 @@
 <template>
   <his-standard-form 
-    :activeField="fieldComponent" 
+    :activeField="fieldComponent"
+    :skipSummary="true"
     @onIndex="fieldComponent=''" 
     :fields="fields" 
     @onFinish="onFinish"/>
@@ -20,7 +21,7 @@ export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     fields: [] as Array<Field>,
-    activity: '' as 'registration' | 'editing' | 'view',
+    activity: 'view' as 'registration' | 'editing' | 'view',
     presets: {} as any,
     userData: {} as any,
     fieldComponent: '' as string,
@@ -28,42 +29,41 @@ export default defineComponent({
     userRoles: [] as Array<any>,
     form: {} as Record<string, Option> | Record<string, null>
   }),
-  async created(){
+  async created() {
     this.userRoles = await this.getRoles()
     this.fields = this.getFields()
   },
   methods: {
-    async onFinish(form: Record<string, Option> | Record<string, null>) {
+    async onFinish(form: Record<string, Option> | Record<string, null>, computeValues: any) {
+        const data = {...this.resolveData(form, 'data_field'), ...computeValues}
         try {
             if (this.activity === 'editing' || this.activity === 'view') {
-                return this.update(form)
+                this.update(data)
             } else {
-                return this.create(form)
+                this.create(data)
             }
+            this.fieldComponent = 'user_info'
+            this.activeField = this.fieldComponent
         } catch (e) {
             toastWarning(e)
         }
+
     },
-    async create(form: Record<string, Option> | Record<string, null>) {
-        const data = this.resolveData(form, 'data_field')
+    async create(data: any) {
         const newPerson = await UserService.createUser(data)
         if (newPerson) {
-            this.userData = this.toUserData(newPerson)
-            this.fieldComponent = 'user_info'
-            this.activeField = this.fieldComponent
+            this.userData = this.toUserData(newPerson.user)
+            return
         }
         throw 'Unable to create new user, Possibly the user already exists or incorrect info was entered'
     },
-    async update(form: Record<string, Option> | Record<string, null>) {
-        const data = this.resolveData(form, 'data_field')
+    async update(data: any) {
         const updatePerson = await UserService.updateUser(this.userData.id, data)
         if (updatePerson) {
             this.userData = this.toUserData(updatePerson)
-            this.fieldComponent = 'user_info'
-            this.activeField = this.fieldComponent
+            return
         }
         throw 'Unable to update user, possibly server error or incorrect information entered'
-
     },
     mapToOption(listOptions: Array<string>): Array<Option> {
         return listOptions.map((item: any) => ({ label: item, value: item })) 
@@ -91,19 +91,20 @@ export default defineComponent({
         }))
     },
     toUserData(userObj: any) {
-        const names = userObj.names[0]
+        const names = userObj.person.names[0]
         return {
             'id': userObj.user_id,
             'given_name': names.given_name,
             'family_name': names.family_name,
             'username': userObj.username,
-            'role': userObj.roles.map((r: any) => r.role).split(', '),
+            'role': userObj.roles.map((r: any) => r.role).join(', '),
             'created': HisDate.toStandardHisDisplayFormat(userObj.date_created),
             'status': userObj.deactivated_on ? 'Inactive' : 'Active'
         }
     },
     editConditionCheck(attributes=[] as Array<string>): boolean {
-        if (this.activity === 'editing' && !attributes.includes(this.activeField)) {
+        if (['editing', 'view'].includes(this.activity) 
+            && !attributes.includes(this.activeField)) {
             return false
         }
         return true
@@ -131,18 +132,18 @@ export default defineComponent({
                 helpText: 'User information',
                 type: FieldType.TT_TABLE_VIEWER,
                 requireNext: false,
-                onload: () => this.activity = 'editing',
-                condition: () => this.activeField === 'user_info',
+                onload: () => this.activity != 'view' ? this.activity = 'editing': null,
+                condition: (f: any) => this.activeField === 'user_info' || f.select_user.value,
                 options: async () => {
-                    const columns = ['Attributes', 'Values', 'Actions']
                     const status = this.userData.status === 'Active' ? 'Deactivate' : 'Activate'
+                    const columns = ['Attributes', 'Values', 'Actions']
                     const deactivateButton = () => ({
                         name: status ,
-                        type: 'Button',
+                        type: 'button',
                         action: async () => {
                             try {
                                 if (status === 'Deactivate') {
-                                    await UserService.deactivateUser(this.userData.id)                                                                        toastSuccess('User has been activated')
+                                    await UserService.deactivateUser(this.userData.id)
                                     toastSuccess('User has been deactivated')
                                 }
                                 if (status === 'Activate') {
@@ -164,19 +165,17 @@ export default defineComponent({
                     })
                     const rows = [
                         ['Username', this.userData.given_name, navButton('Edit','given_name')],
-                        ['Role', this.userData.role, navButton('Change', 'role')],
+                        ['Role', this.userData.role, navButton('Edit', 'role')],
                         ['First name', this.userData.given_name, navButton('Edit','given_name')],
                         ['Last Name', this.userData.family_name, navButton('Edit', 'given_name')],
-                        ['Authentication', '*******', navButton('Change Password', 'new_password')],
+                        ['Password', '*******', navButton('Edit', 'new_password')],
                         ['Status', this.userData.status,  deactivateButton()],
                         ['Date created', this.userData.created, ''],
                     ]
                     return [{
                         label: '',
                         value: '',
-                        other: {
-                            columns, rows
-                        }
+                        other: { columns, rows }
                     }]
                 },
             },
@@ -212,7 +211,7 @@ export default defineComponent({
                 id: 'role',
                 helpText: "Role",
                 type: FieldType.TT_SELECT,
-                group: 'data_field',
+                computedValue: (val: Option) => [val.value],
                 condition: () => this.editConditionCheck(['role']),
                 validation: (val: any) => Validation.required(val),
                 options: () => this.userRoles
@@ -222,24 +221,23 @@ export default defineComponent({
                 helpText: "Username",
                 type: FieldType.TT_TEXT,
                 group: 'data_field',
-                condition: () => this.editConditionCheck(['']),
+                condition: () => this.editConditionCheck(['nothing to see here']),
                 validation: (val: any) => Validation.required(val)
             },
             {
                 id: 'new_password',
-                helpText: "Password",
+                helpText: "New Password",
                 type: FieldType.TT_TEXT,
-                group: 'data_field',
                 condition: () => this.editConditionCheck(['new_password']),
                 validation: (val: any) => Validation.required(val),
             },
             {
-                id: 'confirm_password',
+                id: 'password',
                 helpText: "Confirm Password",
                 type: FieldType.TT_TEXT,
                 group: 'data_field',
                 condition: () => this.editConditionCheck(['new_password']),
-                validation: (val: any, f: any) => Validation.required(val) && f.new_password.value === val.value
+                validation: (val: any, f: any) => Validation.required(val) || f.new_password.value != val.value ? ['Confirm password doesnt match previous password']: null
             },
         ]
     }
