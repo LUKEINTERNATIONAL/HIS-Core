@@ -14,7 +14,7 @@ import Validation from "@/components/Forms/validations/StandardValidations"
 import { UserService } from "@/services/user_service"
 import { PersonService } from "@/services/person_service"
 import HisDate from "@/utils/Date"
-import { toastWarning } from "@/utils/Alerts"
+import { toastWarning, toastSuccess } from "@/utils/Alerts"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -108,7 +108,7 @@ export default defineComponent({
             'username': userObj.username,
             'role': userObj.roles.map((r: any) => r.role).split(', '),
             'created': HisDate.toStandardHisDisplayFormat(userObj.date_created),
-            'status': userObj.deactivated_on ? 'Deactivated' : 'Activated'
+            'status': userObj.deactivated_on ? 'Inactive' : 'Active'
         }
     },
     editConditionCheck(attributes=[] as Array<string>): boolean {
@@ -144,11 +144,23 @@ export default defineComponent({
                 condition: () => this.activeField === 'user_info',
                 options: async () => {
                     const columns = ['Attributes', 'Values', 'Actions']
+                    const status = this.userData.status === 'Active' ? 'Deactivate' : 'Activate'
                     const deactivateButton = () => ({
-                        name: 'Deactivate',
+                        name: status ,
                         type: 'Button',
-                        action: () => {
-                            //TODO: DO something
+                        action: async () => {
+                            try {
+                                if (status === 'Deactivate') {
+                                    await UserService.deactivateUser(this.userData.id)                                                                        toastSuccess('User has been activated')
+                                    toastSuccess('User has been deactivated')
+                                }
+                                if (status === 'Activate') {
+                                    await UserService.activateUser(this.userData.id)
+                                    toastSuccess('User has been activated')
+                                }
+                            } catch(e) {
+                                toastWarning(e)
+                            }
                         }
                     })
                     const navButton = (name: string, targetField: string) => ({ 
