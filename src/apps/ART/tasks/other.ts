@@ -84,7 +84,9 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     id: "master_card",
     name: "Mastercard",
     description: "Mastercard",
-    url: "/",
+    action: ({ patient }: any, router: any) => {
+      router.push({ path: `/art/mastercard/${patient.patient_id}`})
+    },
     icon: img("card.png")
   },
   {

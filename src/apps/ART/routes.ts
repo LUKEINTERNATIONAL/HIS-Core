@@ -10,6 +10,7 @@ import Vitals from "@/apps/ART/views/encounters/Vitals.vue"
 import PatientType from "@/apps/ART/views/encounters/PatientType.vue"
 import FastTrack from "@/apps/ART/views/encounters/FastTrack.vue"
 import LabActivities from "@/apps/ART/views/encounters/LabActivities.vue"
+import Mastercard from "@/apps/ART/views/Mastercard.vue"
 import PepFarDiaggregatedReport from "@/apps/ART/views/reports/pepfar/disaggregated.vue"
 import PepFarDefaultersReport from "@/apps/ART/views/reports/pepfar/defaulters.vue"
 import PepFarRegimenReport from "@/apps/ART/views/reports/pepfar/regimen.vue"
@@ -104,6 +105,11 @@ export default [
         name: "lab activities",
         path: "/art/encounters/lab/:patient_id",
         component: LabActivities
+    },
+    {
+       name: "patient mstercard",
+        path: "/art/mastercard/:patient_id",
+        component: Mastercard
     },
     {
         path: '/art/report/moh',
