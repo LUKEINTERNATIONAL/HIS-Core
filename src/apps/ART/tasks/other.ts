@@ -149,11 +149,11 @@ export const PREFERENCES = {
         'User Management': [
           {
             name: "New user",
-            route: "/user?activity=registration",
+            route: "/user?activity=add",
           },
           {
             name: "Edit Users",
-            route: "/user?activity=view",
+            route: "/user?activity=edit",
           },
         ],
         'System Preferences': [

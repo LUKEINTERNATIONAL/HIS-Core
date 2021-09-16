@@ -150,6 +150,7 @@ export default defineComponent({
                 requireNext: false,
                 condition: () => this.activity === 'edit',
                 options: async (f: any, c: any, table: any) => {
+                    const statusRowIndex = 4
                     const columns = ['Attributes', 'Values', 'Actions']
                     const deactivateButton = (status: string) => ({
                         name: status === 'Active' ? 'Deactivate' : 'Activate' ,
@@ -159,13 +160,13 @@ export default defineComponent({
                                 if (status === 'Active') {
                                     await UserService.deactivateUser(this.userData.id)
                                     this.userData.status = 'Inactive'
-                                    table.rows[5] = ['Status', 'Inactive', deactivateButton('Inactive')],
+                                    table.rows[statusRowIndex] = ['Status', 'Inactive', deactivateButton('Inactive')],
                                     toastSuccess('User has been deactivated', 400)
                                 }
                                 if (status === 'Inactive') {
                                     await UserService.activateUser(this.userData.id)
                                     this.userData.status = 'Active'
-                                    table.rows[5] = ['Status', 'Active', deactivateButton('Active')],
+                                    table.rows[statusRowIndex] = ['Status', 'Active', deactivateButton('Active')],
                                     toastSuccess('User has been activated', 400)
                                 }
                             } catch(e) {
@@ -183,10 +184,9 @@ export default defineComponent({
                     })
                     const rows = [
                         ['Username', this.userData.username, ''],
-                        ['Role', this.userData.role, navButton('Edit', 'roles')],
-                        ['First name', this.userData.given_name, navButton('Edit','given_name')],
-                        ['Last Name', this.userData.family_name, navButton('Edit', 'given_name')],
-                        ['Password', '*******', navButton('Edit', 'new_password')],
+                        ['Role', this.userData.role, navButton('Update role', 'roles')],
+                        ['Name', `${this.userData.given_name} ${this.userData.family_name}`, navButton('Edit usernames', 'given_name')],
+                        ['Password', '*******', navButton('Change password', 'new_password')],
                         ['Status', this.userData.status,  deactivateButton(this.userData.status)],
                         ['Date created', this.userData.created, ''],
                     ]
@@ -196,6 +196,11 @@ export default defineComponent({
                         other: { columns, rows }
                     }]
                 },
+                config: {
+                    hiddenFooterBtns: [
+                        'Clear'
+                    ]
+                }
             },
             {
                 id: 'given_name',
