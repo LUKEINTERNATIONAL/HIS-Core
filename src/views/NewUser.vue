@@ -167,7 +167,6 @@ export default defineComponent({
                 id: 'role',
                 helpText: "Role",
                 type: FieldType.TT_SELECT,
-                group: 'user',
                 condition: () => this.editConditionCheck(['role']),
                 validation: (val: any) => Validation.required(val),
                 options: () => this.userRoles
