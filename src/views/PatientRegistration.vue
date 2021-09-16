@@ -1,5 +1,5 @@
 <template>
-  <his-standard-form 
+  <his-standard-form
     @onIndex="fieldComponent=''" 
     :skipSummary="skipSummary"
     :activeField="fieldComponent" 
@@ -44,6 +44,7 @@ export default defineComponent({
         'current_district',
         'current_traditional_authority',
     ] as Array<string>,  
+    editPersonData: {} as any,
     editPerson: -1 as number,
     activeField: '' as string,
     fieldComponent: '' as string,
@@ -53,29 +54,53 @@ export default defineComponent({
     form: {} as Record<string, Option> | Record<string, null>
   }),
   computed: {
-      showPatientType() {
-          return ProgramService.getProgramID() == 1
-      }
-  },
-  async created(){
-    this.fields = this.getFields()
-    this.isMilitarySite = await GlobalPropertyService.isMilitarySite()
+    showPatientType() {
+        return ProgramService.getProgramID() == 1
+    }
   },
   watch: {
     '$route': {
-        handler({query}: any) {
+        async handler({query}: any) {
             if (query.edit_person) {
-                this.editPerson = query.edit_person
-                this.skipSummary = true
+                await this.initEditMode(query.edit_person)
             } else {
                 this.presets = query
             }
+            this.fields = this.getFields()
+            this.isMilitarySite = await GlobalPropertyService.isMilitarySite()
         },
         immediate: true,
         deep: true
     }
   },
   methods: {
+    async initEditMode(personId: number) {
+        this.editPerson = personId
+        const person = await Patientservice.findByID(this.editPerson)
+        if (!person) return
+        const patient = new Patientservice(person)
+        const { 
+            ancestryDistrict, 
+            ancestryTA, 
+            ancestryVillage,
+            currentDistrict,
+            currentTA
+        } = patient.getAddresses()
+        this.editPersonData = {
+            'given_name': patient.getGivenName(),
+            'family_name': patient.getFamilyName(),
+            'gender': patient.getGender(),
+            'birthdate': patient.getBirthdate(),
+            'home_district': ancestryDistrict,
+            'home_ta': ancestryTA,
+            'home_village': ancestryVillage,
+            'current_district': currentDistrict,
+            'current_ta': currentTA,
+            'cell_phone_number': patient.getPhoneNumber(),
+        }
+        this.presets = this.editPersonData
+        this.skipSummary = true
+    },
     async onFinish(form: Record<string, Option> | Record<string, null>, computedData: any) {
         try {
             if (this.editPerson <= 0) {
@@ -113,9 +138,14 @@ export default defineComponent({
         }
     },
     async update(form: Record<string, Option> | Record<string, null>, computedData: any) {
-        const person: NewPerson = this.resolvePerson(form, computedData)
+        const person: any = this.resolvePerson(form, computedData)
         if (!isEmpty(person)) {
             await new PersonService(person).update(this.editPerson)
+            for(const attr in person) {
+                if (attr in this.editPersonData) {
+                    this.editPersonData[attr] = person[attr]
+                }
+            }
         }
         this.fieldComponent = 'edit_user'
     },
@@ -255,18 +285,6 @@ export default defineComponent({
                 requireNext: false,
                 condition: () => this.editPerson != -1,
                 options: async () => {
-                    const person = await Patientservice.findByID(this.editPerson)
-                    if (!person) {
-                        return []
-                    } 
-                    const patient = new Patientservice(person)
-                    const { 
-                        ancestryDistrict, 
-                        ancestryTA, 
-                        ancestryVillage,
-                        currentDistrict,
-                        currentTA
-                    } = patient.getAddresses()
                     const columns = ['Attributes', 'Values', 'Edit']
                     const editButton = (attribute: string) => ({ 
                         name: 'Edit', 
@@ -277,16 +295,16 @@ export default defineComponent({
                         }
                     })
                     const rows = [
-                        ['Given Name', patient.getGivenName(), editButton('given_name')],
-                        ['Family Name', patient.getFamilyName(), editButton('family_name')],
-                        ['Gender', patient.getGender(),  editButton('gender')],
-                        ['Birthdate', patient.getBirthdate(),  editButton('year_birth_date')],
-                        ['Home district', ancestryDistrict,  editButton('home_region')],
-                        ['Home TA', ancestryTA,  editButton('home_region')],
-                        ['Home Village', ancestryVillage,  editButton('home_region')],
-                        ['Current district', currentDistrict, editButton('home_region')],
-                        ['Current T/A', currentTA, editButton('home_region')],
-                        ['Cell Phone Number', patient.getPhoneNumber(), editButton('cell_phone_number')],
+                        ['Given Name', this.editPersonData.given_name, editButton('given_name')],
+                        ['Family Name', this.editPersonData.family_name, editButton('family_name')],
+                        ['Gender', this.editPersonData.gender,  editButton('gender')],
+                        ['Birthdate', this.editPersonData.birthdate,  editButton('year_birth_date')],
+                        ['Home district', this.editPersonData.home_district,  editButton('home_region')],
+                        ['Home TA', this.editPersonData.home_ta,  editButton('home_region')],
+                        ['Home Village', this.editPersonData.home_village,  editButton('home_region')],
+                        ['Current district',this.editPersonData.current_district, editButton('home_region')],
+                        ['Current T/A', this.editPersonData.current_ta, editButton('home_region')],
+                        ['Cell Phone Number', this.editPersonData.cell_phone_number, editButton('cell_phone_number')],
                     ]
                     return [{
                         label: '',
@@ -488,6 +506,7 @@ export default defineComponent({
                 helpText: 'Cell phone number',
                 group: 'person',
                 type: FieldType.TT_NUMBER,
+                preset: this.getFieldPreset('cell_phone_number'),
                 condition: () => this.editConditionCheck(['cell_phone_number']),
                 validation: (val: any) => {
                     if (val && val.value.match(/Unknown/i)) return
