@@ -1,7 +1,7 @@
 <template>
   <his-standard-form 
-    :activeField="activeField" 
-    @onIndex="activeField=''" 
+    :activeField="fieldComponent" 
+    @onIndex="fieldComponent=''" 
     :fields="fields" 
     @onFinish="onFinish"/>
 </template>
@@ -19,6 +19,7 @@ export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     fields: [] as Array<Field>,
+    activity: '' as 'registration' | 'editing' | 'view',
     presets: {} as any,
     userData: {} as any,
     fieldComponent: '' as string,
@@ -71,12 +72,19 @@ export default defineComponent({
             'status': userObj.deactivated_on ? 'Deactivated' : 'Activated'
         }
     },
+    editConditionCheck(attributes=[] as Array<string>): boolean {
+        if (this.activity === 'editing' && !attributes.includes(this.activeField)) {
+            return false
+        }
+        return true
+    },
     getFields: function(): Array<Field> {
         return [
             {
                 id: 'select_user',
                 helpText: "Select Username",
                 type: FieldType.TT_SELECT,
+                condition: () => this.activity === 'view',
                 validation: (val: any) => Validation.required(val),
                 unload: ({other}: Option) => this.userData = this.toUserData(other),
                 options: async () => {
@@ -93,6 +101,7 @@ export default defineComponent({
                 helpText: 'User information',
                 type: FieldType.TT_TABLE_VIEWER,
                 requireNext: false,
+                condition: () => this.activeField === 'user_info',
                 options: async () => {
                     const columns = ['Attributes', 'Values', 'Actions']
                     const deactivateButton = () => ({
@@ -132,6 +141,7 @@ export default defineComponent({
                 id: 'given_name',
                 helpText: 'First name',
                 type: FieldType.TT_TEXT,
+                condition: () => this.editConditionCheck(['given_name']),
                 validation: (val: any) => Validation.isName(val),
                 options: async (form: any) => {
                     if (!form.given_name || form.given_name.value === null) return []
@@ -145,6 +155,7 @@ export default defineComponent({
                 helpText: "Last name",
                 type: FieldType.TT_TEXT,
                 validation: (val: any) => Validation.isName(val),
+                condition: () => this.editConditionCheck(['given_name']),
                 options: async (form: any) => {
                     if (!form.family_name || form.family_name.value === null) return []
 
@@ -157,6 +168,7 @@ export default defineComponent({
                 helpText: "Role",
                 type: FieldType.TT_SELECT,
                 group: 'user',
+                condition: () => this.editConditionCheck(['role']),
                 validation: (val: any) => Validation.required(val),
                 options: () => this.userRoles
             },
@@ -164,18 +176,21 @@ export default defineComponent({
                 id: 'username',
                 helpText: "Username",
                 type: FieldType.TT_TEXT,
+                condition: () => this.editConditionCheck(['']),
                 validation: (val: any) => Validation.required(val)
             },
             {
                 id: 'new_password',
                 helpText: "Password",
                 type: FieldType.TT_TEXT,
+                condition: () => this.editConditionCheck(['new_password']),
                 validation: (val: any) => Validation.required(val),
             },
             {
                 id: 'confirm_password',
                 helpText: "Confirm Password",
                 type: FieldType.TT_TEXT,
+                condition: () => this.editConditionCheck(['new_password']),
                 validation: (val: any) => Validation.required(val),
             },
         ]
