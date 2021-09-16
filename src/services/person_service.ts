@@ -29,7 +29,9 @@ export class PersonService extends Service{
         this.person = person
     }
 
-    create(){ return Service.postJson('/people', this.person) }
+    create() { return Service.postJson('/people', this.person) }
+
+    update(id: number) { return Service.putJson(`people/${id}`, this.person) }
 
     static searchFamilyName(name: string) {
         return super.getJson('/search/family_name', {'search_string': name})
@@ -38,5 +40,4 @@ export class PersonService extends Service{
     static searchGivenName(name: string) {
         return super.getJson('/search/given_name', {'search_string': name})
     }
-
 }

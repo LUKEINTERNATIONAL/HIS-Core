@@ -152,6 +152,14 @@ export class Patientservice extends Service {
         return this.patient.person.birthdate
     }
 
+    getGivenName() {
+        return this.patient.person.names[0].given_name
+    }
+
+    getFamilyName() {
+        return this.patient.person.names[0].family_name
+    }
+
     getFullName() {
         return getFullName(this.patient.person.names[0]);
     }
