@@ -140,6 +140,7 @@ export default defineComponent({
                 helpText: 'User information',
                 type: FieldType.TT_TABLE_VIEWER,
                 requireNext: false,
+                onload: () => this.activity = 'editing',
                 condition: () => this.activeField === 'user_info',
                 options: async () => {
                     const columns = ['Attributes', 'Values', 'Actions']
