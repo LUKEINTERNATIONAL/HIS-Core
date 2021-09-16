@@ -16,7 +16,7 @@ export function toastWarning(message: string, duration=6000) {
     return toast(message, 'warning', duration)
 }
 
-export function toastSuccess(message: string, duration=6000) {
+export function toastSuccess(message: string, duration=200) {
     return toast(message, 'success', duration)
 }
 

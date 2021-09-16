@@ -1,6 +1,7 @@
 import { TaskInterface } from "../../interfaces/TaskInterface"
 import { PatientPrintoutService } from "@/services/patient_printout_service"
 import { FieldType } from "../preferences"
+
 const BASE_URL_PATH = '/assets/images/'
 
 function img(image: string) { return `${BASE_URL_PATH}${image}` }
@@ -149,19 +150,12 @@ export const PREFERENCES = {
         ],
         'User Management': [
           {
-            name: "Cohort / disaggregated",
-            component: FieldType.TT_SET_SITE_CODE,
-            route: "/",
+            name: "New user",
+            route: "/user?activity=add",
           },
           {
-            component: FieldType.TT_SET_SITE_CODE,
-            name: "Survival analysis",
-            route: "/",
-          },
-          {
-            component: FieldType.TT_SET_SITE_CODE,
-            name: "TPT new initiations",
-            route: "/",
+            name: "Edit Users",
+            route: "/user?activity=edit",
           },
         ],
         'System Preferences': [

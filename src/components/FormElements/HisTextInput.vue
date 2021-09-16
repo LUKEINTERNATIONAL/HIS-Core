@@ -6,7 +6,7 @@
                     <p>{{config.prependValue}}</p>
                 </ion-col>
                 <ion-col size-md="">
-                    <base-input :value="value" @onValue="onKbValue"/>
+                    <base-input :type="inputType" :value="value" @onValue="onKbValue"/>
                 </ion-col>
             </ion-row>
         </ion-grid>
@@ -26,7 +26,6 @@ import handleVirtualInput from "@/components/Keyboard/KbHandler"
 import { IonList, IonItem, IonLabel} from "@ionic/vue"
 import { Option } from '../Forms/FieldInterface'
 import { QWERTY } from "@/components/Keyboard/HisKbConfigurations"
-import { TextInputInterface } from '@/components/FormElements/Interfaces/TextConfig'
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 export default defineComponent({
     components: { BaseInput, HisKeyboard, ViewPort, IonList, IonItem, IonLabel },
@@ -52,11 +51,19 @@ export default defineComponent({
             type: Function
         },
         config: {
-            type: Object as PropType<TextInputInterface>,
+            type: Object,
         },
         clear: {
             type: Boolean
         },
+    },
+    computed: {
+        inputType(): string {
+            if (this.config && 'inputType' in this.config) {
+                return this.config.inputType
+            }
+            return 'text'
+        }
     },
     mounted() {
         if (this.preset) this.onselect(this.preset)

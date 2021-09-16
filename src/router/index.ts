@@ -19,6 +19,7 @@ import SessionDate from "@/views/SessionDate.vue"
 import HostConfig from '@/views/HostConfig.vue'
 import ProgramManagement from "@/views/ProgramManagement.vue"
 import LabResults from "@/views/LabResults.vue"
+import User from "@/views/NewUser.vue"
 
 const HIS_APP_ROUTES = (() => {
   let routes: Array<RouteRecordRaw> = []
@@ -116,6 +117,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/settings',
     name: 'settings',
     component: Settings
+  },
+  {
+    path: '/user',
+    name: 'User',
+    component: User
   },
   {
     path: '/settings/host',
