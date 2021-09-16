@@ -167,7 +167,11 @@ export default defineComponent({
   methods: {
     async nextTask() {
       const params = await WorkflowService.getNextTaskParams(this.patientID)
-      this.$router.push(params)
+      if(params.name) {
+        this.$router.push(params)
+      }else {
+        this.$router.push(`/patient/dashboard/${this.patientID}`)
+      }
     },
     alertPatientNotFound() {
       alertAction('Patient not found', [
@@ -295,14 +299,16 @@ export default defineComponent({
         data: [] as DataInterface[],
       };
       let outcome = "";
-      await ProgramService.getNextTask(this.patientID).then(
-        (task) => {
-          displayData.data.push({
+
+      const params = await WorkflowService.getNextTaskParams(this.patientID)
+      let task = 'NONE'      
+      if(params.name) {
+        task = params.name
+      }
+      displayData.data.push({
             label: "Next Task",
-            value: task.name,
-          });
-        }
-      );
+            value: `${task}`,
+      });
       await ProgramService.getProgramInformation(this.patientID).then(
         (task) => {
           displayData.data.push({
