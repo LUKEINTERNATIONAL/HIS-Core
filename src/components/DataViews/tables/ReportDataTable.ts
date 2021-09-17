@@ -1,4 +1,9 @@
 import HisDate from "@/utils/Date"
+import { sort } from 'fast-sort';
+
+export interface TableInterface {
+    showIndex?: boolean;
+}
 
 export interface ColumnInterface {
     th: string;
@@ -33,11 +38,11 @@ function thTxt(th: string, value='', style={}, cssClass='', sortable=true, expor
         style,
         cssClass,
         sortable,
-        ascSort: () => {
-            //TODO: Add ascending sort algorithm
+        ascSort: (index: number, rows: Array<RowInterface[]>) => {
+            return sort(rows).asc(r => r[index].td)
         },
-        descSort: () => {
-            //TODO: Add descending sort algorithm
+        descSort: (index: number, rows: Array<RowInterface[]>) => {
+            return sort(rows).desc(r => r[index].td)
         },
         exportable
     }
@@ -51,11 +56,11 @@ function thDate(th: string, value='', style={}, cssClass='', sortable=true, expo
         style,
         cssClass,
         sortable,
-        ascSort: () => {
-            //TODO: Add ascending sort algorithm
+        ascSort: (index: number, rows: Array<RowInterface[]>) => {
+            return sort(rows).asc(r => r[index].td)
         },
-        descSort: () => {
-            //TODO: Add descending sort algorithm
+        descSort: (index: number, rows: Array<RowInterface[]>) => {
+            return sort(rows).desc(r => r[index].td)
         },
         exportable
     }
@@ -69,11 +74,11 @@ function thNum(th: string, value='', style={}, cssClass='', sortable=true, expor
         style,
         cssClass,
         sortable,
-        ascSort: () => {
-            //TODO: Add ascending sort algorithm
+        ascSort: (index: number, rows: Array<RowInterface[]>) => {
+            return sort(rows).asc(r => r[index].td)
         },
-        descSort: () => {
-            //TODO: Add descending sort algorithm
+        descSort: (index: number, rows: Array<RowInterface[]>) => {
+            return sort(rows).desc(r => r[index].td)
         },
         exportable
     }
@@ -88,58 +93,37 @@ function tdDate(td: string, value='', cssClass='', style={}): RowInterface {
     }
 }
 
-function td(td: string, value='', cssClass='', style={}): RowInterface {
-    return {
-        td,
-        style,
-        value,
-        cssClass
-    }
+function td(td: string, params={}): RowInterface {
+    return { td, ...params }
 }
 
-function tdLink(td: string, click: Function, cssClass='', style={}): RowInterface {
+function tdLink(td: string, click: Function, params={}): RowInterface {
     return {
         td,
-        style,
         event: {
             click,
             obj: 'link'
         },
-        cssClass
+        ...params
     }
 }
 
-function tdBtn(td: string, click: Function, cssClass='', style={}): RowInterface {
+function tdBtn(td: string, click: Function, params={}): RowInterface {
     return {
         td,
-        style,
         event: {
             click,
             obj: 'button'
         },
-        cssClass
+        ...params
     }
 }
-
-function tdCell(td: string, click: Function, cssClass='', style={}): RowInterface {
-    return {
-        td,
-        style,
-        event: {
-            click,
-            obj: 'cell'
-        },
-        cssClass
-    }
-}
-
 export default {
     thTxt,
     thNum,
     thDate,
     td,
-    tdDate,
-    tdCell,
     tdBtn,
+    tdDate,
     tdLink,
 }

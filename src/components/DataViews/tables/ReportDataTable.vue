@@ -2,33 +2,35 @@
   <table class="report-table">
     <thead class='stick-report-header' v-if="columns">
         <tr>
-            <th> # </th>
-            <th v-for="(column, columnIndex) in columns" :key="columnIndex">
-                <div v-html="column"></div>
+            <th :show="showIndex"> # </th>
+            <th @click="sort(columnIndex, column)"
+                :key="columnIndex" :style="column.style" :class="column.cssClass"
+                v-for="(column, columnIndex) in columns" >
+                {{ column.th }}
             </th>
         </tr>
     </thead>
     <tbody v-if="rows">
-        <tr v-for="(row, rowIndex) in rows" :key="rowIndex">
-            <td> {{ rowIndex + 1 }} </td>
-            <td v-for="(item, itemIndex) in row" :key="itemIndex">
-                <div v-if="isLink(item)">
-                    <div v-if="item.isActive">
-                        <a href="#" @click.prevent="item.action(dataItems)">
-                            {{ item.value }}
-                        </a>
-                    </div>
-                    <div v-else>
-                        {{ item.value }}
-                    </div>
-                </div>
-                <div v-else-if="isActionButton(item)">
-                    <ion-button @click="item.action(dataItems)">
-                        {{ item.name }}
+        <tr v-for="(row, rowIndex) in tableRows" :key="rowIndex">
+            <td :show="showIndex"> {{ rowIndex + 1 }} </td>
+            <td :class="item.cssClass" :style="item.style"
+                v-for="(item, itemIndex) in row" :key="itemIndex"> 
+                <div v-if="item.event"> 
+                    <a href="#" :style="item.style" :class="item.cssClass"
+                        v-if="item?.event?.obj === 'link'"
+                        @click.prevent="item.event.click()">
+                        {{ item.td }}
+                    </a>
+                    <ion-button
+                        :class="item.cssClass"
+                        :style="item.style"
+                        v-if="item.event.obj === 'button'"
+                        @click="item.event.click()">
+                        {{ item.td }}
                     </ion-button>
                 </div>
-                <div v-else>
-                    {{ item }}
+                <div v-else> 
+                    {{ item.td }}
                 </div>
             </td>
         </tr>
@@ -38,29 +40,55 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import { 
+    ColumnInterface, 
+    RowInterface, 
+    TableInterface
+} 
+from "@/components/DataViews/tables/ReportDataTable"
+
 export default defineComponent({
   props: {
+    config: {
+        type: Object as PropType<TableInterface>,
+        default: {}
+    },
     columns: {
-      type: Object as PropType<string[]>,
+      type: Object as PropType<ColumnInterface[]>,
       required: true
     },
     rows: {
-      type: Object as PropType<string[]>,
+      type: Object as PropType<RowInterface[]>,
       required: true
     }
   },
+  data: () => ({
+    tableRows: [] as Array<RowInterface[]>
+  }),
+  watch: {
+    rows: {
+        handler(rows: Array<RowInterface[]>) {
+            if (rows) {
+                this.tableRows = rows
+            }
+        },
+        immediate: true,
+        deep: true
+    }
+  },
+  computed: {
+    showIndex(): boolean {
+        if ('showIndex' in this.config) {
+            return this.config.showIndex ? true : false
+        }
+        return true
+    }
+  },
   methods: {
-    isLink(item: any) {
-        return this.isActionType(item, 'link')
-    },
-    isActionButton(item: any) {
-        return this.isActionType(item, 'button')
-    },
-    isActionType(item: any, expected: string) {
-        try {
-            return typeof item === "object" && item.type === expected;
-        }catch(e) {
-            return item
+    sort(index: number, column: ColumnInterface ) {
+        if (column.ascSort) {
+            this.tableRows = column.ascSort(index, this.tableRows)
+            console.log(this.tableRows)
         }
     }
   }
