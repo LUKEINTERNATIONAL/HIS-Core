@@ -1,11 +1,10 @@
 <template>
   <table class="report-table">
-    <thead class='stick-report-header' v-if="columns">
+    <thead class='stick-report-header' v-if="tableColumns">
         <tr>
-            <th :show="showIndex"> # </th>
             <th @click="sort(columnIndex, column)"
                 :key="columnIndex" :style="column.style" :class="column.cssClass"
-                v-for="(column, columnIndex) in columns" >
+                v-for="(column, columnIndex) in tableColumns" >
                 {{ column.th }}
                 <ion-icon
                     v-if="sortedIndex === columnIndex"
@@ -16,7 +15,6 @@
     </thead>
     <tbody v-if="rows">
         <tr v-for="(row, rowIndex) in tableRows" :key="rowIndex">
-            <td :show="showIndex"> {{ rowIndex + 1 }} </td>
             <td :class="item.cssClass" :style="item.style"
                 v-for="(item, itemIndex) in row" :key="itemIndex"> 
                 <div v-if="item.event"> 
@@ -45,6 +43,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { arrowUp, arrowDown } from "ionicons/icons";
+import table from "@/components/DataViews/tables/ReportDataTable"
 import { 
     ColumnInterface, 
     RowInterface, 
@@ -72,28 +71,35 @@ export default defineComponent({
     arrowDown: arrowDown,
     sortedIndex: -1 as number,
     sortOrder: 'descSort' as 'ascSort' | 'descSort',
+    tableColumns: [] as Array<ColumnInterface>,
     tableRows: [] as Array<RowInterface[]>
   }),
   watch: {
     rows: {
         handler(rows: Array<RowInterface[]>) {
             if (rows) {
-                this.tableRows = rows
+                if (this.showIndex()) {
+                    this.tableRows = [...rows].map((r, i) => ([
+                        table.td((i +1).toString()), ...r
+                    ]))
+                    this.tableColumns = [table.thNum("#"), ...this.columns]
+                } else {
+                    this.tableRows = [...rows]
+                    this.tableColumns = [...this.columns]
+                }
             }
         },
         immediate: true,
         deep: true
     }
   },
-  computed: {
-    showIndex(): boolean {
-        if ('showIndex' in this.config) {
-            return this.config.showIndex ? true : false
+  methods: {
+    showIndex() {
+        if (this.config && 'showIndex' in this.config) {
+            return this.config.showIndex
         }
         return true
-    }
-  },
-  methods: {
+    },
     sort(index: number, column: any ) {
         if (index === this.sortedIndex) {
             this.sortOrder = this.sortOrder === 'ascSort' ? 'descSort' : 'ascSort'
