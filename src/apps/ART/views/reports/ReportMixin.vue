@@ -63,10 +63,13 @@ export default defineComponent({
             }
         },
         drill(values: Array<number>) {
-            return table.tdLink(values.length, async () => {
-                const tableData = await this.patientTableColumns(values)
-                await this.tableDrill(tableData)
-            })
+            if (values.length > 0) {
+                return table.tdLink(values.length, async () => {
+                    const tableData = await this.patientTableColumns(values)
+                    await this.tableDrill(tableData)
+                })
+            }
+            return table.td(values.length)
         },
         getQuaterOptions() {
             const quarters = ArtReportService.getReportQuarters()
