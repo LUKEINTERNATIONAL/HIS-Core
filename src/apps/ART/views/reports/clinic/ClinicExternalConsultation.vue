@@ -19,6 +19,7 @@ import { defineComponent } from 'vue'
 import { PatientReportService } from "@/apps/ART/services/reports/patient_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -30,7 +31,13 @@ export default defineComponent({
         reportReady: false,
         isLoading: false as boolean,
         columns: [
-            'ARV#','NPID', 'First name','Last name', 'Gender','DOB','Date set'
+            table.thTxt('ARV#'),
+            table.thTxt('NPID'), 
+            table.thTxt('First name'),
+            table.thTxt('Last name'), 
+            table.thTxt('Gender'),
+            table.thTxt('DOB'),
+            table.thTxt('Date set')
         ]
     }),
     created() {
@@ -50,13 +57,13 @@ export default defineComponent({
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {
                 this.rows.push([
-                    d.arv_number,
-                    d.npid,
-                    d.given_name,
-                    d.family_name,
-                    d.gender,
-                    this.toDate(d.birthdate),
-                    this.toDate(d.date_set)
+                    table.td(d.arv_number),
+                    table.td(d.npid),
+                    table.td(d.given_name),
+                    table.td(d.family_name),
+                    table.td(d.gender),
+                    table.tdDate(d.birthdate),
+                    table.tdDate(d.date_set)
                 ])
             })
         }

@@ -17,6 +17,7 @@ import { defineComponent } from 'vue'
 import { RegimenReportService } from "@/apps/ART/services/reports/regimen_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -27,12 +28,12 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            'ARV#',
-            'Gender',
-            'DOB',
-            'Curr.Reg',
-            'ARVs', 
-            'Curr.reg dispensed'
+            table.thTxt('ARV#'),
+            table.thTxt('Gender'),
+            table.thTxt('DOB'),
+            table.thTxt('Curr.Reg'),
+            table.thTxt('ARVs'), 
+            table.thTxt('Curr.reg dispensed')
         ]
     }),
     created() {
@@ -58,12 +59,12 @@ export default defineComponent({
                     return `${m.medication} (${m.quantity})`
                 })
                 this.rows.push([
-                    d.arv_number,
-                    d.gender,
-                    this.toDate(d.birthdate),
-                    d.current_regimen,
-                    medications.join(', '),
-                    lastDispenseDate
+                    table.td(d.arv_number),
+                    table.td(d.gender),
+                    table.tdDate(d.birthdate),
+                    table.td(d.current_regimen),
+                    table.td(medications.join(', ')),
+                    table.tdDate(lastDispenseDate)
                 ])
             })
         }

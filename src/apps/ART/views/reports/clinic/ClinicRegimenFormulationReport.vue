@@ -21,6 +21,7 @@ import { REGIMENS, FORMULATIONS } from "@/apps/ART/services/reports/regimen_repo
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { FieldType } from '@/components/Forms/BaseFormElements'
 import { Option } from '@/components/Forms/FieldInterface'
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -32,7 +33,9 @@ export default defineComponent({
         isLoading: false as boolean,
         reportReady: false as boolean,
         columns: [
-            'ARV#', 'Gender', 'DOB'
+            table.thTxt('ARV#'), 
+            table.thTxt('Gender'), 
+            table.thTxt('DOB')
         ]
     }),
     created() {
@@ -68,9 +71,9 @@ export default defineComponent({
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {
                this.rows.push([
-                    d.arv_number,
-                    d.gender,
-                    this.toDate(d.birthdate)
+                    table.td(d.arv_number),
+                    table.td(d.gender),
+                    table.tdDate(d.birthdate)
                ])
             })
         }

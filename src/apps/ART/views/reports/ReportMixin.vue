@@ -11,6 +11,7 @@ import { ArtReportService } from "@/apps/ART/services/reports/art_report_service
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Option } from '@/components/Forms/FieldInterface'
 import Validation from "@/components/Forms/validations/StandardValidations"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     data: () => ({
@@ -61,16 +62,11 @@ export default defineComponent({
                 columns
             }
         },
-        buildDrillableLink(values: Array<number>) {
-            return {
-                type: 'link',
-                value: values.length,
-                isActive: values.length > 0,
-                action: async () => {
-                    const tableData = await this.patientTableColumns(values)
-                    await this.tableDrill(tableData)
-                }
-            }
+        drill(values: Array<number>) {
+            return table.tdLink(values.length, async () => {
+                const tableData = await this.patientTableColumns(values)
+                await this.tableDrill(tableData)
+            })
         },
         getQuaterOptions() {
             const quarters = ArtReportService.getReportQuarters()

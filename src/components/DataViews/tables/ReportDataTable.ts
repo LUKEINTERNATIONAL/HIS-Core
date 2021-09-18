@@ -6,7 +6,7 @@ export interface TableInterface {
 }
 
 export interface ColumnInterface {
-    th: string;
+    th: string | number | Date;
     type: 'string' | 'date' | 'number';
     value?: string;
     sortable?: boolean;
@@ -30,7 +30,7 @@ export interface RowInterface {
     event?: EventInterface;
 }
 
-function thTxt(th: string, value='', style={}, cssClass='', sortable=true, exportable=true): ColumnInterface {
+function thTxt(th: string | number | Date, value='', style={}, cssClass='', sortable=true, exportable=true): ColumnInterface {
     return {
         th,
         type: 'string',
@@ -48,7 +48,7 @@ function thTxt(th: string, value='', style={}, cssClass='', sortable=true, expor
     }
 }
 
-function thDate(th: string, value='', style={}, cssClass='', sortable=true, exportable=true): ColumnInterface  {
+function thDate(th: string | number | Date, value='', style={}, cssClass='', sortable=true, exportable=true): ColumnInterface  {
     return {
         th,
         type: 'date',
@@ -66,7 +66,7 @@ function thDate(th: string, value='', style={}, cssClass='', sortable=true, expo
     }
 }
 
-function thNum(th: string, value='', style={}, cssClass='', sortable=true, exportable=true): ColumnInterface {
+function thNum(th: string | number | Date, value='', style={}, cssClass='', sortable=true, exportable=true): ColumnInterface {
     return {
         th,
         type: 'number',
@@ -84,20 +84,20 @@ function thNum(th: string, value='', style={}, cssClass='', sortable=true, expor
     }
 }
 
-function tdDate(td: string, value='', cssClass='', style={}): RowInterface {
+function tdDate(td: string | number | Date, value='', cssClass='', style={}): RowInterface {
     return {
-        td: HisDate.toStandardHisDisplayFormat(td),
+        td: HisDate.toStandardHisDisplayFormat(td.toString()),
         style,
         value,
         cssClass
     }
 }
 
-function td(td: string, params={}): RowInterface {
+function td(td: string | number | Date, params={}): RowInterface {
     return { td, ...params }
 }
 
-function tdLink(td: string, click: Function, params={}): RowInterface {
+function tdLink(td: string | number | Date, click: Function, params={}): RowInterface {
     return {
         td,
         event: {
@@ -108,7 +108,7 @@ function tdLink(td: string, click: Function, params={}): RowInterface {
     }
 }
 
-function tdBtn(td: string, click: Function, params={}): RowInterface {
+function tdBtn(td: string | number | Date, click: Function, params={}): RowInterface {
     return {
         td,
         event: {

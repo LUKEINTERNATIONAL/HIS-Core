@@ -80,7 +80,7 @@ export default defineComponent({
             if (rows) {
                 if (this.showIndex()) {
                     this.tableRows = [...rows].map((r, i) => ([
-                        table.td((i +1).toString()), ...r
+                        table.td(i + 1), ...r
                     ]))
                     this.tableColumns = [table.thNum("#"), ...this.columns]
                 } else {
@@ -138,9 +138,6 @@ export default defineComponent({
     }
     td {
         border-collapse: collapse;
-        border: 1px solid #c5c5c5;
-    }
-    tr:nth-child(even) {
-        background-color: #f8f8f8;
+        border: 2px solid #c5c5c5;
     }
 </style>

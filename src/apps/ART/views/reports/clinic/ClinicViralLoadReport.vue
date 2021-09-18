@@ -20,6 +20,7 @@ import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import { FieldType } from '@/components/Forms/BaseFormElements'
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { Option } from '@/components/Forms/FieldInterface'
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -31,7 +32,13 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            'ARV#', 'Gender', 'Birthdate', 'Specimen', 'Ordered', 'Result', 'Released'
+            table.thTxt('ARV#'), 
+            table.thTxt('Gender'), 
+            table.thTxt('Birthdate'), 
+            table.thTxt('Specimen'), 
+            table.thTxt('Ordered'), 
+            table.thTxt('Result'), 
+            table.thTxt('Released')
         ]
     }),
     created() {
@@ -75,13 +82,13 @@ export default defineComponent({
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {
                this.rows.push([
-                    d.arv_number,
-                    d.gender,
-                    this.toDate(d.birthdate),
-                    d.specimen,
-                    this.toDate(d.order_date),
-                    d.result,
-                    this.toDate(d.result)                    
+                    table.td(d.arv_number),
+                    table.td(d.gender),
+                    table.tdDate(d.birthdate),
+                    table.td(d.specimen),
+                    table.tdDate(d.order_date),
+                    table.td(d.result),
+                    table.tdDate(d.result)                    
                ])
             })
         }
