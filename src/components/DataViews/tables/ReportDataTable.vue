@@ -7,6 +7,10 @@
                 :key="columnIndex" :style="column.style" :class="column.cssClass"
                 v-for="(column, columnIndex) in columns" >
                 {{ column.th }}
+                <ion-icon
+                    v-if="sortedIndex === columnIndex"
+                    :icon="sortOrder==='ascSort' ? arrowUp : arrowDown"
+                ></ion-icon>
             </th>
         </tr>
     </thead>
@@ -40,6 +44,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import { arrowUp, arrowDown } from "ionicons/icons";
 import { 
     ColumnInterface, 
     RowInterface, 
@@ -63,7 +68,10 @@ export default defineComponent({
     }
   },
   data: () => ({
-    cols: {} as Record<string, string>,
+    arrowUp: arrowUp,
+    arrowDown: arrowDown,
+    sortedIndex: -1 as number,
+    sortOrder: 'descSort' as 'ascSort' | 'descSort',
     tableRows: [] as Array<RowInterface[]>
   }),
   watch: {
@@ -86,20 +94,15 @@ export default defineComponent({
     }
   },
   methods: {
-    sort(index: number, column: ColumnInterface ) {
-        if (!(column.th in this.cols)) {
-            this.cols[column.th] = 'desc'
+    sort(index: number, column: any ) {
+        if (index === this.sortedIndex) {
+            this.sortOrder = this.sortOrder === 'ascSort' ? 'descSort' : 'ascSort'
+        } else {
+            this.sortOrder = 'ascSort'
+            this.sortedIndex = index
         }
-
-        if (this.cols[column.th] === 'desc' && column.ascSort) {
-            this.cols[column.th] = 'asc'
-            this.tableRows = column.ascSort(index, this.tableRows)
-            return
-        }
-        if (this.cols[column.th] === 'asc' && column.descSort) {
-            this.cols[column.th] = 'desc'
-            this.tableRows = column.descSort(index, this.tableRows)
-            return
+        if (this.sortOrder in column) {
+            this.tableRows = column[this.sortOrder](index, this.tableRows)
         }
     }
   }
