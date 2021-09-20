@@ -96,10 +96,10 @@ export default defineComponent({
         }
     },
     watch: {
-        fdata: {
-            async handler(data: any) {
+        value: {
+            async handler() {
               if (this.options) {
-                this.listData = await this.options(data)
+                this.listData = await this.options(this.fdata)
               }
             },
             deep: true
