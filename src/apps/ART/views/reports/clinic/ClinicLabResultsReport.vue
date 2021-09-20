@@ -22,6 +22,7 @@ import { AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
 import { FieldType } from '@/components/Forms/BaseFormElements'
 import { Field } from '@/components/Forms/FieldInterface'
 import { Option } from '@/components/Forms/FieldInterface'
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -32,12 +33,20 @@ export default defineComponent({
         cohort: [] as Array<any>,
         reportType: '' as string,
         reportReady: false as boolean,
-        columns: [] as Array<string>,
+        columns: [] as Array<any>,
         patientLevelColumns: [
-            'ARV#', 'Gender', 'Birthdate', 'Ordered', 'Specimen', 'Test', 'Result', 'Released'
+            table.thTxt('ARV#'), 
+            table.thTxt('Gender'), 
+            table.thTxt('Birthdate'), 
+            table.thTxt('Ordered'), 
+            table.thTxt('Specimen'), 
+            table.thTxt('Test'), 
+            table.thTxt('Result'), 
+            table.thTxt('Released')
         ],
         disaggregatedColumns: [
-            'Age group', 'Gender'
+            table.thTxt('Age group'), 
+            table.thTxt('Gender')
         ]
     }),
     created() {
@@ -126,18 +135,18 @@ export default defineComponent({
         setDisaggregatedRows(results: Array<Option>) {
             const males = []
             const females = []
-            this.columns = this.disaggregatedColumns.concat(results.map((i: any) => i.label))
+            this.columns = this.disaggregatedColumns.concat(results.map((i: any) => table.thTxt(i.label)))
             for(const ageGroupIndex in AGE_GROUPS) {
                 const group = AGE_GROUPS[ageGroupIndex]
-                const maleRow: any = [group, 'M']
-                const femaleRow: any = [group, 'F']
+                const maleRow: any = [table.td(group), table.td('M')]
+                const femaleRow: any = [table.td(group), table.td('F')]
                 results.forEach(({other}: Option) => {
                     const filterByGender = (gender: 'F' | 'M') => {
                         return other.filter((i: any) => i.gender === gender && i.ageGroup === group)
                                     .map((i: any) => i.id)
                     }
-                    maleRow.push(this.buildDrillableLink(filterByGender('M')))
-                    femaleRow.push(this.buildDrillableLink(filterByGender('F')))
+                    maleRow.push(this.drill(filterByGender('M')))
+                    femaleRow.push(this.drill(filterByGender('F')))
                 })
                 males.push(maleRow)
                 females.push(femaleRow)
@@ -149,14 +158,14 @@ export default defineComponent({
             results.forEach(({other}: Option)  => {
                 other.forEach((d: any) => {
                     this.rows.push([
-                        d.arv,
-                        d.gender,
-                        d.birthdate,
-                        d.ordered,
-                        d.specimen,
-                        d.test,
-                        d.result,
-                        d.released
+                        table.td(d.arv),
+                        table.td(d.gender),
+                        table.tdDate(d.birthdate),
+                        table.tdDate(d.ordered),
+                        table.td(d.specimen),
+                        table.td(d.test),
+                        table.td(d.result),
+                        table.tdDate(d.released)
                     ])
                 })
             })

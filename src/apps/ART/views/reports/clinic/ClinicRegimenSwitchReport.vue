@@ -17,6 +17,7 @@ import { defineComponent } from 'vue'
 import { RegimenReportService } from "@/apps/ART/services/reports/regimen_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -27,14 +28,14 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns:  [
-            'ARV#',
-            'Patient type',
-            'Gender',
-            'DOB',
-            'Prev.Reg',
-            'Curr.Reg',
-            'ARVs', 
-            'Curr.reg dispensed date'
+            table.thTxt('ARV#'),
+            table.thTxt('Patient type'),
+            table.thTxt('Gender'),
+            table.thTxt('DOB'),
+            table.thTxt('Prev.Reg'),
+            table.thTxt('Curr.Reg'),
+            table.thTxt('ARVs'), 
+            table.thTxt('Curr.reg dispensed date')
         ]
     }),
     created() {
@@ -55,18 +56,18 @@ export default defineComponent({
             Object.values(data).map((d: any) => {
                 let lastDispenseDate = ''
                 const medications = d.medication.map((m: any) => {
-                    lastDispenseDate = this.toDate(m.start_date)
+                    lastDispenseDate = m.start_date
                     return `${m.medication} (${m.quantity})`
                 })
                 return [
-                    d.arv_number,
-                    d.patient_type,
-                    d.gender,
-                    this.toDate(d.birthdate),
-                    d.previous_regimen,
-                    d.current_regimen,
-                    medications.join(', '),
-                    lastDispenseDate
+                    table.td(d.arv_number),
+                    table.td(d.patient_type),
+                    table.td(d.gender),
+                    table.tdDate(d.birthdate),
+                    table.td(d.previous_regimen),
+                    table.td(d.current_regimen),
+                    table.td(medications.join(', ')),
+                    table.tdDate(lastDispenseDate)
                 ]
             })
         }

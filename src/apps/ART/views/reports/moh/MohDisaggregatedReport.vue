@@ -19,6 +19,7 @@ import { DisaggregatedReportService, AGE_GROUPS, TEMP_OUTCOME_TABLE } from "@/ap
 import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -29,39 +30,39 @@ export default defineComponent({
         title: 'ART disaggregated report',
         isLoading: false as boolean,
         columns: [
-            'Age group',
-            'Gender',
-            'Tx new (new on ART)',
-            'Tx curr (receiving ART)',
-            'TX curr (received IPT)',
-            'TX curr (screened for TB)',
-            '0A',
-            '2A',
-            '4A',
-            '5A',
-            '6A',
-            '7A',
-            '8A',
-            '9A',
-            '10A',
-            '11A',
-            '12A',
-            '13A',
-            '14A',
-            '15A',
-            '16A',
-            '17A',
-            '0P',
-            '2P',
-            '4P',
-            '9P',
-            '11P',
-            '14P',
-            '15P',
-            '16P',
-            '17P',
-            'Unknown',
-            'Total (regimen)'
+            table.thTxt('Age group'),
+            table.thTxt('Gender'),
+            table.thNum('Tx new (new on ART)'),
+            table.thNum('Tx curr (receiving ART)'),
+            table.thNum('TX curr (received IPT)'),
+            table.thNum('TX curr (screened for TB)'),
+            table.thNum('0A'),
+            table.thNum('2A'),
+            table.thNum('4A'),
+            table.thNum('5A'),
+            table.thNum('6A'),
+            table.thNum('7A'),
+            table.thNum('8A'),
+            table.thNum('9A'),
+            table.thNum('10A'),
+            table.thNum('11A'),
+            table.thNum('12A'),
+            table.thNum('13A'),
+            table.thNum('14A'),
+            table.thNum('15A'),
+            table.thNum('16A'),
+            table.thNum('17A'),
+            table.thNum('0P'),
+            table.thNum('2P'),
+            table.thNum('4P'),
+            table.thNum('9P'),
+            table.thNum('11P'),
+            table.thNum('14P'),
+            table.thNum('15P'),
+            table.thNum('16P'),
+            table.thNum('17P'),
+            table.thNum('Unknown'),
+            table.thNum('Total (regimen)')
         ],
         ageGroupCohort: {} as any,
         totalNewF: [] as Array<any>,
@@ -101,9 +102,6 @@ export default defineComponent({
             await this.setTableRows()
             this.isLoading = false
         },
-        drill(data: Array<any>) {
-            return this.buildDrillableLink(data)
-        },
         async setTableRows() {
             await this.setFemaleRows()
             await this.setMaleRows()
@@ -111,6 +109,13 @@ export default defineComponent({
             await this.setFemaleBreastFeedingRows()
             await this.setTotalMalesRow()
             this.setFemaleNotPregnantRows()
+        },
+        buildDefaultRegimenValues() {
+            const values = []
+            for (let i=0; i < 26; ++i ) {
+                values.push(table.td(0))
+            }
+            return values
         },
         async appendRegimensToRow(curRow: Array<any>) {
             switch(this.report.getGender()) {
@@ -124,10 +129,10 @@ export default defineComponent({
                     break;
             }
             const regimens = await this.report.getRegimenDistribution()
-            const row: Array<any> = [...curRow, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+            const row: Array<any> = [...curRow, ...this.buildDefaultRegimenValues()]
             let totals: any = []
             for(const regimenIndex in regimens) {
-                const colIndex = this.columns.indexOf(regimenIndex)
+                const colIndex = this.columns.map((d: any) => d.th).indexOf(regimenIndex)
                 const data: any = regimens[regimenIndex]
                 if (colIndex > 0) {
                     row[colIndex] = this.drill(data)
@@ -157,8 +162,8 @@ export default defineComponent({
             this.report.setGender('Male')
             this.report.setAgeGroup('All')
             const row = await this.appendRegimensToRow([
-                'All', 
-                'Male', 
+                table.td('All'), 
+                table.td('Male'), 
                 this.drill(this.totalNewM),
                 this.drill(this.totalCurM),
                 this.drill(this.totalIptM),
@@ -175,7 +180,7 @@ export default defineComponent({
             ].map((data: any) => this.drill(data.filter((i: any) => !this.pregnantF.includes(i))))
             this.report.setGender('FNP')
             this.report.setAgeGroup('All')
-            const r = await this.appendRegimensToRow([ 'All', 'FNP', ...row ])
+            const r = await this.appendRegimensToRow([ table.td('All'), table.td('FNP'), ...row ])
             this.rows.push(r)
         },
         setFemaleRows() {
@@ -186,7 +191,7 @@ export default defineComponent({
                 this.totalCurF = uniq(this.totalCurF.concat(txCur))
                 this.totalIptF = uniq(this.totalIptF.concat(txIpt))
                 this.totalTbF  = uniq(this.totalTbF.concat(txTb))
-                return [ group, 'Female', this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
+                return [ table.td(group), table.td('Female'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
             })
         },
         setMaleRows() {
@@ -197,7 +202,7 @@ export default defineComponent({
                 this.totalCurM = uniq(this.totalCurM.concat(txCur))
                 this.totalIptM = uniq(this.totalIptM.concat(txIpt))
                 this.totalTbM  = uniq(this.totalTbM.concat(txTb))
-                return [ group, 'Male', this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]   
+                return [ table.td(group), table.td('Male'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]   
             })
         },
         setFemalePregnantRows() {
@@ -208,7 +213,7 @@ export default defineComponent({
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
-                return [ 'All', 'FP', this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
+                return [ table.td('All'), table.td('FP'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
             })
         },
         setFemaleBreastFeedingRows() {
@@ -219,7 +224,7 @@ export default defineComponent({
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
-                return ['All', 'FBf', this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
+                return [ table.td('All'), table.td('FBf'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
             })
         },
         async setRows(category: string, ageGroups: Array<string>, onFormat: Function) {

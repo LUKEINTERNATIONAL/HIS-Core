@@ -22,6 +22,7 @@ import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import { FieldType } from '@/components/Forms/BaseFormElements'
 import { Option } from '@/components/Forms/FieldInterface'
 import Validation from "@/components/Forms/validations/StandardValidations"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -33,7 +34,12 @@ export default defineComponent({
         outcome: '' as string,
         isLoading: false as boolean,
         columns: [
-            'ARV#','First name','Last name', 'Birthdate', 'Gender', 'Outcome date'
+            table.thTxt('ARV#'),
+            table.thTxt('First name'),
+            table.thTxt('Last name'), 
+            table.thTxt('Birthdate'), 
+            table.thTxt('Gender'), 
+            table.thTxt('Outcome date')
         ]
     }),
     created() {
@@ -77,23 +83,23 @@ export default defineComponent({
         async setRows(data: Array<any>) {
             const isTransferOut = this.outcome.match(/trans/i)
             if (isTransferOut) {
-                this.columns.push('TO Location')
+                this.columns.push(table.thTxt('TO Location'))
             }
-            this.columns.push('Action')
+            this.columns.push(table.thTxt('Action'))
             data.forEach((d: any) => {
                const row = []
-               row.push(d.identifier)
-               row.push(d.given_name)
-               row.push(d.family_name)
-               row.push(this.toDate(d.birthdate))
+               row.push(table.td(d.identifier))
+               row.push(table.td(d.given_name))
+               row.push(table.td(d.family_name))
+               row.push(table.tdDate(d.birthdate))
                row.push(d.gender)
-               row.push(this.toDate(d.start_date))
-               if (isTransferOut) row.push(d.transferred_out_to)
-               row.push({
-                   type: "button",
-                   name: "View",
-                   action: () => this.$router.push({ path: `/patient/dashboard/${d.patient_id}`})
-               })
+               row.push(table.tdDate(d.start_date))
+               if (isTransferOut) {
+                   row.push(table.td(d.transferred_out_to))
+               } 
+               row.push(table.tdBtn('View', () => {
+                   this.$router.push({ path: `/patient/dashboard/${d.patient_id}`})
+               }))
                this.rows.push(row)
             })
         }

@@ -20,6 +20,7 @@
     "convert-array-to-csv": "^2.0.0",
     "core-js": "^3.6.5",
     "dayjs": "^1.10.4",
+    "fast-sort": "^3.0.2",
     "jspdf": "^2.3.1",
     "jspdf-autotable": "^3.5.20",
     "lodash": "^4.17.21",

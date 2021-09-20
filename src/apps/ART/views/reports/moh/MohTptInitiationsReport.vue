@@ -19,6 +19,7 @@ import { RegimenReportService } from "@/apps/ART/services/reports/regimen_report
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { isEmpty } from 'lodash'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -30,10 +31,10 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            'Age group',
-            'Gender',
-            '3HP',
-            '6H'
+            table.thTxt('Age group'),
+            table.thTxt('Gender'),
+            table.thNum('3HP'),
+            table.thNum('6H')
         ]
     }),
     created() {
@@ -58,13 +59,18 @@ export default defineComponent({
                 if (!isEmpty(this.cohort) && group in this.cohort) {
                     const data = this.cohort[group]
                     this.rows.push([
-                        group, 
-                        gender, 
-                        this.buildDrillableLink(data['3HP'][gender]), 
-                        this.buildDrillableLink(data['6H'][gender])
+                        table.td(group),
+                        table.td(gender),
+                        this.drill(data['3HP'][gender]),
+                        this.drill(data['6H'][gender])
                     ])
                 } else {
-                    this.rows.push([group, gender, 0, 0])
+                    this.rows.push([
+                        table.td(group),
+                        table.td(gender),
+                        table.td(0),
+                        table.td(0)
+                    ])
                 }
             }
         }

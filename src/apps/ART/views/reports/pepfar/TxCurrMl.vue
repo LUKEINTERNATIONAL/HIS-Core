@@ -17,6 +17,7 @@ import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { TxReportService, AGE_GROUPS } from '@/apps/ART/services/reports/tx_report_service'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -27,14 +28,14 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            'Age group',
-            'Gender',
-            'Defaulted (new registration)',
-            'Defaulted (old registration)',
-            'Died',
-            'Stopped',
-            'Tranferred out',
-            'Unknown'
+            table.thTxt('Age group'),
+            table.thTxt('Gender'),
+            table.thTxt('Defaulted (new registration)'),
+            table.thTxt('Defaulted (old registration)'),
+            table.thTxt('Died'),
+            table.thTxt('Stopped'),
+            table.thTxt('Tranferred out'),
+            table.thTxt('Unknown')
         ],
         cohort: {} as any
     }),
@@ -59,14 +60,23 @@ export default defineComponent({
                 const group = AGE_GROUPS[i]
                 try {
                     const cohortData = this.cohort[group][gender]
-                    const drillable = cohortData.map((d: Array<number>) => this.buildDrillableLink(d))
+                    const drillable = cohortData.map((d: Array<number>) => this.drill(d))
                     this.rows.push([
-                        group,
-                        gender,
+                        table.td(group),
+                        table.td(gender),
                         ...drillable
                     ])
                 }catch(e) {
-                    this.rows.push([group, gender, 0, 0, 0, 0, 0, 0])
+                    this.rows.push([
+                        table.td(group), 
+                        table.td(gender), 
+                        table.td(0), 
+                        table.td(0), 
+                        table.td(0), 
+                        table.td(0), 
+                        table.td(0), 
+                        table.td(0) 
+                    ])
                 }
             }
         }

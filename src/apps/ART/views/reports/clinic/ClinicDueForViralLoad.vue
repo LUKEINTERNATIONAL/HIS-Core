@@ -17,6 +17,7 @@ import { defineComponent } from 'vue'
 import { PatientReportService } from "@/apps/ART/services/reports/patient_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -28,14 +29,14 @@ export default defineComponent({
         rows: [] as Array<any>,
         isLoading: false as boolean,
         columns: [
-            'ARV#',
-            'App.',
-            'ART started',
-            'Months on ART', 
-            'Milestone', 
-            "Ordered",
-            "Result", 
-            "Released"
+            table.thTxt('ARV#'),
+            table.thTxt('App.'),
+            table.thTxt('ART started'),
+            table.thTxt('Months on ART'), 
+            table.thTxt('Milestone'), 
+            table.thTxt("Ordered"),
+            table.thTxt("Result"), 
+            table.thTxt("Released")
         ]
     }),
     created() {
@@ -56,14 +57,14 @@ export default defineComponent({
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {
                 this.rows.push([
-                    d.arv_number,
-                    d.appointment_date,
-                    this.toDate(d.start_date),
-                    d.months_on_art,
-                    d.mile_stone,
-                    this.toDate(d.last_result_order_date),
-                    d.last_result,
-                    this.toDate(d.last_result_date)
+                    table.td(d.arv_number),
+                    table.tdDate(d.appointment_date),
+                    table.tdDate(d.start_date),
+                    table.td(d.months_on_art),
+                    table.td(d.mile_stone),
+                    table.tdDate(d.last_result_order_date),
+                    table.td(d.last_result),
+                    table.tdDate(d.last_result_date)
                 ])
             })
         }

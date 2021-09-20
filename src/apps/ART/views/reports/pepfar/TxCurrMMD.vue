@@ -17,6 +17,7 @@ import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { TxReportService, OTHER_AGE_GROUPS } from '@/apps/ART/services/reports/tx_report_service'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -28,11 +29,11 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns:  [
-            'Age group',
-            'Gender',
-            '# of clients on < 3 months of ARVs',
-            '# of clients on 3 - 5 months of ARVs',
-            '# of clients on  >= 6 months of ARVs'
+            table.thTxt('Age group'),
+            table.thTxt('Gender'),
+            table.thNum('# of clients on < 3 months of ARVs'),
+            table.thNum('# of clients on 3 - 5 months of ARVs'),
+            table.thNum('# of clients on  >= 6 months of ARVs')
         ]
     }),
     created() {
@@ -71,9 +72,9 @@ export default defineComponent({
                 }
             }
             return [
-                this.buildDrillableLink(underThreeMonths),
-                this.buildDrillableLink(betweenThreeAndFiveMonths),
-                this.buildDrillableLink(overSixMonths)
+                this.drill(underThreeMonths),
+                this.drill(betweenThreeAndFiveMonths),
+                this.drill(overSixMonths)
             ]
         },
         async setRows() {
@@ -98,18 +99,30 @@ export default defineComponent({
                 const res = await this.report.getTxCurrMMDReport(minAge, maxAge)
                 if (res) {
                     females.push([
-                        group,
-                        'Female',
+                        table.td(group),
+                        table.td('Female'),
                         ...this.getValues(res['Female'])
                     ])
                     males.push([
-                        group,
-                        'Male',
+                        table.td(group),
+                        table.td('Male'),
                         ...this.getValues(res['Male'])
                     ])
                 } else {
-                    females.push([group, 'Female', 0, 0, 0])
-                    males.push([group, 'Male', 0, 0, 0])
+                    females.push([
+                        table.td(group), 
+                        table.td('Female'), 
+                        table.td(0), 
+                        table.td(0), 
+                        table.td(0)
+                    ])
+                    males.push([
+                        table.td(group), 
+                        table.td('Male'), 
+                        table.td(0), 
+                        table.td(0), 
+                        table.td(0)
+                    ])
                 }
                 this.rows = [...females, ...males]
             }

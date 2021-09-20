@@ -17,6 +17,7 @@ import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { TbPrevReportService, AGE_GROUPS } from '@/apps/ART/services/reports/tb_prev_report_service'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -28,16 +29,16 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            'Age group',
-            'Gender',
-            '3HP',
-            '6HP',
-            '3HP',
-            '6HP',
-            '3HP',
-            '6HP',
-            '3HP',
-            '6HP'
+            table.thTxt('Age group'),
+            table.thTxt('Gender'),
+            table.thNum('3HP'),
+            table.thNum('6HP'),
+            table.thNum('3HP'),
+            table.thNum('6HP'),
+            table.thNum('3HP'),
+            table.thNum('6HP'),
+            table.thNum('3HP'),
+            table.thNum('6HP')
         ]
     }),
     created() {
@@ -58,15 +59,15 @@ export default defineComponent({
         },
         makeDrilldown(data: Array<any>) {
             const values = data.map(p => p.patient_id)
-            return this.buildDrillableLink(values)
+            return this.drill(values)
         },
         async setRows(gender: string) {
             for(const i in AGE_GROUPS) {
                 const group = AGE_GROUPS[i]
                 const cohortData = this.cohort[group][gender]
                 this.rows.push([
-                    group,
-                    gender,
+                    table.td(group),
+                    table.td(gender),
                     this.makeDrilldown(cohortData['3HP']['started_new_on_art']),
                     this.makeDrilldown(cohortData['6H']['started_new_on_art']),
                     this.makeDrilldown(cohortData['3HP']['started_previously_on_art']),

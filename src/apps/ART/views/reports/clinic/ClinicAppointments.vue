@@ -20,6 +20,7 @@ import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import { FieldType } from '@/components/Forms/BaseFormElements'
 import Validation from "@/components/Forms/validations/StandardValidations"
 import HisDate from "@/utils/Date"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -31,12 +32,12 @@ export default defineComponent({
         appointments: [] as any,
         reportReady: false as boolean,
         columns: [
-            'ARV#',
-            'First name',
-            'Last name',
-            'Gender',
-            'birthdate',
-            'Current Address'
+            table.thTxt('ARV#'),
+            table.thTxt('First name'),
+            table.thTxt('Last name'),
+            table.thTxt('Gender'),
+            table.thTxt('birthdate'),
+            table.thTxt('Current Address')
         ]
     }),
     created() {
@@ -68,14 +69,16 @@ export default defineComponent({
         async setRows(data: Array<any>) {
             data.forEach((data: any) => {
                 this.rows.push([
-                    data.arv_number || 'N/A',
-                    data.given_name,
-                    data.family_name,
-                    data.gender,
-                    this.toDate(data.birthdate),
-                    `District: ${data.district}
-                     Village: ${data.village}
-                     Land-mark: ${data.land_mark}`
+                    table.td(data.arv_number || 'N/A'),
+                    table.td(data.given_name),
+                    table.td(data.family_name),
+                    table.td(data.gender),
+                    table.tdDate(data.birthdate),
+                    table.td(
+                       `District: ${data.district}
+                        table.td( Village: ${data.village}
+                        table.td( Land-mark: ${data.land_mark}`
+                    )
                 ])
             })
         }

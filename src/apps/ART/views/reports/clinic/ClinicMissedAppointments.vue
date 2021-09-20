@@ -19,6 +19,7 @@ import { defineComponent } from 'vue'
 import { PatientReportService } from "@/apps/ART/services/reports/patient_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -30,7 +31,15 @@ export default defineComponent({
         rows: [] as Array<any>,
         reportReady: false as boolean,
         columns: [
-           'ARV#','First name','Last name', 'Gender','DOB','Appointment','Days missed','Current outcome','Contact details'
+           table.thTxt('ARV#'),
+           table.thTxt('First name'),
+           table.thTxt('Last name'), 
+           table.thTxt('Gender'),
+           table.thTxt('DOB'),
+           table.thTxt('Appointment'),
+           table.thTxt('Days missed'),
+           table.thTxt('Current outcome'),
+           table.thTxt('Contact details')
         ]
     }),
     created() {
@@ -50,19 +59,20 @@ export default defineComponent({
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {
                this.rows.push([
-                    d.arv_number,
-                    d.given_name,
-                    d.family_name,
-                    d.gender,
-                    this.toDate(d.birthdate),
-                    this.toDate(d.appointment_date),
-                    d.days_missed,
-                    d.current_outcome,
-                    `CELL: ${d.cell_number} \
-                     District: ${d.district} \
-                     Village: ${d.village} \
-                     TA: ${d.ta}
-                    `
+                    table.td(d.arv_number),
+                    table.td(d.given_name),
+                    table.td(d.family_name),
+                    table.td(d.gender),
+                    table.tdDate(d.birthdate),
+                    table.tdDate(d.appointment_date),
+                    table.td(d.days_missed),
+                    table.td(d.current_outcome),
+                    table.td(
+                        `CELL: ${d.cell_number} \
+                        District: ${d.district} \
+                        Village: ${d.village} \
+                        TA: ${d.ta}
+                    `)
                ])
             })
         }

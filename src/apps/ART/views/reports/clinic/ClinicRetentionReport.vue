@@ -18,6 +18,7 @@ import { PatientReportService, OTHER_AGE_GROUPS } from "@/apps/ART/services/repo
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { isEmpty } from 'lodash'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -30,14 +31,14 @@ export default defineComponent({
         cohort: {} as any,
         isLoading: false as boolean,
         columns: [
-            'Age group',
-            'Gender',
-            'Initiated one month',
-            'Completed one month',
-            'Initiated Three months',
-            'Completed Three months',
-            'Initiated Six months',
-            'Completed Six months'
+            table.thTxt('Age group'),
+            table.thTxt('Gender'),
+            table.thTxt('Initiated one month'),
+            table.thTxt('Completed one month'),
+            table.thTxt('Initiated Three months'),
+            table.thTxt('Completed Three months'),
+            table.thTxt('Initiated Six months'),
+            table.thTxt('Completed Six months')
         ]
     }),
     created() {
@@ -61,7 +62,7 @@ export default defineComponent({
                 const data = this.cohort[month][prop]
                                  .filter((d: any) => d.gender === gender && d.age_group === group)
                                  .map((d: any) => d.patient_id)
-                return this.buildDrillableLink(data)
+                return this.drill(data)
             }catch(e) {
                 console.warn(e)
                 return 0
@@ -71,7 +72,7 @@ export default defineComponent({
             const ageGroups = [...OTHER_AGE_GROUPS, 'Unknown']
             for(const ageIndex in ageGroups) {
                 const group = ageGroups[ageIndex]
-                const row: any = [group, gender]
+                const row: any = [table.td(group), table.td(gender)]
                 if (!isEmpty(this.cohort)) {
                     for (const month in this.cohort) {
                         row.push(this.getValue(parseInt(month), gender, group, 'all'))
@@ -79,7 +80,15 @@ export default defineComponent({
                     }
                     this.rows.push(row)
                 } else {
-                    this.rows.push([...row, 0, 0, 0, 0, 0, 0 ])
+                    this.rows.push([
+                        ...row, 
+                        table.td(0), 
+                        table.td(0), 
+                        table.td(0), 
+                        table.td(0), 
+                        table.td(0), 
+                        table.td(0) 
+                    ])
                 }
             }
         }
