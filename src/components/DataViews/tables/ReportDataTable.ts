@@ -30,6 +30,22 @@ export interface RowInterface {
     event?: EventInterface;
 }
 
+export function toExportableFormat(columns: ColumnInterface[], rows: Array<RowInterface[]>) {
+    const strRows: Array<any> = []
+    for(const index  in rows) {
+        const exportableRow: any = []
+        rows[index].forEach((r, i) => {
+            if ('exportable' in columns[i] && columns[i].exportable) {
+                exportableRow.push(r.value ? r.value : r.td)
+            }
+        })
+        strRows.push(exportableRow)
+    }
+    const eColumns = columns.filter(c => 'exportable' in c && c.exportable || !('exportable' in c))
+                            .map(c => c.value ? c.value : c.th)
+    return {columns: eColumns, rows: strRows}
+}
+
 function thTxt(th: string | number | Date, value='', style={}, cssClass='', sortable=true, exportable=true): ColumnInterface {
     return {
         th,
