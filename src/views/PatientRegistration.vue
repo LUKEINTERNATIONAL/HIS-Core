@@ -17,7 +17,6 @@ import Validation from "@/components/Forms/validations/StandardValidations"
 import {LocationService} from "@/services/location_service"
 import {PersonService, NewPerson} from "@/services/person_service"
 import {Person} from "@/interfaces/person"
-import {PersonAttribute} from "@/interfaces/personAttribute"
 import {PersonAttributeService, NewAttribute} from '@/services/person_attributes_service'
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
@@ -30,7 +29,7 @@ import { ObservationService } from "@/services/observation_service";
 import { PatientPrintoutService } from "@/services/patient_printout_service";
 import { toastWarning } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
-import { isEmpty } from "lodash"
+import { isEmpty, isPlainObject } from "lodash"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -116,10 +115,7 @@ export default defineComponent({
         const personPayload: NewPerson = this.resolvePerson(form, computedData)
         const person: Person = await new PersonService(personPayload).create()
         if (person.person_id) {
-            const attributesPayload: Array<NewAttribute> = this.resolvePersonAttributes(form, person.person_id)     
-            if (attributesPayload.length >= 1) {
-                await PersonAttributeService.create(attributesPayload)  
-            }
+            await Promise.all(this.savePersonAttributes(computedData, person.person_id))
             await ProgramService.createPatient(person.person_id)
             .then(() => {
                 ProgramService.enrollPatient(person.person_id)
@@ -155,9 +151,15 @@ export default defineComponent({
         }
         return true
     },
-    resolvePersonAttributes(form: Record<string, Option> | Record<string, null>, personId: number) {
-        const data: Record<string, string> = this.resolveData(form, 'person_attributes')
-        return this.generatePersonAttributes(data, personId)
+    savePersonAttributes(form: Record<string, Option> | Record<string, null>, personId: number) {
+        return Object.values(form)
+                    .filter((d: any) => isPlainObject(d) && 'personAttributes' in d)
+                    .map(async ({personAttributes}: any) => {
+                        return PersonAttributeService.create({
+                            ...personAttributes, 
+                            'person_id': personId
+                        })  
+                    })
     },
     resolvePerson(form: any, computedForm: any) {
         return {...this.resolveBirthDate(computedForm), ...this.resolveData(form, 'person')}
@@ -179,24 +181,6 @@ export default defineComponent({
             if (data && data.value != null) output[name] = data.value
         }
         return output
-    },
-    generatePersonAttributes(data: Record<string, string> | Record<string, number>, personId: number) {
-        const patientAttributes: Array<PersonAttribute> = []
-        // TODO: retrieve these identifiers using API call
-        const attrMap: Record<string, number> = {
-            'person_regiment_id': 35,
-            'person_date_joined_military': 37,
-            'rank': 36
-        }
-        for (const attr in data) {
-            const value = data[attr]
-            patientAttributes.push({ 
-                'person_id': personId,
-                'person_attribute_type_id': attrMap[attr], 
-                value: value.toString()
-            })
-        }
-        return patientAttributes
     },
     mapToOption(listOptions: Array<string>): Array<Option> {
         return listOptions.map((item: any) => ({ label: item, value: item })) 
@@ -555,25 +539,55 @@ export default defineComponent({
             {
                 id: 'person_regiment_id',
                 helpText: 'Regiment ID',
-                type: FieldType.TT_NUMBER,
+                type: FieldType.TT_TEXT,
                 group: 'person_attributes',
+                computedValue: ({value}: Option) => {
+                    return {
+                        personAttributes: {
+                            'person_attribute_type_id': 35, 
+                            'value': value
+                        }
+                    }
+                },
                 condition: (form: any) => this.editConditionCheck(['person_regiment_id']) && form.occupation && form.occupation.value.match(/MDF/i),
                 validation: (val: any) => Validation.required(val), 
             },
-            {
+            ...generateDateFields({
                 id: 'person_date_joined_military',
-                helpText: 'Date joined MDF',
-                type: FieldType.TT_TEXT,
-                group: 'person_attributes',
-                condition: (form: any) => this.editConditionCheck(['person_date_joined_military']) && form.occupation && form.occupation.value.match(/MDF/i),
-                validation: (val: any) => Validation.required(val)
-            },
+                helpText: 'Joined Military',
+                required: true,
+                condition: (form: any) =>  this.editConditionCheck([
+                    'year_person_date_joined_military', 
+                    'month_person_date_joined_military', 
+                    'day_person_date_joined_military'
+                ]) && form.occupation && form.occupation.value.match(/MDF/i),
+                minDate: () => HisDate.estimateDateFromAge(100),
+                maxDate: () => WorkflowService.getSessionDate(),
+                estimation: {
+                    allowUnknown: false
+                },
+                computeValue: (date: string) => ({ 
+                    date,
+                    personAttributes : {
+                        'person_attribute_type_id': 37, 
+                        'value': date
+                    }
+                 })
+            }),
             {
                 id: 'rank',
                 helpText: 'Rank',
                 type: FieldType.TT_SELECT,
                 group: 'person_attributes',
                 validation: (val: any) => Validation.required(val),
+                computedValue: ({value}: Option) => {
+                    return {
+                        personAttributes: {
+                            'person_attribute_type_id': 36, 
+                            'value': value
+                        }
+                    }
+                },
                 condition: (form: any) => this.editConditionCheck(['rank']) && form.occupation && form.occupation.value.match(/MDF/i),
                 options: () => this.mapToOption([
                     'First Lieutenant',

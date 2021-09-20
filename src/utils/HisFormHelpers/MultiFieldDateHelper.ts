@@ -259,7 +259,7 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
                     dateConfig.day.isEstimate = false
                     dateConfig.builtDate = buildDate(dateConfig)
                 }
-                return field.computeValue(dateConfig.builtDate, hasEstimates)
+                return field.computeValue(dateConfig.builtDate, hasEstimates(dateConfig))
             },
             config: {
                 keyboardActions: []
