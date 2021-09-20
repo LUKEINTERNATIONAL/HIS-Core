@@ -5,8 +5,8 @@
         :rows="rows" 
         :fields="fields"
         :columns="columns"
-        :canExportCsv="false"
-        :canExportPDf="false"
+        :canExportCsv="true"
+        :canExportPDf="true"
         :reportReady="reportReady"
         :onReportConfiguration="onPeriod"
         > 

@@ -49,7 +49,7 @@ import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
 import { IonLoading, IonPage, IonContent, IonToolbar, IonRow, IonCol} from "@ionic/vue"
 import { Field } from '@/components/Forms/FieldInterface'
 import { toCsv, toTablePDF } from "@/utils/Export"
-import { isPlainObject } from "lodash"
+import { toExportableFormat, ColumnInterface, RowInterface} from "@/components/DataViews/tables/ReportDataTable" 
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 
 export default defineComponent({
@@ -68,11 +68,11 @@ export default defineComponent({
       required: true
     },
     columns: {
-      type: Object as PropType<string[]>,
+      type: Object as PropType<ColumnInterface[]>,
       required: true
     },
     rows: {
-      type: Object as PropType<string[]>,
+      type: Object as PropType<Array<RowInterface[]>>,
       required: true
     },
     customBtns: {
@@ -108,9 +108,6 @@ export default defineComponent({
   methods: {
     getFileName() {
       return `${this.title}-${this.period}`
-    },
-    getExportRows() {
-      return this.rows.map((d: any) => d.map((c: any) => isPlainObject(c) ? c.value : c))
     }
   },
   created() {
@@ -122,7 +119,10 @@ export default defineComponent({
         slot: "start",
         color: "primary",
         visible: true,
-        onClick: async () => toCsv(this.columns, this.getExportRows(), this.getFileName())
+        onClick: async () => {
+          const {columns, rows} = toExportableFormat(this.columns, this.rows)
+          toCsv(columns, rows, this.getFileName())
+        }
       })
     }
     if (this.canExportPDf) {
@@ -132,7 +132,10 @@ export default defineComponent({
         slot: "start",
         color: "primary",
         visible: true,
-        onClick: async () => toTablePDF(this.columns, this.getExportRows(), this.getFileName())
+        onClick: async () => {
+          const {columns, rows} = toExportableFormat(this.columns, this.rows)
+          toTablePDF(columns, rows, this.getFileName())
+        }
       })
     }
     this.btns.push({
