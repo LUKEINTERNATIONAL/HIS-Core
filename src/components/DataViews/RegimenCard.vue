@@ -1,8 +1,9 @@
 <template>
     <div :class="`his-card ${state}`"  @click="onclick"> 
-        <div class='title' v-if="showTitle"> <b> {{ value }} </b></div> 
-        <div>{{ label }}</div>
-        <div> </div>
+        <table> 
+            <td class='title'> {{ value }}&nbsp; </td>
+            <td :style="{textAlign: 'center'}">{{ label }} </td>
+        </table>
     </div>
 </template>
 <script lang="ts">
@@ -43,19 +44,21 @@ export default defineComponent({
 })
 </script>
 <style scoped>
+ table {
+    width: 100%;
+    font-weight: 400;
+ }
  .title {
     border-style: solid;
-    border-width: 0px 1px 0px 0px;
+    border-color: rgb(105, 105, 105);
+    border-width: 0px 2px 0px 0px;
     text-align: center;
-    min-width: 35px;
+    width: 35px;
+    padding: 5px;
     font-weight: bold;
  }
  .his-card {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    height: 50px;
-    margin: 1.4%;
+    padding: 0.55em;
  }
 
 </style>
