@@ -11,7 +11,7 @@ export function toCsv(header: Array<any>, rows: Array<any>, fileName='document')
     link.setAttribute("download", `${fileName}.csv`);
     document.body.appendChild(link);
     link.click();
-    document.removeChild(link)
+    link.remove()
 }
 
 export function toTablePDF(tableColumns: Array<any>, tableRows: Array<any>, fileName='document') {
