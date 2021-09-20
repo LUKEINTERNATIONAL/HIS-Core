@@ -48,8 +48,7 @@ import HisFooter from "@/components/HisDynamicNavFooter.vue";
 import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
 import { IonLoading, IonPage, IonContent, IonToolbar, IonRow, IonCol} from "@ionic/vue"
 import { Field } from '@/components/Forms/FieldInterface'
-import jsPDF from "jspdf"
-import autoTable from 'jspdf-autotable'
+import { toCsv, toTablePDF } from "@/utils/Export"
 import { isPlainObject } from "lodash"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 
@@ -106,34 +105,34 @@ export default defineComponent({
     btns: [] as Array<any>,
     logo: "/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png" as string
   }),
+  methods: {
+    getFileName() {
+      return `${this.title}-${this.period}`
+    },
+    getExportRows() {
+      return this.rows.map((d: any) => d.map((c: any) => isPlainObject(c) ? c.value : c))
+    }
+  },
   created() {
     this.btns = this.customBtns
-    if (this.canExportPDf) {
+    if (this.canExportCsv) {
       this.btns.push({
         name: "CSV",
         size: "large",
         slot: "start",
         color: "primary",
         visible: true,
-        onClick: async () => this.$router.back()
+        onClick: async () => toCsv(this.columns, this.getExportRows(), this.getFileName())
       })
     }
-    if (this.canExportCsv) {
+    if (this.canExportPDf) {
       this.btns.push({
         name: "PDF",
         size: "large",
         slot: "start",
         color: "primary",
         visible: true,
-        onClick: async () => {
-          const doc = new jsPDF()
-          const rows = this.rows.map((d: any) => d.map((c: any) => isPlainObject(c) ? c.value : c))
-          autoTable(doc, {
-            head: [this.columns],
-            body: rows
-          })
-          doc.save(`${this.title}-${this.period}.pdf`)
-        }
+        onClick: async () => toTablePDF(this.columns, this.getExportRows(), this.getFileName())
       })
     }
     this.btns.push({

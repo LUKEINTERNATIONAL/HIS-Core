@@ -17,6 +17,7 @@
     "@popperjs/core": "^2.10.1",
     "@types/lodash": "^4.14.170",
     "apexcharts": "^3.26.1",
+    "convert-array-to-csv": "^2.0.0",
     "core-js": "^3.6.5",
     "dayjs": "^1.10.4",
     "jspdf": "^2.3.1",

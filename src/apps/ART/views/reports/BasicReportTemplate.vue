@@ -26,9 +26,8 @@ import { defineComponent, PropType } from "vue";
 import HisFooter from "@/components/HisDynamicNavFooter.vue";
 import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
 import { IonPage, IonContent, IonToolbar} from "@ionic/vue"
-import jsPDF from "jspdf"
-import autoTable from 'jspdf-autotable'
 import { isPlainObject } from "lodash"
+import { toCsv, toTablePDF } from "@/utils/Export"
 
 export default defineComponent({
   components: { ReportTable, HisFooter, IonPage, IonContent, IonToolbar },
@@ -53,6 +52,11 @@ export default defineComponent({
   data: () => ({
     btns: [] as Array<any>
   }),
+  methods: {
+    getExportRows() {
+      return this.rows.map((d: any) => d.map((c: any) => isPlainObject(c) ? c.value : c))
+    }
+  },
   created() {
     this.btns = [
       ...this.customBtns,
@@ -62,7 +66,7 @@ export default defineComponent({
         slot: "start",
         color: "primary",
         visible: true,
-        onClick: async () => this.$router.back()
+        onClick: async () => toCsv(this.columns, this.getExportRows(), this.title)
       },
       {
         name: "PDF",
@@ -70,15 +74,7 @@ export default defineComponent({
         slot: "start",
         color: "primary",
         visible: true,
-        onClick: async () => {
-          const doc = new jsPDF()
-          const rows = this.rows.map((d: any) => d.map((c: any) => isPlainObject(c) ? c.value : c))
-          autoTable(doc, {
-            head: [this.columns],
-            body: rows
-          })
-          doc.save(`${this.title}.pdf`)
-        }
+        onClick: async () => toTablePDF(this.columns, this.getExportRows(), this.title)
       },
       {
         name: "Finish",
