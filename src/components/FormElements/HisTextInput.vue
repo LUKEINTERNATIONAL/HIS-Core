@@ -16,8 +16,9 @@
             </ion-item>
         </ion-list>
     </view-port>   
-    <his-keyboard :kbConfig="keyboard" :onKeyPress="keypress" :disabled="false"> </his-keyboard>
+    <his-keyboard :initalKeyboardName="initalKeyboardName" :kbConfig="keyboard" :onKeyPress="keypress" :disabled="false"> </his-keyboard>
 </template>
+
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import BaseInput from "@/components/FormElements/BaseTextInput.vue"
@@ -27,10 +28,12 @@ import { IonList, IonItem, IonLabel} from "@ionic/vue"
 import { Option } from '../Forms/FieldInterface'
 import { QWERTY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
+
 export default defineComponent({
     components: { BaseInput, HisKeyboard, ViewPort, IonList, IonItem, IonLabel },
     data: ()=>({
         value: '',
+        initalKeyboardName: '' as string,
         keyboard: {} as Array<any>,
         listData: [] as Array<Option>
     }),
@@ -65,10 +68,16 @@ export default defineComponent({
             return 'text'
         }
     },
-    mounted() {
+    created() {
         if (this.preset) this.onselect(this.preset)
 
         this.keyboard = this.config?.customKeyboard || QWERTY
+        
+        if (this.config) {
+            if (this.config.initialKb) {
+                this.initalKeyboardName = this.config.initialKb
+            }
+        }
     },
     activated(){
         this.$emit('onFieldActivated', this)
