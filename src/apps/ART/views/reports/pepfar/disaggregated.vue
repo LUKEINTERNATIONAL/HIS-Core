@@ -19,6 +19,7 @@ import { DisaggregatedReportService, AGE_GROUPS } from "@/apps/ART/services/repo
 import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -29,12 +30,12 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            'Age group',
-            'Gender',
-            'Tx new (new on ART)',
-            'Tx curr (receiving ART)',
-            'TX curr (received IPT)',
-            'TX curr (screened for TB)'
+            table.thTxt('Age group'),
+            table.thTxt('Gender'),
+            table.thNum('Tx new (new on ART)'),
+            table.thNum('Tx curr (receiving ART)'),
+            table.thNum('TX curr (received IPT)'),
+            table.thNum('TX curr (screened for TB)')
         ],
         ageGroupCohort: {} as any,
         totalNewF: [] as Array<any>,
@@ -67,9 +68,6 @@ export default defineComponent({
             await this.setTableRows()
             this.isLoading = false
         },
-        drill(data: Array<any>) {
-            return this.buildDrillableLink(data)
-        },
         async setTableRows() {
             await this.setFemaleRows()
             await this.setMaleRows()
@@ -95,8 +93,8 @@ export default defineComponent({
         },
         setTotalMalesRow() {
             this.rows.push([
-                'All', 
-                'Male', 
+                table.td('All'), 
+                table.td('Male'), 
                 this.drill(this.totalNewM),
                 this.drill(this.totalCurM),
                 this.drill(this.totalIptM),
@@ -110,7 +108,7 @@ export default defineComponent({
                 this.totalIptF,
                 this.totalTbF
             ].map((data: any) => this.drill(data.filter((i: any) => !this.pregnantF.includes(i))))
-            this.rows.push([ 'All', 'FNP', ...row ])
+            this.rows.push([ table.td('All'), table.td('FNP'), ...row ])
         },
         setFemaleRows() {
             this.report.setGender('female')
@@ -120,7 +118,7 @@ export default defineComponent({
                 this.totalCurF = uniq(this.totalCurF.concat(txCur))
                 this.totalIptF = uniq(this.totalIptF.concat(txIpt))
                 this.totalTbF  = uniq(this.totalTbF.concat(txTb))
-                return [ group, 'Female', this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
+                return [ table.td(group), table.td('Female'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
             })
         },
         setMaleRows() {
@@ -131,7 +129,7 @@ export default defineComponent({
                 this.totalCurM = uniq(this.totalCurM.concat(txCur))
                 this.totalIptM = uniq(this.totalIptM.concat(txIpt))
                 this.totalTbM  = uniq(this.totalTbM.concat(txTb))
-                return [ group, 'Male', this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]   
+                return [ table.td(group), table.td('Male'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]   
             })
         },
         setFemalePregnantRows() {
@@ -142,7 +140,7 @@ export default defineComponent({
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
-                return [ 'All', 'FP', this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
+                return [table.td('All'), table.td('FP'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
             })
         },
         setFemaleBreastFeedingRows() {
@@ -153,7 +151,7 @@ export default defineComponent({
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
-                return ['All', 'FBf', this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
+                return [table.td('All'), table.td('FBf'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
             })
         },
         async setRows(category: string, ageGroups: Array<string>, onFormat: Function) {

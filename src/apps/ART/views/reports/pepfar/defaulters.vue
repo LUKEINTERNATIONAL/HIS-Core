@@ -19,6 +19,7 @@ import { defineComponent } from 'vue'
 import { DefaulterReportService } from "@/apps/ART/services/reports/defaulters_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -29,13 +30,13 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            'ARV#',
-            'First name',
-            'Last name',
-            'Gender',
-            'birthdate',
-            'Date defaulted',
-            'Address'
+            table.thTxt('ARV#'),
+            table.thTxt('First name'),
+            table.thTxt('Last name'),
+            table.thTxt('Gender'),
+            table.thDate('birthdate'),
+            table.thDate('Date defaulted'),
+            table.thTxt('Address')
         ]
     }),
     created() {
@@ -56,13 +57,13 @@ export default defineComponent({
         async setRows(data: Array<any>) {
             data.forEach((data: any) => {
                 this.rows.push([
-                    data.arv_number,
-                    data.given_name,
-                    data.family_name,
-                    data.gender,
-                    this.toDate(data.birthdate),
-                    this.toDate(data.defaulter_date),
-                    `${data.village} ${data.district} ${data.ta}`
+                    table.td(data.arv_number),
+                    table.td(data.given_name),
+                    table.td(data.family_name),
+                    table.td(data.gender),
+                    table.tdDate(data.birthdate),
+                    table.tdDate(data.defaulter_date),
+                    table.td(`${data.village} ${data.district} ${data.ta}`)
                 ])
             })
         }

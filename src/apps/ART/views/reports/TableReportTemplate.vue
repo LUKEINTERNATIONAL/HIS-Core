@@ -50,7 +50,6 @@ import { IonLoading, IonPage, IonContent, IonToolbar, IonRow, IonCol} from "@ion
 import { Field } from '@/components/Forms/FieldInterface'
 import jsPDF from "jspdf"
 import autoTable from 'jspdf-autotable'
-import { isPlainObject } from "lodash"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 
 export default defineComponent({
@@ -127,9 +126,9 @@ export default defineComponent({
         visible: true,
         onClick: async () => {
           const doc = new jsPDF()
-          const rows = this.rows.map((d: any) => d.map((c: any) => isPlainObject(c) ? c.value : c))
+          const rows = this.rows.map((d: any) => d.map((c: any) =>  c.value ? c.value : c.td))
           autoTable(doc, {
-            head: [this.columns],
+            head: [this.columns.map((d: any) => d.value ? d.value : d.th)],
             body: rows
           })
           doc.save(`${this.title}-${this.period}.pdf`)

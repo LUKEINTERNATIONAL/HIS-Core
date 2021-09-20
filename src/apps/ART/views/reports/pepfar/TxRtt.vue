@@ -17,6 +17,7 @@ import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { TxReportService, AGE_GROUPS } from '@/apps/ART/services/reports/tx_report_service'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -28,9 +29,9 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            'Age group',
-            'Gender',
-            'Returned after 30+ days'
+            table.thTxt('Age group'),
+            table.thTxt('Gender'),
+            table.thTxt('Returned after 30+ days')
         ]
     }),
     created() {
@@ -55,12 +56,12 @@ export default defineComponent({
                 if (group in this.cohort) {
                     const cohortData = this.cohort[group][gender]
                     this.rows.push([
-                        group,
-                        gender,
-                        this.buildDrillableLink(cohortData)
+                        table.td(group),
+                        table.td(gender),
+                        this.drill(cohortData)
                     ])
                 } else {
-                    this.rows.push([group, gender, 0])
+                    this.rows.push([table.td(group), table.td(gender), table.td(0)])
                 }
             }
         }

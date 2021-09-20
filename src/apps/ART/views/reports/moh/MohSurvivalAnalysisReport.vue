@@ -21,6 +21,7 @@ import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { Option } from '@/components/Forms/FieldInterface'
 import { FieldType } from "@/components/Forms/BaseFormElements"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -32,17 +33,17 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            'Reg cohort',
-            'Interval (months)',
-            'Sub group',
-            'Total Reg (database)',
-            'Total Reg (Confirmed)',
-            'Alive',
-            'Died',
-            'Defaulted',
-            'Stopped',
-            'TO',
-            'Unknown'
+            table.thTxt('Reg cohort'),
+            table.thTxt('Interval (months)'),
+            table.thTxt('Sub group'),
+            table.thTxt('Total Reg (database)'),
+            table.thTxt('Total Reg (Confirmed)'),
+            table.thTxt('Alive'),
+            table.thTxt('Died'),
+            table.thTxt('Defaulted'),
+            table.thTxt('Stopped'),
+            table.thTxt('TO'),
+            table.thTxt('Unknown')
         ]
     }),
     created() {
@@ -110,17 +111,17 @@ export default defineComponent({
                     }
                 }
                 this.rows.push([
-                    quarterIndex,
-                    qInterval,
-                    this.report.getAgeGroup(),
-                    totalRegInQuarter,
-                    0, // This column is there for show according to Mwatha
-                    outcomeRef['On antiretrovirals'],
-                    outcomeRef['Patient died'],
-                    outcomeRef['Defaulted'],
-                    outcomeRef['Treatment stopped'],
-                    outcomeRef['Patient transferred out'],
-                    outcomeRef['unknown']
+                    table.td(quarterIndex),
+                    table.td(qInterval),
+                    table.td(this.report.getAgeGroup()),
+                    table.td(totalRegInQuarter),
+                    table.td(0), // This column is there for show according to Mwatha
+                    table.td(outcomeRef['On antiretrovirals']),
+                    table.td(outcomeRef['Patient died']),
+                    table.td(outcomeRef['Defaulted']),
+                    table.td(outcomeRef['Treatment stopped']),
+                    table.td(outcomeRef['Patient transferred out']),
+                    table.td(outcomeRef['unknown'])
                 ])
             }
         }
