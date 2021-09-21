@@ -216,6 +216,12 @@ export const PREFERENCES = {
             name: "Set Site Location",
           },
         ],
+        'Location': [
+          {
+            name: "Print Location",
+            route: "/print/location",
+          },
+        ],
         'Data Management': [
           {
             name: "Cohort / disaggregated",
