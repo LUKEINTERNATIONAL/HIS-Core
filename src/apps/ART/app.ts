@@ -13,7 +13,7 @@ const ART: AppInterface = {
     programID: 1,
     applicationName: 'ART',
     applicationIcon: img('aids.png'),
-    applicationDescription: "Application for HIV testing",
+    applicationDescription: "HIV Client management app",
     appRoutes,
     patientDashboard: {
         tasks: {
