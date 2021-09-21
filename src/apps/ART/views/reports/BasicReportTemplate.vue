@@ -24,10 +24,10 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import HisFooter from "@/components/HisDynamicNavFooter.vue";
+import { toExportableFormat, ColumnInterface, RowInterface} from "@/components/DataViews/tables/ReportDataTable" 
 import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
 import { IonPage, IonContent, IonToolbar} from "@ionic/vue"
-import jsPDF from "jspdf"
-import autoTable from 'jspdf-autotable'
+import { toCsv, toTablePDF } from "@/utils/Export"
 
 export default defineComponent({
   components: { ReportTable, HisFooter, IonPage, IonContent, IonToolbar },
@@ -37,11 +37,11 @@ export default defineComponent({
       required: true,
     },
     columns: {
-      type: Object as PropType<string[]>,
+      type: Object as PropType<ColumnInterface[]>,
       required: true
     },
     rows: {
-      type: Object as PropType<string[]>,
+      type: Object as PropType<Array<RowInterface[]>>,
       required: true
     },
     customBtns: {
@@ -61,7 +61,10 @@ export default defineComponent({
         slot: "start",
         color: "primary",
         visible: true,
-        onClick: async () => this.$router.back()
+        onClick: async () => {
+          const {columns, rows} = toExportableFormat(this.columns, this.rows)
+          toCsv(columns, rows, this.title)
+        }
       },
       {
         name: "PDF",
@@ -70,13 +73,8 @@ export default defineComponent({
         color: "primary",
         visible: true,
         onClick: async () => {
-          const doc = new jsPDF()
-          const rows = this.rows.map((d: any) => d.map((c: any) =>  c.value ? c.value : c.td))
-          autoTable(doc, {
-            head: this.columns.map((d: any) => d.value ? d.value : d.th),
-            body: rows
-          })
-          doc.save(`${this.title}.pdf`)
+          const {columns, rows} = toExportableFormat(this.columns, this.rows)
+          toTablePDF(columns, rows, this.title)
         }
       },
       {

@@ -48,8 +48,8 @@ import HisFooter from "@/components/HisDynamicNavFooter.vue";
 import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
 import { IonLoading, IonPage, IonContent, IonToolbar, IonRow, IonCol} from "@ionic/vue"
 import { Field } from '@/components/Forms/FieldInterface'
-import jsPDF from "jspdf"
-import autoTable from 'jspdf-autotable'
+import { toCsv, toTablePDF } from "@/utils/Export"
+import { toExportableFormat, ColumnInterface, RowInterface} from "@/components/DataViews/tables/ReportDataTable" 
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 
 export default defineComponent({
@@ -68,11 +68,11 @@ export default defineComponent({
       required: true
     },
     columns: {
-      type: Object as PropType<string[]>,
+      type: Object as PropType<ColumnInterface[]>,
       required: true
     },
     rows: {
-      type: Object as PropType<string[]>,
+      type: Object as PropType<Array<RowInterface[]>>,
       required: true
     },
     customBtns: {
@@ -105,19 +105,27 @@ export default defineComponent({
     btns: [] as Array<any>,
     logo: "/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png" as string
   }),
+  methods: {
+    getFileName() {
+      return `${this.title}-${this.period}`
+    }
+  },
   created() {
     this.btns = this.customBtns
-    if (this.canExportPDf) {
+    if (this.canExportCsv) {
       this.btns.push({
         name: "CSV",
         size: "large",
         slot: "start",
         color: "primary",
         visible: true,
-        onClick: async () => this.$router.back()
+        onClick: async () => {
+          const {columns, rows} = toExportableFormat(this.columns, this.rows)
+          toCsv(columns, rows, this.getFileName())
+        }
       })
     }
-    if (this.canExportCsv) {
+    if (this.canExportPDf) {
       this.btns.push({
         name: "PDF",
         size: "large",
@@ -125,13 +133,8 @@ export default defineComponent({
         color: "primary",
         visible: true,
         onClick: async () => {
-          const doc = new jsPDF()
-          const rows = this.rows.map((d: any) => d.map((c: any) =>  c.value ? c.value : c.td))
-          autoTable(doc, {
-            head: [this.columns.map((d: any) => d.value ? d.value : d.th)],
-            body: rows
-          })
-          doc.save(`${this.title}-${this.period}.pdf`)
+          const {columns, rows} = toExportableFormat(this.columns, this.rows)
+          toTablePDF(columns, rows, this.getFileName())
         }
       })
     }
