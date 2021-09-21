@@ -1,6 +1,7 @@
 <template>
   <ion-loading
-    :is-open="isLoading"
+    v-if="isLoading"
+    :is-open="true"
     message="Please wait..."
   >
   </ion-loading>
