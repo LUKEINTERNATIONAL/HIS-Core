@@ -31,13 +31,14 @@ export default defineComponent({
 </script>
 <style scoped>
     .title {
-        font-size: 0.8em;
-        font-weight: 500;
+        font-size: 0.7em;
+        font-weight: 600;
+        color: #333333;
     }
     .task-card {
         padding: 0;
         margin: 0;
-        height: 70px;
+        height: 73px;
         overflow: hidden;
     }
 </style>

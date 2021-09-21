@@ -2,8 +2,8 @@
   <div>
     <div v-show="activeReports.length <= 0">
       <ion-grid>
-        <ion-row>
-          <ion-col size="6" v-for="(group, index) in reportGroups" :key="index">
+        <ion-row v-for="(row, rowIndex) in reports" :key="rowIndex">
+          <ion-col size="4" v-for="(group, index) in row" :key="index">
             <task-card
               @click="activeReports = group.files"
               :key="index"
@@ -45,6 +45,7 @@ import { IonButton } from "@ionic/vue";
 import ART from "@/apps/ART/app"
 import { ReportInterface, ReportGroupInterface } from "@/apps/interfaces/AppInterface"
 import TaskCard from "@/components/DataViews/TaskCard.vue";
+import Transformer from "@/utils/Transformers"
 
 export default defineComponent({
   components: {
@@ -55,6 +56,11 @@ export default defineComponent({
     reportGroups: ART.reports as Array<ReportGroupInterface>,
     activeReports: [] as Array<ReportInterface>
   }),
+  computed: {
+    reports(): any {
+      return Transformer.convertArrayToTurples(ART.reports, 3)
+    }
+  },
   methods: {
     gotoReport(reportFile: ReportInterface){
       if (reportFile.pathName) {
