@@ -7,7 +7,9 @@
     --his-card-primary-shadow-webkit: 0px -2px 19px -2px rgba(196, 190, 196, 1);
     --his-card-primary-shadow-moz: 0px -2px 19px -2px rgba(196, 190, 196, 1);
 }
-
+ion-button {
+    --background: -moz-linear-gradient(top, green, green);
+}
 .input_display {
     border-top: none;
     border-left: none;

@@ -165,11 +165,17 @@ ion-grid {
   color: #333333;
 }
 .encounter-td {
-  text-align: left
+  text-align: left;
+  border: 1px solid #dddddd;
+  padding: 0.7em;
 }
 .other-td {
   text-align: right;
+  font-weight: bold;
+  border: 1px solid #dddddd;
   min-width: 60px;
+    padding: 0.7em;
+
 }
 table {
   font-family: arial, sans-serif;
@@ -179,12 +185,17 @@ table {
 
 td,
 th {
-  border: 1px solid #dddddd;
   text-align: right;
-  padding: 8px;
 }
 
 tr:nth-child(even) {
-  background-color: #dddddd;
+  background-color: #f1efef;
+}
+@media (min-width: 1280px)  {
+  td,
+  th {
+    text-align: right;
+    padding: 1.0em;
+  }
 }
 </style>
