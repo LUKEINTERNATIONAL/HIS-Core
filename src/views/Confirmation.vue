@@ -42,11 +42,12 @@
               <ion-card-title>{{ card.title }}</ion-card-title>
             </ion-card-header>
             <ion-card-content>
-              <ion-list class="card-content"> 
-                <ion-item v-for="(info, id) in card.data" :key="id"> 
-                  <strong v-if="info.label">{{ info.label }} &nbsp; </strong>{{ info.value }}
-                </ion-item>
-              </ion-list>
+              <ul class="card-content"> 
+                <li class='li-item' v-for="(info, id) in card.data" :key="id"> 
+                  <strong v-if="info.label">{{ info.label }} &nbsp; </strong>
+                  {{ info.value }}
+                </li>
+              </ul>
             </ion-card-content>
           </ion-card>
         </ion-col>
@@ -86,7 +87,6 @@ import {
   IonRow,
   IonCol,
   IonButton,
-  IonIcon,
   IonCard,
   IonCardContent,
   IonCardTitle,
@@ -413,12 +413,22 @@ export default defineComponent({
 
 <style scoped>
 .card-content {
-  height: 219px;
+  height: 200px;
   overflow: hidden;
 }
 .tool-bar-medium-card {
   padding: 10px;
   font-size: 0.9em;
+}
+ul {
+  padding: 0;
+}
+.li-item {
+  list-style: none;
+  font-size: 1.0em;
+  margin: 0;
+  padding: 0;
+  line-height: 30px;
 }
 ion-card {
   padding: 0;
