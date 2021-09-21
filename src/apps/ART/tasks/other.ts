@@ -157,6 +157,10 @@ export const PREFERENCES = {
             name: "Edit Users",
             route: "/user?activity=edit",
           },
+          {
+            name: 'System usage report',
+            route: '/users/usage'
+          }
         ],
         'System Preferences': [
           {
