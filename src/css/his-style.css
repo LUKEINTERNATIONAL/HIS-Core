@@ -119,6 +119,7 @@
 }
 
 body {
+ color: #333333;
  font-family: "Nimbus Sans L", "Arial Narrow", sans-serif;
  user-select: none; /* supported by Chrome and Opera */
  -webkit-user-select: none; /* Safari */

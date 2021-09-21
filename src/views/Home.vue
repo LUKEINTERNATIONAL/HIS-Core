@@ -49,13 +49,11 @@
             <ion-label>Administration</ion-label>
           </ion-segment-button>
         </ion-segment>
-        <ion-card>
-          <ion-card-content>
-            <overview v-show="activeTab == 1"> </overview>
-            <reports v-show="activeTab == 2"></reports>
-            <administration v-show="activeTab == 3"></administration>
-          </ion-card-content>
-        </ion-card>
+        <div>
+          <overview v-show="activeTab == 1"> </overview>
+          <reports v-show="activeTab == 2"></reports>
+          <administration v-show="activeTab == 3"></administration>
+        </div>
       </div>
     </ion-content>
 
@@ -100,9 +98,7 @@ import {
   IonButton,
   IonSegment,
   IonSegmentButton,
-  IonLabel,
-  IonCard,
-  IonCardContent
+  IonLabel
 } from "@ionic/vue";
 import HisApp from "@/apps/app_lib"
 import { defineComponent } from "vue";
@@ -136,9 +132,7 @@ export default defineComponent({
     IonSegment,
     IonSegmentButton,
     Overview,
-    IonLabel,
-    IonCard,
-    IonCardContent,
+    IonLabel
   },
   data() {
     return {
@@ -265,11 +259,6 @@ ion-button {
 .subheader {
   font-weight: bold;
 }
-.outlined {
-  border: solid 1px grey;
-  font-size: 100%;
-}
-
 #container strong {
   font-size: 20px;
   line-height: 26px;
