@@ -7,13 +7,6 @@
     --his-card-primary-shadow-webkit: 0px -2px 19px -2px rgba(196, 190, 196, 1);
     --his-card-primary-shadow-moz: 0px -2px 19px -2px rgba(196, 190, 196, 1);
 }
-ion-button {
-    border-radius: 5px !important;
-    font-size: 1.23em !important;
-    text-shadow: #a7cfdf;
-    font-family: arial, helvetica, sans-serif;
-    --background: -webkit-linear-gradient(top, #9dc8da, #23538a)!important;
-}
 .input_display {
     border-top: none;
     border-left: none;

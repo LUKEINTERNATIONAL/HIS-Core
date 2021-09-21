@@ -34,12 +34,12 @@
       </ion-toolbar>
     </ion-header>
 
-    <ion-content :fullscreen="true">
+    <ion-content>
       <ion-row>
         <ion-col size="4" v-for="(card, index) in cards" :key="index">
           <ion-card class="his-card">
             <ion-card-header>
-              <ion-card-title>{{ card.title }}</ion-card-title>
+              <ion-card-title>{{ card.title.toUpperCase() }}</ion-card-title>
             </ion-card-header>
             <ion-card-content>
               <ul class="card-content"> 
@@ -418,6 +418,8 @@ export default defineComponent({
 }
 .tool-bar-medium-card {
   padding: 10px;
+  width: 94.7%;
+  margin: auto;
   font-size: 0.9em;
 }
 ul {
@@ -430,9 +432,6 @@ ul {
   padding: 0;
   line-height: 30px;
 }
-ion-card {
-  padding: 0;
-}
 ion-card-header {
   padding: 0.3em;
   background: #3880ff;
@@ -444,12 +443,9 @@ ion-card-title {
 ion-col p {
   margin: 0;
 }
-ion-item {
-  padding: 0;
-  margin: 0;
-}
-
 ion-card {
   height: 270px;
+  padding: 0; 
+  border-radius: 15px;
 }
 </style>
