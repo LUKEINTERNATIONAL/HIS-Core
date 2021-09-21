@@ -38,4 +38,8 @@ export class PrintoutService extends Service {
         setTimeout(async () => await modalController.dismiss({}), 3000)
         return true
     }
+
+    async printLocation(locationId: number) {
+        await this.printLbl(`labels/location?location_id=${locationId}`)
+    }
 }
