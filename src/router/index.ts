@@ -17,6 +17,7 @@ import Settings from '@/components/ART/Settings.vue'
 import HisApps from '@/apps/his_apps';
 import SessionDate from "@/views/SessionDate.vue"
 import SystemUsage from "@/views/SystemUsage.vue"
+import PrintLocation from "@/views/PrintLocation.vue"
 import HostConfig from '@/views/HostConfig.vue'
 import ProgramManagement from "@/views/ProgramManagement.vue"
 import LabResults from "@/views/LabResults.vue"
@@ -68,6 +69,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/users/usage',
     name: 'User system usage',
     component: SystemUsage
+  },
+  {
+    path: '/print/location',
+    name: 'Print Location',
+    component: PrintLocation
   },
   {
     path: '/select_hc_location',
