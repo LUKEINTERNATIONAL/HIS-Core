@@ -1,7 +1,7 @@
 <template>
   <ion-header>
     <ion-toolbar>
-      <ion-title>Applications</ion-title>
+      <ion-title>Select Module</ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-content class="ion-padding">

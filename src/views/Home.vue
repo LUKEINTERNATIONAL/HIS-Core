@@ -3,42 +3,41 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-row>
-          <ion-col size="0.5">
-            <ion-icon
-              :icon="barcode"
-              size="large"
-              style="height: 100%"
-            ></ion-icon>
-          </ion-col>
-          <ion-col size="3.5" >
-            <ion-input autofocus v-model="patientBarcode" class="barcode-input" ref="scanBarcode"></ion-input>
+          <ion-col>
+            <div class="tool-bar-medium-card">
+              <ion-row> 
+                <ion-col> 
+                  <ion-icon
+                    :icon="barcode"
+                    size="large"
+                    style="height: 100%"
+                  ></ion-icon>
+                </ion-col>
+                <ion-col> 
+                  <ion-input autofocus v-model="patientBarcode" class="barcode-input" ref="scanBarcode"></ion-input>
+                </ion-col>
+              </ion-row>
+            </div>
           </ion-col>
           <ion-col size="5">
-            <p>Facility name: {{ facilityName }}</p>
-            <p>Location: {{ userLocation }}</p>
-            <p>Date: <ion-label :color="isBDE ? 'danger' : 'success'"> {{ sessionDate }} </ion-label></p>
-            <p>User: {{ userName }}</p>
+            <div class="tool-bar-medium-card">
+              <div class="tool-bar-medium-content"> 
+                <p><b>Facility name:</b> {{ facilityName }}</p>
+                <p><b>Location:</b> {{ userLocation }}</p>
+                <p><b>Date:</b> <ion-label :color="isBDE ? 'danger' : 'success'"> {{ sessionDate }} </ion-label></p>
+                <p><b>User:</b> {{ userName }}</p>
+              </div>
+            </div>
           </ion-col>
           <ion-col size="3">
-            <ion-row>
-              <ion-col>
-                <p>
-                  {{ app.applicationName }}
-                </p>
-              </ion-col>
-              <ion-col>
-                <ion-thumbnail v-if="app.applicationIcon">
-                  <ion-img :src="app.applicationIcon"></ion-img>
-                </ion-thumbnail>
-              </ion-col>
-            </ion-row>
+            <program-icon :icon="app.applicationIcon"> </program-icon>
           </ion-col>
         </ion-row>
       </ion-toolbar>
     </ion-header>
 
     <ion-content :fullscreen="true">
-      <div id="container" v-if="ready">
+      <div id="container" class="his-card overview" v-if="ready">
         <ion-segment scrollable value="1" class="ion-justify-content-center">
           <ion-segment-button value="1" @click="activeTab = 1">
             <ion-label>Overview</ion-label>
@@ -50,13 +49,11 @@
             <ion-label>Administration</ion-label>
           </ion-segment-button>
         </ion-segment>
-        <ion-card>
-          <ion-card-content>
-            <overview v-show="activeTab == 1"> </overview>
-            <reports v-show="activeTab == 2"></reports>
-            <administration v-show="activeTab == 3"></administration>
-          </ion-card-content>
-        </ion-card>
+        <div>
+          <overview v-show="activeTab == 1"> </overview>
+          <reports v-show="activeTab == 2"></reports>
+          <administration v-show="activeTab == 3"></administration>
+        </div>
       </div>
     </ion-content>
 
@@ -101,11 +98,7 @@ import {
   IonButton,
   IonSegment,
   IonSegmentButton,
-  IonLabel,
-  IonCard,
-  IonCardContent,
-  IonImg,
-  IonThumbnail
+  IonLabel
 } from "@ionic/vue";
 import HisApp from "@/apps/app_lib"
 import { defineComponent } from "vue";
@@ -118,9 +111,12 @@ import Overview from "@/components/ART/overview.vue";
 import HisDate from "@/utils/Date"
 import { AppInterface } from "@/apps/interfaces/AppInterface";
 import { Service } from "@/services/service"
+import ProgramIcon from "@/components/DataViews/DashboardAppIcon.vue"
+
 export default defineComponent({
   name: "Home",
   components: {
+    ProgramIcon,
     IonContent,
     IonHeader,
     IonPage,
@@ -136,11 +132,7 @@ export default defineComponent({
     IonSegment,
     IonSegmentButton,
     Overview,
-    IonLabel,
-    IonCard,
-    IonCardContent,
-    IonImg,
-    IonThumbnail
+    IonLabel
   },
   data() {
     return {
@@ -247,18 +239,26 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.tool-bar-medium-content {
+  padding: 10px;
+}
+.tool-bar-medium-card {
+  height: 100px;
+  font-size: 0.9em;
+}
 ion-col p {
   margin: 0;
 }
 ion-button {
   width: 100%;
 }
-
-.outlined {
-  border: solid 1px grey;
-  font-size: 100%;
+.overview {
+  min-height: 66vh;
+  margin: 14px;
 }
-
+.subheader {
+  font-weight: bold;
+}
 #container strong {
   font-size: 20px;
   line-height: 26px;

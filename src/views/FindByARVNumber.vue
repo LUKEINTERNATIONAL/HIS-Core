@@ -72,7 +72,8 @@ export default defineComponent({
           },
           config: {
             prepend: true,
-            prependValue: "ARV"
+            prependValue: "ARV",
+            initialKb: '0-9'
           },
           disabled: true,
         },

@@ -21,11 +21,11 @@
             <th>Facility</th>
           </tr>
           <tr v-for="(data, index) in rows" :key="index">
-            <td>{{ encounters[data.encounter] }}</td>
-            <td>{{ data.female }}</td>
-            <td>{{ data.male }}</td>
-            <td>{{ data.me }}</td>
-            <td>{{ data.facility }}</td>
+            <td class="encounter-td">{{ encounters[data.encounter] }}</td>
+            <td class="other-td">{{ data.female }}</td>
+            <td class="other-td">{{ data.male }}</td>
+            <td class="other-td">{{ data.me }}</td>
+            <td class="other-td">{{ data.facility }}</td>
           </tr>
         </table>
       </ion-col>
@@ -161,6 +161,22 @@ export default defineComponent({
 </script>
 
 <style scoped>
+ion-grid {
+  color: #333333;
+}
+.encounter-td {
+  text-align: left;
+  border: 1px solid #dddddd;
+  padding: 0.7em;
+}
+.other-td {
+  text-align: right;
+  font-weight: bold;
+  border: 1px solid #dddddd;
+  min-width: 60px;
+    padding: 0.7em;
+
+}
 table {
   font-family: arial, sans-serif;
   border-collapse: collapse;
@@ -169,12 +185,17 @@ table {
 
 td,
 th {
-  border: 1px solid #dddddd;
-  text-align: left;
-  padding: 8px;
+  text-align: right;
 }
 
 tr:nth-child(even) {
-  background-color: #dddddd;
+  background-color: #f1efef;
+}
+@media (min-width: 1280px)  {
+  td,
+  th {
+    text-align: right;
+    padding: 1.0em;
+  }
 }
 </style>

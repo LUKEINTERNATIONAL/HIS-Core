@@ -14,6 +14,9 @@ import BaseKeyboard from "@/components/Keyboard/BaseKeyboard.vue";
 export default defineComponent({
   components: { BaseKeyboard},
   props: {
+    initalKeyboardName: {
+      type: String
+    },
     kbConfig: {
       type: Array,
       required: true
@@ -27,6 +30,14 @@ export default defineComponent({
     activeLayout: {} as Array<any>
   }),
   watch: {
+    initalKeyboardName: {
+      handler(name: string) {
+        if (name) {
+          this.$nextTick(() => this.switchKeyboard(name))
+        }
+      },
+      immediate: true
+    },
     kbConfig: {
       handler(keyboard: Array<any>){
         if(keyboard) {

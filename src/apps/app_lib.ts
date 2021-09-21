@@ -14,7 +14,7 @@ function getActiveApp() {
     }
 }
 
-function openModal(component: any, props = {}, cssClass = "") {
+function openModal(component: any, props = {}, cssClass = "large-modal") {
     return modalController.create({
         component,
         cssClass: cssClass,

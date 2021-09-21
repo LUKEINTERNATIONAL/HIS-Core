@@ -1,5 +1,4 @@
 <template>
-
   <ion-page>
   <ion-loading
     :is-open="isOpenRef"
@@ -9,54 +8,46 @@
   </ion-loading>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-row>
-          <ion-col size="1">
-            <ion-icon
-              :icon="gender === 'M' ? man : woman"
-              size="large"
-              style="height: 100%"
-            ></ion-icon>
+        <ion-row> 
+          <ion-col> 
+            <div class="tool-bar-medium-card"> 
+              <b> Patient Name:</b> {{patientName}} <p/>
+              <b> Birthdate: </b> {{birthdate}} <p/>
+              <b> Gender: </b> {{gender}}
+            </div>
           </ion-col>
-          <ion-col size="6"
-            ><p>Patient Name: {{ patientName }}</p></ion-col
-          >
-          <ion-col size="3"
-            ><p>Birthdate : {{ birthdate }}</p></ion-col
-          >
-          <ion-col size="3"
-            ><p>Ancestry district: {{ ancestryDistrict }}</p></ion-col
-          >
-          <ion-col size="3"
-            ><p>Ancestry TA: {{ ancestryTA }}</p></ion-col
-          >
-          <ion-col size="3"
-            ><p>Ancestry village: {{ ancestryVillage }}</p></ion-col
-          >
-          <ion-col size="3"
-            ><p>Current District : {{ currentDistrict }}</p></ion-col
-          >
-          <ion-col size="3"
-            ><p>Current TA : {{ currentTA }}</p></ion-col
-          >
-          <ion-col size="3"
-            ><p>Current Village : {{ currentVillage }}</p></ion-col
-          >
+          <ion-col> 
+            <div class="tool-bar-medium-card"> 
+              <b>Ancestry district:</b> {{ ancestryDistrict }}<p/>
+              <b>Ancestry TA:</b> {{ ancestryTA }}<p/>
+              <b>Ancestry village:</b> {{ ancestryVillage }}<p/>
+            </div>
+          </ion-col>
+          <ion-col> 
+            <div class="tool-bar-medium-card"> 
+              <b>Current District:</b> {{ currentDistrict }}<p/>
+              <b>Current TA:</b> {{ currentTA }}<p/>
+              <b>Current Village:</b> {{ currentVillage }}<p/>
+            </div>
+          </ion-col>
         </ion-row>
       </ion-toolbar>
     </ion-header>
 
-    <ion-content :fullscreen="true">
+    <ion-content>
       <ion-row>
         <ion-col size="4" v-for="(card, index) in cards" :key="index">
-          <ion-card>
+          <ion-card class="his-card">
             <ion-card-header>
-              <ion-card-title>{{ card.title }}</ion-card-title>
+              <ion-card-title>{{ card.title.toUpperCase() }}</ion-card-title>
             </ion-card-header>
-
             <ion-card-content>
-              <h2 v-for="(info, id) in card.data" :key="id">
-                {{ info.label }} <strong> {{ info.value }}</strong>
-              </h2>
+              <ul class="card-content"> 
+                <li class='li-item' v-for="(info, id) in card.data" :key="id"> 
+                  <strong v-if="info.label">{{ info.label }} &nbsp; </strong>
+                  {{ info.value }}
+                </li>
+              </ul>
             </ion-card-content>
           </ion-card>
         </ion-col>
@@ -64,26 +55,19 @@
     </ion-content>
 
     <ion-footer>
-      <ion-toolbar>
-        <ion-row>
-          <ion-col>
-            <ion-button color="danger left" size="large" router-link="/"
-              >Cancel</ion-button
-            >
-          </ion-col>
-          <ion-col>
-            <ion-button
-              color="danger left"
-              size="large"
-              router-link="/"
-              v-if="isAdmin"
-              >Void</ion-button
-            >
-          </ion-col>
-          <ion-col>
-            <ion-button color="success" size="large" @click="nextTask">Continue</ion-button>
-          </ion-col>
-        </ion-row>
+      <ion-toolbar color="dark">
+        <ion-button color="danger" size="large" router-link="/"
+          >Cancel</ion-button>
+        <ion-button
+          color="danger left"
+          size="large"
+          router-link="/"
+          v-if="isAdmin"
+          >Void</ion-button
+        >
+        <ion-button slot="end" color="success" size="large" @click="nextTask">
+          Continue
+        </ion-button>
       </ion-toolbar>
     </ion-footer>
   </ion-page>
@@ -103,7 +87,6 @@ import {
   IonRow,
   IonCol,
   IonButton,
-  IonIcon,
   IonCard,
   IonCardContent,
   IonCardTitle,
@@ -139,7 +122,6 @@ export default defineComponent({
     IonFooter,
     IonCard,
     IonCardContent,
-    IonIcon,
     IonCardTitle,
     IonCardHeader, 
     IonLoading
@@ -430,13 +412,40 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.card-content {
+  height: 200px;
+  overflow: hidden;
+}
+.tool-bar-medium-card {
+  padding: 10px;
+  width: 94.7%;
+  margin: auto;
+  font-size: 0.9em;
+}
+ul {
+  padding: 0;
+}
+.li-item {
+  list-style: none;
+  font-size: 1.0em;
+  margin: 0;
+  padding: 0;
+  line-height: 30px;
+}
+ion-card-header {
+  padding: 0.3em;
+  background: #3880ff;
+  color: white!important;
+}
+ion-card-title {
+  color: white;
+}
 ion-col p {
   margin: 0;
 }
-ion-button {
-  width: 100%;
-}
 ion-card {
-  height: 250px;
+  height: 270px;
+  padding: 0; 
+  border-radius: 15px;
 }
 </style>
