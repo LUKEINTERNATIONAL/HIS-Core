@@ -12,12 +12,11 @@ import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Field, Option } from "@/components/Forms/FieldInterface"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
-import { generateDateFields, EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
+import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import Validation from "@/components/Forms/validations/StandardValidations"
-import {LocationService} from "@/services/location_service"
-import {PersonService, NewPerson} from "@/services/person_service"
+import { PersonService } from "@/services/person_service"
 import {Person} from "@/interfaces/person"
-import {PersonAttributeService, NewAttribute} from '@/services/person_attributes_service'
+import {PersonAttributeService } from '@/services/person_attributes_service'
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import { GlobalPropertyService } from "@/services/global_property_service" 
@@ -30,6 +29,7 @@ import { PatientPrintoutService } from "@/services/patient_printout_service";
 import { toastWarning } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
 import { isEmpty, isPlainObject } from "lodash"
+import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -73,6 +73,32 @@ export default defineComponent({
     }
   },
   methods: {
+    getFields(): Array<Field> {
+        let fields: Array<Field> = []
+        fields.push(this.personIndexField())
+        fields.push(this.givenNameField())
+        fields.push(this.familyNameField())
+        fields.push(this.genderField())
+        fields = fields.concat(this.dobFields())
+        fields.push(this.homeRegionField())
+        fields.push(this.homeDistrictField())
+        fields.push(this.homeTAField())
+        fields.push(this.homeVillageField())
+        fields.push(this.currentRegionField())
+        fields.push(this.currentDistrictField())
+        fields.push(this.currentTAField())
+        fields.push(this.currentVillage())
+        fields.push(this.landmarkField())
+        fields.push(this.cellPhoneField())
+        fields.push(this.patientTypeField())
+        fields.push(this.facilityLocationField())
+        fields.push(this.occupationField())
+        fields.push(this.regimentField())
+        fields = fields.concat(this.dateJoinedMilitaryFields())
+        fields.push(this.rankField())
+        fields.push(this.relationshipField())
+        return fields
+    },
     async initEditMode(personId: number) {
         this.editPerson = personId
         const person = await Patientservice.findByID(this.editPerson)
@@ -100,22 +126,22 @@ export default defineComponent({
         this.presets = this.editPersonData
         this.skipSummary = true
     },
-    async onFinish(form: Record<string, Option> | Record<string, null>, computedData: any) {
+    async onFinish(_: Record<string, Option> | Record<string, null>, computedData: any) {
         try {
             if (this.editPerson <= 0) {
-                return this.create(form, computedData)
+                return this.create(computedData)
             } else {
-                return this.update(form, computedData)
+                return this.update(computedData)
             }
         } catch (e) {
             toastWarning(e)
         }
     },
-    async create(form: Record<string, Option> | Record<string, null>, computedData: any) {
-        const personPayload: NewPerson = this.resolvePerson(form, computedData)
+    async create(computedData: any) {
+        const personPayload: any = this.resolvePerson(computedData)
         const person: Person = await new PersonService(personPayload).create()
         if (person.person_id) {
-            await Promise.all(this.savePersonAttributes(computedData, person.person_id))
+            await this.savePersonAttributes(computedData, person.person_id)
             await ProgramService.createPatient(person.person_id)
             .then(() => {
                 ProgramService.enrollPatient(person.person_id)
@@ -133,8 +159,8 @@ export default defineComponent({
             });
         }
     },
-    async update(form: Record<string, Option> | Record<string, null>, computedData: any) {
-        const person: any = this.resolvePerson(form, computedData)
+    async update(computedData: any) {
+        const person: any = this.resolvePerson(computedData)
         if (!isEmpty(person)) {
             await new PersonService(person).update(this.editPerson)
             for(const attr in person) {
@@ -151,36 +177,30 @@ export default defineComponent({
         }
         return true
     },
-    savePersonAttributes(form: Record<string, Option> | Record<string, null>, personId: number) {
-        return Object.values(form)
-                    .filter((d: any) => isPlainObject(d) && 'personAttributes' in d)
-                    .map(async ({personAttributes}: any) => {
-                        return PersonAttributeService.create({
-                            ...personAttributes, 
-                            'person_id': personId
-                        })  
-                    })
+    async savePersonAttributes(form: Record<string, Option> | Record<string, null>, personId: number) {
+        const data = Object.values(form)
+                            .filter((d: any) => isPlainObject(d) && 'personAttributes' in d)
+                            .map(async ({personAttributes}: any) => {
+                                return PersonAttributeService.create({
+                                    ...personAttributes, 
+                                    'person_id': personId
+                                })  
+                            })
+        await Promise.all(data)
     },
-    resolvePerson(form: any, computedForm: any) {
-        return {...this.resolveBirthDate(computedForm), ...this.resolveData(form, 'person')}
-    },
-    resolveBirthDate(data: any) {
-        const value: any = Object.values(data).filter((i: any) => i.dob)
-        return !isEmpty(value) ? value[0].dob : {}
-    },
-    resolveData(form: Record<string, Option> | Record<string, null>, group: string) {
-        const output: any = {} 
-        for(const name in form) {
-            const data = form[name]
-            const filter = this.fields.filter(item => {
-                return item.id === name && item.group === group
-            })
-
-            if (filter.length <= 0) continue 
-
-            if (data && data.value != null) output[name] = data.value
+    resolvePerson(computedForm: any) {
+        let data: any = {}
+        for(const attr in computedForm) {
+            const values = computedForm[attr]
+            if ('person' in values) {
+                if (isPlainObject(values.person)) {
+                    data = {...data, ...values.person}
+                } else {
+                    data[attr] = values['person']
+                }
+            }
         }
-        return output
+        return data   
     },
     mapToOption(listOptions: Array<string>): Array<Option> {
         return listOptions.map((item: any) => ({ label: item, value: item })) 
@@ -213,411 +233,257 @@ export default defineComponent({
             return { label: val, value: val }
         }
     },
-    async getFacilities(filter=''): Promise<Option[]> {
-        const facilities = await LocationService.getFacilities({name: filter})
-        return facilities.map((facility: any) => ({
-            label: facility.name,
-            value: facility.location_id
-        }))
+    givenNameField(): Field {
+        const givenName: Field = PersonField.getGivenNameField()
+        givenName.condition = () => this.editConditionCheck(['given_name'])
+        return givenName
     },
-    async getRegions(): Promise<Option[]> {
-        const regions = await LocationService.getRegions()
-        return regions.map((region: any) => ({
-            label: region.name,
-            value: region.name,
-            other: {
-                id: region.region_id
-            }
-        }))
+    familyNameField(): Field {
+        const familyName: Field = PersonField.getFamilyNameField()
+        familyName.condition = () => this.editConditionCheck(['family_name'])
+        return familyName
     },
-    async getDistricts(regionID: number): Promise<Option[]> {
-        const districts = await LocationService.getDistricts(regionID)
-        return districts.map((district: any) => ({
-            label: district.name,
-            value: district.name,
-            other: {
-                id: district.district_id
-            }
-        }))
+    genderField(): Field {
+        const gender: Field = PersonField.getGenderField()
+        gender.condition = () => this.editConditionCheck(['gender'])
+        return gender
     },
-    async getTraditionalAuthorities(districtID: number): Promise<Option[]> {
-        const TAs = await LocationService.getTraditionalAuthorities(districtID)
-        return TAs.map((TA: any) => ({
-            label: TA.name,
-            value: TA.name,
-            other: {
-                id: TA.traditional_authority_id
-            }
-        }))
+    dobFields(): Array<Field> {
+        const dobConfig = PersonField.getDobConfig()
+        dobConfig.condition = () => this.editConditionCheck([
+            'year_birth_date', 'month_birth_date', 'day_birth_date'
+        ])
+        return generateDateFields(dobConfig)
     },
-    async getVillages(traditionalAuthorityID: number): Promise<Option[]> {
-        const villages = await LocationService.getVillages(traditionalAuthorityID)
-        return villages.map((village: any) => ({
-            label: village.name,
-            value: village.name,
-            other: {
-                id: village.village_id
-            }
-        }))
+    homeRegionField(): Field {
+        const homeRegion: Field = PersonField.getHomeRegionField()
+        homeRegion.condition = () => this.editConditionCheck(this.addressAttributes)
+        return homeRegion
     },
-    getFields: function(): Array<Field> {
-        return [
-            {
-                id: 'edit_user',
-                helpText: 'Edit Demographics',
-                type: FieldType.TT_TABLE_VIEWER,
-                requireNext: false,
-                condition: () => this.editPerson != -1,
-                options: async () => {
-                    const columns = ['Attributes', 'Values', 'Edit']
-                    const editButton = (attribute: string) => ({ 
-                        name: 'Edit', 
-                        type: 'button',
-                        action: () => {
-                            this.activeField = attribute
-                            this.fieldComponent = this.activeField
-                        }
-                    })
-                    const rows = [
-                        ['Given Name', this.editPersonData.given_name, editButton('given_name')],
-                        ['Family Name', this.editPersonData.family_name, editButton('family_name')],
-                        ['Gender', this.editPersonData.gender,  editButton('gender')],
-                        ['Birthdate', this.editPersonData.birthdate,  editButton('year_birth_date')],
-                        ['Home district', this.editPersonData.home_district,  editButton('home_region')],
-                        ['Home TA', this.editPersonData.home_ta,  editButton('home_region')],
-                        ['Home Village', this.editPersonData.home_village,  editButton('home_region')],
-                        ['Current district',this.editPersonData.current_district, editButton('home_region')],
-                        ['Current T/A', this.editPersonData.current_ta, editButton('home_region')],
-                        ['Cell Phone Number', this.editPersonData.cell_phone_number, editButton('cell_phone_number')],
-                    ]
-                    return [{
-                        label: '',
-                        value: '',
-                        other: {
-                            columns, rows
-                        }
-                    }]
-                },
-                config: {
-                    hiddenFooterBtns: [
-                        'Clear'
-                    ]
-                }
-            },
-            {
-                id: 'given_name',
-                helpText: 'First name',
-                type: FieldType.TT_TEXT,
-                group: 'person',
-                preset: this.getFieldPreset('given_name'),
-                condition: () => this.editConditionCheck(['given_name']),
-                validation: (val: any) => Validation.isName(val),
-                options: async (form: any) => {
-                    if (!form.given_name || form.given_name.value === null) return []
-
-                    const names = await PersonService.searchGivenName(form.given_name.value)
-                    return this.mapToOption(names)
-                }
-            },
-            {
-                id: 'family_name',
-                helpText: "Last name",
-                type: FieldType.TT_TEXT,
-                group: 'person',
-                preset: this.getFieldPreset('family_name'),
-                condition: () => this.editConditionCheck(['family_name']),
-                validation: (val: any) => Validation.isName(val),
-                options: async (form: any) => {
-                    if (!form.family_name || form.family_name.value === null) {
-                        return []
-                    } 
-                    const names = await PersonService.searchFamilyName(form.family_name.value)
-                    return this.mapToOption(names)
-                }
-            },
-            {
-                id: 'gender',
-                helpText: 'Gender',
-                type: FieldType.TT_SELECT,
-                group: 'person',
-                requireNext: false,
-                preset: this.getFieldPreset('gender'),
-                condition: () => this.editConditionCheck(['gender']),
-                validation: (val: any) => Validation.required(val),
-                options: () => ([
-                    { 
-                        label: 'Male',
-                        value: 'M'
-                    },
-                    {
-                        label: 'Female',
-                        value: 'F'
-                    }
-                ])
-            },
-            ...generateDateFields({
-                id: 'birth_date',
-                helpText: 'Birth',
-                required: true,
-                condition: () => this.editConditionCheck([
-                    'year_birth_date', 'month_birth_date', 'day_birth_date'
-                ]),
-                minDate: () => HisDate.estimateDateFromAge(100),
-                maxDate: () => WorkflowService.getSessionDate(),
-                estimation: {
-                    allowUnknown: true,
-                    estimationFieldType: EstimationFieldType.AGE_ESTIMATE_FIELD
-                },
-                computeValue: (date: string, isEstimate: boolean) => {
-                    return {
-                        date,
-                        isEstimate,
-                        dob: {
-                            birthdate: date,
-                            'birthdate_estimated': isEstimate
-                        }
-                    }
+    homeDistrictField(): Field {
+        const homeDistrict: Field = PersonField.getHomeDistrictField()
+        homeDistrict.condition = () => this.editConditionCheck(this.addressAttributes)
+        return homeDistrict
+    },
+    homeTAField(): Field {
+        const homeTA: Field = PersonField.getHomeTaField()
+        homeTA.condition = () => this.editConditionCheck(this.addressAttributes)
+        return homeTA
+    },
+    homeVillageField(): Field {
+        const homeVillage: Field = PersonField.getHomeVillageField()
+        homeVillage.condition = () => this.editConditionCheck(this.addressAttributes)
+        return homeVillage
+    },
+    currentRegionField(): Field {
+        const currentRegion: Field = PersonField.getCurrentRegionField()
+        currentRegion.condition = () => this.editConditionCheck(this.addressAttributes)
+        return currentRegion
+    },
+    currentDistrictField(): Field {
+        const currentDistrict: Field = PersonField.getCurrentDistrictField()
+        currentDistrict.condition = () => this.editConditionCheck(this.addressAttributes)
+        return currentDistrict
+    },
+    currentTAField(): Field {
+        const currentTA: Field = PersonField.getCurrentTAfield()
+        currentTA.condition = () => this.editConditionCheck(this.addressAttributes)
+        return currentTA
+    },
+    currentVillage(): Field {
+        const currentVillage: Field = PersonField.getCurrentVillageField()
+        currentVillage.condition = () => this.editConditionCheck(this.addressAttributes)
+        return currentVillage
+    },
+    cellPhoneField(): Field {
+        const cellPhone: Field = PersonField.getCellNumberField()
+        cellPhone.condition = () => this.editConditionCheck(['cell_phone_number'])
+        return cellPhone
+    },
+    facilityLocationField(): Field {
+       const facility: Field = PersonField.getFacilityLocationField()
+       facility.condition = (form: any) => form.patient_type.value === 'External consultation'
+       return facility 
+    },
+    landmarkField(): Field {
+        return {
+            id: 'landmark',
+            helpText: 'Closest Landmark or Plot Number',
+            group: 'person',
+            type: FieldType.TT_SELECT,
+            computedValue: (val: Option) => ({person: val.value}),
+            condition: () => this.editConditionCheck(['land_mark']),
+            validation: (val: any) => Validation.required(val),
+            options: () => this.mapToOption([
+                'Catholic Church',
+                'CCAP',
+                'Seventh Day',
+                'Mosque',
+                'Primary School',
+                'Borehole',
+                'Secondary School',
+                'College',
+                'Market',
+                'Football Ground',
+                'Other'
+            ])
+        }
+    },
+    patientTypeField(): Field {
+        return {
+            id: 'patient_type',
+            helpText: 'Type of patient',
+            type: FieldType.TT_SELECT,
+            computedValue: (val: Option) => ({person: val.value}),
+            condition: () => this.editConditionCheck(['patient_type']) && this.showPatientType,
+            validation: (val: any) => Validation.required(val),
+            options: () => this.mapToOption([
+                'New patient',
+                'External consultation',
+            ])
+        }
+    },
+    occupationField(): Field {
+        return {
+            id: 'occupation',
+            helpText: 'Occupation',
+            type: FieldType.TT_SELECT,
+            computedValue: (val: Option) => ({person: val.value}),
+            condition: () => this.editConditionCheck(['occupation']) && this.isMilitarySite,
+            validation: (val: any) => Validation.required(val),
+            options: () => this.mapToOption([
+                'MDF Reserve',
+                'MDF Retired',
+                'Civilian'
+            ])
+        }
+    },
+    regimentField(): Field {
+        return {
+            id: 'person_regiment_id',
+            helpText: 'Regiment ID',
+            type: FieldType.TT_TEXT,
+            computedValue: ({value}: Option) => ({
+                personAttributes: {
+                    'person_attribute_type_id': 35, 
+                    'value': value
                 }
             }),
-            {
-                id: 'home_region',
-                helpText: 'Region of origin',
-                type: FieldType.TT_SELECT,
-                group: 'person',
-                requireNext: false,
-                condition: () => this.editConditionCheck(this.addressAttributes),
-                validation: (val: any) => Validation.required(val),
-                options: () => this.getRegions()
-            },
-            {
-                id: 'home_district',
-                helpText: 'Home District',
-                type: FieldType.TT_SELECT,
-                group: 'person',
-                requireNext: false,
-                condition: (form: any) => this.editConditionCheck(this.addressAttributes) && !form.home_region.label.match(/foreign/i),
-                options: (form: any) => this.getDistricts(form.home_region.other.id)
-            },
-            {
-                id: 'home_traditional_authority',
-                helpText: 'Home TA',
-                type: FieldType.TT_SELECT,
-                requireNext: false,
-                config: {
-                    showKeyboard: true
-                },
-                group: 'person',
-                condition: (form: any) => this.editConditionCheck(this.addressAttributes) && !form.home_region.label.match(/foreign/i),
-                validation: (val: any) => Validation.required(val),
-                options: (form: any) => this.getTraditionalAuthorities(form.home_district.other.id)
-            },
-            {
-                id: 'home_village',
-                helpText: 'Home Village',
-                type: FieldType.TT_SELECT,
-                group: 'person',
-                config: {
-                    showKeyboard: true
-                },
-                requireNext: false,
-                validation: (val: any) => Validation.required(val),
-                condition: (form: any) => this.editConditionCheck(this.addressAttributes) && !form.home_region.label.match(/foreign/i),
-                options: (form: any) => this.getVillages(form.home_traditional_authority.other.id)
-            },
-            {
-                id: 'current_region',
-                helpText: 'Current Region',
-                requireNext: false,
-                group: 'person',
-                type: FieldType.TT_SELECT,
-                validation: (val: any) => Validation.required(val),
-                condition: () => this.editConditionCheck(this.addressAttributes),
-                options: () => this.getRegions()
-            },
-            {
-                id: 'current_district',
-                helpText: 'District',
-                requireNext: false,
-                group: 'person',
-                type: FieldType.TT_SELECT,
-                validation: (val: any) => Validation.required(val),
-                condition: () => this.editConditionCheck(this.addressAttributes),
-                options: (form: any) => this.getDistricts(form.current_region.other.id)
-            },
-            {
-                id: 'current_traditional_authority',
-                helpText: 'Current TA',
-                requireNext: false,
-                group: 'person',
-                type: FieldType.TT_SELECT,
-                condition: () => this.editConditionCheck(this.addressAttributes),
-                validation: (val: any) => Validation.required(val),
-                options: (form: any) => this.getTraditionalAuthorities(form.current_district.other.id)
-            },
-            {
-                id: 'current_village',
-                helpText: 'Current Village',
-                group: 'person',
-                requireNext: false,
-                type: FieldType.TT_SELECT,
-                condition: () => this.editConditionCheck(this.addressAttributes),
-                validation: (val: any) => Validation.required(val),
-                options: (form: any) => this.getVillages(form.current_traditional_authority.other.id)
-            },
-            {
-                id: 'landmark',
-                helpText: 'Closest Landmark or Plot Number',
-                group: 'person',
-                type: FieldType.TT_SELECT,
-                condition: () => this.editConditionCheck(),
-                validation: (val: any) => Validation.required(val),
-                options: () => this.mapToOption([
-                    'Catholic Church',
-                    'CCAP',
-                    'Seventh Day',
-                    'Mosque',
-                    'Primary School',
-                    'Borehole',
-                    'Secondary School',
-                    'College',
-                    'Market',
-                    'Football Ground',
-                    'Other'
-                ]),
-            },
-            {
-                id: 'cell_phone_number',
-                helpText: 'Cell phone number',
-                group: 'person',
-                type: FieldType.TT_NUMBER,
-                preset: this.getFieldPreset('cell_phone_number'),
-                condition: () => this.editConditionCheck(['cell_phone_number']),
-                validation: (val: any) => {
-                    if (val && val.value.match(/Unknown/i)) return
-
-                    return Validation.isMWPhoneNumber(val)
-                } 
-            },
-            {
-                id: 'patient_type',
-                helpText: 'Type of patient',
-                group: 'person',
-                type: FieldType.TT_SELECT,
-                condition: () => this.editConditionCheck(['patient_type']) && this.showPatientType,
-                validation: (val: any) => Validation.required(val),
-                options: () => this.mapToOption([
-                    'New patient',
-                    'External consultation',
-                ])
-            },
-            {
-                id: 'location',
-                helpText: 'Please select facility name',
-                type: FieldType.TT_SELECT,
-                group: 'person',
-                validation: (val: any) => Validation.required(val),
-                condition: (form: any) => this.editConditionCheck(['location']) && this.showPatientType && form.patient_type.label === 'External consultation',  
-                options: (_, filter='') => this.getFacilities(filter),
-                config: {
-                    showKeyboard: true,
-                    isFilterDataViaApi: true
+            condition: (form: any) => this.editConditionCheck(['person_regiment_id']) && form.occupation && form.occupation.value.match(/MDF/i),
+            validation: (val: any) => Validation.required(val)
+        }
+    },
+    rankField(): Field {
+        return {
+            id: 'rank',
+            helpText: 'Rank',
+            type: FieldType.TT_SELECT,
+            validation: (val: any) => Validation.required(val),
+            computedValue: ({value}: Option) => ({
+                personAttributes: {
+                    'person_attribute_type_id': 36, 
+                    'value': value
                 }
-            },
-            {
-                id: 'occupation',
-                helpText: 'Occupation',
-                type: FieldType.TT_SELECT,
-                group: 'person_attributes',
-                condition: () => this.editConditionCheck(['occupation']) && this.isMilitarySite,
-                validation: (val: any) => Validation.required(val),
-                options: () => this.mapToOption([
-                    'MDF Reserve',
-                    'MDF Retired',
-                    'Civilian'
-                ])
-            },
-            {
-                id: 'person_regiment_id',
-                helpText: 'Regiment ID',
-                type: FieldType.TT_TEXT,
-                group: 'person_attributes',
-                computedValue: ({value}: Option) => {
-                    return {
-                        personAttributes: {
-                            'person_attribute_type_id': 35, 
-                            'value': value
-                        }
-                    }
-                },
-                condition: (form: any) => this.editConditionCheck(['person_regiment_id']) && form.occupation && form.occupation.value.match(/MDF/i),
-                validation: (val: any) => Validation.required(val), 
-            },
-            ...generateDateFields({
-                id: 'person_date_joined_military',
-                helpText: 'Joined Military',
-                required: true,
-                condition: (form: any) =>  this.editConditionCheck([
-                    'year_person_date_joined_military', 
-                    'month_person_date_joined_military', 
-                    'day_person_date_joined_military'
-                ]) && form.occupation && form.occupation.value.match(/MDF/i),
-                minDate: () => HisDate.estimateDateFromAge(100),
-                maxDate: () => WorkflowService.getSessionDate(),
-                estimation: {
-                    allowUnknown: false
-                },
-                computeValue: (date: string) => ({ 
-                    date,
-                    personAttributes : {
-                        'person_attribute_type_id': 37, 
-                        'value': date
-                    }
-                 })
             }),
-            {
-                id: 'rank',
-                helpText: 'Rank',
-                type: FieldType.TT_SELECT,
-                group: 'person_attributes',
-                validation: (val: any) => Validation.required(val),
-                computedValue: ({value}: Option) => {
-                    return {
-                        personAttributes: {
-                            'person_attribute_type_id': 36, 
-                            'value': value
-                        }
-                    }
-                },
-                condition: (form: any) => this.editConditionCheck(['rank']) && form.occupation && form.occupation.value.match(/MDF/i),
-                options: () => this.mapToOption([
-                    'First Lieutenant',
-                    'Captain',
-                    'Major',
-                    'Lieutenant Colonel',
-                    'Colonel',
-                    'Brigadier General',
-                    'Lieutenant General',
-                    'General',
-                    'Private',
-                    'Corporal',
-                    'Lance Corporal',
-                    'Seargent',
-                    'Staff Seargent',
-                    'Warrant Officer class 1',
-                    'Warrant Officer class 2'
-                ])
+            condition: (form: any) => this.editConditionCheck(['rank']) && form.occupation && form.occupation.value.match(/MDF/i),
+            options: () => this.mapToOption([
+                'First Lieutenant',
+                'Captain',
+                'Major',
+                'Lieutenant Colonel',
+                'Colonel',
+                'Brigadier General',
+                'Lieutenant General',
+                'General',
+                'Private',
+                'Corporal',
+                'Lance Corporal',
+                'Seargent',
+                'Staff Seargent',
+                'Warrant Officer class 1',
+                'Warrant Officer class 2'
+            ])
+        }
+    },
+    dateJoinedMilitaryFields(): Array<Field> {
+        return generateDateFields({
+            id: 'person_date_joined_military',
+            helpText: 'Joined Military',
+            required: true,
+            condition: (form: any) =>  this.editConditionCheck([
+                'year_person_date_joined_military', 
+                'month_person_date_joined_military', 
+                'day_person_date_joined_military'
+            ]) && form.occupation && form.occupation.value.match(/MDF/i),
+            minDate: () => HisDate.estimateDateFromAge(100),
+            maxDate: () => WorkflowService.getSessionDate(),
+            estimation: {
+                allowUnknown: false
             },
-            {
-                id: 'relationship',
-                helpText: 'Register guardian?',
-                type: FieldType.TT_SELECT,
-                group: 'person',
-                condition: () => this.editConditionCheck(),
-                validation: (val: any) => Validation.required(val),
-                options: () => this.mapToOption(['Yes', 'No'])
+            computeValue: (date: string) => ({ 
+                date, 
+                personAttributes : {
+                    'person_attribute_type_id': 37, 
+                    'value': date
+                }
+            })
+        })
+    },
+    relationshipField(): Field {
+        return {
+            id: 'relationship',
+            helpText: 'Register guardian?',
+            type: FieldType.TT_SELECT,
+            computedValue: (val: Option) => ({person: val.value}),
+            condition: () => this.editConditionCheck(['relationship']),
+            validation: (val: any) => Validation.required(val),
+            options: () => this.mapToOption(['Yes', 'No'])
+        }
+    },
+    personIndexField(): Field {
+        return {
+            id: 'edit_user',
+            helpText: 'Edit Demographics',
+            type: FieldType.TT_TABLE_VIEWER,
+            requireNext: false,
+            condition: () => this.editPerson != -1,
+            options: async () => {
+                const columns = ['Attributes', 'Values', 'Edit']
+                const editButton = (attribute: string) => ({ 
+                    name: 'Edit', 
+                    type: 'button',
+                    action: () => {
+                        this.activeField = attribute
+                        this.fieldComponent = this.activeField
+                    }
+                })
+                const rows = [
+                    ['Given Name', this.editPersonData.given_name, editButton('given_name')],
+                    ['Family Name', this.editPersonData.family_name, editButton('family_name')],
+                    ['Gender', this.editPersonData.gender,  editButton('gender')],
+                    ['Birthdate', this.editPersonData.birthdate,  editButton('year_birth_date')],
+                    ['Home district', this.editPersonData.home_district,  editButton('home_region')],
+                    ['Home TA', this.editPersonData.home_ta,  editButton('home_region')],
+                    ['Home Village', this.editPersonData.home_village,  editButton('home_region')],
+                    ['Current district',this.editPersonData.current_district, editButton('home_region')],
+                    ['Current T/A', this.editPersonData.current_ta, editButton('home_region')],
+                    ['Cell Phone Number', this.editPersonData.cell_phone_number, editButton('cell_phone_number')],
+                ]
+                return [{
+                    label: '',
+                    value: '',
+                    other: {
+                        columns, rows
+                    }
+                }]
+            },
+            config: {
+                hiddenFooterBtns: [
+                    'Clear'
+                ]
             }
-        ]
-    }
-  },
+        }
+    },
+  }
 })
 </script>
