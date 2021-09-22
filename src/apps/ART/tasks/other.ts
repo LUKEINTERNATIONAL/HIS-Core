@@ -226,6 +226,12 @@ export const PREFERENCES = {
             route: "/print/location",
           },
         ],
+        'Portal settings': [
+          {
+            name: "Portal settings",
+            route: "/portal/config",
+          },
+        ],
         'Data Management': [
           {
             name: "Cohort / disaggregated",

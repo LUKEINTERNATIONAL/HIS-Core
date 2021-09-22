@@ -61,7 +61,7 @@
       <ion-toolbar>
         <ion-row>
           <ion-col>
-            <ion-button color="danger left" size="large" router-link="/login"
+            <ion-button color="danger left" size="large" @click="signOut"
               >Logout</ion-button
             >
           </ion-col>
@@ -215,6 +215,15 @@ export default defineComponent({
         this.$router.push('/patients/confirm?patient_barcode='+patientBarcode);
       }
     },
+    async signOut() {
+      const portalStatus = await GlobalPropertyService.get('portal.enabled');
+      if(portalStatus === "true") {
+        const portalLocation = await GlobalPropertyService.get('portal.properties');
+        window.location = portalLocation;
+      }else {
+        this.$router.push('/login')
+      }
+    }
   },
   mounted(){
     const app = HisApp.getActiveApp()
