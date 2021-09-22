@@ -31,8 +31,18 @@ export default defineComponent({
     },
     activated(){
         this.$emit('onFieldActivated', this)
+        this.setDefaultValue()
     },
     methods: {
+        setDefaultValue() {
+            if (this.defaultValue) {
+                const defaults = this.defaultValue(this.fdata, this.cdata)
+                if (defaults){
+                    this.value = defaults.value
+                    this.$emit('onValue', defaults)
+                }
+            }
+        },
         async keypress(text: any){
             this.value = handleVirtualInput(text, '')
             this.$emit('onValue', { label: this.value, value: this.value })

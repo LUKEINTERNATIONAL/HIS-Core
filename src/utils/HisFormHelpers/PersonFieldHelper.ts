@@ -57,7 +57,6 @@ export default {
             id: 'gender',
             helpText: 'Gender',
             type: FieldType.TT_SELECT,
-            requireNext: false,
             computedValue: (val: Option) => ({person: val.value}),
             validation: (val: any) => Validation.required(val),
             options: () => ([

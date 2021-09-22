@@ -18,7 +18,6 @@
 import { defineComponent } from 'vue'
 import { Option } from '../Forms/FieldInterface'
 import SelectMixin from "@/components/FormElements/SelectMixin.vue"
-import { find } from "lodash"
 
 export default defineComponent({
     name: "HisSelect",
@@ -29,13 +28,17 @@ export default defineComponent({
     async activated() {
         this.$emit('onFieldActivated', this)
         this.listData = await this.options(this.fdata)
-        if (this.preset) {
-            const found = find(this.listData, {label: this.preset.label})
-
-            if (found) this.onselect(found)
-        }
+        await this.setDefaultValue()
     },
     methods: {
+        async setDefaultValue() {
+            if(this.defaultValue) {
+                const defaults: Option = await this.defaultValue(this.fdata, this.cdata, this.listData)
+                if (defaults) {
+                    this.onselect(defaults)
+                }
+            }
+        },
         async onselect(item: Option) {
             this.selected = item.label
             if (this.onValue) {

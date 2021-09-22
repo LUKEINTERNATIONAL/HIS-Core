@@ -4,6 +4,7 @@
     </view-port>
     <his-keyboard :kbConfig="keyboard" :onKeyPress="keypress" :disabled="false"> </his-keyboard>
 </template>
+
 <script lang="ts">
 import { defineComponent } from 'vue'
 import BaseInput from "@/components/FormElements/BaseTextInput.vue"
@@ -22,8 +23,18 @@ export default defineComponent({
     }),
     activated(){
         this.$emit('onFieldActivated', this)
+        this.setDefaultValue()
     },
     methods: {
+        setDefaultValue() {
+            if (this.defaultValue) {
+                const defaults = this.defaultValue(this.fdata, this.cdata)
+                if (defaults){
+                    this.value = defaults.value
+                    this.$emit('onValue', defaults)
+                }
+            }
+        },
         onKbValue(text: any) { 
             this.value = text
         },

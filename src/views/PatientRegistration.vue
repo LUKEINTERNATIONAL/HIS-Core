@@ -232,20 +232,24 @@ export default defineComponent({
             const val = this.presets[attr]
             return { label: val, value: val }
         }
+        return { label: '', value: ''}
     },
     givenNameField(): Field {
-        const givenName: Field = PersonField.getGivenNameField()
-        givenName.condition = () => this.editConditionCheck(['given_name'])
-        return givenName
+        const name: Field = PersonField.getGivenNameField()
+        name.condition = () => this.editConditionCheck(['given_name'])
+        name.defaultValue = () => this.getFieldPreset('given_name')
+        return name
     },
     familyNameField(): Field {
-        const familyName: Field = PersonField.getFamilyNameField()
-        familyName.condition = () => this.editConditionCheck(['family_name'])
-        return familyName
+        const name: Field = PersonField.getFamilyNameField()
+        name.condition = () => this.editConditionCheck(['family_name'])
+        name.defaultValue = () => this.getFieldPreset('family_name')
+        return name
     },
     genderField(): Field {
         const gender: Field = PersonField.getGenderField()
         gender.condition = () => this.editConditionCheck(['gender'])
+        gender.defaultValue = () => this.getFieldPreset('gender')
         return gender
     },
     dobFields(): Array<Field> {
@@ -256,14 +260,14 @@ export default defineComponent({
         return generateDateFields(dobConfig)
     },
     homeRegionField(): Field {
-        const homeRegion: Field = PersonField.getHomeRegionField()
-        homeRegion.condition = () => this.editConditionCheck(this.addressAttributes)
-        return homeRegion
+        const region: Field = PersonField.getHomeRegionField()
+        region.condition = () => this.editConditionCheck(this.addressAttributes)
+        return region
     },
     homeDistrictField(): Field {
-        const homeDistrict: Field = PersonField.getHomeDistrictField()
-        homeDistrict.condition = () => this.editConditionCheck(this.addressAttributes)
-        return homeDistrict
+        const district: Field = PersonField.getHomeDistrictField()
+        district.condition = () => this.editConditionCheck(this.addressAttributes)
+        return district
     },
     homeTAField(): Field {
         const homeTA: Field = PersonField.getHomeTaField()
@@ -298,6 +302,7 @@ export default defineComponent({
     cellPhoneField(): Field {
         const cellPhone: Field = PersonField.getCellNumberField()
         cellPhone.condition = () => this.editConditionCheck(['cell_phone_number'])
+        cellPhone.defaultValue = () => this.getFieldPreset('cell_phone_number')
         return cellPhone
     },
     facilityLocationField(): Field {
