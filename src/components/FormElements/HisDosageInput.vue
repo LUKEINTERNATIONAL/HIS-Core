@@ -44,21 +44,10 @@ import { modalController } from '@ionic/vue'
 import { Option } from '@/components/Forms/FieldInterface'
 import KeyPad from '../Keyboard/HisKeypad.vue'
 import { find } from 'lodash'
+import FieldMixinVue from './FieldMixin.vue'
 export default defineComponent({
   components: { ViewPort },
-  props: {
-    fdata: {
-        type: Object as PropType<Record<string, any>>,
-        required: true
-    },
-    options: {
-        type: Function,
-        required: true
-    },
-    clear: {
-        type: Boolean
-    }
-  },
+  mixins: [FieldMixinVue],
   data: () => ({
     listData: [] as any
   }),

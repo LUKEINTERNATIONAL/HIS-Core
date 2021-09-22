@@ -56,20 +56,13 @@
   </view-port>
 </template>
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 import ViewPort from "@/components/DataViews/ViewPort.vue"
+import FieldMixinVue from './FieldMixin.vue'
+
 export default defineComponent({
    components: { ViewPort },
-   props: {
-       options: {
-            type: Function,
-            required: true
-       },
-       fdata: {
-            type: Object as PropType<Record<string, any>>,
-            required: true
-       }
-   },
+   mixins: [FieldMixinVue],
    data: () => ({
       stats: {
         prevWeight: '-' as string,

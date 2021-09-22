@@ -38,15 +38,11 @@ import { IonGrid, IonCol, IonRow } from "@ionic/vue";
 import { DatePicker } from "v-calendar";
 import { Service } from "@/services/service";
 import HisDate from "@/utils/Date"
+import FieldMixinVue from "./FieldMixin.vue";
 
 export default defineComponent({
   components: { DatePicker, ViewPort, IonGrid, IonCol, IonRow },
-  props: {
-    onValue: {
-      type: Function,
-      required: false
-    }
-  },
+  mixins: [FieldMixinVue],
   watch: {
     date: {
       async handler(date: string) {

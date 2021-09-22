@@ -86,25 +86,18 @@
   </view-port>
 </template>
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 import ViewPort from "@/components/DataViews/ViewPort.vue";
 import { IonGrid, IonCol, IonRow } from "@ionic/vue";
 import { Calendar } from "v-calendar";
 import HisDate from "@/utils/Date";
 import { AppointmentService } from "@/apps/ART/services/appointment_service";
 import { GlobalPropertyService } from "@/services/global_property_service";
+import FieldMixinVue from "./FieldMixin.vue";
+
 export default defineComponent({
   components: { ViewPort, Calendar, IonGrid, IonCol, IonRow },
-  props: {
-    options: {
-      type: Function,
-      required: true,
-    },
-    fdata: {
-      type: Object as PropType<Record<string, any>>,
-      required: true,
-    },
-  },
+  mixins: [FieldMixinVue],
   watch: {
     startDate: {
       async handler(params: any) {

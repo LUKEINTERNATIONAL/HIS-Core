@@ -21,24 +21,14 @@
 import { defineComponent } from 'vue'
 import { Option } from "@/components/Forms/FieldInterface"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
+import FieldMixinVue from './FieldMixin.vue'
+
 export default defineComponent({
     components: { ViewPort },
+    mixins: [FieldMixinVue],
     data: () => ({
         listData: [] as Array<Option>
     }),
-    props: {
-        fdata: {
-            type: Object,
-            required: true
-        },
-        config: {
-            type: Object
-        },
-        options: {
-            type: Function,
-            required: true
-        }
-    },
     computed: {
         titleItems(): Array<Option> {
             return this.listData.filter((item) => item.other?.type === 'title-section')

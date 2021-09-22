@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 import BaseInput from "@/components/FormElements/BaseTextInput.vue"
 import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
@@ -28,38 +28,17 @@ import { IonInput, IonList, IonItem, IonLabel} from "@ionic/vue"
 import { Option } from '../Forms/FieldInterface'
 import { QWERTY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
+import FieldMixinVue from './FieldMixin.vue'
 
 export default defineComponent({
     components: { IonInput, BaseInput, HisKeyboard, ViewPort, IonList, IonItem, IonLabel },
+    mixins: [FieldMixinVue],
     data: ()=>({
         value: '',
         initalKeyboardName: '' as string,
         keyboard: {} as Array<any>,
         listData: [] as Array<Option>
     }),
-    props: {
-        fdata: {
-            type: Object,
-            required: true
-        },
-        preset: {
-            type: Object as PropType<Option>,
-            required: false
-        },
-        options: {
-            type: Function,
-            required: false,
-        },
-        onValue: {
-            type: Function
-        },
-        config: {
-            type: Object,
-        },
-        clear: {
-            type: Boolean
-        },
-    },
     computed: {
         inputType(): string {
             if (this.config && 'inputType' in this.config) {
@@ -69,10 +48,7 @@ export default defineComponent({
         }
     },
     created() {
-        if (this.preset) this.onselect(this.preset)
-
         this.keyboard = this.config?.customKeyboard || QWERTY
-        
         if (this.config) {
             if (this.config.initialKb) {
                 this.initalKeyboardName = this.config.initialKb

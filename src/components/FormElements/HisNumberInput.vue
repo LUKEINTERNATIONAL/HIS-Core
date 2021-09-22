@@ -11,20 +11,17 @@ import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
 import { NUMBERS_ONLY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
+import FieldMixinVue from './FieldMixin.vue'
 
 export default defineComponent({
     components: { BaseInput, HisKeyboard, ViewPort },
+    mixins: [FieldMixinVue],
     data: ()=>({ 
         value: '',
         keyboard: NUMBERS_ONLY,
     }),
     activated(){
         this.$emit('onFieldActivated', this)
-    },
-    props: {
-        clear: {
-            type: Boolean
-        }
     },
     methods: {
         onKbValue(text: any) { 

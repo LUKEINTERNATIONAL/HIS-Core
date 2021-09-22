@@ -12,11 +12,14 @@ import handleVirtualInput from "@/components/Keyboard/KbHandler"
 import { MONTHLY_DAYS } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from '@/components/DataViews/ViewPort.vue'
 import { MONTHLY_DAYS_LO } from '../Keyboard/KbLayouts'
+import FieldMixinVue from './FieldMixin.vue'
+
 export default defineComponent({
     components: { BaseInput, HisKeyboard, ViewPort },
+    mixins: [FieldMixinVue],
     data: ()=>({ 
         value: '',
-        keyboard: MONTHLY_DAYS,
+        keyboard: MONTHLY_DAYS
     }),
     created() {
         if (this.config  && this.config.keyboardActions) {
@@ -28,14 +31,6 @@ export default defineComponent({
     },
     activated(){
         this.$emit('onFieldActivated', this)
-    },
-    props: {
-        clear: {
-            type: Boolean
-        },
-        config: {
-            type: Object
-        }
     },
     methods: {
         async keypress(text: any){
