@@ -12,7 +12,7 @@
       <ion-col size="2"><ion-button @click="printLabel(item.value)"> {{item.label}} </ion-button></ion-col>
       <ion-col size="2"><p>{{item.data.weight}}</p> </ion-col>
       <ion-col size="2"><p>{{item.data.regimen}}</p> </ion-col>
-      <ion-col size="2"><p>0%</p></ion-col>
+      <ion-col size="2"><p class="small">{{formatAdherence(item.data.adherence)}}</p></ion-col>
       <ion-col size="2"><p>{{item.data.outcome}}</p></ion-col>
       <ion-col size="2"><ion-button color="success" @click="showMore(item.value)">show more</ion-button></ion-col>
     </ion-row>
@@ -21,6 +21,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { IonGrid, IonRow, IonCol, IonButton } from "@ionic/vue";
+import { isArray } from "lodash";
 export default defineComponent({
   name: "HisResultCard",
   components: {
@@ -44,7 +45,24 @@ export default defineComponent({
     },
     showMore(date: any) {
       this.$emit("onDetails", date);
+    },
+    formatAdherence(vals: any) {
+      console.log(vals);
+      if (isArray(vals)) {
+            const f = [...vals];
+            if (isArray(f)) {
+              let j = "";
+              f.forEach((element) => {
+                j += `${element.join(":")} (%), `;
+              });
+              return j;
+            }
+            return f;
+          } else {
+            return vals;
+          }
     }
+
   },
 });
 </script>
@@ -66,5 +84,8 @@ export default defineComponent({
 }
 ion-col {
   text-align: center;
+} 
+.small {
+  font-size: 1.1vw;
 }
 </style>

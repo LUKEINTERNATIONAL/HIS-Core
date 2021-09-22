@@ -254,8 +254,13 @@ export default defineComponent({
     FormData(data: any) {
       return Object.keys(data).map((d) => {
         const display: any = data[d];
-
-        const formatD: any = (vals: any) => {
+        return {
+          label: this.camelCase(d),
+          value: this.joinData(display),
+        };
+      });
+    },
+    joinData(vals: any) {
           if (isArray(vals)) {
             const f = [...vals];
             if (isArray(f)) {
@@ -269,12 +274,6 @@ export default defineComponent({
           } else {
             return vals;
           }
-        };
-        return {
-          label: this.camelCase(d),
-          value: formatD(display),
-        };
-      });
     },
     camelCase(val: string) {
       const label = val.split("_");
