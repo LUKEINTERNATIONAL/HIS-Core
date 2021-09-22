@@ -216,6 +216,7 @@ export default defineComponent({
       }
     },
     async signOut() {
+      sessionStorage.clear();
       const portalStatus = await GlobalPropertyService.get('portal.enabled');
       if(portalStatus === "true") {
         const portalLocation = await GlobalPropertyService.get('portal.properties');
