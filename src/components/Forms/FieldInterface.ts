@@ -22,7 +22,7 @@ export interface Field {
     group?: string;  // Categories fields with related data
     computedValue?: Function;
     preset?: Option | Record<string, any>;
-    defaultValue?: (fdata?: any, cdata?: any, other?: any) => Option | Promise<Option> | Promise<Option[]> | Array<Option>;
+    defaultValue?: (fdata?: any, cdata?: any, other?: any) => string | Option | Promise<Option> | Promise<Option[]> | Array<Option>;
     condition?: Function;
     validation?: Function;
     beforeNext?: Function;

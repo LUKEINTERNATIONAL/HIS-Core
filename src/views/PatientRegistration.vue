@@ -227,29 +227,30 @@ export default defineComponent({
         };
         return ObservationService.create(obs);
     },
-    getFieldPreset(attr: string) {
-        if (attr in this.presets) {
-            const val = this.presets[attr]
-            return { label: val, value: val }
-        }
-        return { label: '', value: ''}
-    },
     givenNameField(): Field {
         const name: Field = PersonField.getGivenNameField()
         name.condition = () => this.editConditionCheck(['given_name'])
-        name.defaultValue = () => this.getFieldPreset('given_name')
+        name.defaultValue = () => this.presets.given_name
         return name
     },
     familyNameField(): Field {
         const name: Field = PersonField.getFamilyNameField()
         name.condition = () => this.editConditionCheck(['family_name'])
-        name.defaultValue = () => this.getFieldPreset('family_name')
+        name.defaultValue = () => this.presets.family_name
         return name
     },
     genderField(): Field {
         const gender: Field = PersonField.getGenderField()
         gender.condition = () => this.editConditionCheck(['gender'])
-        gender.defaultValue = () => this.getFieldPreset('gender')
+        gender.defaultValue = () => {
+            if (!this.presets.gender) {
+                return ''
+            }
+            if (this.presets.gender === 'M') {
+                return {label: 'Male', value: 'M'}
+            }
+            return {label: 'Female', value: 'F'}
+        }
         return gender
     },
     dobFields(): Array<Field> {
@@ -302,7 +303,7 @@ export default defineComponent({
     cellPhoneField(): Field {
         const cellPhone: Field = PersonField.getCellNumberField()
         cellPhone.condition = () => this.editConditionCheck(['cell_phone_number'])
-        cellPhone.defaultValue = () => this.getFieldPreset('cell_phone_number')
+        cellPhone.defaultValue = () => this.presets.cell_phone_number
         return cellPhone
     },
     facilityLocationField(): Field {

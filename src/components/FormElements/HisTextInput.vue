@@ -28,6 +28,7 @@ import { Option } from '../Forms/FieldInterface'
 import { QWERTY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue'
+import { isPlainObject } from 'lodash'
 
 export default defineComponent({
     components: { IonInput, BaseInput, HisKeyboard, ViewPort, IonList, IonItem, IonLabel },
@@ -61,10 +62,15 @@ export default defineComponent({
     methods: {
         async setDefaultValue() {
             if (this.defaultValue) {
-                const defaults: Option = await this.defaultValue(this.fdata, this.cdata)
+                const defaults: any = await this.defaultValue(this.fdata, this.cdata)
                 if (defaults) {
-                    this.value = defaults.value.toString()
-                    this.emitValue(defaults)
+                    if (isPlainObject(defaults)) {
+                        this.emitValue(defaults)
+                        this.value = defaults.value.toString()
+                    } else {
+                        this.value = defaults
+                        this.emitValue({label: defaults, value: defaults})
+                    }
                 }
             }
         },
