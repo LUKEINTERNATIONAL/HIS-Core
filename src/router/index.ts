@@ -18,6 +18,7 @@ import HisApps from '@/apps/his_apps';
 import SessionDate from "@/views/SessionDate.vue"
 import SystemUsage from "@/views/SystemUsage.vue"
 import PrintLocation from "@/views/PrintLocation.vue"
+import PortalSettings from "@/views/PortalSettings.vue"
 import HostConfig from '@/views/HostConfig.vue'
 import ProgramManagement from "@/views/ProgramManagement.vue"
 import LabResults from "@/views/LabResults.vue"
@@ -144,6 +145,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/lab/results/:patient_id',
     name: 'Lab Results',
     component: LabResults
+  },
+  {
+    path: '/portal/config',
+    name: 'Portal settings',
+    component: PortalSettings
   }
 ]
 
