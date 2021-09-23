@@ -468,7 +468,7 @@ export default defineComponent({
                     ['Given Name', this.editPersonData.given_name, editButton('given_name')],
                     ['Family Name', this.editPersonData.family_name, editButton('family_name')],
                     ['Gender', this.editPersonData.gender,  editButton('gender')],
-                    ['Birthdate', this.editPersonData.birthdate,  editButton('year_birth_date')],
+                    ['Birthdate', HisDate.toStandardHisDisplayFormat(this.editPersonData.birthdate),  editButton('year_birth_date')],
                     ['Home district', this.editPersonData.home_district,  editButton('home_region')],
                     ['Home TA', this.editPersonData.home_ta,  editButton('home_region')],
                     ['Home Village', this.editPersonData.home_village,  editButton('home_region')],
