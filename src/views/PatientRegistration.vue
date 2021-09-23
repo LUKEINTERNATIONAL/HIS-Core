@@ -7,6 +7,7 @@
     @onFinish="onFinish"
  />
 </template>
+
 <script lang="ts">
 import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements"
@@ -35,13 +36,17 @@ export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     skipSummary: false,
-    addressAttributes: [
-        'home_region', 
-        'home_district', 
-        'home_traditional_authority', 
-        'home_village',
+    currentAddressAttributes: [
+        'current_region',
         'current_district',
-        'current_traditional_authority',
+        'current_village',
+        'current_traditional_authority'
+    ] as Array<string>,
+    homeAddressAttributes: [
+        'home_region',
+        'home_district',
+        'home_traditional_authority',
+        'home_village'
     ] as Array<string>,  
     editPersonData: {} as any,
     editPerson: -1 as number,
@@ -99,6 +104,9 @@ export default defineComponent({
         fields.push(this.relationshipField())
         return fields
     },
+    isEditMode() {
+        return this.editPerson >= 1
+    },
     async initEditMode(personId: number) {
         this.editPerson = personId
         const person = await Patientservice.findByID(this.editPerson)
@@ -117,10 +125,10 @@ export default defineComponent({
             'gender': patient.getGender(),
             'birthdate': patient.getBirthdate(),
             'home_district': ancestryDistrict,
-            'home_ta': ancestryTA,
+            'home_traditional_authority': ancestryTA,
             'home_village': ancestryVillage,
             'current_district': currentDistrict,
-            'current_ta': currentTA,
+            'current_traditional_authority': currentTA,
             'cell_phone_number': patient.getPhoneNumber(),
         }
         this.presets = this.editPersonData
@@ -128,7 +136,7 @@ export default defineComponent({
     },
     async onFinish(_: Record<string, Option> | Record<string, null>, computedData: any) {
         try {
-            if (this.editPerson <= 0) {
+            if (!this.isEditMode()) {
                 return this.create(computedData)
             } else {
                 return this.update(computedData)
@@ -172,7 +180,7 @@ export default defineComponent({
         this.fieldComponent = 'edit_user'
     },
     editConditionCheck(attributes=[] as Array<string>): boolean {
-        if (this.editPerson > 0 && !attributes.includes(this.activeField)) {
+        if (this.isEditMode() && !attributes.includes(this.activeField)) {
             return false
         }
         return true
@@ -241,6 +249,7 @@ export default defineComponent({
     },
     genderField(): Field {
         const gender: Field = PersonField.getGenderField()
+        gender.requireNext = this.isEditMode()
         gender.condition = () => this.editConditionCheck(['gender'])
         gender.defaultValue = () => {
             if (this.presets.gender) {
@@ -263,49 +272,49 @@ export default defineComponent({
     },
     homeRegionField(): Field {
         const region: Field = PersonField.getHomeRegionField()
-        region.condition = () => this.editConditionCheck(this.addressAttributes)
+        region.condition = () => this.editConditionCheck(this.homeAddressAttributes)
         return region
     },
     homeDistrictField(): Field {
         const district: Field = PersonField.getHomeDistrictField()
-        district.condition = () => this.editConditionCheck(this.addressAttributes)
+        district.condition = () => this.editConditionCheck(this.homeAddressAttributes)
         return district
     },
     homeTAField(): Field {
         const homeTA: Field = PersonField.getHomeTaField()
-        homeTA.condition = () => this.editConditionCheck(this.addressAttributes)
+        homeTA.condition = () => this.editConditionCheck(this.homeAddressAttributes)
         return homeTA
     },
     homeVillageField(): Field {
         const homeVillage: Field = PersonField.getHomeVillageField()
-        homeVillage.condition = () => this.editConditionCheck(this.addressAttributes)
+        homeVillage.condition = () => this.editConditionCheck(this.homeAddressAttributes)
         return homeVillage
     },
     currentRegionField(): Field {
         const currentRegion: Field = PersonField.getCurrentRegionField()
-        currentRegion.condition = () => this.editConditionCheck(this.addressAttributes)
+        currentRegion.condition = () => this.editConditionCheck(this.currentAddressAttributes)
         return currentRegion
     },
     currentDistrictField(): Field {
         const currentDistrict: Field = PersonField.getCurrentDistrictField()
-        currentDistrict.condition = () => this.editConditionCheck(this.addressAttributes)
+        currentDistrict.condition = () => this.editConditionCheck(this.currentAddressAttributes)
         return currentDistrict
     },
     currentTAField(): Field {
         const currentTA: Field = PersonField.getCurrentTAfield()
-        currentTA.condition = () => this.editConditionCheck(this.addressAttributes)
+        currentTA.condition = () => this.editConditionCheck(this.currentAddressAttributes)
         return currentTA
     },
     currentVillage(): Field {
         const currentVillage: Field = PersonField.getCurrentVillageField()
-        currentVillage.condition = () => this.editConditionCheck(this.addressAttributes)
+        currentVillage.condition = () => this.editConditionCheck(this.currentAddressAttributes)
         return currentVillage
     },
     cellPhoneField(): Field {
         const cellPhone: Field = PersonField.getCellNumberField()
         cellPhone.condition = () => this.editConditionCheck(['cell_phone_number'])
         cellPhone.defaultValue = () => this.presets.cell_phone_number
-        return cellPhone
+        return cellPhone 
     },
     facilityLocationField(): Field {
        const facility: Field = PersonField.getFacilityLocationField()
@@ -469,12 +478,12 @@ export default defineComponent({
                     ['Family Name', this.editPersonData.family_name, editButton('family_name')],
                     ['Gender', this.editPersonData.gender,  editButton('gender')],
                     ['Birthdate', HisDate.toStandardHisDisplayFormat(this.editPersonData.birthdate),  editButton('year_birth_date')],
-                    ['Home district', this.editPersonData.home_district,  editButton('home_region')],
-                    ['Home TA', this.editPersonData.home_ta,  editButton('home_region')],
-                    ['Home Village', this.editPersonData.home_village,  editButton('home_region')],
-                    ['Current district',this.editPersonData.current_district, editButton('home_region')],
-                    ['Current T/A', this.editPersonData.current_ta, editButton('home_region')],
                     ['Cell Phone Number', this.editPersonData.cell_phone_number, editButton('cell_phone_number')],
+                    ['Current district',this.editPersonData.current_district, editButton('current_region')],
+                    ['Current T/A', this.editPersonData.current_traditional_authority, editButton('current_region')],
+                    ['Home district', this.editPersonData.home_district, editButton('home_region')],
+                    ['Home TA', this.editPersonData.home_traditional_authority,  editButton('home_region')],
+                    ['Home Village', this.editPersonData.home_village,  editButton('home_region')],
                 ]
                 return [{
                     label: '',

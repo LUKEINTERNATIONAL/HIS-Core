@@ -34,7 +34,7 @@ export default defineComponent({
     methods: {
         async setDefaultValue() {
             if(this.defaultValue) {
-                const defaults: string = await this.defaultValue(this.fdata, this.cdata, this.listData)
+                const defaults: string = await this.defaultValue(this.fdata, this.cdata, this.selected)
                 if (defaults) {
                     const found = find(this.listData, {label: defaults}) || find(this.listData, {value: defaults}) 
                     if (found) {
