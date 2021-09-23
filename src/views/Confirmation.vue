@@ -109,6 +109,7 @@ import { alertAction } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
 import PatientAlerts from "@/services/patient_alerts"
 import HisDate from "@/utils/Date"
+import { PatientPrintoutService } from "@/services/patient_printout_service";
 export default defineComponent({
   name: "Home",
   components: {
@@ -208,6 +209,7 @@ export default defineComponent({
       }
     },
     parsePatient: async function(data: Patient) {
+        this.cards = [];
         const patient = new Patientservice(data);
         this.patientName = patient.getFullName();
         this.landmark = patient.getAttribute(19);
@@ -223,7 +225,7 @@ export default defineComponent({
         this.currentVillage = addresses.ancestryVillage;
         this.ARVNumber = patient.getPatientIdentifier(4);
         const ARVNumber = patient.getPatientIdentifier(4);
-        const NPID = patient.getPatientIdentifier(3);
+        const NPID = await this.getNPID(patient);
         this.cards.push({
           title: "PATIENT IDENTIFIERS",
           data: [
@@ -237,6 +239,7 @@ export default defineComponent({
             },
           ],
         });
+        
         await this.fetchAlerts()
           .then(this.fetchLabOrders)
           .then(this.fetchProgramInfo)
@@ -244,6 +247,32 @@ export default defineComponent({
 
           this.setOpen(false);
     },
+    async getNPID(patient: any) {
+      this.setOpen(false)
+      const NPID = patient.getPatientIdentifier(3)
+      if(NPID ==="") {
+          const f = await this.assignNHID(patient.getID());
+          this.printNHID();
+          return f.new_identifier.identifier;
+        }
+      this.setOpen(true)
+      return NPID;
+    },
+    async assignNHID(patientID: number) {
+      await alertAction("Patient was found BUT has no National ID.<br />The system is going to assign the patient with a new ID", [
+        {
+          text: "OK",
+          handler: async () => {
+            null
+          },
+        },
+      ]);
+      return await Patientservice.assignNHID(patientID);
+    },
+    async printNHID() {
+     const p = new PatientPrintoutService(this.patientID);
+     await p.printNidLbl()
+  },
     fetchAlerts: async function () {
       const sideEffects: Observation[] = await PatientAlerts.alertSideEffects(this.patientID)
       const displayData = {

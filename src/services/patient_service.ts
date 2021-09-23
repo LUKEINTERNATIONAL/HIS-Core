@@ -29,7 +29,9 @@ export class Patientservice extends Service {
     public static async findByID(patientId: number | string) {
         return super.getJson(`/patients/${patientId}`)
     }
-
+    public static async assignNHID(patientId: number | string) {
+        return super.postJson(`/patients/${patientId}/npid`, {});
+    }
     public static toPatient(json: string): Patient {
         return JSON.parse(json);
     }
