@@ -243,18 +243,19 @@ export default defineComponent({
         const gender: Field = PersonField.getGenderField()
         gender.condition = () => this.editConditionCheck(['gender'])
         gender.defaultValue = () => {
-            if (!this.presets.gender) {
-                return ''
+            if (this.presets.gender) {
+                if (this.presets.gender === 'M') {
+                    return {label: 'Male', value: 'M'}
+                }
+                return {label: 'Female', value: 'F'}
             }
-            if (this.presets.gender === 'M') {
-                return {label: 'Male', value: 'M'}
-            }
-            return {label: 'Female', value: 'F'}
+            return ''
         }
         return gender
     },
     dobFields(): Array<Field> {
         const dobConfig = PersonField.getDobConfig()
+        dobConfig.defaultValue = () => this.presets.birthdate
         dobConfig.condition = () => this.editConditionCheck([
             'year_birth_date', 'month_birth_date', 'day_birth_date'
         ])

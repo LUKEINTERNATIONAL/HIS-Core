@@ -20,6 +20,7 @@ export interface DateFieldInterface {
     condition?: Function;
     validation?: Function;
     required?: boolean;
+    defaultValue?: Function;
     minDate?(formData: any, computeForm: any): string;
     maxDate?(formData: any, computeForm: any): string;
     unload?(data: any, state: string, formData: any,  computeForm: any): void; 
@@ -73,6 +74,22 @@ function buildDate(dateConfig: any) {
 
 function formatDigit(s: string) {
     return parseInt(s) < 10 ? `0${s}` : s
+}
+
+async function getDefaultDate(field: DateFieldInterface, datePart: 'Year' | 'Month' | 'Day') {
+    if (field.defaultValue) {
+        const date = await field.defaultValue()
+        const [year, month, day] = date.split('-')
+        switch(datePart) {
+            case 'Year':
+                return year
+            case 'Month':
+                return parseInt(month)
+            case 'Day':
+                return parseInt(day)           
+        }
+    }
+    return ''
 }
 
 function onValidation(
@@ -186,11 +203,13 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
     dateConfig.day.id = field.id
     dateConfig.month.id = `month_${field.id}`
     dateConfig.year.id = `year_${field.id}`
+
     return [
         {
             id: dateConfig.year.id,
             helpText: `${field.helpText} Year`,
             type: FieldType.TT_NUMBER,
+            defaultValue: () => getDefaultDate(field, 'Year'),
             appearInSummary: () => false,
             condition: (f: any) => field.condition ? field.condition(f) : true,
             validation: (v: Option, f: any, c: any) => {
@@ -214,6 +233,7 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             id: dateConfig.month.id,
             helpText: `${field.helpText} Month`,
             type: FieldType.TT_SELECT,
+            defaultValue: () => getDefaultDate(field, 'Month'),
             appearInSummary: () => false,
             options: () => MonthOptions,
             condition: (f: any) => onCondition(field, f),
@@ -231,6 +251,7 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             id: dateConfig.day.id,
             helpText: `${field.helpText} Day`,
             type: FieldType.TT_MONTHLY_DAYS,
+            defaultValue: () => getDefaultDate(field, 'Day'),
             unload: (d: any, s: any, f: any, c: any) => {
                 if (field.unload) {
                     field.unload(d, s, f, c)

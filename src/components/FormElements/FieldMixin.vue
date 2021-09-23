@@ -26,7 +26,8 @@ export default defineComponent({
             required: true
         },
         clear: {
-            type: Boolean
+            type: Boolean,
+            required: true
         },
         options: {
             type: Function,

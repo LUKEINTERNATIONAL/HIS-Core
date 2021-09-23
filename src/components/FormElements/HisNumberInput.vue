@@ -13,6 +13,7 @@ import handleVirtualInput from "@/components/Keyboard/KbHandler"
 import { NUMBERS_ONLY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue'
+import { isPlainObject } from 'lodash'
 
 export default defineComponent({
     components: { BaseInput, HisKeyboard, ViewPort },
@@ -21,17 +22,16 @@ export default defineComponent({
         value: '',
         keyboard: NUMBERS_ONLY,
     }),
-    activated(){
+    async activated(){
         this.$emit('onFieldActivated', this)
-        this.setDefaultValue()
+        await this.setDefaultValue()
     },
     methods: {
-        setDefaultValue() {
+        async setDefaultValue() {
             if (this.defaultValue) {
-                const defaults = this.defaultValue(this.fdata, this.cdata)
-                if (defaults){
-                    this.value = defaults.value
-                    this.$emit('onValue', defaults)
+                const defaults = await this.defaultValue(this.fdata, this.cdata)
+                if (defaults) {
+                    this.value = defaults.toString()
                 }
             }
         },
