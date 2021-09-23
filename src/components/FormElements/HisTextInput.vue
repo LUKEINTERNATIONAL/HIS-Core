@@ -61,7 +61,7 @@ export default defineComponent({
     },
     methods: {
         async setDefaultValue() {
-            if (this.defaultValue) {
+            if (this.defaultValue && !this.value) {
                 const defaults: any = await this.defaultValue(this.fdata, this.cdata)
                 if (defaults) {
                     if (isPlainObject(defaults)) {

@@ -74,15 +74,6 @@ export default defineComponent({
     }
   },
   methods: {
-    setDefaultValue() {
-      if (this.defaultValue) {
-          const defaults = this.defaultValue(this.fdata, this.cdata)
-          if (defaults){
-            this.value = defaults
-            this.$emit('onValue', defaults)
-          }
-      }
-    },
     onselect(data: any): void {
       this.$emit("onValue", data);
     },

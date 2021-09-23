@@ -30,10 +30,7 @@ export default defineComponent({
         {
           id: "site_code",
           helpText: "Enter Site Code",
-          preset: {
-            label: val,
-            value: val,
-          },
+          defaultValue: () => val,
           type: FieldType.TT_TEXT,
           validation(value: any): null | Array<string> {
             return !value ? ["Value is required"] : null;

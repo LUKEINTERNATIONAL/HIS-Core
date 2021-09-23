@@ -36,7 +36,7 @@ export default defineComponent({
     },
     methods: {
         async setDefaultValue() {
-            if (this.defaultValue) {
+            if (this.defaultValue && !this.value) {
                 const defaults = await this.defaultValue(this.fdata, this.cdata)
                 if (defaults){
                     this.value = defaults

@@ -36,17 +36,15 @@ export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     skipSummary: false,
-    currentAddressAttributes: [
+    addressAttributes: [
+        'home_region',
+        'home_district',
+        'home_traditional_authority',
+        'home_village',
         'current_region',
         'current_district',
         'current_village',
         'current_traditional_authority'
-    ] as Array<string>,
-    homeAddressAttributes: [
-        'home_region',
-        'home_district',
-        'home_traditional_authority',
-        'home_village'
     ] as Array<string>,  
     editPersonData: {} as any,
     editPerson: -1 as number,
@@ -272,42 +270,42 @@ export default defineComponent({
     },
     homeRegionField(): Field {
         const region: Field = PersonField.getHomeRegionField()
-        region.condition = () => this.editConditionCheck(this.homeAddressAttributes)
+        region.condition = () => this.editConditionCheck(this.addressAttributes)
         return region
     },
     homeDistrictField(): Field {
         const district: Field = PersonField.getHomeDistrictField()
-        district.condition = () => this.editConditionCheck(this.homeAddressAttributes)
+        district.condition = () => this.editConditionCheck(this.addressAttributes)
         return district
     },
     homeTAField(): Field {
         const homeTA: Field = PersonField.getHomeTaField()
-        homeTA.condition = () => this.editConditionCheck(this.homeAddressAttributes)
+        homeTA.condition = () => this.editConditionCheck(this.addressAttributes)
         return homeTA
     },
     homeVillageField(): Field {
         const homeVillage: Field = PersonField.getHomeVillageField()
-        homeVillage.condition = () => this.editConditionCheck(this.homeAddressAttributes)
+        homeVillage.condition = () => this.editConditionCheck(this.addressAttributes)
         return homeVillage
     },
     currentRegionField(): Field {
         const currentRegion: Field = PersonField.getCurrentRegionField()
-        currentRegion.condition = () => this.editConditionCheck(this.currentAddressAttributes)
+        currentRegion.condition = () => this.editConditionCheck(this.addressAttributes)
         return currentRegion
     },
     currentDistrictField(): Field {
         const currentDistrict: Field = PersonField.getCurrentDistrictField()
-        currentDistrict.condition = () => this.editConditionCheck(this.currentAddressAttributes)
+        currentDistrict.condition = () => this.editConditionCheck(this.addressAttributes)
         return currentDistrict
     },
     currentTAField(): Field {
         const currentTA: Field = PersonField.getCurrentTAfield()
-        currentTA.condition = () => this.editConditionCheck(this.currentAddressAttributes)
+        currentTA.condition = () => this.editConditionCheck(this.addressAttributes)
         return currentTA
     },
     currentVillage(): Field {
         const currentVillage: Field = PersonField.getCurrentVillageField()
-        currentVillage.condition = () => this.editConditionCheck(this.currentAddressAttributes)
+        currentVillage.condition = () => this.editConditionCheck(this.addressAttributes)
         return currentVillage
     },
     cellPhoneField(): Field {
@@ -479,8 +477,8 @@ export default defineComponent({
                     ['Gender', this.editPersonData.gender,  editButton('gender')],
                     ['Birthdate', HisDate.toStandardHisDisplayFormat(this.editPersonData.birthdate),  editButton('year_birth_date')],
                     ['Cell Phone Number', this.editPersonData.cell_phone_number, editButton('cell_phone_number')],
-                    ['Current district',this.editPersonData.current_district, editButton('current_region')],
-                    ['Current T/A', this.editPersonData.current_traditional_authority, editButton('current_region')],
+                    ['Current district',this.editPersonData.current_district, editButton('home_region')],
+                    ['Current T/A', this.editPersonData.current_traditional_authority, editButton('home_region')],
                     ['Home district', this.editPersonData.home_district, editButton('home_region')],
                     ['Home TA', this.editPersonData.home_traditional_authority,  editButton('home_region')],
                     ['Home Village', this.editPersonData.home_village,  editButton('home_region')],
