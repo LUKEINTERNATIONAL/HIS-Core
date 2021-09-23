@@ -30,19 +30,11 @@ import ViewPort from "@/components/DataViews/ViewPort.vue";
 import { modalController } from "@ionic/vue";
 import LabOrderModal from "@/components/DataViews/LabOrderModal.vue"
 import { isEmpty } from "lodash";
+import FieldMixinVue from "./FieldMixin.vue";
 
 export default defineComponent({
   components: { ViewPort },
-  props: {
-    options: {
-      type: Function,
-      required: true,
-    },
-    fdata: {
-      type: Object as PropType<Record<string, any>>,
-      required: true,
-    },
-  },
+  mixins: [FieldMixinVue],
   data: () => ({
     rows: [] as Array<any>,
   }),

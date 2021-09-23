@@ -50,25 +50,11 @@ import { defineComponent } from 'vue'
 import { Option } from '../Forms/FieldInterface'
 import { isEmpty } from 'lodash'
 import HisDate from "@/utils/Date"
+import FieldMixinVue from './FieldMixin.vue'
 
 export default defineComponent({
     name: "HisSelect",
-    props: {
-        fdata: {
-            type: Object,
-            required: true
-        },
-        onValue: {
-            type: Function
-        },
-        config: {
-            type: Object
-        },
-        options: {
-            type: Function,
-            required: true
-        }
-    },
+    mixins: [FieldMixinVue],
     watch: {
         clear(val: boolean){ 
            if (val) {

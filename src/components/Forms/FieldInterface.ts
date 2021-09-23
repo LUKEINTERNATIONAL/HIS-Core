@@ -22,6 +22,7 @@ export interface Field {
     group?: string;  // Categories fields with related data
     computedValue?: Function;
     preset?: Option | Record<string, any>;
+    defaultValue?: (fdata?: any, cdata?: any, other?: any) => any;
     condition?: Function;
     validation?: Function;
     beforeNext?: Function;

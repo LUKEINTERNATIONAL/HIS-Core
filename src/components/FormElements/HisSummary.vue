@@ -14,25 +14,14 @@
 import { defineComponent } from 'vue'
 import { Option } from "@/components/Forms/FieldInterface"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
+import FieldMixinVue from './FieldMixin.vue'
+
 export default defineComponent({
     components: { ViewPort },
+    mixins: [FieldMixinVue],
     data: () => ({
         listData: [] as Array<Option[]>
     }),
-    props: {
-        fdata: {
-            type: Object,
-            required: true
-        },
-        cdata: {
-            type: Object,
-            required: true
-        },
-        options: {
-            type: Function,
-            required: true
-        }
-    },
     async activated() {
         this.$emit('onFieldActivated', this)
         this.listData = this.options(this.fdata, this.cdata)

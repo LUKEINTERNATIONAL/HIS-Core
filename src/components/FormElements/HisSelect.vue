@@ -29,13 +29,20 @@ export default defineComponent({
     async activated() {
         this.$emit('onFieldActivated', this)
         this.listData = await this.options(this.fdata)
-        if (this.preset) {
-            const found = find(this.listData, {label: this.preset.label})
-
-            if (found) this.onselect(found)
-        }
+        await this.setDefaultValue()
     },
     methods: {
+        async setDefaultValue() {
+            if(this.defaultValue) {
+                const defaults: string = await this.defaultValue(this.fdata, this.cdata, this.selected)
+                if (defaults) {
+                    const found = find(this.listData, {label: defaults}) || find(this.listData, {value: defaults}) 
+                    if (found) {
+                        this.onselect(found)
+                    }
+                }
+            }
+        },
         async onselect(item: Option) {
             this.selected = item.label
             if (this.onValue) {

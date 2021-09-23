@@ -75,7 +75,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 import ViewPort from '../DataViews/ViewPort.vue'
 import { modalController } from '@ionic/vue'
 import { Option } from '@/components/Forms/FieldInterface'
@@ -83,28 +83,11 @@ import Barcode from '@/components/BarcodeInput.vue'
 import NavButton from "@/components/Buttons/ActionSideButton.vue"
 import ResetButton from "@/components/Buttons/ResetButton.vue"
 import ArtDispensationModal from "@/components/DataViews/ArtDispensationModal.vue"
+import FieldMixinVue from './FieldMixin.vue'
 
 export default defineComponent({
   components: { ViewPort, Barcode, NavButton, ResetButton },
-  props: {
-    fdata: {
-        type: Object as PropType<Record<string, any>>,
-        required: true
-    },
-    onValue: {
-        type: Function
-    },
-    onValueUpdate: {
-        type: Function
-    },
-    config: {
-        type: Object
-    },
-    options: {
-        type: Function,
-        required: true
-    }
-  },
+  mixins: [FieldMixinVue],
   data: () => ({
     tab: 'prescribe',
     listData: [] as any

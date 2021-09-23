@@ -11,6 +11,7 @@
       :cdata="computedFormData"
       :activationState="state"
       :onValue="activeField.onValue"
+      :defaultValue="activeField.defaultValue"
       :onValueUpdate="activeField.onValueUpdate"
       @onValue="onValue"
       @onClear="isClear=false"

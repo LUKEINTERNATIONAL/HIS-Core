@@ -210,6 +210,7 @@ export default defineComponent({
                 helpText: 'First name',
                 type: FieldType.TT_TEXT,
                 group: 'data_field',
+                defaultValue: () => this.userData.given_name,
                 condition: () => this.editConditionCheck(['given_name']),
                 validation: (val: any) => Validation.isName(val),
                 options: async (form: any) => {
@@ -224,6 +225,7 @@ export default defineComponent({
                 helpText: "Last name",
                 type: FieldType.TT_TEXT,
                 group: 'data_field',
+                defaultValue: () => this.userData.family_name,
                 validation: (val: any) => Validation.isName(val),
                 condition: () => this.editConditionCheck(['given_name']),
                 options: async (form: any) => {

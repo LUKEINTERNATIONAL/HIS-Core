@@ -82,6 +82,8 @@ import { VITALS_KEYPAD } from "../Keyboard/KbLayouts";
 import { BMIService } from "@/services/bmi_service";
 import { Option } from "../Forms/FieldInterface";
 import OptionButton from "@/components/Buttons/ActionSideButton.vue"
+import FieldMixinVue from "./FieldMixin.vue";
+
 export default defineComponent({
   components: {
     ViewPort,
@@ -90,23 +92,7 @@ export default defineComponent({
     IonRow,
     OptionButton
   },
-  props: {
-    fdata: {
-      type: Object as PropType<Record<string, any>>,
-      required: true,
-    },
-    options: {
-      type: Function,
-      required: true,
-    },
-    clear: {
-      type: Boolean,
-    },
-    preset: {
-      type: Object as PropType<Option>,
-      required: false,
-    },
-  },
+  mixins: [FieldMixinVue],
   data: () => ({
     keys: [] as any,
     patientID: "" as any,

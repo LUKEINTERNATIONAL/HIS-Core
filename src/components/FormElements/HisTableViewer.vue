@@ -10,8 +10,11 @@ import { defineComponent } from 'vue'
 import HisTable from "@/components/DataViews/HisBasicTable.vue"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import { isEmpty } from "lodash"
+import FieldMixinVue from './FieldMixin.vue'
+
 export default defineComponent({
     components: { ViewPort, HisTable },
+    mixins: [FieldMixinVue],
     data: ()=>({
         columns: [] as Array<string>,
         rows: [] as Array<string>,
@@ -19,23 +22,6 @@ export default defineComponent({
         cellColors: [] as Array<any>,
         styles: [] as Array<string>
     }),
-    props: {
-        fdata: {
-            type: Object,
-            required: true
-        },
-        cdata: {
-            type: Object,
-            required: true
-        },
-        config: {
-            type: Object
-        },
-        options: {
-            type: Function,
-            required: true
-        }
-    },
     async activated() {
         this.$emit('onFieldActivated', this)
         const data = await this.options(this.fdata, this.cdata, this)

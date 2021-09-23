@@ -18,9 +18,8 @@
     </view-port>   
     <his-keyboard :initalKeyboardName="initalKeyboardName" :kbConfig="keyboard" :onKeyPress="keypress" :disabled="false"> </his-keyboard>
 </template>
-
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 import BaseInput from "@/components/FormElements/BaseTextInput.vue"
 import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
@@ -28,38 +27,18 @@ import { IonInput, IonList, IonItem, IonLabel} from "@ionic/vue"
 import { Option } from '../Forms/FieldInterface'
 import { QWERTY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
+import FieldMixinVue from './FieldMixin.vue'
+import { isPlainObject } from 'lodash'
 
 export default defineComponent({
     components: { IonInput, BaseInput, HisKeyboard, ViewPort, IonList, IonItem, IonLabel },
+    mixins: [FieldMixinVue],
     data: ()=>({
         value: '',
         initalKeyboardName: '' as string,
         keyboard: {} as Array<any>,
         listData: [] as Array<Option>
     }),
-    props: {
-        fdata: {
-            type: Object,
-            required: true
-        },
-        preset: {
-            type: Object as PropType<Option>,
-            required: false
-        },
-        options: {
-            type: Function,
-            required: false,
-        },
-        onValue: {
-            type: Function
-        },
-        config: {
-            type: Object,
-        },
-        clear: {
-            type: Boolean
-        },
-    },
     computed: {
         inputType(): string {
             if (this.config && 'inputType' in this.config) {
@@ -69,20 +48,32 @@ export default defineComponent({
         }
     },
     created() {
-        if (this.preset) this.onselect(this.preset)
-
         this.keyboard = this.config?.customKeyboard || QWERTY
-        
         if (this.config) {
             if (this.config.initialKb) {
                 this.initalKeyboardName = this.config.initialKb
             }
         }
     },
-    activated(){
+    async activated(){
         this.$emit('onFieldActivated', this)
+        await this.setDefaultValue()
     },
     methods: {
+        async setDefaultValue() {
+            if (this.defaultValue && !this.value) {
+                const defaults: any = await this.defaultValue(this.fdata, this.cdata)
+                if (defaults) {
+                    if (isPlainObject(defaults)) {
+                        this.emitValue(defaults)
+                        this.value = defaults.value.toString()
+                    } else {
+                        this.value = defaults
+                        this.emitValue({label: defaults, value: defaults})
+                    }
+                }
+            }
+        },
         async emitValue(v: Option) {
             if (this.onValue) {
                 const ok = await this.onValue(v)
@@ -114,7 +105,10 @@ export default defineComponent({
             deep: true
         },
         clear(val: boolean){
-            if (val) this.value = ''
+            if (val) {
+                this.value = ''
+                this.$emit('onClear')
+            } 
         }
     }
 })

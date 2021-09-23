@@ -1,49 +1,16 @@
 <script lang='ts'>
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
 import { IonList, IonItem, IonLabel} from "@ionic/vue"
 import HisTextInput from "@/components/FormElements/BaseTextInput.vue";
 import { Option } from '../Forms/FieldInterface'
 import { QWERTY } from "@/components/Keyboard/HisKbConfigurations"
-import SelectConfig from "@/components/FormElements/Interfaces/SelectConfig"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
+import FieldMixinVue from './FieldMixin.vue';
 export default defineComponent({
     components: { IonList, IonItem, IonLabel, HisTextInput, HisKeyboard, ViewPort },
-    props: {
-        config: {
-            type: Object as PropType<SelectConfig>,
-        },
-        preset: {
-            type: Object as PropType<Option>,
-            required: true
-        },
-        fdata: {
-            type: Object,
-            required: true
-        },
-        cdata: {
-            type: Object,
-            required: true
-        },
-        clear: {
-            type: Boolean
-        },
-        options: {
-            required: true,
-            type: Function
-        },
-        activationState: {
-            type: String,
-            default: ''
-        },
-        onValue: {
-            type: Function
-        },
-        onValueUpdate: {
-            type: Function
-        }
-    },
+    mixins: [FieldMixinVue],
     data: () => ({ 
         showKeyboard: false,
         selected: '',
