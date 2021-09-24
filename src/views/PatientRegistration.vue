@@ -15,26 +15,20 @@ import { Field, Option } from "@/components/Forms/FieldInterface"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import Validation from "@/components/Forms/validations/StandardValidations"
-import { PersonService } from "@/services/person_service"
-import {Person} from "@/interfaces/person"
-import {PersonAttributeService } from '@/services/person_attributes_service'
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import { GlobalPropertyService } from "@/services/global_property_service" 
 import { ProgramService } from "@/services/program_service";
-import { EncounterService } from "@/services/encounter_service";
-import { Encounter } from "@/interfaces/encounter";
-import { ConceptService } from "@/services/concept_service";
-import { ObservationService } from "@/services/observation_service";
-import { PatientPrintoutService } from "@/services/patient_printout_service";
-import { toastWarning } from "@/utils/Alerts"
+import { toastWarning, toastDanger } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
-import { isEmpty, isPlainObject } from "lodash"
+import { isPlainObject } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
+import { PatientRegistrationService } from "@/services/patient_registration_service"
 
 export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
+    registrationService: {} as any,
     skipSummary: false,
     addressAttributes: [
         'home_region',
@@ -109,6 +103,9 @@ export default defineComponent({
         this.editPerson = personId
         const person = await Patientservice.findByID(this.editPerson)
         if (!person) return
+        
+        this.registrationService = new PatientRegistrationService()
+        this.registrationService.setPersonID(personId)
         const patient = new Patientservice(person)
         const { 
             ancestryDistrict, 
@@ -144,35 +141,31 @@ export default defineComponent({
         }
     },
     async create(computedData: any) {
-        const personPayload: any = this.resolvePerson(computedData)
-        const person: Person = await new PersonService(personPayload).create()
-        if (person.person_id) {
-            await this.savePersonAttributes(computedData, person.person_id)
-            await ProgramService.createPatient(person.person_id)
-            .then(() => {
-                ProgramService.enrollPatient(person.person_id)
-                .then(() => {
-                    this.createRegistrationEncounter(person.person_id)
-                    .then((data: Encounter) => {
-                        this.createRegistrationOs(data, personPayload.patient_type? personPayload.patient_type : 'New patient')
-                        .then(() => new PatientPrintoutService(person.person_id).printNidLbl())
-                        .then(async () => {
-                            const params = await WorkflowService.getNextTaskParams(person.person_id)
-                            this.$router.push(params)
-                        })
-                    })
-                })
-            });
+        try {
+            const person: any = this.resolvePerson(computedData)
+            const attributes: Array<any> = this.resolvePersonAttributes(computedData) 
+
+            const registration: any = new PatientRegistrationService()
+            await registration.registerPatient(person, attributes)
+
+            const nextTask = await WorkflowService.getNextTaskParams(
+                registration.getPersonID()
+            )
+            this.$router.push(nextTask)
+        }catch(e) {
+            toastDanger(e)
         }
     },
     async update(computedData: any) {
         const person: any = this.resolvePerson(computedData)
-        if (!isEmpty(person)) {
-            await new PersonService(person).update(this.editPerson)
-            for(const attr in person) {
-                if (attr in this.editPersonData) {
-                    this.editPersonData[attr] = person[attr]
-                }
+        const update = new PatientRegistrationService()
+
+        update.setPersonID(this.editPerson)
+        await update.updatePerson(person)
+
+        for(const attr in person) {
+            if (attr in this.editPersonData) {
+                this.editPersonData[attr] = person[attr]
             }
         }
         this.fieldComponent = 'edit_user'
@@ -183,16 +176,10 @@ export default defineComponent({
         }
         return true
     },
-    async savePersonAttributes(form: Record<string, Option> | Record<string, null>, personId: number) {
-        const data = Object.values(form)
-                            .filter((d: any) => isPlainObject(d) && 'personAttributes' in d)
-                            .map(async ({personAttributes}: any) => {
-                                return PersonAttributeService.create({
-                                    ...personAttributes, 
-                                    'person_id': personId
-                                })  
-                            })
-        await Promise.all(data)
+    resolvePersonAttributes(form: Record<string, Option> | Record<string, null>) {
+        return Object.values(form)
+                    .filter((d: any) => isPlainObject(d) && 'personAttributes' in d)
+                    .map(({personAttributes}: any) => personAttributes)
     },
     resolvePerson(computedForm: any) {
         let data: any = {}
@@ -210,28 +197,6 @@ export default defineComponent({
     },
     mapToOption(listOptions: Array<string>): Array<Option> {
         return listOptions.map((item: any) => ({ label: item, value: item })) 
-    },
-    createRegistrationEncounter(patientID: number) {
-        return EncounterService.create({
-            'encounter_type_id': 5, //TODO: get key from api or reference dictionary using name
-            'patient_id': patientID
-        })
-    },
-    createRegistrationOs(encounter: Encounter, patientType: string) {
-        let ans: number;
-        const typeOfPatientConcept = ConceptService.getCachedConceptID('Type of patient');
-        if(this.showPatientType == true) {
-            ans  = ConceptService.getCachedConceptID(patientType)
-        }else{
-            ans  = ConceptService.getCachedConceptID('New patient')
-        }
-        const obs = {
-            'encounter_id': encounter.encounter_id,
-            observations: [
-                {'concept_id': typeOfPatientConcept, 'value_coded': ans}
-            ]
-        };
-        return ObservationService.create(obs);
     },
     givenNameField(): Field {
         const name: Field = PersonField.getGivenNameField()
