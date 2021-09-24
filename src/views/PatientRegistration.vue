@@ -21,7 +21,7 @@ import { GlobalPropertyService } from "@/services/global_property_service"
 import { ProgramService } from "@/services/program_service";
 import { toastWarning, toastDanger } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
-import { isPlainObject } from "lodash"
+import { isPlainObject, isEmpty, findIndex } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
 import { PatientRegistrationService } from "@/services/patient_registration_service"
 
@@ -75,6 +75,7 @@ export default defineComponent({
         fields.push(this.givenNameField())
         fields.push(this.familyNameField())
         fields.push(this.genderField())
+        fields.push(this.searchResultField())
         fields = fields.concat(this.dobFields())
         fields.push(this.homeRegionField())
         fields.push(this.homeDistrictField())
@@ -415,6 +416,116 @@ export default defineComponent({
             condition: () => this.editConditionCheck(['relationship']),
             validation: (val: any) => Validation.required(val),
             options: () => this.mapToOption(['Yes', 'No'])
+        }
+    },
+    searchResultField(): Field {
+        return {
+            id: 'results',
+            helpText: 'Search results',
+            type: FieldType.TT_PERSON_RESULT_VIEW,
+            onValue: (val: Option, { env }: any) => {
+                const btns = env.footer.footerBtns
+                const confirmIndex = findIndex(btns, { name: 'Continue' })
+                if (!isEmpty(val)) {
+                    env.footer.footerBtns[confirmIndex].visible = true
+                    env.footer.footerBtns[confirmIndex].onClick = () => {
+                       return this.$router.push(`/patients/confirm?person_id=${val.value}`)
+                    }
+                } else {
+                    env.footer.footerBtns[confirmIndex].visible = false
+                }
+                return true
+            },
+            validation: (val: Option) => Validation.required(val),
+            options: async (form: any) => {
+                const patients = await Patientservice.search({
+                    'given_name': form.given_name.value, 
+                    'family_name': form.family_name.value, 
+                    'gender': form.gender.value, 
+                });
+                return patients.map((item: any) => {
+                    const patient = new Patientservice(item);
+                    const prop = (patient: any, prop: string) => prop in patient ? patient[prop]() : '-'
+                    return {
+                        label: patient.getPatientInfoString(),
+                        value: patient.getID(),
+                        other: [
+                            {
+                                label: "Patient ID",
+                                value: prop(patient, 'getNationalID')
+                            },
+                            {
+                                label: "Name",
+                                value: prop(patient, 'getFullName'),
+                            },
+                            {
+                                label: "Gender",
+                                value: prop(patient, 'getGender'),
+                            },
+                            {
+                                label: "Birthdate",
+                                value: prop(patient, 'getBirthdate'),
+                            },
+                            {
+                                label: "Home District",
+                                value: prop(patient, 'getHomeDistrict'),
+                            },
+                            {
+                                label: "Home Village",
+                                value: prop(patient, 'getHomeVillage'),
+                            },
+                            {
+                                label: "Current District",
+                                value: prop(patient, 'getCurrentDistrict'),
+                            },
+                            {
+                                label: "Current T/A",
+                                value: prop(patient, 'getCurrentTA'),
+                            }
+                        ]
+                    }
+                })
+            },
+            config: {
+                hiddenFooterBtns: [
+                    'Clear',
+                    'Next',
+                    'Back'
+                ],
+                footerBtns: [
+                    {
+                        name: 'Edit Search',
+                        size: 'large',
+                        slot: 'end',
+                        visible: true,
+                        onClick: () => {
+                            this.fieldComponent = 'given_name'
+                        },
+                        visibleOnStateChange: (state: any) => {
+                            return state.field.id === 'results'
+                        }
+                    },
+                    {
+                        name: 'New Patient',
+                        size: 'large',
+                        slot: 'end',
+                        visible: true,
+                        onClick: () => {
+                            this.fieldComponent = 'year_birth_date'
+                        },
+                        visibleOnStateChange: (state: any) => {
+                            return state.field.id === 'results'
+                        }
+                    },
+                    {
+                        name: 'Continue',
+                        color: 'success',
+                        size: 'large',
+                        slot: 'end',
+                        visible: false
+                    }
+                ]
+            }
         }
     },
     personIndexField(): Field {

@@ -67,9 +67,18 @@ export default defineComponent({
     selectedResult: {} as any
   }),
   methods: {
-    onSelect(item: any) {
-        this.selectedResult = item
-        this.$emit('onValue', item)
+    async onSelect(item: any) {
+      if (!item) {
+        return
+      }
+      if (this.onValue) {
+        const ok = await this.onValue(item, this)
+        if (!ok) {
+          return
+        }
+      }
+      this.selectedResult = item
+      this.$emit('onValue', item)
     }
   },
   async activated() {
