@@ -1,3 +1,4 @@
+import BarcodeInput from "@/components/FormElements/HisBarcodeInput.vue"
 import SingleSelect from "@/components/FormElements/HisSelect.vue";
 import MultipleSelect from "@/components/FormElements/HisMultipleSelect.vue";
 import TextInput from "@/components/FormElements/HisTextInput.vue"
@@ -21,9 +22,9 @@ import DispensationInput from "@/components/FormElements/DrugDispensationSelecti
 import ProgamSelection from "@/components/FormElements/ProgramSelection.vue"
 import AppointmentPicker from "@/components/FormElements/HisAppointmentPicker.vue"
 import PersonSearchView from "@/components/FormElements/PersonSearchView.vue"
-
 // Reference names for BaseFormComponents
 export enum FieldType {
+    TT_BARCODE = 'BarcodeInput',
     TT_MONTHLY_DAYS="monthly-days",
     TT_TEXT="text-input",
     TT_NUMBER = "number-input",
@@ -55,6 +56,7 @@ export const BaseFormComponents = {
     MultipleSelect,
     NumberInput,
     MonthlyDays,
+    BarcodeInput,
     ArtRegimenSelection,
     NextVisitInterval,
     TableViewer,
