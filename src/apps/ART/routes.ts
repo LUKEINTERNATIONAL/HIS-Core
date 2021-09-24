@@ -39,6 +39,7 @@ import MohCohort from "@/apps/ART/views/reports/moh/CohortReport/MohCohort.vue"
 import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
 import StockCardReport from "@/apps/ART/views/reports/clinic/ClinicStockCardReport.vue"
 import ClinicAppointments from "@/apps/ART/views/reports/clinic/ClinicAppointments.vue"
+import DataCleaning from "@/apps/ART/views/reports/inconsistencies/DataCleaning.vue"
 
 export default [
     {
@@ -107,9 +108,14 @@ export default [
         component: LabActivities
     },
     {
-       name: "patient mstercard",
+        name: "patient mstercard",
         path: "/art/mastercard/:patient_id",
         component: Mastercard
+    },
+    {
+        name: "Data cleaning",
+        path: "/data_cleaning",
+        component: DataCleaning
     },
     {
         path: '/art/report/moh',
