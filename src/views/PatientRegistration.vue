@@ -28,7 +28,6 @@ import { PatientRegistrationService } from "@/services/patient_registration_serv
 export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
-    registrationService: {} as any,
     skipSummary: false,
     addressAttributes: [
         'home_region',
@@ -102,10 +101,9 @@ export default defineComponent({
     async initEditMode(personId: number) {
         this.editPerson = personId
         const person = await Patientservice.findByID(this.editPerson)
-        if (!person) return
-        
-        this.registrationService = new PatientRegistrationService()
-        this.registrationService.setPersonID(personId)
+        if (!person) {
+            return
+        }
         const patient = new Patientservice(person)
         const { 
             ancestryDistrict, 
