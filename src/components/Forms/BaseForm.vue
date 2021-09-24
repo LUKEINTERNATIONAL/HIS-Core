@@ -2,6 +2,7 @@
   <keep-alive>
     <component
       :key="activeField.id"
+      :env="env"
       v-bind:is="activeField.type"
       :config="activeField.config"
       :options="activeField.options"
@@ -32,6 +33,9 @@ export default defineComponent({
   props: {
     index: {
       type: Number
+    },
+    env: {
+      type: Object
     },
     clear: {
       type: Boolean
@@ -173,7 +177,7 @@ export default defineComponent({
       // load callback before changing active component
       if (!isEmpty(this.activeField) && this.activeField.unload) {
         const data = this.formData[this.activeField.id]
-        if (data) await this.activeField.unload(data, state, this.formData, this.computedFormData)
+        if (data) await this.activeField.unload(data, state, this.formData, this.computedFormData, this)
       }
       this.state = state
       this.activeIndex = index;

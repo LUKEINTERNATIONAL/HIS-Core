@@ -3,6 +3,10 @@ import { defineComponent } from 'vue'
 
 export default defineComponent({
     props: {
+        env: {
+            type: Object,
+            required: true
+        },
         config: {
             type: Object,
             default: () => ({})
