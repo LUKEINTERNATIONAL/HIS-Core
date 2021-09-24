@@ -20,6 +20,7 @@ import LabOrders from "@/components/FormElements/HisLabOrders.vue"
 import DispensationInput from "@/components/FormElements/DrugDispensationSelection.vue"
 import ProgamSelection from "@/components/FormElements/ProgramSelection.vue"
 import AppointmentPicker from "@/components/FormElements/HisAppointmentPicker.vue"
+import PersonSearchView from "@/components/FormElements/PersonSearchView.vue"
 
 // Reference names for BaseFormComponents
 export enum FieldType {
@@ -44,7 +45,8 @@ export enum FieldType {
     TT_APPOINTMENTS_ENTRY = "appointments-entry",
     TT_DISPENSATION_INPUT = 'dispensation-input',
     TT_PROGRAM_SELECTION = 'ProgamSelection',
-    TT_APPOINTMENT_PICKER = 'appointment-picker'
+    TT_APPOINTMENT_PICKER = 'appointment-picker',
+    TT_PERSON_RESULT_VIEW = 'PersonSearchView'
 }
 // Components to be rendered
 export const BaseFormComponents = {
@@ -68,5 +70,6 @@ export const BaseFormComponents = {
     AppointmentsEntry,
     DispensationInput,
     ProgamSelection,
-    AppointmentPicker
+    AppointmentPicker,
+    PersonSearchView
 }
