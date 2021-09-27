@@ -28,7 +28,7 @@ export default defineComponent({
   data: () => ({
     guardianData: {} as any,
     patientData: {} as any,
-    activeField: '' as string,
+    fieldAction: '' as 'Scan' | 'Search' | 'Registration',
     fieldComponent: '' as string,
     fields: [] as Array<Field>,
     form: {} as Record<string, Option> | Record<string, null>
@@ -89,6 +89,9 @@ export default defineComponent({
             toastDanger(e)
         }
     },
+    isRegistrationMode() {
+        return ['Search', 'Registration'].includes(this.fieldAction)
+    },
     resolvePerson(computedForm: any) {
         let data: any = {}
         for(const attr in computedForm) {
@@ -118,50 +121,75 @@ export default defineComponent({
     givenNameField(): Field {
         const name: Field = PersonField.getGivenNameField()
         name.helpText = 'Guardian First name'
+        name.condition = () => this.isRegistrationMode()
         return name
     },
     familyNameField(): Field {
         const name: Field = PersonField.getFamilyNameField()
         name.helpText = 'Guardian Last name'
+        name.condition = () => this.isRegistrationMode()
         return name
     },
     genderField(): Field {
-        return PersonField.getGenderField()
+        const gender: Field = PersonField.getGenderField()
+        gender.condition = () => this.isRegistrationMode()
+        return gender
     },
     dobFields(): Array<Field> {
         const dob =PersonField.getDobConfig() 
+        dob.condition = () => this.isRegistrationMode()
         dob.onload = () => this.guardianData = {} //Clear guardian data loaded elsewhere
         return generateDateFields(dob)
     },
     homeRegionField(): Field {
-        return PersonField.getHomeRegionField()
+        const home: Field = PersonField.getHomeRegionField()
+        home.condition = () => this.isRegistrationMode()
+        return home
     },
     homeDistrictField(): Field {
-        return PersonField.getHomeDistrictField()
+        const district: Field = PersonField.getHomeDistrictField()
+        district.condition = () => this.isRegistrationMode()
+        return district
     },
     homeTAField(): Field {
-        return PersonField.getHomeTaField()
+        const ta: Field =  PersonField.getHomeTaField()
+        ta.condition = () => this.isRegistrationMode()
+        return ta
     },
     homeVillageField(): Field {
-        return PersonField.getHomeVillageField()
+        const village: Field = PersonField.getHomeVillageField()
+        village.condition = () => this.isRegistrationMode()
+        return village
     },
     currentRegionField(): Field {
-        return PersonField.getCurrentRegionField()
+        const region: Field = PersonField.getCurrentRegionField()
+        region.condition = () => this.isRegistrationMode()
+        return region
     },
     currentDistrictField(): Field {
-        return PersonField.getCurrentDistrictField()
+        const currentDistrict: Field = PersonField.getCurrentDistrictField()
+        currentDistrict.condition = () => this.isRegistrationMode()
+        return currentDistrict
     },
     currentTAField(): Field {
-        return PersonField.getCurrentTAfield()
+        const currentTA: Field = PersonField.getCurrentTAfield()
+        currentTA.condition = () => this.isRegistrationMode()
+        return currentTA
     },
     currentVillage(): Field {
-        return PersonField.getCurrentVillageField()
+        const currentVillage: Field = PersonField.getCurrentVillageField()
+        currentVillage.condition = () => this.isRegistrationMode()
+        return currentVillage
     },
     cellPhoneField(): Field {
-        return PersonField.getCellNumberField()
+        const cellPhone: Field = PersonField.getCellNumberField()
+        cellPhone.condition = () => this.isRegistrationMode()
+        return cellPhone 
     },
     landmarkField(): Field {
-        return PersonField.getLandmarkField()
+        const landmark: Field = PersonField.getLandmarkField()
+        landmark.condition = () => this.isRegistrationMode()
+        return landmark
     },
     relationsField(): Field {
         return {
@@ -207,6 +235,7 @@ export default defineComponent({
                 if (!isEmpty(searchResults)) {
                     this.guardianData = this.toPersonData(searchResults[0].person)
                     this.fieldComponent = 'relations'
+                    this.fieldAction = 'Scan'
                 }
                 return false
             },
@@ -222,6 +251,7 @@ export default defineComponent({
                         slot: 'end',
                         visible: true,
                         onClick: () => {
+                            this.fieldAction = 'Search'
                             this.fieldComponent = 'given_name'
                         },
                         visibleOnStateChange: (state: any) => {
@@ -238,6 +268,7 @@ export default defineComponent({
             helpText: 'Search results',
             type: FieldType.TT_PERSON_RESULT_VIEW,
             appearInSummary: () => false,
+            condition: () => this.fieldAction === 'Search',
             onValue: (val: Option, { env }: any) => {
                 const btns = env.footer.footerBtns
                 const newGuardianIndex = findIndex(btns, { name: 'Continue Guardian' })
@@ -246,6 +277,7 @@ export default defineComponent({
                     env.footer.footerBtns[newGuardianIndex].onClick = () => {
                        this.guardianData = this.toPersonData(val.other.person.person)
                        this.fieldComponent = 'relations'
+                       this.fieldAction = 'Search'
                     }
                 } else {
                     env.footer.footerBtns[newGuardianIndex].visible = false
@@ -274,6 +306,7 @@ export default defineComponent({
                         slot: 'end',
                         visible: true,
                         onClick: () => {
+                            this.fieldAction = 'Search'
                             this.fieldComponent = 'given_name'
                         },
                         visibleOnStateChange: (state: any) => {
@@ -286,6 +319,7 @@ export default defineComponent({
                         slot: 'end',
                         visible: true,
                         onClick: () => {
+                            this.fieldAction = 'Registration'
                             this.fieldComponent = 'year_birth_date'
                         },
                         visibleOnStateChange: (state: any) => {
