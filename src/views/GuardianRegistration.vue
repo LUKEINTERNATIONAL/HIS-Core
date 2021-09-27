@@ -73,7 +73,7 @@ export default defineComponent({
     async onFinish(form: any, computedData: any) {
         try {
             let guardianID = -1
-            if (isEmpty(this.guardianData)) {
+            if (this.isRegistrationMode()) {
                 const guardian: any = new PatientRegistrationService()
                 await guardian.registerGuardian(PersonField.resolvePerson(computedData))
                 guardianID = guardian.getPersonID()
@@ -127,7 +127,6 @@ export default defineComponent({
     dobFields(): Array<Field> {
         const dob =PersonField.getDobConfig() 
         dob.condition = () => this.isRegistrationMode()
-        dob.onload = () => this.guardianData = {} //Clear guardian data loaded elsewhere
         return generateDateFields(dob)
     },
     homeRegionField(): Field {
@@ -187,7 +186,7 @@ export default defineComponent({
             type: FieldType.TT_RELATION_SELECTION,
             onload: (context: any) => {
                 context.patient = this.patientData
-                if (isEmpty(this.guardianData)) {
+                if (this.isRegistrationMode()) {
                     const person = PersonField.resolvePerson(context.cdata)
                     context.guardian = {
                         name: `${person.given_name} ${person.family_name}`,
