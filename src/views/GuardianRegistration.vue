@@ -19,7 +19,7 @@ import HisDate from "@/utils/Date"
 import { toastDanger } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
 import { RelationsService } from "@/services/relations_service"
-import { isPlainObject, isEmpty, findIndex } from "lodash"
+import { isEmpty, findIndex } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
 import { PatientRegistrationService } from "@/services/patient_registration_service"
 
@@ -89,8 +89,11 @@ export default defineComponent({
             toastDanger(e)
         }
     },
-    isRegistrationMode() {
+    isSearchMode() {
         return ['Search', 'Registration'].includes(this.fieldAction)
+    },
+    isRegistrationMode() {
+        return this.fieldAction === 'Registration'
     },
     toPersonData(data: any) {
         const address = data.addresses[0]
@@ -107,18 +110,18 @@ export default defineComponent({
     givenNameField(): Field {
         const name: Field = PersonField.getGivenNameField()
         name.helpText = 'Guardian First name'
-        name.condition = () => this.isRegistrationMode()
+        name.condition = () => this.isSearchMode()
         return name
     },
     familyNameField(): Field {
         const name: Field = PersonField.getFamilyNameField()
         name.helpText = 'Guardian Last name'
-        name.condition = () => this.isRegistrationMode()
+        name.condition = () => this.isSearchMode()
         return name
     },
     genderField(): Field {
         const gender: Field = PersonField.getGenderField()
-        gender.condition = () => this.isRegistrationMode()
+        gender.condition = () => this.isSearchMode()
         return gender
     },
     dobFields(): Array<Field> {
@@ -249,27 +252,29 @@ export default defineComponent({
         }
     },
     searchResultField(): Field {
+        let footerBtns: Array<any> = []
+        const newGuardianIndex = () => findIndex(footerBtns, { name: 'Continue Guardian' })
         return {
             id: 'results',
             helpText: 'Search results',
             type: FieldType.TT_PERSON_RESULT_VIEW,
             appearInSummary: () => false,
-            condition: () => this.fieldAction === 'Search',
+            condition: () => this.isSearchMode(),
             onValue: (val: Option, { env }: any) => {
-                const btns = env.footer.footerBtns
-                const newGuardianIndex = findIndex(btns, { name: 'Continue Guardian' })
+                footerBtns = env.footer.footerBtns
                 if (!isEmpty(val)) {
-                    env.footer.footerBtns[newGuardianIndex].visible = true
-                    env.footer.footerBtns[newGuardianIndex].onClick = () => {
+                    footerBtns[newGuardianIndex()].visible = true
+                    footerBtns[newGuardianIndex()].onClick = () => {
                        this.guardianData = this.toPersonData(val.other.person.person)
                        this.fieldComponent = 'relations'
                        this.fieldAction = 'Search'
                     }
                 } else {
-                    env.footer.footerBtns[newGuardianIndex].visible = false
+                    footerBtns[newGuardianIndex()].visible = false
                 }
                 return true
             },
+            unload: () => footerBtns[newGuardianIndex()].visible = false,
             validation: (val: Option) => Validation.required(val),
             options: async (form: any) => {
                 const patients = await Patientservice.search({
