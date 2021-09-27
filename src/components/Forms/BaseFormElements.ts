@@ -13,7 +13,6 @@ import MultiYesNo from "@/components/FormElements/MultiYesNoSelect.vue"
 import WeightChart from "@/components/FormElements/HisWeightChart.vue"
 import VitalsEntry from "@/components/FormElements/HisVitalsEntry.vue"
 import AppointmentsEntry from "@/components/FormElements/HisAppointments.vue"
-
 import SummaryPage from "@/components/FormElements/HisSummary.vue"
 import ArtStagingSummary from "@/components/FormElements/ArtStagingSummary.vue"
 import AdherenceInput from "@/components/FormElements/HisAdherenceInput.vue"
@@ -22,6 +21,8 @@ import DispensationInput from "@/components/FormElements/DrugDispensationSelecti
 import ProgamSelection from "@/components/FormElements/ProgramSelection.vue"
 import AppointmentPicker from "@/components/FormElements/HisAppointmentPicker.vue"
 import PersonSearchView from "@/components/FormElements/PersonSearchView.vue"
+import RelationSelection from "@/components/FormElements/RelationsSelection.vue"
+
 // Reference names for BaseFormComponents
 export enum FieldType {
     TT_BARCODE = 'BarcodeInput',
@@ -47,7 +48,8 @@ export enum FieldType {
     TT_DISPENSATION_INPUT = 'dispensation-input',
     TT_PROGRAM_SELECTION = 'ProgamSelection',
     TT_APPOINTMENT_PICKER = 'appointment-picker',
-    TT_PERSON_RESULT_VIEW = 'PersonSearchView'
+    TT_PERSON_RESULT_VIEW = 'PersonSearchView',
+    TT_RELATION_SELECTION = 'RelationSelection'
 }
 // Components to be rendered
 export const BaseFormComponents = {
@@ -73,5 +75,6 @@ export const BaseFormComponents = {
     DispensationInput,
     ProgamSelection,
     AppointmentPicker,
-    PersonSearchView
+    PersonSearchView,
+    RelationSelection
 }
