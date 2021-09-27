@@ -2,7 +2,7 @@
     <ion-row>
         <ion-col size="5">
             <div class="large-card">
-                <h3> People: </h3>
+                <h3> People ({{listData.length}}):  </h3>
                 <ion-list>
                     <ion-item
                         button
