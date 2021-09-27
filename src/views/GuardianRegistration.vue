@@ -81,7 +81,7 @@ export default defineComponent({
                 guardianID = this.guardianData.id
             }
             await RelationsService.createRelation(
-                guardianID, this.patientData.id, form.relations.other.relatonship_type_id
+                guardianID, this.patientData.id, form.relations.other.relationship_type_id
             )
             const nextTask = await WorkflowService.getNextTaskParams(this.patientData.id)
             this.$router.push(nextTask)
