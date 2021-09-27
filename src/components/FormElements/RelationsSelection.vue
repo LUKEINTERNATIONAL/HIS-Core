@@ -10,6 +10,9 @@
                 </ul>
             </div>
         </ion-col>
+        <ion-col size="2"> 
+            <center class="relation-category"> TO </center>
+        </ion-col>
         <ion-col>
             <div class="tool-bar-medium-card"> 
                 <center class="relation-category"> Guardian </center>
