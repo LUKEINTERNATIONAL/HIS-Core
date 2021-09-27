@@ -17,6 +17,7 @@ export interface EstimationInterface {
 export interface DateFieldInterface {
     id: string;
     helpText: string;
+    onload?: Function;
     condition?: Function;
     validation?: Function;
     required?: boolean;
@@ -209,6 +210,7 @@ export function generateDateFields(field: DateFieldInterface, currentDate=''): A
             id: dateConfig.year.id,
             helpText: `${field.helpText} Year`,
             type: FieldType.TT_NUMBER,
+            onload: (c: any) => field.onload ? field.onload(c) : null,
             defaultValue: () => getDefaultDate(field, 'Year'),
             appearInSummary: () => false,
             condition: (f: any) => field.condition ? field.condition(f) : true,

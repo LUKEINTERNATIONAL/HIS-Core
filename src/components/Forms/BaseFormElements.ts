@@ -1,3 +1,4 @@
+import BarcodeInput from "@/components/FormElements/HisBarcodeInput.vue"
 import SingleSelect from "@/components/FormElements/HisSelect.vue";
 import MultipleSelect from "@/components/FormElements/HisMultipleSelect.vue";
 import TextInput from "@/components/FormElements/HisTextInput.vue"
@@ -12,7 +13,6 @@ import MultiYesNo from "@/components/FormElements/MultiYesNoSelect.vue"
 import WeightChart from "@/components/FormElements/HisWeightChart.vue"
 import VitalsEntry from "@/components/FormElements/HisVitalsEntry.vue"
 import AppointmentsEntry from "@/components/FormElements/HisAppointments.vue"
-
 import SummaryPage from "@/components/FormElements/HisSummary.vue"
 import ArtStagingSummary from "@/components/FormElements/ArtStagingSummary.vue"
 import AdherenceInput from "@/components/FormElements/HisAdherenceInput.vue"
@@ -20,9 +20,12 @@ import LabOrders from "@/components/FormElements/HisLabOrders.vue"
 import DispensationInput from "@/components/FormElements/DrugDispensationSelection.vue"
 import ProgamSelection from "@/components/FormElements/ProgramSelection.vue"
 import AppointmentPicker from "@/components/FormElements/HisAppointmentPicker.vue"
+import PersonSearchView from "@/components/FormElements/PersonSearchView.vue"
+import RelationSelection from "@/components/FormElements/RelationsSelection.vue"
 
 // Reference names for BaseFormComponents
 export enum FieldType {
+    TT_BARCODE = 'BarcodeInput',
     TT_MONTHLY_DAYS="monthly-days",
     TT_TEXT="text-input",
     TT_NUMBER = "number-input",
@@ -44,7 +47,9 @@ export enum FieldType {
     TT_APPOINTMENTS_ENTRY = "appointments-entry",
     TT_DISPENSATION_INPUT = 'dispensation-input',
     TT_PROGRAM_SELECTION = 'ProgamSelection',
-    TT_APPOINTMENT_PICKER = 'appointment-picker'
+    TT_APPOINTMENT_PICKER = 'appointment-picker',
+    TT_PERSON_RESULT_VIEW = 'PersonSearchView',
+    TT_RELATION_SELECTION = 'RelationSelection'
 }
 // Components to be rendered
 export const BaseFormComponents = {
@@ -53,6 +58,7 @@ export const BaseFormComponents = {
     MultipleSelect,
     NumberInput,
     MonthlyDays,
+    BarcodeInput,
     ArtRegimenSelection,
     NextVisitInterval,
     TableViewer,
@@ -68,5 +74,7 @@ export const BaseFormComponents = {
     AppointmentsEntry,
     DispensationInput,
     ProgamSelection,
-    AppointmentPicker
+    AppointmentPicker,
+    PersonSearchView,
+    RelationSelection
 }

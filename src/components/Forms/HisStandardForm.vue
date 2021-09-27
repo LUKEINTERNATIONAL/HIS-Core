@@ -20,6 +20,7 @@
             :prev="isPrev"
             :clear="isClear"
             :index="skipToIndex"
+            :env="env"
             @onFinish="onFinish"
             @onClear="isClear=false"
             @onErrors="onErrors"
@@ -27,7 +28,8 @@
         />
     </ion-content>
     <his-footer 
-        :btns="footerBtns"
+        :btns="footerBtns" 
+        @onFooterInstance="onFooterInstance" 
         :state="{index, field, totalFields, onNextRequired}">
     </his-footer>
   </ion-page>
@@ -66,6 +68,10 @@ export default defineComponent({
     },
     data:()=>({
       index: -1,
+      env: {
+        standardForm: {} as any,
+        footer: {} as any
+      } as any,
       field: {} as Field,
       isNext: false,
       isPrev: false,
@@ -114,6 +120,10 @@ export default defineComponent({
         } 
     },
     methods: {
+        onFooterInstance(footerInstance: any) {
+            this.env.standardForm = this
+            this.env.footer = footerInstance
+        },
         onErrors(errors: Array<string>) {
             toastWarning(errors.join(', '), 3000)
         },

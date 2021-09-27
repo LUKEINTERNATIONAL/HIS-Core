@@ -14,6 +14,7 @@
     </ion-toolbar>
   </ion-footer>
 </template>
+
 <script lang="ts">
 import { defineComponent, PropType } from 'vue';
 import {IonButton, IonFooter, IonToolbar} from "@ionic/vue";
@@ -23,6 +24,9 @@ export default defineComponent({
   data: () => ({
     footerBtns: [] as Array<NavBtnInterface>
   }),
+  created() {
+    this.$emit('onFooterInstance', this)
+  },
   props: {
     color: {
       type: String,

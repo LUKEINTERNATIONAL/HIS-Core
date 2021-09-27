@@ -12,14 +12,29 @@ import {PersonService} from "@/services/person_service"
 import { EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import HisDate from "@/utils/Date"
 import { DateFieldInterface } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
+import { Patientservice } from "@/services/patient_service"
+import { isPlainObject } from "lodash"
 
 function mapToOption(listOptions: Array<string>): Array<Option> {
     return listOptions.map((item: any) => ({ 
-        label: item, 
-        value: item 
+        label: item, value: item 
     })) 
 }
 export default {
+    resolvePerson(computedForm: any) {
+        let data: any = {}
+        for(const attr in computedForm) {
+            const values = computedForm[attr]
+            if ('person' in values) {
+                if (isPlainObject(values.person)) {
+                    data = {...data, ...values.person}
+                } else {
+                    data[attr] = values['person']
+                }
+            }
+        }
+        return data   
+    },
     getGivenNameField(): Field {
         return {
             id: 'given_name',
@@ -202,6 +217,29 @@ export default {
             } 
         }
     },
+    getLandmarkField(): Field {
+        return {
+            id: 'landmark',
+            helpText: 'Closest Landmark or Plot Number',
+            group: 'person',
+            type: FieldType.TT_SELECT,
+            computedValue: (val: Option) => ({person: val.value}),
+            validation: (val: any) => Validation.required(val),
+            options: () => mapToOption([
+                'Catholic Church',
+                'CCAP',
+                'Seventh Day',
+                'Mosque',
+                'Primary School',
+                'Borehole',
+                'Secondary School',
+                'College',
+                'Market',
+                'Football Ground',
+                'Other'
+            ])
+        }
+    },
     getFacilityLocationField() {
         return  {
             id: 'location',
@@ -215,5 +253,50 @@ export default {
                 isFilterDataViaApi: true
             }
         }
+    },
+    getPersonAttributeOptions(person: any) {
+        const patient = new Patientservice(person);
+        const prop = (patient: any, prop: string) => prop in patient ? patient[prop]() : '-'
+        return {
+            label: patient.getPatientInfoString(),
+            value: patient.getID(),
+            other: {
+                person,
+                options: [
+                    {
+                        label: "Patient ID",
+                        value: prop(patient, 'getNationalID')
+                    },
+                    {
+                        label: "Name",
+                        value: prop(patient, 'getFullName'),
+                    },
+                    {
+                        label: "Gender",
+                        value: prop(patient, 'getGender'),
+                    },
+                    {
+                        label: "Birthdate",
+                        value: prop(patient, 'getBirthdate'),
+                    },
+                    {
+                        label: "Home District",
+                        value: prop(patient, 'getHomeDistrict'),
+                    },
+                    {
+                        label: "Home Village",
+                        value: prop(patient, 'getHomeVillage'),
+                    },
+                    {
+                        label: "Current District",
+                        value: prop(patient, 'getCurrentDistrict'),
+                    },
+                    {
+                        label: "Current T/A",
+                        value: prop(patient, 'getCurrentTA'),
+                    }
+                ]
+            }
+        }    
     }
 }

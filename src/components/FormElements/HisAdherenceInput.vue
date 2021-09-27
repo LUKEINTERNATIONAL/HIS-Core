@@ -19,7 +19,7 @@
     </view-port>
 </template>
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 import ViewPort from '../DataViews/ViewPort.vue'
 import { modalController } from '@ionic/vue'
 import { Option } from '@/components/Forms/FieldInterface'
