@@ -141,7 +141,7 @@ export default defineComponent({
     },
     async create(form: any, computedData: any) {
         try {
-            const person: any = this.resolvePerson(computedData)
+            const person: any = PersonField.resolvePerson(computedData)
             const attributes: Array<any> = this.resolvePersonAttributes(computedData) 
 
             const registration: any = new PatientRegistrationService()
@@ -165,7 +165,7 @@ export default defineComponent({
         }
     },
     async update(computedData: any) {
-        const person: any = this.resolvePerson(computedData)
+        const person: any = PersonField.resolvePerson(computedData)
         const update = new PatientRegistrationService()
 
         update.setPersonID(this.editPerson)
@@ -188,20 +188,6 @@ export default defineComponent({
         return Object.values(form)
                     .filter((d: any) => isPlainObject(d) && 'personAttributes' in d)
                     .map(({personAttributes}: any) => personAttributes)
-    },
-    resolvePerson(computedForm: any) {
-        let data: any = {}
-        for(const attr in computedForm) {
-            const values = computedForm[attr]
-            if ('person' in values) {
-                if (isPlainObject(values.person)) {
-                    data = {...data, ...values.person}
-                } else {
-                    data[attr] = values['person']
-                }
-            }
-        }
-        return data   
     },
     mapToOption(listOptions: Array<string>): Array<Option> {
         return listOptions.map((item: any) => ({ label: item, value: item })) 

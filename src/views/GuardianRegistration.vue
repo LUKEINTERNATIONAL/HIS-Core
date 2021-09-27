@@ -75,7 +75,7 @@ export default defineComponent({
             let guardianID = -1
             if (isEmpty(this.guardianData)) {
                 const guardian: any = new PatientRegistrationService()
-                await guardian.registerGuardian(this.resolvePerson(computedData))
+                await guardian.registerGuardian(PersonField.resolvePerson(computedData))
                 guardianID = guardian.getPersonID()
             } else {
                 guardianID = this.guardianData.id
@@ -91,20 +91,6 @@ export default defineComponent({
     },
     isRegistrationMode() {
         return ['Search', 'Registration'].includes(this.fieldAction)
-    },
-    resolvePerson(computedForm: any) {
-        let data: any = {}
-        for(const attr in computedForm) {
-            const values = computedForm[attr]
-            if ('person' in values) {
-                if (isPlainObject(values.person)) {
-                    data = {...data, ...values.person}
-                } else {
-                    data[attr] = values['person']
-                }
-            }
-        }
-        return data   
     },
     toPersonData(data: any) {
         const address = data.addresses[0]
@@ -199,7 +185,7 @@ export default defineComponent({
             onload: (context: any) => {
                 context.patient = this.patientData
                 if (isEmpty(this.guardianData)) {
-                    const person = this.resolvePerson(context.cdata)
+                    const person = PersonField.resolvePerson(context.cdata)
                     context.guardian = {
                         name: `${person.given_name} ${person.family_name}`,
                         birthdate: HisDate.toStandardHisDisplayFormat(person.birthdate),

@@ -13,14 +13,28 @@ import { EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper
 import HisDate from "@/utils/Date"
 import { DateFieldInterface } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { Patientservice } from "@/services/patient_service"
+import { isPlainObject } from "lodash"
 
 function mapToOption(listOptions: Array<string>): Array<Option> {
     return listOptions.map((item: any) => ({ 
-        label: item, 
-        value: item 
+        label: item, value: item 
     })) 
 }
 export default {
+    resolvePerson(computedForm: any) {
+        let data: any = {}
+        for(const attr in computedForm) {
+            const values = computedForm[attr]
+            if ('person' in values) {
+                if (isPlainObject(values.person)) {
+                    data = {...data, ...values.person}
+                } else {
+                    data[attr] = values['person']
+                }
+            }
+        }
+        return data   
+    },
     getGivenNameField(): Field {
         return {
             id: 'given_name',
