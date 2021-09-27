@@ -118,7 +118,6 @@ export default defineComponent({
     givenNameField(): Field {
         const name: Field = PersonField.getGivenNameField()
         name.helpText = 'Guardian First name'
-        name.onload = () => this.guardianData = {}
         return name
     },
     familyNameField(): Field {
@@ -130,7 +129,9 @@ export default defineComponent({
         return PersonField.getGenderField()
     },
     dobFields(): Array<Field> {
-        return generateDateFields(PersonField.getDobConfig())
+        const dob =PersonField.getDobConfig() 
+        dob.onload = () => this.guardianData = {} //Clear guardian data loaded elsewhere
+        return generateDateFields(dob)
     },
     homeRegionField(): Field {
         return PersonField.getHomeRegionField()
@@ -168,8 +169,17 @@ export default defineComponent({
             helpText: 'Select relationship type',
             type: FieldType.TT_RELATION_SELECTION,
             onload: (context: any) => {
-                context.guardian = this.guardianData
                 context.patient = this.patientData
+                if (isEmpty(this.guardianData)) {
+                    const person = this.resolvePerson(context.cdata)
+                    context.guardian = {
+                        name: `${person.given_name} ${person.family_name}`,
+                        birthdate: HisDate.toStandardHisDisplayFormat(person.birthdate),
+                        homeAddress: `${person.home_district} ${person.home_traditional_authority}`
+                    }
+                } else {
+                    context.guardian = this.guardianData
+                }
             },
             options: async() => {
                 const relationships = await RelationsService.getRelations()
