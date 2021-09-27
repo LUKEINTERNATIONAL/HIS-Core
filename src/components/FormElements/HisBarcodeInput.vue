@@ -1,20 +1,17 @@
 <template>
-    <view-port :showFull="false">
-        <div class="view-port-content"> 
-            <barcode-input @onScan="onScan"> </barcode-input>    
-        </div>
-    </view-port>
+    <div class="his-card"> 
+        <barcode-input @onScan="onScan"> </barcode-input>    
+    </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
 import FieldMixinVue from './FieldMixin.vue'
 import BarcodeInput from "@/components/BarcodeInput.vue"
-import ViewPort from '../DataViews/ViewPort.vue'
 
 export default defineComponent({
     mixins: [FieldMixinVue],
-    components: { BarcodeInput, ViewPort },
+    components: { BarcodeInput },
     methods: {
         onScan(text: string) {
             this.$emit('onValue', text)
@@ -22,3 +19,8 @@ export default defineComponent({
     }
 })
 </script>
+<style scoped>
+    .his-card {
+        margin: 2%;
+    }
+</style>
