@@ -6,6 +6,20 @@ import { PersonAttributeService } from '@/services/person_attributes_service'
 import { AppEncounterService } from "./app_encounter_service"
 import { PatientPrintoutService } from "@/services/patient_printout_service";
 
+export const LAND_MARK_LOCATIONS  = [
+    'Catholic Church',
+    'CCAP',
+    'Seventh Day',
+    'Mosque',
+    'Primary School',
+    'Borehole',
+    'Secondary School',
+    'College',
+    'Market',
+    'Football Ground',
+    'Other'
+]
+
 export class PatientRegistrationService extends Service {
     personId: number
     constructor() {
@@ -28,6 +42,10 @@ export class PatientRegistrationService extends Service {
         await this.enrollPatient()
         await this.createRegistrationEncounterObs(person.patient_type)
         await this.printPatient()
+    }
+
+    async registerGuardian(person: any) {
+        return this.createPerson(person)
     }
 
     updatePerson(person: any) {

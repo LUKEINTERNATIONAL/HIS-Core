@@ -12,6 +12,7 @@ import {PersonService} from "@/services/person_service"
 import { EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import HisDate from "@/utils/Date"
 import { DateFieldInterface } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
+import { Patientservice } from "@/services/patient_service"
 
 function mapToOption(listOptions: Array<string>): Array<Option> {
     return listOptions.map((item: any) => ({ 
@@ -215,5 +216,47 @@ export default {
                 isFilterDataViaApi: true
             }
         }
+    },
+    getPersonAttributeOptions(person: any) {
+        const patient = new Patientservice(person);
+        const prop = (patient: any, prop: string) => prop in patient ? patient[prop]() : '-'
+        return {
+            label: patient.getPatientInfoString(),
+            value: patient.getID(),
+            other: [
+                {
+                    label: "Patient ID",
+                    value: prop(patient, 'getNationalID')
+                },
+                {
+                    label: "Name",
+                    value: prop(patient, 'getFullName'),
+                },
+                {
+                    label: "Gender",
+                    value: prop(patient, 'getGender'),
+                },
+                {
+                    label: "Birthdate",
+                    value: prop(patient, 'getBirthdate'),
+                },
+                {
+                    label: "Home District",
+                    value: prop(patient, 'getHomeDistrict'),
+                },
+                {
+                    label: "Home Village",
+                    value: prop(patient, 'getHomeVillage'),
+                },
+                {
+                    label: "Current District",
+                    value: prop(patient, 'getCurrentDistrict'),
+                },
+                {
+                    label: "Current T/A",
+                    value: prop(patient, 'getCurrentTA'),
+                }
+            ]
+        }    
     }
 }

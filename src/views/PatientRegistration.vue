@@ -23,7 +23,7 @@ import { toastWarning, toastDanger } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
 import { isPlainObject, isEmpty, findIndex } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
-import { PatientRegistrationService } from "@/services/patient_registration_service"
+import { PatientRegistrationService, LAND_MARK_LOCATIONS } from "@/services/patient_registration_service"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -292,19 +292,7 @@ export default defineComponent({
             computedValue: (val: Option) => ({person: val.value}),
             condition: () => this.editConditionCheck(['land_mark']),
             validation: (val: any) => Validation.required(val),
-            options: () => this.mapToOption([
-                'Catholic Church',
-                'CCAP',
-                'Seventh Day',
-                'Mosque',
-                'Primary School',
-                'Borehole',
-                'Secondary School',
-                'College',
-                'Market',
-                'Football Ground',
-                'Other'
-            ])
+            options: () => this.mapToOption(LAND_MARK_LOCATIONS)
         }
     },
     patientTypeField(): Field {

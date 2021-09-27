@@ -8,6 +8,7 @@ import HClocation from '../views/HClocation.vue';
 import SearchPatient from "@/views/SearchPatient.vue";
 import SearchClient from '../views/SearchClient.vue'
 import PatientRegistration from '../views/PatientRegistration.vue'
+import GuardianRegistration from '../views/GuardianRegistration.vue'
 import SearchResults from '../views/SearchResults.vue'
 import Example from '../views/Example.vue'
 import FindByARVNumber from '../views/FindByARVNumber.vue'
@@ -95,6 +96,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/patient/registration',
     name: 'Patient Registration',
     component: PatientRegistration
+  },
+  {
+    path: '/guardian/registration',
+    name: 'Guardian Registration',
+    component: GuardianRegistration
   },
   {
     path: '/example',

@@ -1,6 +1,8 @@
 <template>
-    <view-port :showFull="false"> 
-        <barcode-input @onScan="onScan"> </barcode-input>    
+    <view-port :showFull="false">
+        <div class="view-port-content"> 
+            <barcode-input @onScan="onScan"> </barcode-input>    
+        </div>
     </view-port>
 </template>
 
