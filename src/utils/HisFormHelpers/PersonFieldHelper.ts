@@ -203,6 +203,29 @@ export default {
             } 
         }
     },
+    getLandmarkField(): Field {
+        return {
+            id: 'landmark',
+            helpText: 'Closest Landmark or Plot Number',
+            group: 'person',
+            type: FieldType.TT_SELECT,
+            computedValue: (val: Option) => ({person: val.value}),
+            validation: (val: any) => Validation.required(val),
+            options: () => mapToOption([
+                'Catholic Church',
+                'CCAP',
+                'Seventh Day',
+                'Mosque',
+                'Primary School',
+                'Borehole',
+                'Secondary School',
+                'College',
+                'Market',
+                'Football Ground',
+                'Other'
+            ])
+        }
+    },
     getFacilityLocationField() {
         return  {
             id: 'location',
@@ -223,40 +246,43 @@ export default {
         return {
             label: patient.getPatientInfoString(),
             value: patient.getID(),
-            other: [
-                {
-                    label: "Patient ID",
-                    value: prop(patient, 'getNationalID')
-                },
-                {
-                    label: "Name",
-                    value: prop(patient, 'getFullName'),
-                },
-                {
-                    label: "Gender",
-                    value: prop(patient, 'getGender'),
-                },
-                {
-                    label: "Birthdate",
-                    value: prop(patient, 'getBirthdate'),
-                },
-                {
-                    label: "Home District",
-                    value: prop(patient, 'getHomeDistrict'),
-                },
-                {
-                    label: "Home Village",
-                    value: prop(patient, 'getHomeVillage'),
-                },
-                {
-                    label: "Current District",
-                    value: prop(patient, 'getCurrentDistrict'),
-                },
-                {
-                    label: "Current T/A",
-                    value: prop(patient, 'getCurrentTA'),
-                }
-            ]
+            other: {
+                person,
+                options: [
+                    {
+                        label: "Patient ID",
+                        value: prop(patient, 'getNationalID')
+                    },
+                    {
+                        label: "Name",
+                        value: prop(patient, 'getFullName'),
+                    },
+                    {
+                        label: "Gender",
+                        value: prop(patient, 'getGender'),
+                    },
+                    {
+                        label: "Birthdate",
+                        value: prop(patient, 'getBirthdate'),
+                    },
+                    {
+                        label: "Home District",
+                        value: prop(patient, 'getHomeDistrict'),
+                    },
+                    {
+                        label: "Home Village",
+                        value: prop(patient, 'getHomeVillage'),
+                    },
+                    {
+                        label: "Current District",
+                        value: prop(patient, 'getCurrentDistrict'),
+                    },
+                    {
+                        label: "Current T/A",
+                        value: prop(patient, 'getCurrentTA'),
+                    }
+                ]
+            }
         }    
     }
 }

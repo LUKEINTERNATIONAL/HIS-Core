@@ -23,7 +23,7 @@ import { toastWarning, toastDanger } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
 import { isPlainObject, isEmpty, findIndex } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
-import { PatientRegistrationService, LAND_MARK_LOCATIONS } from "@/services/patient_registration_service"
+import { PatientRegistrationService } from "@/services/patient_registration_service"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -284,16 +284,9 @@ export default defineComponent({
        return facility 
     },
     landmarkField(): Field {
-        return {
-            id: 'landmark',
-            helpText: 'Closest Landmark or Plot Number',
-            group: 'person',
-            type: FieldType.TT_SELECT,
-            computedValue: (val: Option) => ({person: val.value}),
-            condition: () => this.editConditionCheck(['land_mark']),
-            validation: (val: any) => Validation.required(val),
-            options: () => this.mapToOption(LAND_MARK_LOCATIONS)
-        }
+        const landmark: Field = PersonField.getLandmarkField()
+        landmark.condition = () => this.editConditionCheck(['land_mark'])
+        return landmark
     },
     patientTypeField(): Field {
         return {
@@ -432,48 +425,7 @@ export default defineComponent({
                     'family_name': form.family_name.value, 
                     'gender': form.gender.value, 
                 });
-                return patients.map((item: any) => {
-                    const patient = new Patientservice(item);
-                    const prop = (patient: any, prop: string) => prop in patient ? patient[prop]() : '-'
-                    return {
-                        label: patient.getPatientInfoString(),
-                        value: patient.getID(),
-                        other: [
-                            {
-                                label: "Patient ID",
-                                value: prop(patient, 'getNationalID')
-                            },
-                            {
-                                label: "Name",
-                                value: prop(patient, 'getFullName'),
-                            },
-                            {
-                                label: "Gender",
-                                value: prop(patient, 'getGender'),
-                            },
-                            {
-                                label: "Birthdate",
-                                value: prop(patient, 'getBirthdate'),
-                            },
-                            {
-                                label: "Home District",
-                                value: prop(patient, 'getHomeDistrict'),
-                            },
-                            {
-                                label: "Home Village",
-                                value: prop(patient, 'getHomeVillage'),
-                            },
-                            {
-                                label: "Current District",
-                                value: prop(patient, 'getCurrentDistrict'),
-                            },
-                            {
-                                label: "Current T/A",
-                                value: prop(patient, 'getCurrentTA'),
-                            }
-                        ]
-                    }
-                })
+                return patients.map((item: any) => PersonField.getPersonAttributeOptions(item))
             },
             config: {
                 hiddenFooterBtns: [
