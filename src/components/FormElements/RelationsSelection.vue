@@ -1,41 +1,43 @@
 <template>
-    <ion-row :style="{marginTop: '1%'}">
-        <ion-col>
-            <div class="tool-bar-medium-card"> 
-                <center class="relation-category"> Patient </center>
-                <ul> 
-                    <li>Name: {{patient.name}} </li>
-                    <li>Birthdate: {{patient.birthdate}} </li>
-                    <li>Home Address: {{patient.homeAddress}}</li>
-                </ul>
-            </div>
-        </ion-col>
-        <ion-col size="2"> 
-            <center class="relation-category"> TO </center>
-        </ion-col>
-        <ion-col>
-            <div class="tool-bar-medium-card"> 
-                <center class="relation-category"> Guardian </center>
-                <ul> 
-                    <li>Name: {{guardian.name}} </li>
-                    <li>Birthdate: {{guardian.birthdate}} </li>
-                    <li>Home Address: {{guardian.homeAddress}}</li>
-                </ul>
-            </div>
-        </ion-col>
-    </ion-row>
-    <view-port :style="{height: '65vh', overflowY: 'auto'}">
-        <ion-row v-for="(relations, rIndex) in relationList" :key="rIndex">
-            <ion-col size="6" v-for="(relation, iIndex) in relations" :key="iIndex">
-                <div :class="`his-card clickable ${selected === relation.label ? `active-card-color`: ''}`" 
-                    @click="onClick(relation)"> 
-                    <ul>
-                        <li><b>Relationship</b> {{relation.label}} </li>
-                        <li><b>Desc</b> {{relation.value}} </li>
+    <view-port>
+        <ion-row>
+            <ion-col>
+                <div class="tool-bar-medium-card"> 
+                    <center class="relation-category" :style="{color: '#3880ff'}"> Patient </center>
+                    <ul> 
+                        <li>Name: <b>{{patient.name}}</b> </li>
+                        <li>Birthdate: <b>{{patient.birthdate}}</b> </li>
+                        <li>Home Address: <b>{{patient.homeAddress}}</b></li>
+                    </ul>
+                </div>
+            </ion-col>
+            <ion-col size="2"> 
+                <center class="relation-category" :style="{marginTop: '20%'}"> TO </center>
+            </ion-col>
+            <ion-col>
+                <div class="tool-bar-medium-card"> 
+                    <center class="relation-category" :style="{color: '#3dc2ff'}"> Guardian </center>
+                    <ul> 
+                        <li>Name: <b>{{guardian.name}}</b> </li>
+                        <li>Birthdate: <b>{{guardian.birthdate}}</b> </li>
+                        <li>Home Address: <b>{{guardian.homeAddress}}</b></li>
                     </ul>
                 </div>
             </ion-col>
         </ion-row>
+        <div class="view-port-content">
+            <ion-row v-for="(relations, rIndex) in relationList" :key="rIndex">
+                <ion-col size="6" v-for="(relation, iIndex) in relations" :key="iIndex">
+                    <div :class="`his-card clickable ${selected === relation.label ? `active-card-color`: ''}`" 
+                        @click="onClick(relation)"> 
+                        <ul>
+                            <li>Relationship <b>{{relation.label}}</b> </li>
+                            <li>Desc <b>{{relation.value}}</b>  </li>
+                        </ul>
+                    </div>
+                </ion-col>
+            </ion-row>
+        </div>
     </view-port>
 </template>
 <script lang="ts">
@@ -71,6 +73,10 @@ export default defineComponent({
 })
 </script>
 <style scoped>
+.view-port-content {
+    overflow-x: auto;
+    height: 80%;
+}
 .tool-bar-medium-card {
     height: 105px;    
 }
