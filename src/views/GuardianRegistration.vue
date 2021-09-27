@@ -81,7 +81,7 @@ export default defineComponent({
                 guardianID = this.guardianData.id
             }
             await RelationsService.createRelation(
-                guardianID, this.patientData.id, form.relations.other.relationship_type_id
+                this.patientData.id, guardianID, form.relations.other.relationship_type_id
             )
             const nextTask = await WorkflowService.getNextTaskParams(this.patientData.id)
             this.$router.push(nextTask)
@@ -184,10 +184,15 @@ export default defineComponent({
             options: async() => {
                 const relationships = await RelationsService.getRelations()
                 return relationships.map((r: any) => ({
-                    label: r.b_is_to_a,
-                    value: r.description,
+                    label: r.b_is_to_a, 
+                    value: r.description, 
                     other: r
                 }))
+            },
+            config: {
+                hiddenFooterBtns: [
+                  'Clear'
+                ]
             }
         }
     },

@@ -2,8 +2,9 @@
     <ion-row :style="{marginTop: '1%'}">
         <ion-col>
             <div class="tool-bar-medium-card"> 
+                <center class="relation-category"> Patient </center>
                 <ul> 
-                    <li>Patient: {{patient.name}} </li>
+                    <li>Name: {{patient.name}} </li>
                     <li>Birthdate: {{patient.birthdate}} </li>
                     <li>Home Address: {{patient.homeAddress}}</li>
                 </ul>
@@ -11,8 +12,9 @@
         </ion-col>
         <ion-col>
             <div class="tool-bar-medium-card"> 
+                <center class="relation-category"> Guardian </center>
                 <ul> 
-                    <li>Gurdian: {{guardian.name}} </li>
+                    <li>Name: {{guardian.name}} </li>
                     <li>Birthdate: {{guardian.birthdate}} </li>
                     <li>Home Address: {{guardian.homeAddress}}</li>
                 </ul>
@@ -66,16 +68,25 @@ export default defineComponent({
 })
 </script>
 <style scoped>
- .his-card {
+.tool-bar-medium-card {
+    height: 105px;    
+}
+.relation-category {
+    margin-top: 1%;
+    font-size: 1.9em;
+    font-weight: bold;
+    text-align: center;
+}
+.his-card {
     height: 110px;
     margin: 0;
     padding: 0;
     overflow: hidden;
- }
- li {
+}
+li {
     list-style: none;
- }
- ion-col {
-  padding: 0.5%;
+}
+ion-col {
+    padding: 0.3%;
 }
 </style>
