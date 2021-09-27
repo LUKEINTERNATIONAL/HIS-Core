@@ -13,7 +13,13 @@ export default defineComponent({
     mixins: [FieldMixinVue],
     components: { BarcodeInput },
     methods: {
-        onScan(text: string) {
+        async onScan(text: string) {
+            if (this.onValue) {
+                const ok = await this.onValue(text)
+                if (!ok) {
+                    return
+                }
+            }
             this.$emit('onValue', text)
         }
     }

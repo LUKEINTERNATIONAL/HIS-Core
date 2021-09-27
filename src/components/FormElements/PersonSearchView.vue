@@ -25,16 +25,16 @@
                 <h3> Details: </h3>
                 <ion-list>
                     <ion-item
-                        v-for="(opt, index) in selectedResult.other"
-                        :key="index"
-                        inset="none"
-                        >
-                        <ion-label> 
-                            {{ opt.label }} 
-                        </ion-label>
-                        <ion-label slot="end"> 
-                            {{ opt.value }} 
-                        </ion-label>
+                      v-for="(opt, index) in selectedResult.other.options"
+                      :key="index"
+                      inset="none"
+                      >
+                      <ion-label> 
+                          {{ opt.label }} 
+                      </ion-label>
+                      <ion-label slot="end"> 
+                          {{ opt.value }} 
+                      </ion-label>
                     </ion-item>
                 </ion-list>
             </div>

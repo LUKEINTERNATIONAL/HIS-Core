@@ -18,14 +18,17 @@ import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import { toastWarning, toastDanger } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
+import { RelationsService } from "@/services/relations_service"
 import { isPlainObject, isEmpty, findIndex } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
-import { PatientRegistrationService, LAND_MARK_LOCATIONS } from "@/services/patient_registration_service"
+import { PatientRegistrationService } from "@/services/patient_registration_service"
 
 export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     skipSummary: false,
+    guardianData: {} as any,
+    patientData: {} as any,
     activeField: '' as string,
     fieldComponent: '' as string,
     fields: [] as Array<Field>,
@@ -35,7 +38,11 @@ export default defineComponent({
     '$route': {
         async handler({query}: any) {
             if (query.patient) {
-                this.fields = this.getFields()
+                const patient = await Patientservice.findByID(query.patient)
+                if (patient) {
+                    this.patientData = new Patientservice(patient)
+                    this.fields = this.getFields()
+                }
             }
         },
         immediate: true,
@@ -61,18 +68,24 @@ export default defineComponent({
         fields.push(this.currentVillage())
         fields.push(this.landmarkField())
         fields.push(this.cellPhoneField())
+        fields.push(this.relationsField())
         return fields
     },
-    async onFinish(_: Record<string, Option> | Record<string, null>, computedData: any) {
+    async onFinish(form: any, computedData: any) {
         try {
-            const person: any = this.resolvePerson(computedData)
-
-            const registration: any = new PatientRegistrationService()
-            await registration.registerGuardian(person)
-
-            const nextTask = await WorkflowService.getNextTaskParams(
-                registration.getPersonID()
+            let guardianID = -1
+            const patientID = this.patientData.getID()
+            if (isEmpty(this.guardianData)) {
+                const guardian: any = new PatientRegistrationService()
+                await guardian.registerGuardian(this.resolvePerson(computedData))
+                guardianID = guardian.getPersonID()
+            } else {
+                guardianID = this.guardianData.person_id
+            }
+            await RelationsService.createRelation(
+                guardianID, patientID, form.relations.other.relatonship_type_id
             )
+            const nextTask = await WorkflowService.getNextTaskParams(patientID)
             this.$router.push(nextTask)
         }catch(e) {
             toastDanger(e)
@@ -95,16 +108,10 @@ export default defineComponent({
     mapToOption(listOptions: Array<string>): Array<Option> {
         return listOptions.map((item: any) => ({ label: item, value: item })) 
     },
-    scanGuardian(): Field {
-        return {
-            id: 'scan',
-            helpText: 'Scan or Register Guardian',
-            type: FieldType.TT_BARCODE
-        }
-    },
     givenNameField(): Field {
         const name: Field = PersonField.getGivenNameField()
         name.helpText = 'Guardian First name'
+        name.onload = () => this.guardianData = {}
         return name
     },
     familyNameField(): Field {
@@ -146,14 +153,57 @@ export default defineComponent({
         return PersonField.getCellNumberField()
     },
     landmarkField(): Field {
+        return PersonField.getLandmarkField()
+    },
+    relationsField(): Field {
         return {
-            id: 'landmark',
-            helpText: 'Closest Landmark or Plot Number',
-            group: 'person',
-            type: FieldType.TT_SELECT,
-            computedValue: (val: Option) => ({person: val.value}),
-            validation: (val: any) => Validation.required(val),
-            options: () => this.mapToOption(LAND_MARK_LOCATIONS)
+            id: 'relations',
+            helpText: 'Select relationship type',
+            type: FieldType.TT_RELATION_SELECTION,
+            options: async() => {
+                const relationships = await RelationsService.getRelations()
+                return relationships.map((r: any) => ({
+                    label: r.b_is_to_a,
+                    value: r.description,
+                    other: r
+                }))
+            }
+        }
+    },
+    scanGuardian(): Field {
+        return {
+            id: 'scan',
+            helpText: 'Scan or Register Guardian',
+            type: FieldType.TT_BARCODE,
+            requireNext: false,
+            onValue: async (id: string) => {
+                const searchResults = await Patientservice.findByNpid(id)
+                if (searchResults) {
+                    this.guardianData = searchResults
+                    this.fieldComponent = 'relations'
+                }
+                return false
+            },
+            config: {
+                hiddenFooterBtns: [
+                    'Clear'
+                ],
+                footerBtns : [
+                    {
+                        name: 'Find or Register Guardian',
+                        size: 'large',
+                        color: 'success',
+                        slot: 'end',
+                        visible: true,
+                        onClick: () => {
+                            this.fieldComponent = 'given_name'
+                        },
+                        visibleOnStateChange: (state: any) => {
+                            return state.field.id === 'scan'
+                        }
+                    }
+                ]
+            }
         }
     },
     searchResultField(): Field {
@@ -164,14 +214,15 @@ export default defineComponent({
             appearInSummary: () => false,
             onValue: (val: Option, { env }: any) => {
                 const btns = env.footer.footerBtns
-                const confirmIndex = findIndex(btns, { name: 'Continue Guardian' })
+                const newGuardianIndex = findIndex(btns, { name: 'Continue Guardian' })
                 if (!isEmpty(val)) {
-                    env.footer.footerBtns[confirmIndex].visible = true
-                    env.footer.footerBtns[confirmIndex].onClick = () => {
-                       return this.$router.push(`/patients/confirm?person_id=${val.value}`)
+                    env.footer.footerBtns[newGuardianIndex].visible = true
+                    env.footer.footerBtns[newGuardianIndex].onClick = () => {
+                       this.guardianData = val.other.person
+                       this.fieldComponent = 'relations'
                     }
                 } else {
-                    env.footer.footerBtns[confirmIndex].visible = false
+                    env.footer.footerBtns[newGuardianIndex].visible = false
                 }
                 return true
             },
