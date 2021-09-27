@@ -25,7 +25,7 @@
                 <h3> Details: </h3>
                 <ion-list>
                     <ion-item
-                      v-for="(opt, index) in selectedResult.other.options"
+                      v-for="(opt, index) in selectedResult?.other?.options || []"
                       :key="index"
                       inset="none"
                       >

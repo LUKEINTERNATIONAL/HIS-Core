@@ -1,7 +1,7 @@
 <template>
   <his-standard-form
     @onIndex="fieldComponent=''" 
-    :skipSummary="skipSummary"
+    :skipSummary="true"
     :activeField="fieldComponent" 
     :fields="fields" 
     @onFinish="onFinish"
@@ -16,7 +16,7 @@ import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
-import { toastWarning, toastDanger } from "@/utils/Alerts"
+import { toastDanger } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
 import { RelationsService } from "@/services/relations_service"
 import { isPlainObject, isEmpty, findIndex } from "lodash"
@@ -26,7 +26,6 @@ import { PatientRegistrationService } from "@/services/patient_registration_serv
 export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
-    skipSummary: false,
     guardianData: {} as any,
     patientData: {} as any,
     activeField: '' as string,
@@ -40,7 +39,7 @@ export default defineComponent({
             if (query.patient) {
                 const patient = await Patientservice.findByID(query.patient)
                 if (patient) {
-                    this.patientData = new Patientservice(patient)
+                    this.patientData = this.toPersonData(patient.person)
                     this.fields = this.getFields()
                 }
             }
@@ -74,18 +73,17 @@ export default defineComponent({
     async onFinish(form: any, computedData: any) {
         try {
             let guardianID = -1
-            const patientID = this.patientData.getID()
             if (isEmpty(this.guardianData)) {
                 const guardian: any = new PatientRegistrationService()
                 await guardian.registerGuardian(this.resolvePerson(computedData))
                 guardianID = guardian.getPersonID()
             } else {
-                guardianID = this.guardianData.person_id
+                guardianID = this.guardianData.id
             }
             await RelationsService.createRelation(
-                guardianID, patientID, form.relations.other.relatonship_type_id
+                guardianID, this.patientData.id, form.relations.other.relatonship_type_id
             )
-            const nextTask = await WorkflowService.getNextTaskParams(patientID)
+            const nextTask = await WorkflowService.getNextTaskParams(this.patientData.id)
             this.$router.push(nextTask)
         }catch(e) {
             toastDanger(e)
@@ -104,6 +102,15 @@ export default defineComponent({
             }
         }
         return data   
+    },
+    toPersonData(data: any) {
+        const address = data.addresses[0]
+        return {
+            id: data.person_id,
+            name: `${data.names[0].given_name} ${data.names[0].family_name}`,
+            birthdate: HisDate.toStandardHisDisplayFormat(data.birthdate),
+            homeAddress: `${address.county_district} ${address.neighborhood_cell}`
+        }
     },
     mapToOption(listOptions: Array<string>): Array<Option> {
         return listOptions.map((item: any) => ({ label: item, value: item })) 
@@ -160,6 +167,10 @@ export default defineComponent({
             id: 'relations',
             helpText: 'Select relationship type',
             type: FieldType.TT_RELATION_SELECTION,
+            onload: (context: any) => {
+                context.guardian = this.guardianData
+                context.patient = this.patientData
+            },
             options: async() => {
                 const relationships = await RelationsService.getRelations()
                 return relationships.map((r: any) => ({
@@ -178,8 +189,8 @@ export default defineComponent({
             requireNext: false,
             onValue: async (id: string) => {
                 const searchResults = await Patientservice.findByNpid(id)
-                if (searchResults) {
-                    this.guardianData = searchResults
+                if (!isEmpty(searchResults)) {
+                    this.guardianData = this.toPersonData(searchResults[0].person)
                     this.fieldComponent = 'relations'
                 }
                 return false
@@ -218,7 +229,7 @@ export default defineComponent({
                 if (!isEmpty(val)) {
                     env.footer.footerBtns[newGuardianIndex].visible = true
                     env.footer.footerBtns[newGuardianIndex].onClick = () => {
-                       this.guardianData = val.other.person
+                       this.guardianData = this.toPersonData(val.other.person.person)
                        this.fieldComponent = 'relations'
                     }
                 } else {

@@ -128,10 +128,10 @@ export default defineComponent({
         this.presets = this.editPersonData
         this.skipSummary = true
     },
-    async onFinish(_: Record<string, Option> | Record<string, null>, computedData: any) {
+    async onFinish(form: Record<string, Option> | Record<string, null>, computedData: any) {
         try {
             if (!this.isEditMode()) {
-                return this.create(computedData)
+                return this.create(form, computedData)
             } else {
                 return this.update(computedData)
             }
@@ -139,17 +139,26 @@ export default defineComponent({
             toastWarning(e)
         }
     },
-    async create(computedData: any) {
+    async create(form: any, computedData: any) {
         try {
             const person: any = this.resolvePerson(computedData)
             const attributes: Array<any> = this.resolvePersonAttributes(computedData) 
 
             const registration: any = new PatientRegistrationService()
             await registration.registerPatient(person, attributes)
-
-            const nextTask = await WorkflowService.getNextTaskParams(
-                registration.getPersonID()
-            )
+            let nextTask: any = {}
+            if (form.relationship.value === 'Yes') {
+                nextTask = { 
+                    path: '/guardian/registration', 
+                    query: {
+                        patient: registration.getPersonID() 
+                    }
+                }
+            } else {
+                nextTask = await WorkflowService.getNextTaskParams(
+                    registration.getPersonID()
+                )
+            }
             this.$router.push(nextTask)
         }catch(e) {
             toastDanger(e)
