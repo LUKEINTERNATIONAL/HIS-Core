@@ -117,7 +117,11 @@ export default defineComponent({
                     table.td(qInterval),
                     table.td(this.report.getAgeGroup()),
                     table.td(totalRegInQuarter),
-                    table.td(0), // This column is there for show according to Mwatha
+                    table.td(0, {
+                        style: {
+                            'border-right': '5px solid black'
+                        }
+                    }), // This column is there for show according to Mwatha
                     table.td(outcomeRef['On antiretrovirals']),
                     table.td(outcomeRef['Patient died']),
                     table.td(outcomeRef['Defaulted']),
