@@ -127,13 +127,15 @@ export default defineComponent({
         width: 100%;
         position: relative;
         text-align: left;
-        border-collapse: collapse;
         padding: 1em;
     }
     .stick-report-header {
         background: white;
         position: sticky;
         top: 0;
+    }
+    table {
+        border-collapse: unset;
     }
     th {
         background: rgb(233, 233, 233);

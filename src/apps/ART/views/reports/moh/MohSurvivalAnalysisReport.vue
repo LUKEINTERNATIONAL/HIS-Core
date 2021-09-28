@@ -38,7 +38,11 @@ export default defineComponent({
                 table.thTxt('Interval (months)'),
                 table.thTxt('Sub group'),
                 table.thTxt('Total Reg (database)'),
-                table.thTxt('Total Reg (Confirmed)'),
+                table.thTxt('Total Reg (Confirmed)', {
+                    style: {
+                        borderRight: '5px solid black !important'
+                    }
+                }),
                 table.thTxt('Alive'),
                 table.thTxt('Died'),
                 table.thTxt('Defaulted'),
