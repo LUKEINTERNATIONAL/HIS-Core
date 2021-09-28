@@ -55,6 +55,7 @@ import {
     TableInterface
 } 
 from "@/components/DataViews/tables/ReportDataTable"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
   props: {
@@ -63,7 +64,7 @@ export default defineComponent({
         default: {}
     },
     columns: {
-      type: Object as PropType<ColumnInterface[]>,
+      type: Object as PropType<Array<ColumnInterface[]>>,
       required: true
     },
     rows: {
@@ -76,24 +77,27 @@ export default defineComponent({
     arrowDown: arrowDown,
     sortedIndex: -1 as number,
     sortOrder: 'descSort' as 'ascSort' | 'descSort',
-    tableColumns: [] as Array<ColumnInterface>,
+    tableColumns: [] as Array<ColumnInterface[]>,
     tableRows: [] as Array<RowInterface[]>
   }),
   watch: {
     rows: {
         handler(rows: Array<RowInterface[]>) {
             if (rows) {
-                this.tableRows = [...rows]
-                this.tableColumns = [...this.columns]
-                // if (this.showIndex()) {
-                //     this.tableRows = [...rows].map((r, i) => ([
-                //         table.td(i + 1), ...r
-                //     ]))
-                //     this.tableColumns = [table.thNum("#"), ...this.columns]
-                // } else {
-                //     this.tableRows = [...rows]
-                //     this.tableColumns = [...this.columns]
-                // }
+                const tColumns = [...this.columns]
+                const tRows = [...rows]
+                // Append numbers to table rows and columns if configuration says so
+                if (this.showIndex()) {
+                    this.tableRows = tRows.map((r, i) => ([
+                        table.td(i + 1), ...r
+                    ]))
+                    const lastColIndex = this.columns.length-1
+                    tColumns[lastColIndex] = [table.thNum("#"), ...tColumns[lastColIndex]]
+                    this.tableColumns = tColumns
+                } else {
+                    this.tableRows = tRows
+                    this.tableColumns = tColumns
+                }
             }
         },
         immediate: true,
@@ -147,6 +151,6 @@ export default defineComponent({
     }
     td {
         border-collapse: collapse;
-        border: 2px solid #c5c5c5;
+        border: 1px solid #c5c5c5;
     }
 </style>

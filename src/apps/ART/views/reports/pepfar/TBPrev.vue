@@ -36,6 +36,10 @@ export default defineComponent({
                 }),
                 table.thTxt('', { 
                     sortable: false,
+                    exportable: false 
+                }),
+                table.thTxt('', { 
+                    sortable: false,
                     exportable: false  
                 }),
                 table.thTxt('Started new on ART', { 
