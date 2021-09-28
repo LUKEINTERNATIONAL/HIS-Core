@@ -32,11 +32,11 @@
                         </ion-input>
                     </ion-col>
                 </ion-row>
-                <ion-row> 
+                <ion-row>
                     <ion-col>
-                        <div class="result-section"> 
-                            <patient-card 
-                                @click="activeInputACard=patientA"
+                        <div class="result-section">
+                            <patient-card
+                                @click="onPrimaryPatient(patientA)"
                                 v-for="(patientA, aIndex) in inputASearchResults" :key="aIndex"
                                 :patient="patientA"
                                 :isActive="activeInputACard.index === aIndex"
@@ -47,7 +47,7 @@
                     <ion-col> 
                         <div class="result-section">
                             <patient-card
-                                @click="patientB.isChecked = patientB.isChecked ? false: true"
+                                @click="onSecondaryPatient(patientB)"
                                 v-for="(patientB, bIndex) in inputBSearchResults" :key="bIndex"
                                 :patient="patientB"
                                 :isActive="patientB.isChecked"
@@ -64,7 +64,7 @@
                 <ion-button color="danger" size="large" @click="onCancel"> 
                     Cancel
                 </ion-button>
-                <ion-button color="success" size="large" slot="end" @click="changeApp"> 
+                <ion-button v-if="canMerge" color="success" size="large" slot="end" @click="changeApp"> 
                     Merge
                 </ion-button>
             </ion-toolbar>
@@ -113,10 +113,27 @@ export default defineComponent({
     computed: {
         canMerge(): boolean {
             return (!isEmpty(this.activeInputACard) 
-                    && !isEmpty(this.inputBSearchResults.filter((b: any) => b.isChecked)))
+                && !isEmpty(this.inputBSearchResults.filter((b: any) => b.isChecked)))
         }
     },
     methods: {
+        onPrimaryPatient(patient: any) {
+            this.inputBSearchResults.forEach((i: any) => {
+                if (i.id === patient.id) {
+                    this.inputBSearchResults[i.index].isChecked = false
+                }
+            })
+            this.activeInputACard = patient
+        },
+        onSecondaryPatient(patient: any) {
+            if (patient.isChecked) {
+                return this.inputBSearchResults[patient.index].isChecked = false
+            }
+            if (!isEmpty(this.activeInputACard) 
+                && patient.id != this.activeInputACard.id) {
+                this.inputBSearchResults[patient.index].isChecked = true
+            }
+        },
         async searchPatient(text: string) {
             const [givenName, familyName] = text.split(' ')
             const patients = await Patientservice.search({
