@@ -83,7 +83,9 @@ export default defineComponent({
             CHARACTERS_AND_NUMBERS_LO, 
             [
                 ['Search', 'Hide'],
-                ['Space', 'Delete']
+                ['Space', 'Delete'],
+                ['inputA', 'inputB'],
+                ['Clear']
             ]
         ] as any
     }),
@@ -103,6 +105,10 @@ export default defineComponent({
                     // Run search query
                     this.inputBSearchResults = []
                 }
+            } else if(input.match(/input/i)) {
+                this.inputFocus = input === 'inputA' ? 'inputA' : 'inputB'
+            } else if (input.match(/clear/i)) {
+                this[this.inputFocus] = ''
             } else {
                 this[this.inputFocus] = input
             }
