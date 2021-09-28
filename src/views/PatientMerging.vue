@@ -105,8 +105,10 @@ export default defineComponent({
                     // Run search query
                     this.inputBSearchResults = []
                 }
-            } else if(input.match(/input/i)) {
-                this.inputFocus = input === 'inputA' ? 'inputA' : 'inputB'
+            } else if(input.match(/inputA/i)) {
+                this.inputFocus = 'inputA'
+            } else if (input.match(/inputB/)) {
+                this.inputFocus = 'inputB'
             } else if (input.match(/clear/i)) {
                 this[this.inputFocus] = ''
             } else {
