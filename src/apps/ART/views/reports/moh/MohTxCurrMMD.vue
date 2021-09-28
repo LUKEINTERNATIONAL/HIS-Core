@@ -45,6 +45,7 @@ export default defineComponent({
         async onPeriod(_: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.report = new TxReportService()
             this.report.setOrg('moh')
             this.report.setStartDate(config.start_date)

@@ -48,6 +48,7 @@ export default defineComponent({
         async onPeriod(_: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.report = new DefaulterReportService()
             this.report.setIsPepfar(false)
             this.report.setStartDate(config.start_date)

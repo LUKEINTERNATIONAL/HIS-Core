@@ -65,6 +65,7 @@ export default defineComponent({
     methods: {
         async onPeriod(form: any) {
             this.reportReady = true
+            this.rows = []
             this.period = HisDate.toStandardHisDisplayFormat(form.date)
             this.setRows(this.appointments)
         },

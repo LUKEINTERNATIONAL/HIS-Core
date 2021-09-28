@@ -73,6 +73,7 @@ export default defineComponent({
             const resultType = form.result_type
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)

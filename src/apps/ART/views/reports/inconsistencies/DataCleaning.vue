@@ -56,6 +56,7 @@ export default defineComponent({
         async onPeriod(form: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.title = form.indicator.value
             this.report = new DataCleaningReportService()
             this.report.setStartDate(config.start_date)

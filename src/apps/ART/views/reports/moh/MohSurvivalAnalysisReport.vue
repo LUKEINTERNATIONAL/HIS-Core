@@ -81,6 +81,7 @@ export default defineComponent({
         async onPeriod({ quarter, group }: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.period = quarter.label
             this.report = new SurvivalAnalysisReportService()
             this.report.setQuarter(quarter.label)

@@ -84,6 +84,7 @@ export default defineComponent({
         async onPeriod(form: any, config: any) {
             this.reportReady = true
             this.isLoading=true
+            this.rows = []
             this.report = new DisaggregatedReportService()
             this.report.setOutcomeTable(TEMP_OUTCOME_TABLE.PATIENT_OUTCOME_TEMP)
             if (form.quarter) {
