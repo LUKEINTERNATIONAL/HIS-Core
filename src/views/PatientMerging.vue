@@ -110,10 +110,10 @@ export default defineComponent({
         keyboard: [
             CHARACTERS_AND_NUMBERS_LO, 
             [
-                ['Search', 'Hide'],
+                ['','Hide'],
                 ['Space', 'Delete'],
                 ['inputA', 'inputB'],
-                ['Clear']
+                ['Search', 'Clear']
             ]
         ] as any
     }),
