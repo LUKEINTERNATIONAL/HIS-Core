@@ -84,6 +84,7 @@ import { CHARACTERS_AND_NUMBERS_LO } from "@/components/Keyboard/KbLayouts";
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
 import { Patientservice } from "@/services/patient_service"
 import  PatientCard from "@/components/DataViews/ArtPatientCard.vue"
+import {PatientPrintoutService} from "@/services/patient_printout_service"
 import { toastDanger } from "@/utils/Alerts"
 
 import {
@@ -136,6 +137,8 @@ export default defineComponent({
                     }))
                 }
                 await Patientservice.mergePatients(payload)
+                const print = new PatientPrintoutService(this.activeInputACard.id)
+                await print.printNidLbl()
                 this.inputBSearchResults = this.inputBSearchResults.filter(
                     (r: any) => !r.isChecked
                 )
