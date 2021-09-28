@@ -4,7 +4,6 @@ import { sort } from 'fast-sort';
 export interface TableInterface {
     showIndex?: boolean;
 }
-
 export interface ColumnInterface {
     th: string | number | Date;
     type: 'string' | 'date' | 'number';
@@ -17,12 +16,10 @@ export interface ColumnInterface {
     style?: Record<string, any>;
     cssClass?: string;
 }
-
 export interface EventInterface {
     obj: 'button' | 'link' | 'cell';
     click: Function;
 }
-
 export interface RowInterface {
     td: string | number | Date;
     value?: string | number | Date;
@@ -30,23 +27,34 @@ export interface RowInterface {
     cssClass?: string;
     event?: EventInterface;
 }
-
-export function toExportableFormat(columns: ColumnInterface[], rows: Array<RowInterface[]>) {
+export function toExportableFormat(columns: Array<ColumnInterface[]>, rows: Array<RowInterface[]>) {
     const strRows: Array<any> = []
+    const strCols: Array<any> = []
     for(const index  in rows) {
         const exportableRow: any = []
         rows[index].forEach((r, i) => {
-            if ('exportable' in columns[i] && columns[i].exportable) {
+            /*
+                Last column of columns is the preferred source of reference
+                for checking if a row cell is exportable
+            */
+            const column = columns[columns.length-1][i]
+            if ('exportable' in column && column.exportable) {
                 exportableRow.push(r.value ? r.value : r.td)
             }
         })
         strRows.push(exportableRow)
     }
-    const eColumns = columns.filter(c => 'exportable' in c && c.exportable || !('exportable' in c))
-                            .map(c => c.value ? c.value : c.th)
-    return {columns: eColumns, rows: strRows}
+    for(const index  in columns) {
+        const exportableColumns: any = []
+        columns[index].forEach((c) => {
+            if (c.exportable) {
+                exportableColumns.push(c.value ? c.value : c.th)
+            } 
+        })
+        strCols.push(exportableColumns)
+    }
+    return {columns: strCols, rows: strRows}
 }
-
 function configCell(conf: any) {
     const attributes: any  = {
         th: () => {

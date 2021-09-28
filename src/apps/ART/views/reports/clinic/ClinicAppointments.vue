@@ -32,12 +32,14 @@ export default defineComponent({
         appointments: [] as any,
         reportReady: false as boolean,
         columns: [
-            table.thTxt('ARV#'),
-            table.thTxt('First name'),
-            table.thTxt('Last name'),
-            table.thTxt('Gender'),
-            table.thTxt('birthdate'),
-            table.thTxt('Current Address')
+            [
+                table.thTxt('ARV#'),
+                table.thTxt('First name'),
+                table.thTxt('Last name'),
+                table.thTxt('Gender'),
+                table.thTxt('birthdate'),
+                table.thTxt('Current Address')
+            ]
         ]
     }),
     created() {

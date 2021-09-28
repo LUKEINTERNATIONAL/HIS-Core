@@ -28,14 +28,16 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('Age group'),
-            table.thTxt('Gender'),
-            table.thTxt('Defaulted (new registration)'),
-            table.thTxt('Defaulted (old registration)'),
-            table.thTxt('Died'),
-            table.thTxt('Stopped'),
-            table.thTxt('Tranferred out'),
-            table.thTxt('Unknown')
+            [
+                table.thTxt('Age group'),
+                table.thTxt('Gender'),
+                table.thTxt('Defaulted (new registration)'),
+                table.thTxt('Defaulted (old registration)'),
+                table.thTxt('Died'),
+                table.thTxt('Stopped'),
+                table.thTxt('Tranferred out'),
+                table.thTxt('Unknown')
+            ]
         ],
         cohort: {} as any
     }),

@@ -30,13 +30,15 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('ARV#'),
-            table.thTxt('First name'),
-            table.thTxt('Last name'),
-            table.thTxt('Gender'),
-            table.thTxt('birthdate'),
-            table.thTxt('Date defaulted'),
-            table.thTxt('Address')
+            [
+                table.thTxt('ARV#'),
+                table.thTxt('First name'),
+                table.thTxt('Last name'),
+                table.thTxt('Gender'),
+                table.thTxt('birthdate'),
+                table.thTxt('Date defaulted'),
+                table.thTxt('Address')
+            ]
         ]
     }),
     created() {

@@ -29,11 +29,13 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('First name'),
-            table.thTxt('Last name'),
-            table.thTxt('Role'),
-            table.thDate('Registered on'),
-            table.thDate('Encounters created'),
+            [
+                table.thTxt('First name'),
+                table.thTxt('Last name'),
+                table.thTxt('Role'),
+                table.thDate('Registered on'),
+                table.thDate('Encounters created')
+            ]
         ]
     }),
     created() {

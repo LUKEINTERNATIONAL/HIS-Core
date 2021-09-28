@@ -34,15 +34,17 @@ export default defineComponent({
         reportType: '' as string,
         reportReady: false as boolean,
         columns: [] as Array<any>,
-        patientLevelColumns: [
-            table.thTxt('ARV#'), 
-            table.thTxt('Gender'), 
-            table.thTxt('Birthdate'), 
-            table.thTxt('Ordered'), 
-            table.thTxt('Specimen'), 
-            table.thTxt('Test'), 
-            table.thTxt('Result'), 
-            table.thTxt('Released')
+        patientLevelColumns:[ 
+            [
+                table.thTxt('ARV#'), 
+                table.thTxt('Gender'), 
+                table.thTxt('Birthdate'), 
+                table.thTxt('Ordered'), 
+                table.thTxt('Specimen'), 
+                table.thTxt('Test'), 
+                table.thTxt('Result'), 
+                table.thTxt('Released')
+            ]
         ],
         disaggregatedColumns: [
             table.thTxt('Age group'), 

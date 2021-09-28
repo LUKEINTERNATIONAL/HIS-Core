@@ -33,9 +33,11 @@ export default defineComponent({
         isLoading: false as boolean,
         reportReady: false as boolean,
         columns: [
-            table.thTxt('ARV#'), 
-            table.thTxt('Gender'), 
-            table.thTxt('DOB')
+            [
+                table.thTxt('ARV#'), 
+                table.thTxt('Gender'), 
+                table.thTxt('DOB')
+            ]
         ]
     }),
     created() {

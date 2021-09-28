@@ -31,10 +31,12 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('Age group'),
-            table.thTxt('Gender'),
-            table.thNum('3HP'),
-            table.thNum('6H')
+            [
+                table.thTxt('Age group'),
+                table.thTxt('Gender'),
+                table.thNum('3HP'),
+                table.thNum('6H')
+            ]
         ]
     }),
     created() {

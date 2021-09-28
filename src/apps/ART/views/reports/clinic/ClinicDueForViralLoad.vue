@@ -29,14 +29,16 @@ export default defineComponent({
         rows: [] as Array<any>,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('ARV#'),
-            table.thTxt('App.'),
-            table.thTxt('ART started'),
-            table.thTxt('Months on ART'), 
-            table.thTxt('Milestone'), 
-            table.thTxt("Ordered"),
-            table.thTxt("Result"), 
-            table.thTxt("Released")
+            [
+                table.thTxt('ARV#'),
+                table.thTxt('App.'),
+                table.thTxt('ART started'),
+                table.thTxt('Months on ART'), 
+                table.thTxt('Milestone'), 
+                table.thTxt("Ordered"),
+                table.thTxt("Result"), 
+                table.thTxt("Released")
+            ]
         ]
     }),
     created() {

@@ -32,18 +32,20 @@ export default defineComponent({
         rows: [] as Array<any>,
         reportReady: false as boolean,
         isLoading: false as boolean,
-        columns: [
-            table.thTxt('Reg cohort'),
-            table.thTxt('Interval (months)'),
-            table.thTxt('Sub group'),
-            table.thTxt('Total Reg (database)'),
-            table.thTxt('Total Reg (Confirmed)'),
-            table.thTxt('Alive'),
-            table.thTxt('Died'),
-            table.thTxt('Defaulted'),
-            table.thTxt('Stopped'),
-            table.thTxt('TO'),
-            table.thTxt('Unknown')
+        columns:[ 
+            [
+                table.thTxt('Reg cohort'),
+                table.thTxt('Interval (months)'),
+                table.thTxt('Sub group'),
+                table.thTxt('Total Reg (database)'),
+                table.thTxt('Total Reg (Confirmed)'),
+                table.thTxt('Alive'),
+                table.thTxt('Died'),
+                table.thTxt('Defaulted'),
+                table.thTxt('Stopped'),
+                table.thTxt('TO'),
+                table.thTxt('Unknown')
+            ]
         ]
     }),
     created() {

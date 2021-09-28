@@ -69,7 +69,7 @@ export default defineComponent({
       required: true
     },
     columns: {
-      type: Object as PropType<ColumnInterface[]>,
+      type: Object as PropType<Array<ColumnInterface[]>>,
       required: true
     },
     rows: {

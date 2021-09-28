@@ -30,12 +30,14 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('Age group'),
-            table.thTxt('Gender'),
-            table.thNum('Tx new (new on ART)'),
-            table.thNum('Tx curr (receiving ART)'),
-            table.thNum('TX curr (received IPT)'),
-            table.thNum('TX curr (screened for TB)')
+            [
+                table.thTxt('Age group'),
+                table.thTxt('Gender'),
+                table.thNum('Tx new (new on ART)'),
+                table.thNum('Tx curr (receiving ART)'),
+                table.thNum('TX curr (received IPT)'),
+                table.thNum('TX curr (screened for TB)')
+            ]
         ],
         ageGroupCohort: {} as any,
         totalNewF: [] as Array<any>,

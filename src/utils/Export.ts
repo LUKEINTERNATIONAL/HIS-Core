@@ -8,7 +8,7 @@ function convertToCsv(list: Array<any>) {
 }
 
 export function toCsv(header: Array<any>, rows: Array<any>, fileName='document') {
-    const csvContent = convertToCsv([header].concat(rows))
+    const csvContent = convertToCsv(header.concat(rows))
     const csvData = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.setAttribute('id', 'csv')
@@ -22,7 +22,7 @@ export function toCsv(header: Array<any>, rows: Array<any>, fileName='document')
 export function toTablePDF(tableColumns: Array<any>, tableRows: Array<any>, fileName='document') {
     const doc = new jsPDF()
     autoTable(doc, {
-      head: [tableColumns],
+      head: tableColumns,
       body: tableRows
     })
     doc.save(`${fileName}.pdf`)

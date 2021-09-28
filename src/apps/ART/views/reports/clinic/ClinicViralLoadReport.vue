@@ -32,13 +32,15 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('ARV#'), 
-            table.thTxt('Gender'), 
-            table.thTxt('Birthdate'), 
-            table.thTxt('Specimen'), 
-            table.thTxt('Ordered'), 
-            table.thTxt('Result'), 
-            table.thTxt('Released')
+            [
+                table.thTxt('ARV#'), 
+                table.thTxt('Gender'), 
+                table.thTxt('Birthdate'), 
+                table.thTxt('Specimen'), 
+                table.thTxt('Ordered'), 
+                table.thTxt('Result'), 
+                table.thTxt('Released')
+            ]
         ]
     }),
     created() {

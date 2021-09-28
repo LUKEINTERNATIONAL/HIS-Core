@@ -29,9 +29,11 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('Age group'),
-            table.thTxt('Gender'),
-            table.thTxt('Returned after 30+ days')
+            [       
+                table.thTxt('Age group'),
+                table.thTxt('Gender'),
+                table.thTxt('Returned after 30+ days')
+            ]
         ]
     }),
     created() {
