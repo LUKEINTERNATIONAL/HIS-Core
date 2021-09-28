@@ -36,16 +36,22 @@
                     <ion-col>
                         <div class="result-section"> 
                             <patient-card 
+                                @click="activeInputACard=patientA"
                                 v-for="(patientA, aIndex) in inputASearchResults" :key="aIndex"
-                                :patient="patientA">
+                                :patient="patientA"
+                                :isActive="activeInputACard.index === aIndex"
+                                >
                             </patient-card>
                         </div> 
                     </ion-col>
                     <ion-col> 
                         <div class="result-section">
-                            <patient-card 
+                            <patient-card
+                                @click="activeInputBCard=patientB"
                                 v-for="(patientB, bIndex) in inputBSearchResults" :key="bIndex"
-                                :patient="patientB">
+                                :patient="patientB"
+                                :isActive="activeInputBCard.index === bIndex"
+                                >
                             </patient-card>
                         </div>
                     </ion-col>
@@ -92,6 +98,8 @@ export default defineComponent({
         inputFocus: 'inputA' as 'inputA' | 'inputB' | '',
         inputASearchResults: [] as Array<any>,
         inputBSearchResults: [] as Array<any>,
+        activeInputACard: {} as any,
+        activeInputBCard: {} as any,
         keyboard: [
             CHARACTERS_AND_NUMBERS_LO, 
             [
@@ -109,9 +117,10 @@ export default defineComponent({
                 'given_name': givenName,
                 'family_name': familyName
             })
-            return patients.map((p: any) => {
+            return patients.map((p: any, i: number) => {
                 const patient = new Patientservice(p)
                 return {
+                    index: i,
                     id: patient.getID(),
                     name: patient.getFullName(),
                     birthdate: patient.getBirthdate(),
@@ -135,9 +144,11 @@ export default defineComponent({
                 input = input.replace('Search', '')
                 if (this.inputFocus === 'inputA') {
                     this.inputASearchResults = await this.searchPatient(input)
+                    this.activeInputACard = {}
                 } else {
                     // Run search query
                     this.inputBSearchResults = await this.searchPatient(input)
+                    this.activeInputBCard = {}
                 }
                 this.inputFocus = ''
             } else if(input.match(/inputA/i)) {

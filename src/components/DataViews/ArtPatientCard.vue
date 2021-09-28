@@ -1,6 +1,8 @@
 <template>
-    <div class="his-card clickable"> 
-        <li> 
+    <div class="his-card clickable"
+        :class="stateClass"
+        > 
+        <li>
             <ul> Arv# : <b>{{patient.arv}}</b></ul>
             <ul> Name : <b>{{patient.name}}</b></ul>
             <ul> Birth date : <b>{{patient.birthdate}}</b></ul>
@@ -21,6 +23,17 @@ export default defineComponent({
         patient: {
             type: Object,
             required: true
+        },
+        isActive: {
+            type: Boolean
+        }
+    },
+    computed: {
+        stateClass(): any {
+            return {
+                'active-card-color': this.isActive,
+                'inactive-card-color': !this.isActive
+            }
         }
     }
 })
