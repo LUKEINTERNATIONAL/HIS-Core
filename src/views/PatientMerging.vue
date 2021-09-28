@@ -11,6 +11,7 @@
                     <ion-col class="seperator-border"> 
                         <ion-input
                             @click="inputFocus='inputA'"
+                            placeholder="Primary patient (INPUTA)"
                             class="input_display"
                             v-model="inputA"
                             :class="{
@@ -23,11 +24,11 @@
                         <ion-input 
                             @click="inputFocus='inputB'"
                             class="input_display"
+                            placeholder="Secondary Patient (INPUTB)"
                             v-model="inputB"
                             :class="{
                                 'input-focused': 'inputB' === inputFocus
-                            }"
-                            > 
+                            }"> 
                         </ion-input>
                     </ion-col>
                 </ion-row>
@@ -61,6 +62,8 @@ import ViewPort from "@/components/DataViews/ViewPort.vue"
 import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
 import { CHARACTERS_AND_NUMBERS_LO } from "@/components/Keyboard/KbLayouts";
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
+import { Patientservice } from "@/services/patient_service"
+
 import {
     IonPage,
     IonContent,
@@ -90,21 +93,43 @@ export default defineComponent({
         ] as any
     }),
     methods: {
-        keypress(text: string) {
+        async searchPatient(text: string) {
+            const [givenName, familyName] = text.split(' ')
+            const patients = await Patientservice.search({
+                'given_name': givenName,
+                'family_name': familyName
+            })
+            return patients.map((p: any) => {
+                const patient = new Patientservice(p)
+                return {
+                    id: patient.getID(),
+                    name: patient.getFullName(),
+                    birthdate: patient.getBirthdate(),
+                    arvNum: patient.getArvNumber(),
+                    gender: patient.getGender(),
+                    homeDistrict: patient.getHomeDistrict(),
+                    homeVillage: patient.getHomeVillage(),
+                    currentDistrict: patient.getCurrentDistrict(),
+                    currentVillage: patient.getCurrentVillage(),
+                }
+            })
+        },
+        async keypress(text: string) {
             if (!this.inputFocus) {
                 return
             }
-            const input = handleVirtualInput(text, this[this.inputFocus])
+            let input = handleVirtualInput(text, this[this.inputFocus])
             if (input.match(/hide/i)) {
                 this.inputFocus = ''
             } else if (input.match(/search/i)) {
+                input = input.replace('Search', '')
                 if (this.inputFocus === 'inputA') {
-                    // Run search query
-                    this.inputASearchResults = []
+                    this.inputASearchResults = await this.searchPatient(input)
                 } else {
                     // Run search query
-                    this.inputBSearchResults = []
+                    this.inputBSearchResults = await this.searchPatient(input)
                 }
+                this.inputFocus = ''
             } else if(input.match(/inputA/i)) {
                 this.inputFocus = 'inputA'
             } else if (input.match(/inputB/)) {
