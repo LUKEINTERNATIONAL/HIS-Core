@@ -163,6 +163,11 @@ export default defineComponent({
                 this.inputFocus = 'inputB'
             } else if (input.match(/clear/i)) {
                 this[this.inputFocus] = ''
+                if (this.inputFocus === 'inputA') {
+                    this.inputASearchResults = []
+                } else {
+                    this.inputBSearchResults = []
+                }
             } else {
                 this[this.inputFocus] = input
             }
