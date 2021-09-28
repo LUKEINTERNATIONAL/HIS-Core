@@ -16,6 +16,10 @@ export class Patientservice extends Service {
         this.patient = patient;
     }
 
+    public static voidPatient(patientID: number, reason='') {
+        return super.void(`patients/${patientID}`, { reason })
+    }
+
     public static async search(params: Record<string, string>) {
         return super.getJson(`/search/patients`, params)
     }
