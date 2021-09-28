@@ -32,7 +32,7 @@
                     </ion-col>
                 </ion-row>
                 <ion-row> 
-                    <ion-col class="seperator-border"> 
+                    <ion-col> 
                         
                     </ion-col>
                     <ion-col> 
@@ -40,7 +40,7 @@
                     </ion-col>
                 </ion-row>
             </view-port>
-            <his-keyboard v-if="inputFocus" :kbConfig="keyboard" :onKeyPress="keypress" :disabled="false"> </his-keyboard>
+            <his-keyboard v-if="inputFocus" :kbConfig="keyboard" :onKeyPress="keypress"> </his-keyboard>
         </ion-content>
         <ion-footer> 
             <ion-toolbar color="dark">
@@ -77,11 +77,13 @@ export default defineComponent({
         inputA: '' as string,
         inputB: '' as string,
         inputFocus: '' as 'inputA' | 'inputB' | '',
+        inputASearchResults: [] as Array<any>,
+        inputBSearchResults: [] as Array<any>,
         keyboard: [
             CHARACTERS_AND_NUMBERS_LO, 
             [
-                ['Search', 'Space'],
-                ['Delete', 'Hide']
+                ['Search', 'Hide'],
+                ['Space', 'Delete']
             ]
         ] as any
     }),
@@ -93,6 +95,14 @@ export default defineComponent({
             const input = handleVirtualInput(text, this[this.inputFocus])
             if (input.match(/hide/i)) {
                 this.inputFocus = ''
+            } else if (input.match(/search/i)) {
+                if (this.inputFocus === 'inputA') {
+                    // Run search query
+                    this.inputASearchResults = []
+                } else {
+                    // Run search query
+                    this.inputBSearchResults = []
+                }
             } else {
                 this[this.inputFocus] = input
             }
