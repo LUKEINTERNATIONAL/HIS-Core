@@ -16,6 +16,11 @@ export class Patientservice extends Service {
         this.patient = patient;
     }
 
+    public static mergePatients(payload: any) {
+        payload['program_id'] = super.getProgramID()
+        return super.postJson('dde/patients/merge', payload)
+    }
+
     public static async search(params: Record<string, string>) {
         return super.getJson(`/search/patients`, params)
     }

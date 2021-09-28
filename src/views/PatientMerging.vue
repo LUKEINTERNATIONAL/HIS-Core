@@ -2,7 +2,11 @@
     <ion-page> 
         <ion-header> 
             <ion-toolbar>
-                <h2>Merge Clients</h2>
+                <ion-row> 
+                    <ion-col> 
+                        <h2>Merge Clients</h2>
+                    </ion-col>
+                </ion-row>
             </ion-toolbar>
         </ion-header>
         <ion-content>
@@ -61,10 +65,10 @@
         </ion-content>
         <ion-footer> 
             <ion-toolbar color="dark">
-                <ion-button color="danger" size="large" @click="onCancel"> 
+                <ion-button color="danger" size="large" router-link="/"> 
                     Cancel
                 </ion-button>
-                <ion-button v-if="canMerge" color="success" size="large" slot="end" @click="changeApp"> 
+                <ion-button v-if="canMerge" color="success" size="large" slot="end" @click="onMerge"> 
                     Merge
                 </ion-button>
             </ion-toolbar>
@@ -80,6 +84,8 @@ import { CHARACTERS_AND_NUMBERS_LO } from "@/components/Keyboard/KbLayouts";
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
 import { Patientservice } from "@/services/patient_service"
 import  PatientCard from "@/components/DataViews/ArtPatientCard.vue"
+import { toastDanger } from "@/utils/Alerts"
+
 import {
     IonPage,
     IonContent,
@@ -117,6 +123,27 @@ export default defineComponent({
         }
     },
     methods: {
+        async onMerge() {
+            try {
+                const payload = {
+                    'primary': {
+                        'patient_id': this.activeInputACard.id,
+                        'doc_id': null
+                    },
+                    'secondary': this.inputBSearchResults.map((s: any) => ({
+                        'patient_id': s.id,
+                        'doc_id': null
+                    }))
+                }
+                await Patientservice.mergePatients(payload)
+                this.inputBSearchResults = this.inputBSearchResults.filter(
+                    (r: any) => !r.isChecked
+                )
+            }catch(e) {
+                toastDanger(e)
+            }
+
+        },
         onPrimaryPatient(patient: any) {
             this.inputBSearchResults.forEach((i: any) => {
                 if (i.id === patient.id) {
