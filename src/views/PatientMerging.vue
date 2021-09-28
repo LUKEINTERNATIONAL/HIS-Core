@@ -47,10 +47,10 @@
                     <ion-col> 
                         <div class="result-section">
                             <patient-card
-                                @click="activeInputBCard=patientB"
+                                @click="patientB.isChecked = patientB.isChecked ? false: true"
                                 v-for="(patientB, bIndex) in inputBSearchResults" :key="bIndex"
                                 :patient="patientB"
-                                :isActive="activeInputBCard.index === bIndex"
+                                :isActive="patientB.isChecked"
                                 >
                             </patient-card>
                         </div>
@@ -64,7 +64,7 @@
                 <ion-button color="danger" size="large" @click="onCancel"> 
                     Cancel
                 </ion-button>
-                <ion-button v-if="canMerge" color="success" size="large" slot="end" @click="changeApp"> 
+                <ion-button color="success" size="large" slot="end" @click="changeApp"> 
                     Merge
                 </ion-button>
             </ion-toolbar>
@@ -100,7 +100,6 @@ export default defineComponent({
         inputASearchResults: [] as Array<any>,
         inputBSearchResults: [] as Array<any>,
         activeInputACard: {} as any,
-        activeInputBCard: {} as any,
         keyboard: [
             CHARACTERS_AND_NUMBERS_LO, 
             [
@@ -113,7 +112,8 @@ export default defineComponent({
     }),
     computed: {
         canMerge(): boolean {
-            return !isEmpty(this.activeInputACard) && !isEmpty(this.activeInputBCard)
+            return (!isEmpty(this.activeInputACard) 
+                    && !isEmpty(this.inputBSearchResults.filter((b: any) => b.isChecked)))
         }
     },
     methods: {
@@ -136,6 +136,7 @@ export default defineComponent({
                     homeVillage: patient.getHomeVillage(),
                     currentDistrict: patient.getCurrentDistrict(),
                     currentVillage: patient.getCurrentVillage(),
+                    isChecked: false
                 }
             })
         },
@@ -154,7 +155,6 @@ export default defineComponent({
                 } else {
                     // Run search query
                     this.inputBSearchResults = await this.searchPatient(input)
-                    this.activeInputBCard = {}
                 }
                 this.inputFocus = ''
             } else if(input.match(/inputA/i)) {
