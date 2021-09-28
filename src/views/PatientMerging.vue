@@ -76,7 +76,7 @@ export default defineComponent({
     data: () => ({
         inputA: '' as string,
         inputB: '' as string,
-        inputFocus: '' as 'inputA' | 'inputB' | '',
+        inputFocus: 'inputA' as 'inputA' | 'inputB' | '',
         inputASearchResults: [] as Array<any>,
         inputBSearchResults: [] as Array<any>,
         keyboard: [
