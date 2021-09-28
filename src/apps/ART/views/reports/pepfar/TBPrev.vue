@@ -29,16 +29,26 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('Age group'),
-            table.thTxt('Gender'),
-            table.thNum('3HP'),
-            table.thNum('6HP'),
-            table.thNum('3HP'),
-            table.thNum('6HP'),
-            table.thNum('3HP'),
-            table.thNum('6HP'),
-            table.thNum('3HP'),
-            table.thNum('6HP')
+            [
+                table.thTxt('', { sortable: false }),
+                table.thTxt('', { sortable: false }),
+                table.thTxt('Started new on ART', { colspan: 2, sortable: false }),
+                table.thTxt('Started previously on ART', { colspan: 2, sortable: false }),
+                table.thTxt('Completed New on ART', { colspan: 2, sortable: false }),
+                table.thTxt('Completed previously on ART', { colspan: 2, sortable: false })
+            ],
+            [
+                table.thTxt('Age group'),
+                table.thTxt('Gender'),
+                table.thNum('3HP'),
+                table.thNum('6HP'),
+                table.thNum('3HP'),
+                table.thNum('6HP'),
+                table.thNum('3HP'),
+                table.thNum('6HP'),
+                table.thNum('3HP'),
+                table.thNum('6HP')
+            ]
         ]
     }),
     created() {
