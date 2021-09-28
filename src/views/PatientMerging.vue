@@ -8,10 +8,10 @@
         <ion-content>
             <view-port>
                 <ion-row> 
-                    <ion-col class="seperator-border"> 
+                    <ion-col>
                         <ion-input
                             @click="inputFocus='inputA'"
-                            placeholder="Primary patient (INPUTA)"
+                            placeholder="Primary patient"
                             class="input_display"
                             v-model="inputA"
                             :class="{
@@ -24,7 +24,7 @@
                         <ion-input 
                             @click="inputFocus='inputB'"
                             class="input_display"
-                            placeholder="Secondary Patient (INPUTB)"
+                            placeholder="Secondary patient"
                             v-model="inputB"
                             :class="{
                                 'input-focused': 'inputB' === inputFocus
@@ -33,11 +33,21 @@
                     </ion-col>
                 </ion-row>
                 <ion-row> 
-                    <ion-col> 
-                        
+                    <ion-col>
+                        <div class="result-section"> 
+                            <patient-card 
+                                v-for="(patientA, aIndex) in inputASearchResults" :key="aIndex"
+                                :patient="patientA">
+                            </patient-card>
+                        </div> 
                     </ion-col>
                     <ion-col> 
-
+                        <div class="result-section">
+                            <patient-card 
+                                v-for="(patientB, bIndex) in inputBSearchResults" :key="bIndex"
+                                :patient="patientB">
+                            </patient-card>
+                        </div>
                     </ion-col>
                 </ion-row>
             </view-port>
@@ -63,7 +73,7 @@ import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
 import { CHARACTERS_AND_NUMBERS_LO } from "@/components/Keyboard/KbLayouts";
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
 import { Patientservice } from "@/services/patient_service"
-
+import  PatientCard from "@/components/DataViews/ArtPatientCard.vue"
 import {
     IonPage,
     IonContent,
@@ -75,7 +85,7 @@ import {
     IonButton,
 } from "@ionic/vue"
 export default defineComponent({
-    components: { IonPage, IonInput, IonButton, IonContent, IonRow, IonCol, IonFooter, IonHeader, ViewPort, HisKeyboard },
+    components: { PatientCard, IonPage, IonInput, IonButton, IonContent, IonRow, IonCol, IonFooter, IonHeader, ViewPort, HisKeyboard },
     data: () => ({
         inputA: '' as string,
         inputB: '' as string,
@@ -147,5 +157,9 @@ export default defineComponent({
     .input-focused {
         color: #3880ff;
         border-bottom: 3px solid #3880ff;
+    }
+    .result-section {
+        overflow-y: auto;
+        height: 70vh;
     }
 </style>
