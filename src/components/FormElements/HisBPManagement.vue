@@ -4,7 +4,7 @@
       <ion-header>
         <ion-toolbar
           ><span>BP management screening on {{ date }}</span>
-          <span slot="end"><ion-button>View/Edit riskfactors</ion-button></span>
+          <span slot="end"><ion-button @click="showRiskFactors">View/Edit riskfactors</ion-button></span>
         </ion-toolbar>
       </ion-header>
       <ion-content>
@@ -49,7 +49,8 @@ import HisTable from "@/components/DataViews/HisBasicTable.vue";
 import ViewPort from "@/components/DataViews/ViewPort.vue";
 import { isEmpty } from "lodash";
 import FieldMixinVue from "./FieldMixin.vue";
-import { IonToolbar, IonHeader, IonContent, IonGrid, IonRow, IonCol, IonCheckbox, IonButton} from "@ionic/vue"
+import { IonToolbar, IonHeader, IonContent, IonGrid, IonRow, IonCol, IonCheckbox, IonButton, modalController} from "@ionic/vue"
+import RiskFactorModal from "../DataViews/RiskFactorModal.vue";
 export default defineComponent({
   components: { ViewPort, HisTable, IonToolbar, IonHeader, IonContent, IonGrid, IonRow,  IonCheckbox, IonButton},
   mixins: [FieldMixinVue],
@@ -71,6 +72,20 @@ export default defineComponent({
     // this.cellColors = other.cellColors;
     // this.styles = this.config ? this.config.styles : [];
   },
+ methods: {
+async showRiskFactors() {
+      const modal = await modalController.create({
+        component: RiskFactorModal,
+        backdropDismiss: false,
+        cssClass: 'large-modal'
+      })
+      modal.present()
+      const { data } = await modal.onDidDismiss()
+      if (!isEmpty(data)) {
+        // this.rows = [...this.formatOrders(data), ...this.rows]
+      }
+  }
+ } 
 });
 </script>
 <style scoped>

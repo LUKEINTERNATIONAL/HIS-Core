@@ -1,81 +1,29 @@
 <template>
   <ion-header>
     <ion-toolbar>
-      <ion-title>Lab orders</ion-title>
+      <ion-title>Risk Factors</ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-content :style="{ overflowY: 'hidden', background: 'grey' }" >
   <ion-grid>
   <ion-row>
-  <ion-col size="4">
+  <ion-col >
   <ion-list :style="{overflowY: 'auto', height:'78vh'}"> 
       <ion-item
-        v-for="(data, index) in testTypes" :key="data"
-        @click="getSpecimens(data.name, index)"
-        :detail="true"
+        v-for="(data) in riskFactors" :key="data"
       > 
         <ion-label> {{ data.name }} </ion-label>
         <ion-checkbox v-model="data.isChecked" slot="start"/>
       </ion-item>
     </ion-list>
     </ion-col>
-    <ion-col 
-      :style="{overflowY: 'auto', height:'78vh'}"
-      v-if="activeIndex != null && selectedOrders.length > 0">
-    <div style="">
-      <ion-list> 
-      
-    <ion-radio-group v-model="testTypes[activeIndex]['specimen']">
-      <div class="side-title">
-        Select specimen
-      </div>
-        <!-- :color="isActive(item) ? 'primary' : ''" -->
-        <ion-item v-for="data in specimens" :key="data" > 
-      <ion-label>{{data.name}}</ion-label>
-        <ion-radio slot="start" :value="data.name" @click="addSpecimen(data)"></ion-radio>
-      </ion-item>
-    </ion-radio-group>
-    </ion-list>
-    <ion-radio-group v-model="testTypes[activeIndex]['reason']">
-      <div class="side-title">
-        Main test(s) reason
-      </div>
-        <!-- :color="isActive(item) ? 'primary' : ''" -->
-        <ion-item v-for="data in reasons" :key="data"> 
-      <ion-label>{{data}}</ion-label>
-        <ion-radio slot="start" :value="data" ></ion-radio>
-      </ion-item>
-    </ion-radio-group>
-      </div>
-      <p/>
-       <div :style="{background: 'lightyellow', height: '200px'}">
-         <table>
-           <thead>
-             <tr>
-               <td>Test</td>
-               <td>Specimen</td>
-               <td>Reason</td>
-               <td>Action</td>
-             </tr>
-           </thead>
-           <tbody>
-             <tr v-for="(data, index) in finalOrders" :key="index">
-               <td>{{data.name}}</td>
-               <td>{{data.specimen}}</td>
-               <td>{{data.reason}}</td>
-               <td><ion-button @click="removeOrder(data.currentIndex)" slot="end" color="danger">X</ion-button></td>
-             </tr>
-           </tbody>
-         </table>
-      </div>
-    </ion-col>
-  </ion-row>
+    </ion-row>
 </ion-grid> 
   </ion-content>
   <ion-footer>
     <ion-toolbar> 
-      <ion-button @click="postActivities" slot="end" :disabled="finalOrders.length === 0"> Place orders </ion-button>
-      <ion-button @click="closeModal([])" slot="start" color="danger"> Close </ion-button>
+      <ion-button @click="postActivities" slot="end" > Save </ion-button>
+      <ion-button @click="closeModal()" slot="start" color="danger"> Close </ion-button>
     </ion-toolbar>
   </ion-footer>
 </template>
@@ -91,12 +39,16 @@ import {
   IonList,
   IonItem,
   IonCheckbox,
-  IonRadioGroup,
+  IonFooter,
   IonRow,
+  IonCol,
+  IonGrid
 } from "@ionic/vue";
 import { defineComponent, PropType } from "vue";
 import { ActivityInterface } from "@/apps/interfaces/AppInterface"
-import HisMultipleSelect from "../FormElements/HisMultipleSelect.vue";
+import { MedicalHistoryService } from "@/apps/ART/services/medical_history";
+import { ConceptService } from "@/services/concept_service";
+import { ObsValue } from "@/services/observation_service";
 export default defineComponent({
   name: "Modal",
   props: {
@@ -110,24 +62,84 @@ export default defineComponent({
     },
   },
   methods: {
-   // 
-  },
-  computed: {
-   // 
-  },
-  mounted() {
-    // this.getActivities();
+    async postActivities() {
+      const patientID= `${this.$route.params.patient_id}`;
+      const history = new MedicalHistoryService(parseInt(patientID), -1)
+      const encounter = await history.createEncounter();
+
+      if(encounter) {
+        const obs: any = await this.buildObs();
+        await history.saveObservationList(obs);
+        await this.closeModal();
+      }
+    },
+    async closeModal() {
+      await modalController.dismiss()
+    },
+    async buildObs() {
+      return this.riskFactors.map((r: any) => {
+        const val = r.isChecked === true ? 'Yes' : 'No';
+        const valConcept = ConceptService.getConceptID(val, true);
+        const con = ConceptService.getConceptID(r.concept, true)
+        return {
+          'concept_id': con,
+          'value_coded': valConcept
+        }
+      });
+    }
   },
   data() {
     return {
-      content: "Content",
-      activeIndex: null as any
+      riskFactors: [
+        {name: 'Diabetes', isChecked: false, concept: 'Diabetes'},
+        {name: 'Cronic kidney disease', isChecked: false, concept: 'CKD'},
+        {name: 'Past history of IHD or CVD', isChecked: false, concept: 'history of CVD'},
+        {name: 'First degree relative with IHD or CVD <65', isChecked: false, concept: 'relative with CVD'},
+        {name: 'Patient currently smokes', isChecked: false, concept: 'patient smokes'}
+      ]
     };
   },
   components: {
-    HisMultipleSelect
-    
-    //
+    IonButton,
+    IonContent,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+    IonLabel,
+    IonList,
+    IonItem,
+    IonCheckbox,
+    IonRow,
+    IonFooter,
+    IonGrid,
+    IonCol,
   },
 });
 </script>
+<style scoped>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+ion-col {
+  border-right: solid 1px #ccc;
+}
+.side-title {
+  width: 100%;
+  padding: 0.5em;
+  text-align: center;
+  background: rgb(233, 232, 232);
+  font-size: 1.2em;
+}
+td,
+th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+</style>

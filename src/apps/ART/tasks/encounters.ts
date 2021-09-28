@@ -60,5 +60,11 @@ export const ENCOUNTERS: Array<TaskInterface> = [
     name: "Fast Track assesment",
     icon: img("fast-track.png")
     //how it's named in the database. ignore grammatical error
+  },
+  {
+    id: "BP management",
+    name: "BP management",
+    icon: img("dispensing.png")
+    //how it's named in the database. ignore grammatical error
   }
 ]
