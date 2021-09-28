@@ -1,13 +1,16 @@
 <template>
   <table class="report-table">
     <thead class='stick-report-header' v-if="tableColumns">
-        <tr>
-            <th @click="sort(columnIndex, column)"
-                :key="columnIndex" :style="column.style" :class="column.cssClass"
-                v-for="(column, columnIndex) in tableColumns" >
-                {{ column.th }}
+        <tr v-for="(columns, colIndex) in tableColumns" :key="colIndex">
+            <th v-for="(column, columnIndex) in columns" 
+                :key="columnIndex"
+                :colspan="column.colspan || 0"
+                @click="sort(columnIndex, column)"
+                :style="column.style" 
+                :class="column.cssClass">
+                {{column.th}}
                 <ion-icon
-                    v-if="sortedIndex === columnIndex"
+                    v-if="sortedIndex === columnIndex && column.sortable"
                     :icon="sortOrder==='ascSort' ? arrowUp : arrowDown"
                 ></ion-icon>
             </th>
@@ -15,8 +18,11 @@
     </thead>
     <tbody v-if="rows">
         <tr v-for="(row, rowIndex) in tableRows" :key="rowIndex">
-            <td :class="item.cssClass" :style="item.style"
-                v-for="(item, itemIndex) in row" :key="itemIndex"> 
+            <td v-for="(item, itemIndex) in row" :key="itemIndex"
+                :colspan="item.colspan || 0"
+                :class="item.cssClass" 
+                :style="item.style"
+                > 
                 <div v-if="item.event"> 
                     <a href="#" :style="item.style" :class="item.cssClass"
                         v-if="item?.event?.obj === 'link'"
@@ -43,7 +49,6 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { arrowUp, arrowDown } from "ionicons/icons";
-import table from "@/components/DataViews/tables/ReportDataTable"
 import { 
     ColumnInterface, 
     RowInterface, 
@@ -78,15 +83,17 @@ export default defineComponent({
     rows: {
         handler(rows: Array<RowInterface[]>) {
             if (rows) {
-                if (this.showIndex()) {
-                    this.tableRows = [...rows].map((r, i) => ([
-                        table.td(i + 1), ...r
-                    ]))
-                    this.tableColumns = [table.thNum("#"), ...this.columns]
-                } else {
-                    this.tableRows = [...rows]
-                    this.tableColumns = [...this.columns]
-                }
+                this.tableRows = [...rows]
+                this.tableColumns = [...this.columns]
+                // if (this.showIndex()) {
+                //     this.tableRows = [...rows].map((r, i) => ([
+                //         table.td(i + 1), ...r
+                //     ]))
+                //     this.tableColumns = [table.thNum("#"), ...this.columns]
+                // } else {
+                //     this.tableRows = [...rows]
+                //     this.tableColumns = [...this.columns]
+                // }
             }
         },
         immediate: true,
