@@ -45,6 +45,7 @@ export default defineComponent({
         async onPeriod(_: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             const data = await UserService.getSystemUsageByUsers(config.start_date, config.end_date)
             this.period = `${HisDate.toStandardHisDisplayFormat(config.start_date)}-${HisDate.toStandardHisDisplayFormat(config.end_date)}`
             this.setRows(data)
