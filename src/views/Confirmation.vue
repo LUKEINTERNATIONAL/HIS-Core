@@ -475,6 +475,6 @@ ion-col p {
 ion-card {
   height: 270px;
   padding: 0; 
-  border-radius: 15px;
+  border-radius: 6px;
 }
 </style>
