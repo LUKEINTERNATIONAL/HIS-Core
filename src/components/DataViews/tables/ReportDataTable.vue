@@ -139,6 +139,7 @@ export default defineComponent({
         top: 0;
     }
     table {
+        width: 100%;
         border-collapse: unset;
     }
     th {

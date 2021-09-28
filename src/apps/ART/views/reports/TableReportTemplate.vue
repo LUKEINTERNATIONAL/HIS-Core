@@ -6,12 +6,12 @@
   >
   </ion-loading>
   <his-standard-form
-    v-if="!reportReady"
-    @onFinish="onReportConfiguration"
+    v-if="!canShowReport"
+    @onFinish="onFinish"
     :skipSummary="true" 
     :fields="fields">
   </his-standard-form>
-  <ion-page v-if="reportReady">
+  <ion-page v-if="canShowReport">
     <ion-header>
       <ion-toolbar>
         <ion-row> 
@@ -104,11 +104,23 @@ export default defineComponent({
   },
   data: () => ({
     btns: [] as Array<any>,
+    canShowReport: false as boolean,
     logo: "/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png" as string
   }),
+  watch: {
+    reportReady: {
+      handler(ready: boolean) {
+        this.canShowReport = ready
+      }
+    }
+  },
   methods: {
     getFileName() {
       return `${this.title}-${this.period}`
+    },
+    async onFinish(f: any, c: any) {
+      this.canShowReport = true
+      await this.onReportConfiguration(f, c)
     }
   },
   created() {
@@ -140,10 +152,18 @@ export default defineComponent({
       })
     }
     this.btns.push({
-      name: "Finish",
+      name: "Back",
       size: "large",
       slot: "end",
       color: "primary",
+      visible: true,
+      onClick: () => this.canShowReport = false
+    })
+    this.btns.push({
+      name: "Finish",
+      size: "large",
+      slot: "end",
+      color: "success",
       visible: true,
       onClick: async () => this.$router.push({ path:'/' })
     })
