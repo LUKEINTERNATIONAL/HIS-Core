@@ -64,7 +64,7 @@
                 <ion-button color="danger" size="large" @click="onCancel"> 
                     Cancel
                 </ion-button>
-                <ion-button color="success" size="large" slot="end" @click="changeApp"> 
+                <ion-button v-if="canMerge" color="success" size="large" slot="end" @click="changeApp"> 
                     Merge
                 </ion-button>
             </ion-toolbar>
@@ -90,6 +90,7 @@ import {
     IonFooter,
     IonButton,
 } from "@ionic/vue"
+import { isEmpty } from 'lodash';
 export default defineComponent({
     components: { PatientCard, IonPage, IonInput, IonButton, IonContent, IonRow, IonCol, IonFooter, IonHeader, ViewPort, HisKeyboard },
     data: () => ({
@@ -110,6 +111,11 @@ export default defineComponent({
             ]
         ] as any
     }),
+    computed: {
+        canMerge(): boolean {
+            return !isEmpty(this.activeInputACard) && !isEmpty(this.activeInputBCard)
+        }
+    },
     methods: {
         async searchPatient(text: string) {
             const [givenName, familyName] = text.split(' ')
