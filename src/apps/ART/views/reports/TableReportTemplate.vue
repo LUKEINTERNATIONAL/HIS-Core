@@ -96,6 +96,8 @@ export default defineComponent({
     }
   },
   data: () => ({
+    formData: {} as any,
+    computeFormData: {} as any,
     btns: [] as Array<any>,
     isLoadingData: false as boolean,
     canShowReport: false as boolean,
@@ -105,16 +107,21 @@ export default defineComponent({
     getFileName() {
       return `${this.title}-${this.period}`
     },
-    async onFinish(f: any, c: any) {
+    async onFinish(formData: any, computedData: any) {
+      this.formData = formData
+      this.computeFormData = computedData
       this.canShowReport = true
       await this.presentLoading()
       try {
-        await this.onReportConfiguration(f, c)
+        await this.onReportConfiguration(this.formData, this.computeFormData)
         loadingController.dismiss ()
       }catch(e) {
         toastDanger(e)
         loadingController.dismiss()
       }
+    },
+    async reloadReport() {
+      await this.onFinish(this.formData, this.computeFormData)
     },
     async presentLoading() {
       const loading = await loadingController
@@ -160,6 +167,14 @@ export default defineComponent({
       color: "primary",
       visible: true,
       onClick: () => this.canShowReport = false
+    })
+    this.btns.push({
+      name: "Rebuild",
+      size: "large",
+      slot: "end",
+      color: "danger",
+      visible: true,
+      onClick: async () => this.reloadReport()
     })
     this.btns.push({
       name: "Finish",
