@@ -236,6 +236,10 @@ export const PREFERENCES = {
           {
             name: "Data Cleaning",
             route: "/data_cleaning",
+          },
+          {
+            name: "Merge patients",
+            route: "/patients/merge",
           }
         ]
       }

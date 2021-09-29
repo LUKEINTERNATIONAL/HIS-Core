@@ -10,7 +10,7 @@ import {
     MONTHLY_DAYS_LO,
     ALPHABETICAL_LO,
     QWERTY_LO,
-    SYMBOLS
+    SYMBOLS,
 } from "@/components/Keyboard/KbLayouts";
 
 export const SYMBOLS_CONFIG = [

@@ -16,6 +16,11 @@ export class Patientservice extends Service {
         this.patient = patient;
     }
 
+    public static mergePatients(payload: any) {
+        payload['program_id'] = super.getProgramID()
+        return super.postJson('dde/patients/merge', payload)
+    }
+    
     public static voidPatient(patientID: number, reason='') {
         return super.void(`patients/${patientID}`, { reason })
     }
