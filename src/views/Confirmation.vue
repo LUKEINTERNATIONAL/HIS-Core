@@ -61,7 +61,7 @@
         <ion-button
           color="danger left"
           size="large"
-          router-link="/"
+          @click="onVoid"
           v-if="isAdmin"
           >Void</ion-button
         >
@@ -110,6 +110,8 @@ import { WorkflowService } from "@/services/workflow_service"
 import PatientAlerts from "@/services/patient_alerts"
 import HisDate from "@/utils/Date"
 import { PatientPrintoutService } from "@/services/patient_printout_service";
+import { voidWithReason } from "@/utils/VoidHelper"
+
 export default defineComponent({
   name: "Home",
   components: {
@@ -148,6 +150,12 @@ export default defineComponent({
     };
   },
   methods: {
+    async onVoid() {
+      voidWithReason(async (reason: string) => {
+        await Patientservice.voidPatient(this.patientID, reason)
+        this.$router.push('/')        
+      })
+    },
     async nextTask() {
       const params = await WorkflowService.getNextTaskParams(this.patientID)
       if(params.name) {
@@ -475,6 +483,6 @@ ion-col p {
 ion-card {
   height: 270px;
   padding: 0; 
-  border-radius: 15px;
+  border-radius: 6px;
 }
 </style>

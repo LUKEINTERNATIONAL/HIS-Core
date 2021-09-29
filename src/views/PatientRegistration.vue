@@ -400,6 +400,7 @@ export default defineComponent({
             helpText: 'Search results',
             type: FieldType.TT_PERSON_RESULT_VIEW,
             appearInSummary: () => false,
+            condition: () => !this.isEditMode(),
             onValue: (val: Option, { env }: any) => {
                 const btns = env.footer.footerBtns
                 const confirmIndex = findIndex(btns, { name: 'Continue' })
