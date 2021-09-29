@@ -41,6 +41,8 @@ export default defineComponent({
   mixins: [ReportMixinVue],
   components: { IonLoading, CohortH, CohortV, CohortFt, HisStandardForm, HisFooter, IonPage, IonContent },
   data: () => ({
+    formData: {} as any,
+    computedFormData: {} as any,
     cohort: {} as any,
     vCohort: {} as any,
     btns: [] as Array<any>,
@@ -56,6 +58,8 @@ export default defineComponent({
   },
   methods: {
     async onPeriod(form: any, config: any) {
+      this.formData = form
+      this.computedFormData = config
       this.reportReady = true 
       this.isLoading = true
       this.report = new MohCohortReportService()
@@ -125,6 +129,14 @@ export default defineComponent({
           color: "primary",
           visible: true,
           onClick: async () => print(),
+        },
+        {
+          name: "Rebuild",
+          size: "large",
+          slot: "end",
+          color: "danger",
+          visible: true,
+          onClick: async () => this.onPeriod(this.formData, this.computedFormData)
         },
         {
           name: "Disaggregeted",
