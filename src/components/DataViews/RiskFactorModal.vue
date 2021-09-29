@@ -52,8 +52,8 @@ import { ObsValue } from "@/services/observation_service";
 export default defineComponent({
   name: "Modal",
   props: {
-    activities: {
-      type: Object as PropType<ActivityInterface[]>,
+    factors: {
+      type: Object,
       required: true
     },
     title: {
@@ -74,7 +74,7 @@ export default defineComponent({
       }
     },
     async closeModal() {
-      await modalController.dismiss()
+      await modalController.dismiss(this.riskFactors)
     },
     async buildObs() {
       return this.riskFactors.map((r: any) => {
@@ -98,6 +98,14 @@ export default defineComponent({
         {name: 'Patient currently smokes', isChecked: false, concept: 'patient smokes'}
       ]
     };
+  },
+  mounted() {
+    this.factors.forEach((factor: any) => {
+      if(factor.value === "Yes") {
+        const ind = this.riskFactors.findIndex(d => d.concept === factor.concept);
+        this.riskFactors[ind].isChecked = true;
+      }
+    });
   },
   components: {
     IonButton,
