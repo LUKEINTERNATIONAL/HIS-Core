@@ -13,9 +13,9 @@
   <ion-page v-if="reportReady">
     <ion-content>
       <div class="report-content" ref="cohort">
-        <cohort-v :dataparams="vCohort" ref="validation"> </cohort-v>
-        <cohort-h :reportparams="period" ref="header" :clinicName="clinicName"></cohort-h>
-        <cohort-ft :onDrillDown="onDrillDown" :params="cohort" :reportid="reportID" :quarter="period" ref="rep"> </cohort-ft>
+        <cohort-v :key="componentKey" :dataparams="vCohort" ref="validation"> </cohort-v>
+        <cohort-h :key="componentKey" :reportparams="period" ref="header" :clinicName="clinicName"></cohort-h>
+        <cohort-ft :key="componentKey" :onDrillDown="onDrillDown" :params="cohort" :reportid="reportID" :quarter="period" ref="rep"> </cohort-ft>
       </div>
     </ion-content>
     <his-footer :btns="btns"></his-footer>
@@ -42,6 +42,7 @@ export default defineComponent({
   components: { IonLoading, CohortH, CohortV, CohortFt, HisStandardForm, HisFooter, IonPage, IonContent },
   data: () => ({
     formData: {} as any,
+    componentKey: 0 as number,
     computedFormData: {} as any,
     cohort: {} as any,
     vCohort: {} as any,
@@ -57,12 +58,14 @@ export default defineComponent({
     this.fields = this.getDateDurationFields(true, true)
   },
   methods: {
-    async onPeriod(form: any, config: any) {
+    async onPeriod(form: any, config: any, regenerate=false) {
+      this.componentKey += 1
       this.formData = form
       this.computedFormData = config
       this.reportReady = true 
       this.isLoading = true
       this.report = new MohCohortReportService()
+      this.report.setRegenerate(regenerate)
       let data: any = {}
 
       if (form.quarter.value === 'custom_period') {
@@ -83,6 +86,9 @@ export default defineComponent({
         toastWarning('Unable to render report')
       }
       this.isLoading = false
+    },
+    async regenerate() {
+      await this.onPeriod(this.formData, this.computedFormData, true)
     },
     async onDrillDown(resourceId: string) {
       const columns = [
@@ -109,7 +115,6 @@ export default defineComponent({
       await this.tableDrill({ columns, onRows })
     },
     getBtns() {
-      
       return  [
         {
           name: "CSV",
@@ -131,12 +136,12 @@ export default defineComponent({
           onClick: async () => print(),
         },
         {
-          name: "Rebuild",
+          name: "Regenerate",
           size: "large",
           slot: "end",
           color: "danger",
           visible: true,
-          onClick: async () => this.onPeriod(this.formData, this.computedFormData)
+          onClick: async () => this.regenerate()
         },
         {
           name: "Disaggregeted",
