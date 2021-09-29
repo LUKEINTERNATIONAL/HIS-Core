@@ -1,10 +1,4 @@
 <template>
-  <ion-loading
-    v-if="isLoading"
-    :is-open="true"
-    message="Please wait..."
-  >
-  </ion-loading>
   <his-standard-form
     v-if="!canShowReport"
     @onFinish="onFinish"
@@ -47,14 +41,21 @@
 import { defineComponent, PropType } from "vue";
 import HisFooter from "@/components/HisDynamicNavFooter.vue";
 import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
-import { IonLoading, IonPage, IonContent, IonToolbar, IonRow, IonCol} from "@ionic/vue"
 import { Field } from '@/components/Forms/FieldInterface'
 import { toCsv, toTablePDF } from "@/utils/Export"
 import { toExportableFormat, ColumnInterface, RowInterface} from "@/components/DataViews/tables/ReportDataTable" 
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
+import { 
+  IonPage, 
+  IonContent, 
+  IonToolbar, 
+  IonRow, 
+  IonCol,
+  loadingController
+} from "@ionic/vue"
 
 export default defineComponent({
-  components: { IonLoading, HisStandardForm, ReportTable, HisFooter, IonPage, IonContent, IonToolbar, IonRow, IonCol},
+  components: { HisStandardForm, ReportTable, HisFooter, IonPage, IonContent, IonToolbar, IonRow, IonCol},
   props: {
     title: {
       type: String,
@@ -104,6 +105,7 @@ export default defineComponent({
   },
   data: () => ({
     btns: [] as Array<any>,
+    isLoadingData: false as boolean,
     canShowReport: false as boolean,
     logo: "/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png" as string
   }),
@@ -120,7 +122,17 @@ export default defineComponent({
     },
     async onFinish(f: any, c: any) {
       this.canShowReport = true
+      await this.presentLoading()
       await this.onReportConfiguration(f, c)
+      loadingController.dismiss()
+    },
+    async presentLoading() {
+      const loading = await loadingController
+        .create({
+          message: 'Please wait...',
+          backdropDismiss: false
+        })
+      await loading.present()
     }
   },
   created() {
