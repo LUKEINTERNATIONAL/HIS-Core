@@ -53,6 +53,7 @@ import {
   IonCol,
   loadingController
 } from "@ionic/vue"
+import { toastDanger } from "@/utils/Alerts";
 
 export default defineComponent({
   components: { HisStandardForm, ReportTable, HisFooter, IonPage, IonContent, IonToolbar, IonRow, IonCol},
@@ -107,8 +108,13 @@ export default defineComponent({
     async onFinish(f: any, c: any) {
       this.canShowReport = true
       await this.presentLoading()
-      await this.onReportConfiguration(f, c)
-      loadingController.dismiss()
+      try {
+        await this.onReportConfiguration(f, c)
+        loadingController.dismiss ()
+      }catch(e) {
+        toastDanger(e)
+        loadingController.dismiss()
+      }
     },
     async presentLoading() {
       const loading = await loadingController
