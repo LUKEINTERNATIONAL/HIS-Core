@@ -13,8 +13,9 @@ export class Service {
     static async getJson(url: string, params = {} as Record<string, any>) {
         const transformedUrl = `${url}?${Url.parameterizeObjToString(params)}`
         const req = await ApiClient.get(transformedUrl)
-
-        if (req && req.ok) return req?.json()
+        if (req && req.ok && [200, 201].includes(req.status)) {
+            return req?.json()
+        } 
     }
 
     static async postJson(url: string, data: any, genericError='Unable to save record') {
