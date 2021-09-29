@@ -85,7 +85,8 @@ import handleVirtualInput from "@/components/Keyboard/KbHandler"
 import { Patientservice } from "@/services/patient_service"
 import  PatientCard from "@/components/DataViews/ArtPatientCard.vue"
 import {PatientPrintoutService} from "@/services/patient_printout_service"
-import { toastDanger } from "@/utils/Alerts"
+import { alertConfirmation, toastDanger } from "@/utils/Alerts"
+import { WorkflowService } from "@/services/workflow_service"
 
 import {
     IonPage,
@@ -142,6 +143,15 @@ export default defineComponent({
                 this.inputBSearchResults = this.inputBSearchResults.filter(
                     (r: any) => !r.isChecked
                 )
+                const confrm = await alertConfirmation('Do you want to go to patient encounter?')
+                if (confrm) {
+                    const workflow: any = await WorkflowService.getNextTaskParams(this.activeInputACard.id)
+                    if (workflow.name) {
+                        this.$router.push(workflow)
+                    } else {
+                        this.$router.push(`/patient/dashboard/${this.activeInputACard.id}`)
+                    }
+                }
             }catch(e) {
                 toastDanger(e)
             }
