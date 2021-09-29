@@ -127,11 +127,16 @@ export default defineComponent({
 </script>
 
 <style scoped> 
+    a {
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1em;
+    }
     .report-table {
         width: 100%;
         position: relative;
         text-align: left;
-        padding: 1em;
+        font-size: 0.9em;
     }
     .stick-report-header {
         background: white;
@@ -143,15 +148,22 @@ export default defineComponent({
         border-collapse: unset;
     }
     th {
-        background: rgb(233, 233, 233);
+        background: #3880ff;
+        color: white;
+        padding: 0.5em;
     }
     th, td {
         width: 3%;
-        padding: 0.6em;
+        border-collapse: collapse;
         text-align: center;
     }
     td {
-        border-collapse: collapse;
-        border: 1px solid #c5c5c5;
+        border-bottom: 2px solid rgb(165, 165, 165);
+        padding: 0.5em;
+        font-weight: 500;
+        font-size: 1.2em;
+    }
+    tr:nth-child(even) {
+        background-color: #f0f0f0;
     }
 </style>

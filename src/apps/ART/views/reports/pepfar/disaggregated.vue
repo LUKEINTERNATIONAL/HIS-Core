@@ -55,8 +55,6 @@ export default defineComponent({
     },
     methods: {
         async onPeriod(_: any, config: any) {
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
             this.report = new DisaggregatedReportService()
             this.report.setQuarter('pepfar')
@@ -65,11 +63,9 @@ export default defineComponent({
             this.period = this.report.getDateIntervalPeriod()
             const isInit = await this.report.init()
             if (!isInit) {
-                this.isLoading = false
                 return toastWarning('Unable to initialise report')
             }
             await this.setTableRows()
-            this.isLoading = false
         },
         async setTableRows() {
             await this.setFemaleRows()

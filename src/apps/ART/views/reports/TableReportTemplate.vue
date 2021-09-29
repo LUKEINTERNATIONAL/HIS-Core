@@ -14,12 +14,12 @@
           </ion-col>
           <ion-col>
             <ion-row>
-              <ion-col size="2"><b>Title</b></ion-col> 
-              <ion-col> {{ title }} </ion-col>
+              <ion-col size="2">Title</ion-col> 
+              <ion-col> <b>{{ title }}</b> </ion-col>
             </ion-row>
             <ion-row> 
-              <ion-col size="2"><b>Period</b></ion-col> 
-              <ion-col> {{ period }} </ion-col>
+              <ion-col size="2">Period</ion-col> 
+              <ion-col> <b>{{ period }}</b> </ion-col>
             </ion-row>
           </ion-col>
         </ion-row>
