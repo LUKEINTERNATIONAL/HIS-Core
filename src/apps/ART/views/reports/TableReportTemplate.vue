@@ -46,10 +46,10 @@ import { toCsv, toTablePDF } from "@/utils/Export"
 import { toExportableFormat, ColumnInterface, RowInterface} from "@/components/DataViews/tables/ReportDataTable" 
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { 
-  IonPage, 
-  IonContent, 
+  IonPage,
+  IonContent,
   IonToolbar, 
-  IonRow, 
+  IonRow,
   IonCol,
   loadingController
 } from "@ionic/vue"
@@ -81,15 +81,6 @@ export default defineComponent({
       type: Array,
       default: () => []
     },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    reportReady: {
-      type: Boolean,
-      required: true,
-      default: false
-    },
     canExportPDf: {
       type: Boolean,
       default: true
@@ -109,13 +100,6 @@ export default defineComponent({
     canShowReport: false as boolean,
     logo: "/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png" as string
   }),
-  watch: {
-    reportReady: {
-      handler(ready: boolean) {
-        this.canShowReport = ready
-      }
-    }
-  },
   methods: {
     getFileName() {
       return `${this.title}-${this.period}`
