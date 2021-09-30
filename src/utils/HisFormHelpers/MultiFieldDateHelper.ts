@@ -219,8 +219,6 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         value: d(fullDate)
     })
 
-    const dayConf = field.config ? field.config : {}
-
     day.unload = (d: any, s: any, f: any, c: any) => {
         if (field.unload) {
             field.unload(d, s, f, c)
@@ -229,7 +227,6 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
 
     day.config = { 
         keyboardActions: [],
-        ...dayConf,
         year: (f: any) => f[yearID].value,
         month: (f: any) => f[monthID].value 
     }
