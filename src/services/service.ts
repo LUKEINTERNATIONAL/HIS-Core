@@ -4,6 +4,10 @@ import HisApp from "@/apps/app_lib"
 import { AppInterface } from "@/apps/interfaces/AppInterface"
 
 export class Service {
+    static ajxGet(url: string, params={}) {
+        return ApiClient.get(`${url}?${Url.parameterizeObjToString(params)}`)
+    }
+
     static async getText(url: string) {
         const req = await ApiClient.get(url)
 

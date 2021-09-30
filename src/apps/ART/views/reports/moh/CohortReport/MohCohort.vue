@@ -82,8 +82,6 @@ export default defineComponent({
         this.reportID = data.id
         this.vCohort = data.values
         this.cohort = data.values
-      } else {
-        toastWarning('Unable to render report')
       }
       this.isLoading = false
     },
