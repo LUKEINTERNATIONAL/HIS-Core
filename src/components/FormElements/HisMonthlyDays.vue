@@ -57,7 +57,7 @@ export default defineComponent({
     },
     methods: {
         generateKeypad(year: number, month: number) {
-            const days: Array<number[]> = [[]]
+            const days: Array<string[]> = [[]]
             const numberOfDays = new Date(year, month, 0).getDate()
             let row = 0
             let counter = 0
@@ -67,7 +67,7 @@ export default defineComponent({
                     days[row] = []
                     counter = 0
                 }
-                days[row].push(i + 1)
+                days[row].push(`${i + 1}`)
                 ++counter
             }
             return days
