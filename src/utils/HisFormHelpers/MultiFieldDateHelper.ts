@@ -184,6 +184,10 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         return StandardValidations.required(v)
     }
 
+    month.defaultValue = () => {
+        return getDefaultDate(field, 'Month')
+    }
+
     // DAY CONFIG
     day.condition = (f: any) => {
         return datePartCondition(f) 
@@ -199,7 +203,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     }
 
     day.defaultValue = () => {
-        return getDefaultDate(field, 'Year')
+        return getDefaultDate(field, 'Day')
     }
 
     day.computedValue = () => {
