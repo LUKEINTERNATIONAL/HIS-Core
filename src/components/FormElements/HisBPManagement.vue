@@ -10,43 +10,45 @@
       <ion-content>
         <div>
           <ion-grid>
-            <ion-row style="height: 70%">
+            <ion-row >
               <his-table :columns="columns" :rows="rows"></his-table>
             </ion-row>
-            <ion-row style="height: 30%">
+            <ion-row style="margin-top: 40vh">
+              <ion-radio-group v-model="action">
               <ion-grid>
-                <ion-col size="3">
+                <ion-row>
+
+                <ion-col size="4">
   <ion-item>
                       <ion-label>Lifestyle advice given</ion-label>
-                      <ion-checkbox></ion-checkbox>
+                      <ion-radio value="lifestyle advice given"></ion-radio>
                   </ion-item>
                 </ion-col>
-                <ion-col size="3">
+                <ion-col size="4">
 
                   <ion-item>
                       <ion-label>not yet stable on ART</ion-label>
-                      <ion-checkbox></ion-checkbox>
+                      <ion-radio value="not yet stable"></ion-radio>
                   </ion-item>
                 </ion-col>
-                <ion-col size="3">
+                <ion-col size="4">
 
                   <ion-item>
                       <ion-label>Patient declining BP drugs</ion-label>
-                      <ion-checkbox></ion-checkbox>
+                      <ion-radio value="patient declining BP drugs"></ion-radio>
                   </ion-item>
                 </ion-col>
-                <ion-col size="3">
+                <ion-col size="4">
 
                   <ion-item>
                       <ion-label>Start anti-hypertensives</ion-label>
-                      <ion-checkbox></ion-checkbox>
+                      <ion-radio value="start anti-hypertensives"></ion-radio>
                   </ion-item>
                 </ion-col>
+                </ion-row>
               </ion-grid>
-              <div>
+              </ion-radio-group>
                 
-                
-              </div>
             </ion-row>
           </ion-grid>
         </div>
@@ -60,12 +62,12 @@ import HisTable from "@/components/DataViews/HisBasicTable.vue";
 import ViewPort from "@/components/DataViews/ViewPort.vue";
 import { isEmpty } from "lodash";
 import FieldMixinVue from "./FieldMixin.vue";
-import { IonToolbar, IonHeader, IonContent, IonGrid, IonRow, IonCol, IonCheckbox, IonButton, modalController} from "@ionic/vue"
+import { IonToolbar, IonHeader, IonContent, IonGrid, IonRow, IonCol, IonRadioGroup, IonRadio, IonButton, modalController} from "@ionic/vue"
 import RiskFactorModal from "../DataViews/RiskFactorModal.vue";
 import { ConceptService } from "@/services/concept_service";
 import { ObservationService } from "@/services/observation_service";
 export default defineComponent({
-  components: { ViewPort, HisTable, IonToolbar, IonHeader, IonContent, IonGrid, IonRow,  IonCheckbox, IonButton},
+  components: { ViewPort, HisTable, IonToolbar, IonHeader, IonContent, IonGrid, IonRow,  IonButton, IonRadioGroup, IonRadio},
   mixins: [FieldMixinVue],
   data: () => ({
     columns: ['Date', 'Systolic', 'Diastolic', 'BP Drugs', 'Action / Note'] as Array<string>,
@@ -74,7 +76,8 @@ export default defineComponent({
     cellColors: [] as Array<any>,
     styles: [] as Array<string>,
     patientID: 0 as any,
-    riskFactors: [] as any
+    riskFactors: [] as any,
+    action: null as any
   }),
   async activated() {
     const data = await this.options(this.fdata, this.cdata, this);
