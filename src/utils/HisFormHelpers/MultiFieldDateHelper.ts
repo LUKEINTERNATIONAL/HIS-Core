@@ -101,17 +101,21 @@ async function getDefaultDate(field: DateFieldInterface, datePart: 'Year' | 'Mon
     return ''
 }
 
+function d(date: string) {
+    return HisDate.toStandardHisDisplayFormat(date)
+}
+
 function validateMinMax(date: string, field: DateFieldInterface, form: any, computed: any) {
     if (field.minDate) {
         const min = field.minDate(form, computed)
         if (new Date(date) < new Date(min)) {
-            return [`${date} is less than minimum date of ${min}`]
+            return [`${d(date)} is less than minimum date of ${d(min)}`]
         }
     }
     if (field.maxDate) {
         const max = field.maxDate(form, computed)
         if (new Date(date) > new Date(max)) {
-            return [`${date} is greater than max date of  ${max}`]
+            return [`${d(date)} is greater than max date of  ${d(max)}`]
         }
     }
 }
@@ -212,7 +216,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
 
     day.summaryMapValue = () => ({
         label: `${field.helpText} Date`,
-        value: HisDate.toStandardHisDisplayFormat(fullDate)
+        value: d(fullDate)
     })
 
     const dayConf = field.config ? field.config : {}
@@ -260,7 +264,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
 
     ageEstimate.summaryMapValue = ({ label }: Option) => ({ 
         label: `${field.helpText} Date Estimate`,
-        value: `${label} (${HisDate.toStandardHisDisplayFormat(fullDate)})`
+        value: `${label} (${d(fullDate)})`
     })
 
     // DURATION ESTIMATE
@@ -286,7 +290,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
 
     durationEstimate.summaryMapValue = ({ label }: Option) => ({ 
         label: `${field.helpText} Date Estimate`,
-        value: `${label} (${HisDate.toStandardHisDisplayFormat(fullDate)})`
+        value: `${label} (${d(fullDate)})`
     })
 
     return [
