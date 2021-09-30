@@ -241,18 +241,21 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         return validateMinMax(fullDate, field, f, c)
     }
 
-    // AGE ESTIMATE CONFIG
-    ageEstimate.validation = validateValueEstimate
-
-    ageEstimate.condition = (f: any) => {
-        const estimateType = field.estimation.estimationFieldType
+    const valueEstimateCondition = (f: any, estimateType: EstimationFieldType) => {
         const conditions = [
             f[yearID].value === 'Unknown',
             field.condition ? field.condition(f) : true,
-            estimateType === EstimationFieldType.AGE_ESTIMATE_FIELD
+            field.estimation.estimationFieldType === estimateType
         ]
         return conditions.every(Boolean)
     }
+
+    // AGE ESTIMATE CONFIG
+    ageEstimate.validation = validateValueEstimate
+
+    ageEstimate.condition = (form: any) => valueEstimateCondition(
+        form, EstimationFieldType.AGE_ESTIMATE_FIELD
+    ) 
 
     ageEstimate.computedValue = (val: Option) => {
         const [year] = HisDate.estimateDateFromAge(
@@ -267,18 +270,13 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         value: `${label} (${d(fullDate)})`
     })
 
+
     // DURATION ESTIMATE
     durationEstimate.validation = validateValueEstimate
 
-    durationEstimate.condition = (f: any) => {
-        const estimateType = field.estimation.estimationFieldType
-        const conditions = [
-            f[yearID].value === 'Unknown',
-            field.condition ? field.condition(f) : true,
-            estimateType === EstimationFieldType.MONTH_ESTIMATE_FIELD
-        ]
-        return conditions.every(Boolean)
-    }
+    durationEstimate.condition = (form: any) => valueEstimateCondition(
+        form, EstimationFieldType.MONTH_ESTIMATE_FIELD
+    ) 
 
     durationEstimate.computedValue = (val: Option) => {
         const [year] = HisDate.getDateBeforeByDays(
