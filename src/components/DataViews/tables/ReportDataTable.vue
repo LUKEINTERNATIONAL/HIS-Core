@@ -56,6 +56,7 @@ import {
 } 
 from "@/components/DataViews/tables/ReportDataTable"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { isEmpty } from "lodash";
 
 export default defineComponent({
   props: {
@@ -68,7 +69,7 @@ export default defineComponent({
       required: true
     },
     rows: {
-      type: Object as PropType<RowInterface[]>,
+      type: Object as PropType<Array<RowInterface[]>>,
       required: true
     }
   },
@@ -77,31 +78,22 @@ export default defineComponent({
     arrowDown: arrowDown,
     sortedIndex: -1 as number,
     sortOrder: 'descSort' as 'ascSort' | 'descSort',
-    tableColumns: [] as Array<ColumnInterface[]>,
-    tableRows: [] as Array<RowInterface[]>
   }),
-  watch: {
-    rows: {
-        handler(rows: Array<RowInterface[]>) {
-            if (rows) {
-                const tColumns = [...this.columns]
-                const tRows = [...rows]
-                // Append numbers to table rows and columns if configuration says so
-                if (this.showIndex()) {
-                    this.tableRows = tRows.map((r, i) => ([
-                        table.td(i + 1), ...r
-                    ]))
-                    const lastColIndex = this.columns.length-1
-                    tColumns[lastColIndex] = [table.thNum("#"), ...tColumns[lastColIndex]]
-                    this.tableColumns = tColumns
-                } else {
-                    this.tableRows = tRows
-                    this.tableColumns = tColumns
-                }
-            }
-        },
-        immediate: true,
-        deep: true
+  computed: {
+    tableColumns(): Array<any[]> {
+        if (this.showIndex() && !isEmpty(this.columns)) {
+            const tcolumns: Array<any[]> = [...this.columns]
+            const lastColIndex = this.columns.length-1
+            tcolumns[lastColIndex] = [table.thNum("#"), ...tcolumns[lastColIndex]]
+            return tcolumns
+        }
+        return this.columns
+    },
+    tableRows(): Array<any[]> {
+        if (this.showIndex() && !isEmpty(this.rows)) {
+            return this.rows.map((r, i) => ([table.td(i + 1), ...r]))
+        }
+        return this.rows
     }
   },
   methods: {
