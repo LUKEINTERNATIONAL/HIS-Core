@@ -24,6 +24,7 @@ import HostConfig from '@/views/HostConfig.vue'
 import ProgramManagement from "@/views/ProgramManagement.vue"
 import LabResults from "@/views/LabResults.vue"
 import User from "@/views/NewUser.vue"
+import PatientMerging from "@/views/PatientMerging.vue"
 
 const HIS_APP_ROUTES = (() => {
   let routes: Array<RouteRecordRaw> = []
@@ -121,6 +122,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/patients/confirm',
     name: 'Patient confirmation',
     component: Confirmation
+  },
+  {
+    path: '/patients/merge',
+    name: 'Patient Merging',
+    component: PatientMerging
   },
   {
     path: '/patient/programs/:patient_id',

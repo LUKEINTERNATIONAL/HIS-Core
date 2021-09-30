@@ -129,7 +129,7 @@ export default defineComponent({
                             this.endDate = c.end_date
                         }
                     },
-                    minDate: () => this.startDate,
+                    minDate: (_: any, c: any) => c.start_date,
                     maxDate: () => maxDate,
                     estimation: {
                         allowUnknown: false

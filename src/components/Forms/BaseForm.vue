@@ -79,7 +79,9 @@ export default defineComponent({
       if (val) {
         if (this.activeField.validation) {
           const value = this.formData[this.activeField.id]
-          const errors = this.activeField.validation(value, this.formData, this.computedFormData)
+          const errors = this.activeField.validation(
+            value, this.formData, this.computedFormData
+          )
           if (errors) {
             this.emitState()
             return this.$emit('onErrors', errors)
@@ -118,6 +120,29 @@ export default defineComponent({
     onFieldActivated(fieldContext: any) {
       if (this.activeField.onload) this.activeField.onload(fieldContext)
     },
+    onComputeValue() {
+      if (this.activeField.computedValue) {
+        const id = this.activeField.id
+        if (this.formData[id]) {
+          this.computedFormData[id] = this.activeField
+          .computedValue(this.formData[id], this.formData)
+        } else {
+          this.computedFormData[id] = null
+        }
+      }
+    },
+    async onUnload(state='') {
+      if (!isEmpty(this.activeField) && this.activeField.unload) {
+        const data = this.formData[this.activeField.id]
+        if (data) {
+          await this.activeField.unload(
+            data, 
+            state, 
+            this.formData, 
+            this.computedFormData, this)
+        } 
+      }
+    },
     buildFormData(fields: Array<Field>): void {
       this.formData = {};
       fields.forEach((field) => (this.formData[field.id] = null));
@@ -126,12 +151,7 @@ export default defineComponent({
       return i >= 0 && i <= this.fields.length
     },
     async setActiveFieldValue(value: any) {
-      const { id } = this.activeField
-      this.formData[id] = value;
-      // Set computed field values seperately
-      if (this.activeField.computedValue)  {
-        this.computedFormData[id] = value != null ? this.activeField.computedValue(value, this.formData): null
-      }
+      this.formData[this.activeField.id] = value
     },
     async onNext() {
       const totalFields = this.fields.length
@@ -139,7 +159,9 @@ export default defineComponent({
       for(let i=this.activeIndex; i < totalFields; ++i) {
         const field = this.fields[i]
 
-        if (!isEmpty(this.activeField) && this.activeField.id === field.id) continue
+        if (!isEmpty(this.activeField) 
+          && this.activeField.id === field.id) 
+          continue
 
         try {
           if (field.condition && !field.condition(this.formData)) {
@@ -152,13 +174,16 @@ export default defineComponent({
         await this.setActiveField(i, 'next')
         return
       }
+      this.onComputeValue()
       this.$emit("onFinish", this.formData, this.computedFormData);
     },
     async onPrev() {
       for(let i=this.activeIndex; i >= 0; --i) {
         const field = this.fields[i]
 
-        if (!isEmpty(this.activeField) && this.activeField.id === field.id) continue
+        if (!isEmpty(this.activeField) 
+          && this.activeField.id === field.id) 
+          continue
 
         try {
           if (field.condition && !field.condition(this.formData)) {
@@ -174,11 +199,8 @@ export default defineComponent({
       this.emitState()
     },
     async setActiveField(index: number, state='' as 'init' | 'next' | 'prev') {
-      // load callback before changing active component
-      if (!isEmpty(this.activeField) && this.activeField.unload) {
-        const data = this.formData[this.activeField.id]
-        if (data) await this.activeField.unload(data, state, this.formData, this.computedFormData, this)
-      }
+      await this.onUnload(state)
+      this.onComputeValue()
       this.state = state
       this.activeIndex = index;
       this.activeField = this.fields[this.activeIndex];
@@ -186,8 +208,9 @@ export default defineComponent({
     },
     onValue(value: string | number | Option | Array<Option>) {
       this.setActiveFieldValue(value);
-
-      if ('requireNext' in this.activeField && !this.activeField.requireNext) this.onNext()
+      if ('requireNext' in this.activeField 
+        && !this.activeField.requireNext) 
+        this.onNext()
     },
     emitState() {
       this.$emit("onState", { 
