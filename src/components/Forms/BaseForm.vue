@@ -124,7 +124,7 @@ export default defineComponent({
         const id = this.activeField.id 
         if (this.formData[id] && this.formData[id].value) {
           this.computedFormData[id] = this.activeField.computedValue(
-            this.formData[id].value, this.formData
+            this.formData[id], this.formData
           )
         }
       }
