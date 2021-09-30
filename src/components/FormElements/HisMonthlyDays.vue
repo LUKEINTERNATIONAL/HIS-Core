@@ -20,21 +20,58 @@ export default defineComponent({
     mixins: [FieldMixinVue],
     data: ()=>({ 
         value: '',
-        keyboard: MONTHLY_DAYS
+        keyboard: [] as any
     }),
-    created() {
-        if (this.config  && this.config.keyboardActions) {
-            this.keyboard = [
-                MONTHLY_DAYS_LO,
-                this.config.keyboardActions
-            ]
-        }
-    },
-    async activated(){
+    async activated() {
         this.$emit('onFieldActivated', this)
+        let keypad: Array<any> = MONTHLY_DAYS_LO
+
+        if (this.config) {
+            // Generate dynamic keypad based on year and month configuration
+            if (this.config.year && this.config.month) {
+                keypad = this.generateKeypad(
+                    this.config.year(this.fdata), 
+                    this.config.month(this.fdata)
+                )
+            }
+            // Load secondary keyboard buttons if configured
+            if (this.config.keyboardActions) {
+                this.keyboard = [
+                    keypad, 
+                    this.config.keyboardActions
+                ]
+            } else {
+                this.keyboard = [
+                    keypad, 
+                    [
+                        ['Unknown']
+                    ]
+                ]                
+            }
+        } else {
+            // Use fixed configuration for everything
+            this.keyboard = MONTHLY_DAYS
+        }
+
         await this.setDefaultValue()
     },
     methods: {
+        generateKeypad(year: number, month: number) {
+            const days: Array<number[]> = [[]]
+            const numberOfDays = new Date(year, month, 0).getDate()
+            let row = 0
+            let counter = 0
+            for(let i=0; i < numberOfDays; ++i) {
+                if (counter > 7) {
+                    ++row
+                    days[row] = []
+                    counter = 0
+                }
+                days[row].push(i + 1)
+                ++counter
+            }
+            return days
+        },
         async setDefaultValue() {
             if (this.defaultValue && !this.value) {
                 const defaults = await this.defaultValue(this.fdata, this.cdata)

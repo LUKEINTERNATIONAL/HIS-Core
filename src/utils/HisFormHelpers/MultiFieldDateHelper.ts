@@ -121,7 +121,6 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     let yearValue = ''
     let monthValue = ''
     let dayValue = ''
-    let isEstimate = false
 
     const yearID = `year_${field.id}`
     const monthID = `month_${field.id}`
@@ -204,7 +203,6 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     }
 
     day.beforeNext = () => {
-        isEstimate = false
         return field.computeValue(fullDate, false)
     }
 
@@ -215,7 +213,12 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
 
     const dayConf = field.config ? field.config : {}
 
-    day.config = { ...dayConf, keyboardActions: [] }
+    day.config = { 
+        keyboardActions: [],
+        ...dayConf,
+        year: (f: any) => f[yearID].value,
+        month: (f: any) => f[monthID].value 
+    }
 
     const validateValueEstimate = (v: Option, f: any, c: any) => {
         if (StandardValidations.required(v)) {
@@ -242,7 +245,6 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             parseInt(val.value.toString()
         )).split('-')
         fullDate = `${year}-07-15`
-        isEstimate = true
         return field.computeValue(fullDate, true)
     }
 
@@ -269,7 +271,6 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             refDate, parseInt(val.value.toString()
         )).split('-')
         fullDate = `${year}-07-15`
-        isEstimate = true
         return field.computeValue(fullDate, true)
     }
 
