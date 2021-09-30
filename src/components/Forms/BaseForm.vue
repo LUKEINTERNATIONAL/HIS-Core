@@ -174,6 +174,7 @@ export default defineComponent({
         await this.setActiveField(i, 'next')
         return
       }
+      this.onComputeValue()
       this.$emit("onFinish", this.formData, this.computedFormData);
     },
     async onPrev() {
