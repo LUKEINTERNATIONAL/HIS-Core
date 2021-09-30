@@ -91,6 +91,7 @@ export default defineComponent({
             return this.emitState()
           } 
         }
+        this.onComputeValue()
         this.onNext();
         return
       }
@@ -118,6 +119,16 @@ export default defineComponent({
     onFieldActivated(fieldContext: any) {
       if (this.activeField.onload) this.activeField.onload(fieldContext)
     },
+    onComputeValue() {
+      if (this.activeField.computedValue)  {
+        const id = this.activeField.id 
+        if (this.formData[id] && this.formData[id].value) {
+          this.computedFormData[id] = this.activeField.computedValue(
+            this.formData[id].value, this.formData
+          )
+        }
+      }
+    },
     buildFormData(fields: Array<Field>): void {
       this.formData = {};
       fields.forEach((field) => (this.formData[field.id] = null));
@@ -127,11 +138,7 @@ export default defineComponent({
     },
     async setActiveFieldValue(value: any) {
       const { id } = this.activeField
-      this.formData[id] = value;
-      // Set computed field values seperately
-      if (this.activeField.computedValue)  {
-        this.computedFormData[id] = value != null ? this.activeField.computedValue(value, this.formData): null
-      }
+      this.formData[id] = value
     },
     async onNext() {
       const totalFields = this.fields.length
