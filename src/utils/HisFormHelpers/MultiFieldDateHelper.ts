@@ -1,8 +1,8 @@
 import { FieldType } from "@/components/Forms/BaseFormElements"
-import MonthOptions from "@/components/FormElements/Presets/MonthOptions"
+import MonthOptions from "@/utils/HisFormHelpers/MonthOptions"
 import { Field, Option } from "@/components/Forms/FieldInterface"
 import HisDate from "@/utils/Date"
-import { isEmpty } from "lodash"
+import StandardValidations from "@/components/Forms/validations/StandardValidations"
 
 export enum EstimationFieldType {
     AGE_ESTIMATE_FIELD = "age-estimate-field",
@@ -17,9 +17,7 @@ export interface EstimationInterface {
 export interface DateFieldInterface {
     id: string;
     helpText: string;
-    onload?: Function;
     condition?: Function;
-    validation?: Function;
     required?: boolean;
     defaultValue?: Function;
     minDate?(formData: any, computeForm: any): string;
@@ -31,331 +29,260 @@ export interface DateFieldInterface {
     config?: any;
 }
 
-function getDateConfig(field: DateFieldInterface) {
+export function getYearField(id: string, name: string): Field {
     return {
-        isUnknown: false,
-        builtDate: '',
-        isEstimated: false,
-        year: {
-            id: `year_${field.id}`,
-            type: 'year',
-            isEstimate: false,
-            estimateValue: '',
-            value: '',
-        },
-        month: {
-            id: `month_${field.id}`,
-            value: '01',
-            type: 'month',
-            isEstimate: true,
-            defaultEstimateValue: '07',
-        },
-        day: {
-            id: field.id,
-            value: '01',
-            type: 'day',
-            isEstimate: true,
-            defaultEstimateValue: '15',
-        }
+        id,
+        helpText: `${name} Year`,
+        appearInSummary: () => false,
+        type: FieldType.TT_NUMBER
     }
 }
 
-function hasEstimates(dateConfig: any) {
-    return Object.values(dateConfig)
-                .map((d: any) => d.isEstimate ? d.defaultEstimateValue : d.value )
-                .join('-')
+export function getMonthField(id: string, name: string): Field {
+    return {
+        id,
+        helpText: `${name} Month`,
+        appearInSummary: () => false,
+        type: FieldType.TT_SELECT,
+        options: () => MonthOptions
+    }
 }
 
-function buildDate(dateConfig: any) {
-    return Object.values(dateConfig)
-                .filter((d: any) => typeof d === 'object' && ['day', 'year', 'month'].includes(d.type))
-                .map((d: any) => d.isEstimate ? d.defaultEstimateValue : d.value )
-                .join('-')
+export function getDayField(id: string, name: string): Field {
+    return {
+        id,
+        helpText: `${name} Day`,
+        type: FieldType.TT_MONTHLY_DAYS
+    }
 }
 
-function formatDigit(s: string) {
+export function getMonthDurationEstimateField(id: string, name: string): Field {
+    return {
+        id,
+        helpText: `${name} Estimated period`,
+        type: FieldType.TT_SELECT,
+        options: () => ([
+            { label: '6 months ago', value: 180 },
+            { label: '12 months ago', value: 365 },
+            { label: '18 months ago', value: 540 },
+            { label: '24 months ago', value: 730 },
+            { label: 'Over 2 years ago', value: 730 }
+        ])
+    }
+}
+
+export function getAgeEstimateField(id: string, name: string): Field {
+    return {
+        id,
+        helpText: `${name} Age Estimate`,
+        type: FieldType.TT_NUMBER
+    }
+}
+
+function appendLeadingZero(s: string) {
     return parseInt(s) < 10 ? `0${s}` : s
 }
 
 async function getDefaultDate(field: DateFieldInterface, datePart: 'Year' | 'Month' | 'Day') {
     if (field.defaultValue) {
         const date = await field.defaultValue()
-        const [year, month, day] = date.split('-')
-        switch(datePart) {
-            case 'Year':
-                return year
-            case 'Month':
-                return parseInt(month)
-            case 'Day':
-                return parseInt(day)           
+        if (date) {
+            const [year, month, day] = date.split('-')
+            switch(datePart) {
+                case 'Year':
+                    return year || ''
+                case 'Month':
+                    return parseInt(month) || ''
+                case 'Day':
+                    return parseInt(day) || ''    
+            }
         }
     }
     return ''
 }
 
-function onValidation(
-    datePart: any,
-    dateConfig: any,
-    val: Option,
-    formData: any,
-    computedFormData: any,
-    field: DateFieldInterface) {
-    /**
-     * Run any custom validations defined in the field
-     * @param data 
-     * @returns 
-     */
-    const customValidation = (data: any) => {
-        return field.validation ? field.validation(data, formData, computedFormData) : null
-    } 
-    /**
-     * Since the date is entered on seperate fields and not
-     * all parts of a date can be available, the function below fills
-     * in the missing parts using a reference date inorder to build 
-     * a complete date.
-     * @param refDate 
-     * @returns 
-     */
-    const getInputDate = (refDate: string) => {
-        const {year, day, month} = dateConfig 
-        const [_, refM, refD] = refDate.split('-')
+function validateMinMax(date: string, field: DateFieldInterface, form: any, computed: any) {
+    if (field.minDate) {
+        const min = field.minDate(form, computed)
+        if (new Date(date) < new Date(min)) {
+            return [`${date} is less than minimum date of ${min}`]
+        }
+    }
+    if (field.maxDate) {
+        const max = field.maxDate(form, computed)
+        if (new Date(date) > new Date(max)) {
+            return [`${date} is greater than max date of  ${max}`]
+        }
+    }
+}
 
-        let inputDate = `${year.value}`
-        
-        if (month.isEstimate) {
-            inputDate += `-${refM}`
-        } else {
-            inputDate += `-${month.value}`
-        }
-        if (day.isEstimate) {
-            inputDate += `-${refD}`
-        } else {
-            inputDate += `-${day.value}`
-        }
-        return inputDate
-    } 
+export function generateDateFields(field: DateFieldInterface, refDate=''): Array<Field> {
+    let fullDate = ''
+    let yearValue = ''
+    let monthValue = ''
+    let dayValue = ''
+    let isEstimate = false
 
-    const validateMinMax = (date: string) => {
-        const strInputDate  = HisDate.toStandardHisDisplayFormat(date)
-        if (field.minDate) {
-            const minDate = field.minDate(formData, computedFormData)
-            const strMinDate = HisDate.toStandardHisDisplayFormat(minDate)
-            if (new Date(date) < new Date(minDate)) {
-                return [`${strInputDate} is less than minimum date of ${strMinDate}`]
-            }
+    const yearID = `year_${field.id}`
+    const monthID = `month_${field.id}`
+    const dayID = field.id
+    const ageEstimateID = `age_estimate_${field.id}`
+    const durationEstimateID = `duration_estimate_${field.id}`
+
+    const year = getYearField(yearID, field.helpText)
+    const month = getMonthField(monthID, field.helpText)
+    const day = getDayField(dayID, field.helpText)
+
+    const ageEstimate = getAgeEstimateField(ageEstimateID, field.helpText)
+    const durationEstimate = getMonthDurationEstimateField(durationEstimateID, field.helpText)
+
+    const datePartCondition = (f: any) => {
+        if (f[yearID] && f[yearID].value 
+            && f[yearID].value === 'Unknown') {
+            return false
         }
-        if (field.maxDate) {
-            const maxDate = field.maxDate(formData, computedFormData)
-            const strMaxDate = HisDate.toStandardHisDisplayFormat(maxDate)
-            if (new Date(date) > new Date(maxDate)) {
-                return [`${strInputDate} is greater than max date of ${strMaxDate}`]
-            }
+        return field.condition ? field.condition(f) : true
+    }
+
+    year.unload = (v: Option) => yearValue = v.value.toString()
+ 
+    // YEAR CONFIG
+    year.config = field.config
+
+    year.defaultValue = () => {
+        return getDefaultDate(field, 'Year')
+    }
+
+    year.condition = (f: any) => {
+        return field.condition ? field.condition(f) : true
+    }
+
+    year.validation = (v: Option) => {
+        if (field.required && StandardValidations.required(v)) {
+            return ['Year cannot be empty']
+        }
+        const year = v ? v.value : ''
+        if (!field.estimation.allowUnknown 
+            && year.toString().match(/unknown/i)) {
+            return ['Value unknown is not permitted']
+        }
+        if (year && year !='Unknown'
+            && isNaN(parseInt(year.toString()))
+            || year < 1900) {
+            return ['Invalid Year']
         }
         return null
     }
 
-    if (isEmpty(val) || val.value === '') { 
-        if (field.required) {
-            return ['Date value should not be empty']
-        }
-        return customValidation(val)
+    // MONTH CONFIG
+    month.unload = (v: Option) => monthValue = appendLeadingZero(v.value.toString())
+
+    month.condition = (f: any) => {
+        return datePartCondition(f)
     }
 
-    if (typeof datePart === 'object') {
-        if (datePart.type === 'year') {
-            if ('allowUnknown' in field.estimation){
-                if (!field.estimation.allowUnknown && val.value === 'Unknown') {
-                    return ['Unknown is not allowed']
-                } 
-                if (val.value === 'Unknown')  {
-                    return null
-                }
-            }
-            if (parseInt(datePart.value) < 1900) {
-                return ['Invalid Year!']
-            }
-        }
-        if (isEmpty(datePart)) {
-            const issueFound = validateMinMax(dateConfig.builtDate)
-            if (issueFound) return issueFound
-        } else {
-            if (field.minDate) {
-                const issuesFound = validateMinMax(getInputDate(field.minDate(formData, computedFormData)))
-                if (issuesFound) return issuesFound
-            }
-            if (field.maxDate) {
-                const issuesFound = validateMinMax(getInputDate(field.maxDate(formData, computedFormData)))
-                if (issuesFound) return issuesFound
-            }
-        }
+    month.validation = (v: Option) => {
+        return StandardValidations.required(v)
     }
-    return customValidation({ label: val.label, value: dateConfig.builtDate })
-}
 
-function onCondition(field: DateFieldInterface, formData: any) {
-    if (formData[`year_${field.id}`].value === 'Unknown') {
-        return false
+    // DAY CONFIG
+    day.condition = (f: any) => {
+        return datePartCondition(f) 
     }
-    return field.condition ? field.condition(formData): true 
-}
 
-export function generateDateFields(field: DateFieldInterface, currentDate=''): Array<Field>{
-    const dateConfig: any = getDateConfig(field)
-    dateConfig.day.id = field.id
-    dateConfig.month.id = `month_${field.id}`
-    dateConfig.year.id = `year_${field.id}`
+    day.validation =  (v: Option, f: any, c: any) => {
+        if (StandardValidations.required(v)) {
+            return ['Day is required for date']
+        }
+        dayValue = appendLeadingZero(v.value.toString())
+        fullDate = `${yearValue}-${monthValue}-${dayValue}`
+        return validateMinMax(fullDate, field, f, c)
+    }
+
+    day.defaultValue = () => {
+        return getDefaultDate(field, 'Year')
+    }
+
+    day.beforeNext = () => {
+        isEstimate = false
+        return field.computeValue(fullDate, false)
+    }
+
+    day.summaryMapValue = () => ({
+        label: `${field.helpText} Date`,
+        value: HisDate.toStandardHisDisplayFormat(fullDate)
+    })
+
+    const dayConf = field.config ? field.config : {}
+
+    day.config = { ...dayConf, keyboardActions: [] }
+
+    const validateValueEstimate = (v: Option, f: any, c: any) => {
+        if (StandardValidations.required(v)) {
+            return ['Please select an estimate']
+        }
+        return validateMinMax(fullDate, field, f, c)
+    }
+
+    // AGE ESTIMATE CONFIG
+    ageEstimate.validation = validateValueEstimate
+
+    ageEstimate.condition = (f: any) => {
+        const estimateType = field.estimation.estimationFieldType
+        const conditions = [
+            f[yearID].value === 'Unknown',
+            field.condition ? field.condition(f) : true,
+            estimateType === EstimationFieldType.AGE_ESTIMATE_FIELD
+        ]
+        return conditions.every(Boolean)
+    }
+
+    ageEstimate.computedValue = (val: Option) => {
+        const [year] = HisDate.estimateDateFromAge(
+            parseInt(val.value.toString()
+        )).split('-')
+        fullDate = `${year}-07-15`
+        isEstimate = true
+        return field.computeValue(fullDate, true)
+    }
+
+    ageEstimate.summaryMapValue = ({ label }: Option) => ({ 
+        label: `${field.helpText} Date Estimate`,
+        value: `${label} (${HisDate.toStandardHisDisplayFormat(fullDate)})`
+    })
+
+    // DURATION ESTIMATE
+    durationEstimate.validation = validateValueEstimate
+
+    durationEstimate.condition = (f: any) => {
+        const estimateType = field.estimation.estimationFieldType
+        const conditions = [
+            f[yearID].value === 'Unknown',
+            field.condition ? field.condition(f) : true,
+            estimateType === EstimationFieldType.MONTH_ESTIMATE_FIELD
+        ]
+        return conditions.every(Boolean)
+    }
+
+    durationEstimate.computedValue = (val: Option) => {
+        const [year] = HisDate.getDateBeforeByDays(
+            refDate, parseInt(val.value.toString()
+        )).split('-')
+        fullDate = `${year}-07-15`
+        isEstimate = true
+        return field.computeValue(fullDate, true)
+    }
+
+    durationEstimate.summaryMapValue = ({ label }: Option) => ({ 
+        label: `${field.helpText} Date Estimate`,
+        value: `${label} (${HisDate.toStandardHisDisplayFormat(fullDate)})`
+    })
 
     return [
-        {
-            id: dateConfig.year.id,
-            helpText: `${field.helpText} Year`,
-            type: FieldType.TT_NUMBER,
-            onload: (c: any) => field.onload ? field.onload(c) : null,
-            defaultValue: () => getDefaultDate(field, 'Year'),
-            appearInSummary: () => false,
-            condition: (f: any) => field.condition ? field.condition(f) : true,
-            validation: (v: Option, f: any, c: any) => {
-                if (v) {
-                    dateConfig.day.isEstimate = true
-                    dateConfig.month.isEstimate = true
-                    if (v.value != 'Unknown') {
-                        dateConfig.year.value =  v.value.toString()
-                        dateConfig.isUnknown = false
-                        dateConfig.builtDate = buildDate(dateConfig)
-                    } else {
-                        dateConfig.year.value = -1
-                        dateConfig.isUnknown = true                      
-                    }
-                }
-                return onValidation(dateConfig.year, dateConfig, v, f, c, field)
-            },
-            config: field.config
-        },
-        {
-            id: dateConfig.month.id,
-            helpText: `${field.helpText} Month`,
-            type: FieldType.TT_SELECT,
-            defaultValue: () => getDefaultDate(field, 'Month'),
-            appearInSummary: () => false,
-            options: () => MonthOptions,
-            condition: (f: any) => onCondition(field, f),
-            validation: (v: Option, f: any, c: any) => {
-                if (v) {
-                    dateConfig.day.isEstimate = true
-                    dateConfig.month.value = formatDigit(v.value.toString())
-                    dateConfig.month.isEstimate = false
-                    dateConfig.builtDate = buildDate(dateConfig)
-                }
-                return onValidation(dateConfig.month, dateConfig, v, f, c, field)
-            }
-        },
-        {
-            id: dateConfig.day.id,
-            helpText: `${field.helpText} Day`,
-            type: FieldType.TT_MONTHLY_DAYS,
-            defaultValue: () => getDefaultDate(field, 'Day'),
-            unload: (d: any, s: any, f: any, c: any) => {
-                if (field.unload) {
-                    field.unload(d, s, f, c)
-                }
-            },
-            condition: (f: any) => onCondition(field, f),
-            appearInSummary: (f: any) => {
-                return field.appearInSummary ? field.appearInSummary(f): true
-            },
-            summaryMapValue: (_: Option, f: any, computed: Record<string, any>) => ({
-                label: `${field.helpText} Date`,
-                value: `${computed.date} ${computed.isEstimate ? '(Estimated Date)': ''}`
-            }),
-            validation: (v: Option, f: any, c: any) => {
-                if (v) {
-                    dateConfig.day.value = formatDigit(v.value.toString())
-                    dateConfig.day.isEstimate = false
-                    dateConfig.builtDate = buildDate(dateConfig)
-                }
-                return onValidation(dateConfig.day, dateConfig, v, f, c, field)
-            },
-            computedValue: (v: Option) => {
-                /** This duplication is a necessary evil when saving dates */
-                if (v) {
-                    dateConfig.day.value = formatDigit(v.value.toString())
-                    dateConfig.day.isEstimate = false
-                    dateConfig.builtDate = buildDate(dateConfig)
-                }
-                return field.computeValue(dateConfig.builtDate, hasEstimates(dateConfig))
-            },
-            config: {
-                keyboardActions: []
-            }
-        },
-        {
-            id: `estimated_${field.id}`,
-            helpText: `${field.helpText} Estimated period`,
-            type: FieldType.TT_SELECT,
-            summaryMapValue: ({ label }: Option) => ({ 
-                label: `${field.helpText} Date Estimate`,
-                value: `${label} (${HisDate.toStandardHisDisplayFormat(dateConfig.builtDate)})`
-            }),
-            condition: (f: any) => {
-                const conditions = [
-                    field.estimation.estimationFieldType === EstimationFieldType.MONTH_ESTIMATE_FIELD,
-                    dateConfig.isUnknown,
-                    field.condition ? field.condition(f): true
-                ]
-                return conditions.every(Boolean)
-            },
-            computedValue: (val: any) =>{
-                if (val) {
-                    const [year] = HisDate.getDateBeforeByDays(currentDate, parseInt(val.value.toString())).split('-')
-                    dateConfig.builtDate = `${year}-07-15`
-                }
-                return field.computeValue(dateConfig.builtDate, true)
-            },
-            options: () => ([
-                { label: '6 months ago', value: 180 },
-                { label: '12 months ago', value: 365 },
-                { label: '18 months ago', value: 540 },
-                { label: '24 months ago', value: 730 },
-                { label: 'Over 2 years ago', value: 730 }
-            ]),
-            validation: (v: Option, f: any, c: any) => {
-                if (v) {
-                    const [year] = HisDate.getDateBeforeByDays(currentDate, parseInt(v.value.toString())).split('-')
-                    dateConfig.builtDate = `${year}-07-15`
-                }
-                return onValidation({}, dateConfig, v, f, c, field) 
-            }
-        },
-        {
-            id: `age_estimate_${field.id}`,
-            helpText: `${field.helpText} Age Estimate`,
-            type: FieldType.TT_NUMBER,
-            summaryMapValue: ({ label }: Option) => ({ 
-                label: `${field.helpText} Date Estimate`,
-                value: `${label} (${HisDate.toStandardHisDisplayFormat(dateConfig.builtDate)})`
-            }),
-            computedValue: (v: any) => {
-                if (v) {
-                    const [year] = HisDate.estimateDateFromAge(parseInt(v.value.toString())).split('-')
-                    dateConfig.builtDate = `${year}-07-15`
-                    return field.computeValue(dateConfig.builtDate , true)
-                }
-            },
-            condition: (f: any) => {
-                const conditions = [
-                    field.estimation.estimationFieldType === EstimationFieldType.AGE_ESTIMATE_FIELD,
-                    dateConfig.isUnknown,
-                    field.condition ? field.condition(f): true
-                ]
-                return conditions.every(Boolean)
-            },
-            validation: (v: Option, f: any, c: any) => {
-                if (v) {
-                    const [year] = HisDate.estimateDateFromAge(parseInt(v.value.toString())).split('-')
-                    dateConfig.builtDate = `${year}-07-15`
-                }
-                return onValidation({}, dateConfig, v, f, c, field)
-            },
-        }
+        year,
+        month,
+        day,
+        ageEstimate,
+        durationEstimate
     ]
 }
