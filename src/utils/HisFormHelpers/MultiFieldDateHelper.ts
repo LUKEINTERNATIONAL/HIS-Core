@@ -202,7 +202,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         return getDefaultDate(field, 'Year')
     }
 
-    day.beforeNext = () => {
+    day.computedValue = () => {
         return field.computeValue(fullDate, false)
     }
 
@@ -212,6 +212,12 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     })
 
     const dayConf = field.config ? field.config : {}
+
+    day.unload = (d: any, s: any, f: any, c: any) => {
+        if (field.unload) {
+            field.unload(d, s, f, c)
+        }
+    }
 
     day.config = { 
         keyboardActions: [],
