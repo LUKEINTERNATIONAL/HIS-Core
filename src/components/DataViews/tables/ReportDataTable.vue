@@ -78,22 +78,40 @@ export default defineComponent({
     arrowDown: arrowDown,
     sortedIndex: -1 as number,
     sortOrder: 'descSort' as 'ascSort' | 'descSort',
+    tableColumns: [] as Array<ColumnInterface[]>,
+    tableRows: [] as Array<RowInterface[]>
   }),
-  computed: {
-    tableColumns(): Array<any[]> {
-        if (this.showIndex() && !isEmpty(this.columns)) {
-            const tcolumns: Array<any[]> = [...this.columns]
-            const lastColIndex = this.columns.length-1
-            tcolumns[lastColIndex] = [table.thNum("#"), ...tcolumns[lastColIndex]]
-            return tcolumns
-        }
-        return this.columns
+  watch: {
+    columns: {
+        handler(columns: Array<ColumnInterface[]>) {
+            if (!columns) {
+                return
+            } 
+            if (this.showIndex() && !isEmpty(this.columns)) {
+                const tcolumns: Array<any[]> = [...this.columns]
+                const lastColIndex = this.columns.length-1
+                tcolumns[lastColIndex] = [table.thNum("#"), ...tcolumns[lastColIndex]]
+                this.tableColumns = tcolumns
+            } else {
+                this.tableColumns = this.columns
+            }
+        },
+        immediate: true,
+        deep: true
     },
-    tableRows(): Array<any[]> {
-        if (this.showIndex() && !isEmpty(this.rows)) {
-            return this.rows.map((r, i) => ([table.td(i + 1), ...r]))
-        }
-        return this.rows
+    rows: {
+        handler(rows: Array<RowInterface[]>) {
+            if (!rows) {
+                return
+            }
+            if (this.showIndex() && !isEmpty(this.rows)) {
+               this.tableRows = this.rows.map((r, i) => ([table.td(i + 1), ...r]))
+            } else {
+                this.tableRows = rows
+            }
+        },
+        immediate: true,
+        deep: true
     }
   },
   methods: {

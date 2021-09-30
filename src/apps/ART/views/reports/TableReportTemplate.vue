@@ -164,7 +164,7 @@ export default defineComponent({
       name: "Back",
       size: "large",
       slot: "end",
-      color: "primary",
+      color: "warning",
       visible: true,
       onClick: () => this.canShowReport = false
     })
