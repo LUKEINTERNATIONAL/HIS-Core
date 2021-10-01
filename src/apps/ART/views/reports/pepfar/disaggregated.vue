@@ -30,12 +30,14 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('Age group'),
-            table.thTxt('Gender'),
-            table.thNum('Tx new (new on ART)'),
-            table.thNum('Tx curr (receiving ART)'),
-            table.thNum('TX curr (received IPT)'),
-            table.thNum('TX curr (screened for TB)')
+            [
+                table.thTxt('Age group'),
+                table.thTxt('Gender'),
+                table.thNum('Tx new (new on ART)'),
+                table.thNum('Tx curr (receiving ART)'),
+                table.thNum('TX curr (received IPT)'),
+                table.thNum('TX curr (screened for TB)')
+            ]
         ],
         ageGroupCohort: {} as any,
         totalNewF: [] as Array<any>,
@@ -53,8 +55,7 @@ export default defineComponent({
     },
     methods: {
         async onPeriod(_: any, config: any) {
-            this.reportReady = true
-            this.isLoading = true
+            this.rows = []
             this.report = new DisaggregatedReportService()
             this.report.setQuarter('pepfar')
             this.report.setStartDate(config.start_date)
@@ -62,11 +63,9 @@ export default defineComponent({
             this.period = this.report.getDateIntervalPeriod()
             const isInit = await this.report.init()
             if (!isInit) {
-                this.isLoading = false
                 return toastWarning('Unable to initialise report')
             }
             await this.setTableRows()
-            this.isLoading = false
         },
         async setTableRows() {
             await this.setFemaleRows()

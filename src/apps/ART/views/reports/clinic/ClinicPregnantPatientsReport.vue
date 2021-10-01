@@ -31,10 +31,12 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('ARV#'),
-            table.thTxt('First name'),
-            table.thTxt('Last name'),
-            table.thTxt('birthdate')
+            [
+                table.thTxt('ARV#'),
+                table.thTxt('First name'),
+                table.thTxt('Last name'),
+                table.thTxt('birthdate')
+            ]
         ]
     }),
     created() {
@@ -44,6 +46,7 @@ export default defineComponent({
         async onPeriod(_: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)

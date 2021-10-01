@@ -32,12 +32,14 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('ARV Number'),
-            table.thTxt('First Name'),
-            table.thTxt('Last Name'),
-            table.thTxt('Gender'),
-            table.thTxt('Date of birth'),
-            table.thTxt('Action')
+            [
+                table.thTxt('ARV Number'),
+                table.thTxt('First Name'),
+                table.thTxt('Last Name'),
+                table.thTxt('Gender'),
+                table.thTxt('Date of birth'),
+                table.thTxt('Action')
+            ]
         ]
     }),
     created() {
@@ -54,6 +56,7 @@ export default defineComponent({
         async onPeriod(form: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.title = form.indicator.value
             this.report = new DataCleaningReportService()
             this.report.setStartDate(config.start_date)

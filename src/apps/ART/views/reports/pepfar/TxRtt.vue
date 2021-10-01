@@ -29,9 +29,11 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('Age group'),
-            table.thTxt('Gender'),
-            table.thTxt('Returned after 30+ days')
+            [       
+                table.thTxt('Age group'),
+                table.thTxt('Gender'),
+                table.thTxt('Returned after 30+ days')
+            ]
         ]
     }),
     created() {
@@ -41,6 +43,7 @@ export default defineComponent({
         async onPeriod(_: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.report = new TxReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)

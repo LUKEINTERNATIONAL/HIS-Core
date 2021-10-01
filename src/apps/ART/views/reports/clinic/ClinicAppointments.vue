@@ -32,12 +32,14 @@ export default defineComponent({
         appointments: [] as any,
         reportReady: false as boolean,
         columns: [
-            table.thTxt('ARV#'),
-            table.thTxt('First name'),
-            table.thTxt('Last name'),
-            table.thTxt('Gender'),
-            table.thTxt('birthdate'),
-            table.thTxt('Current Address')
+            [
+                table.thTxt('ARV#'),
+                table.thTxt('First name'),
+                table.thTxt('Last name'),
+                table.thTxt('Gender'),
+                table.thTxt('birthdate'),
+                table.thTxt('Current Address')
+            ]
         ]
     }),
     created() {
@@ -63,6 +65,7 @@ export default defineComponent({
     methods: {
         async onPeriod(form: any) {
             this.reportReady = true
+            this.rows = []
             this.period = HisDate.toStandardHisDisplayFormat(form.date)
             this.setRows(this.appointments)
         },

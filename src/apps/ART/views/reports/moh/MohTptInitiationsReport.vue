@@ -31,10 +31,12 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('Age group'),
-            table.thTxt('Gender'),
-            table.thNum('3HP'),
-            table.thNum('6H')
+            [
+                table.thTxt('Age group'),
+                table.thTxt('Gender'),
+                table.thNum('3HP'),
+                table.thNum('6H')
+            ]
         ]
     }),
     created() {
@@ -44,6 +46,7 @@ export default defineComponent({
         async onPeriod(_: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.report = new RegimenReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)

@@ -13,9 +13,9 @@
   <ion-page v-if="reportReady">
     <ion-content>
       <div class="report-content" ref="cohort">
-        <cohort-v :dataparams="vCohort" ref="validation"> </cohort-v>
-        <cohort-h :reportparams="period" ref="header" :clinicName="clinicName"></cohort-h>
-        <cohort-ft :onDrillDown="onDrillDown" :params="cohort" :reportid="reportID" :quarter="period" ref="rep"> </cohort-ft>
+        <cohort-v :key="componentKey" :dataparams="vCohort" ref="validation"> </cohort-v>
+        <cohort-h :key="componentKey" :reportparams="period" ref="header" :clinicName="clinicName"></cohort-h>
+        <cohort-ft :key="componentKey" :onDrillDown="onDrillDown" :params="cohort" :reportid="reportID" :quarter="period" ref="rep"> </cohort-ft>
       </div>
     </ion-content>
     <his-footer :btns="btns"></his-footer>
@@ -41,6 +41,9 @@ export default defineComponent({
   mixins: [ReportMixinVue],
   components: { IonLoading, CohortH, CohortV, CohortFt, HisStandardForm, HisFooter, IonPage, IonContent },
   data: () => ({
+    formData: {} as any,
+    componentKey: 0 as number,
+    computedFormData: {} as any,
     cohort: {} as any,
     vCohort: {} as any,
     btns: [] as Array<any>,
@@ -55,30 +58,45 @@ export default defineComponent({
     this.fields = this.getDateDurationFields(true, true)
   },
   methods: {
-    async onPeriod(form: any, config: any) {
+    async onPeriod(form: any, config: any, regenerate=false) {
+      this.componentKey += 1
+      this.formData = form
+      this.computedFormData = config
       this.reportReady = true 
       this.isLoading = true
       this.report = new MohCohortReportService()
+      this.report.setRegenerate(regenerate)
       let data: any = {}
 
       if (form.quarter.value === 'custom_period') {
         this.report.setStartDate(config.start_date)
         this.report.setEndDate(config.end_date)
         this.period = `Custom ${this.report.getDateIntervalPeriod()}`
-        data = await this.report.getCohortByDates()
+        data = this.report.datePeriodRequestParams()
       } else {
         this.report.setQuarter(form.quarter.label)
-        data = await this.report.getCohortByQuarter()
+        data = this.report.qaurterRequestParams()
         this.period = form.quarter.label
       }
-      if (data) {
-        this.reportID = data.id
-        this.vCohort = data.values
-        this.cohort = data.values
-      } else {
-        toastWarning('Unable to render report')
+      const request = await this.report.requestCohort(data)
+      if (request.ok) {
+        // Check the backend if background task is complete
+        const interval = setInterval(async () => {
+          data.regenerate = false
+          const state = await this.report.requestCohort(data)
+          if (state.status === 200) {
+            const data = await state.json()
+            this.reportID = data.id
+            this.vCohort = data.values
+            this.cohort = data.values
+            this.isLoading = false
+            clearInterval(interval)
+          }
+        }, 3000)
       }
-      this.isLoading = false
+    },
+    async regenerate() {
+      await this.onPeriod(this.formData, this.computedFormData, true)
     },
     async onDrillDown(resourceId: string) {
       const columns = [
@@ -105,7 +123,6 @@ export default defineComponent({
       await this.tableDrill({ columns, onRows })
     },
     getBtns() {
-      
       return  [
         {
           name: "CSV",
@@ -125,6 +142,14 @@ export default defineComponent({
           color: "primary",
           visible: true,
           onClick: async () => print(),
+        },
+        {
+          name: "Regenerate",
+          size: "large",
+          slot: "end",
+          color: "danger",
+          visible: true,
+          onClick: async () => this.regenerate()
         },
         {
           name: "Disaggregeted",

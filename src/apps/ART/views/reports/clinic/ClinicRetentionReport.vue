@@ -31,14 +31,16 @@ export default defineComponent({
         cohort: {} as any,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('Age group'),
-            table.thTxt('Gender'),
-            table.thTxt('Initiated one month'),
-            table.thTxt('Completed one month'),
-            table.thTxt('Initiated Three months'),
-            table.thTxt('Completed Three months'),
-            table.thTxt('Initiated Six months'),
-            table.thTxt('Completed Six months')
+            [
+                table.thTxt('Age group'),
+                table.thTxt('Gender'),
+                table.thTxt('Initiated one month'),
+                table.thTxt('Completed one month'),
+                table.thTxt('Initiated Three months'),
+                table.thTxt('Completed Three months'),
+                table.thTxt('Initiated Six months'),
+                table.thTxt('Completed Six months')
+            ]
         ]
     }),
     created() {
@@ -48,6 +50,7 @@ export default defineComponent({
         async onPeriod(_: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
