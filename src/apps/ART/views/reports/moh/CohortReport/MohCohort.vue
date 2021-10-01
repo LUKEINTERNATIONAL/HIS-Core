@@ -72,18 +72,28 @@ export default defineComponent({
         this.report.setStartDate(config.start_date)
         this.report.setEndDate(config.end_date)
         this.period = `Custom ${this.report.getDateIntervalPeriod()}`
-        data = await this.report.getCohortByDates()
+        data = this.report.datePeriodRequestParams()
       } else {
         this.report.setQuarter(form.quarter.label)
-        data = await this.report.getCohortByQuarter()
+        data = this.report.qaurterRequestParams()
         this.period = form.quarter.label
       }
-      if (data) {
-        this.reportID = data.id
-        this.vCohort = data.values
-        this.cohort = data.values
+      const request = await this.report.requestCohort(data)
+      if (request.ok) {
+        // Check the backend if background task is complete
+        const interval = setInterval(async () => {
+          data.regenerate = false
+          const state = await this.report.requestCohort(data)
+          if (state.status === 200) {
+            const data = await state.json()
+            this.reportID = data.id
+            this.vCohort = data.values
+            this.cohort = data.values
+            this.isLoading = false
+            clearInterval(interval)
+          }
+        }, 3000)
       }
-      this.isLoading = false
     },
     async regenerate() {
       await this.onPeriod(this.formData, this.computedFormData, true)
