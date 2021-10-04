@@ -5,7 +5,7 @@
     </ion-toolbar>
   </ion-header>
   <ion-grid class="selector">
-    <ion-row v-for="(row, rowIndex) in turpleTaskItems" :key="rowIndex">
+    <ion-row v-for="(row, rowIndex) in showableItems" :key="rowIndex">
       <ion-col size="4" v-for="(taskItem, taskIndex) in row" :key="`task-${taskIndex}`">
         <task-card
           @click="doTask(taskItem)"
@@ -28,8 +28,13 @@ import TaskCard from "@/components/DataViews/TaskCard.vue";
 import { IonGrid, IonRow, IonCol, modalController } from "@ionic/vue"; 
 import { TaskInterface } from "@/apps/interfaces/TaskInterface";
 import Transformer from "@/utils/Transformers"
+import { GlobalPropertyService } from "@/services/global_property_service"
+
 export default defineComponent({
   components: { IonGrid, IonRow, IonCol, TaskCard },
+  data: () => ({
+    showableItems: [] as Array<any[]>
+  }),
   props: {
     title: {
       type: String,
@@ -68,9 +73,22 @@ export default defineComponent({
       this.closeModal()
     }
   },
-  computed: {
-    turpleTaskItems(): any {
-      return Transformer.convertArrayToTurples(this.items, this.itemsPerRow)
+  watch: {
+    items: {
+      async handler(items: Array<any>) {
+        if (items) {
+          const displayableItems = this.items.filter((i: any) => {
+            return i.condition 
+            ? i.condition(GlobalPropertyService)
+            : true
+          })
+          this.showableItems = Transformer.convertArrayToTurples(
+            (await Promise.all(displayableItems)), this.itemsPerRow
+          )
+        }
+      },
+      deep: true,
+      immediate: true
     }
   }
 });
