@@ -79,7 +79,7 @@ export default defineComponent({
         if (items) {
           const displayableItems = this.items.filter((i: any) => {
             return i.condition 
-            ? i.condition(GlobalPropertyService)
+            ? i.condition(this.taskParams)
             : true
           })
           this.showableItems = Transformer.convertArrayToTurples(

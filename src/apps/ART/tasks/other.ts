@@ -104,14 +104,20 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     name: "Archive client",
     description: "Archive a client",
     url: "/",
+    condition: (p: any) => {
+      return p.program.filing_number.number != "N/A"
+    },
     icon: img("archive.png")
   },
   {
     id: "assign_filing_number",
     name: "Assign filing number",
     description: "Assign a new filing number",
+    condition: (p: any) => {
+      return p.program.filing_number.number === "N/A"
+    },
     action: ({ patient }: any, router: any) => {
-      router.push({ path: `/art/filing_numbers/${patient.patient_id}?assign=true`})
+      router.push(`/art/filing_numbers/${patient.patient_id}?assign=true`)
     },
     icon: img("archive.png")
   },
