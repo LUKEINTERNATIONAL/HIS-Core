@@ -40,8 +40,14 @@ import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
 import StockCardReport from "@/apps/ART/views/reports/clinic/ClinicStockCardReport.vue"
 import ClinicAppointments from "@/apps/ART/views/reports/clinic/ClinicAppointments.vue"
 import DataCleaning from "@/apps/ART/views/reports/inconsistencies/DataCleaning.vue"
+import FilingNumberManagement from "@/apps/ART/views/FilingNumberManagement.vue"
 
 export default [
+    {
+        name: "filing management",
+        path: '/art/filing_numbers',
+        component: FilingNumberManagement
+    },
     {
         name: "treatment",
         path: "/art/encounters/prescriptions/:patient_id",
