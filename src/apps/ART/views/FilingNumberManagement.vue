@@ -13,6 +13,7 @@ import { loadingController } from "@ionic/vue"
 import { Patientservice } from '@/services/patient_service';
 import { FilingNumberService } from '@/apps/ART/services/filing_number_service'
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
+import { toastDanger } from '@/utils/Alerts';
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -30,7 +31,13 @@ export default defineComponent({
                     this.service.setPatientID(params.patient_id)
                 }
                 if (query) {
-                    this.assignFilingNum = query.assign === "true"
+                    if (query.archive === "true") {
+                        await this.archiveFilingNumber()
+                        return 
+                    }
+                    if (query.assign === "true") {
+                        this.assignFilingNum = query.assign === "true"
+                    }
                     this.fields.push(this.getFilingNumberField())
                 }
             },
@@ -51,6 +58,17 @@ export default defineComponent({
                 return new Patientservice(patient).getFullName()
             }
             return ''
+        },
+        async archiveFilingNumber() {
+            await this.presentLoading('Archiving filing number')
+            try {
+                await this.service.archiveFilingNumber()
+                await this.service.printFilingNumber()
+            }catch(e) {
+                toastDanger(e)
+            }
+            await loadingController.dismiss()
+            this.$router.push(`/patient/dashboard/${this.service.getPatientID()}`)
         },
         getFilingNumberField(): Field {
             return {

@@ -103,7 +103,9 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     id: "archive_client",
     name: "Archive client",
     description: "Archive a client",
-    url: "/",
+    action: ({ patient }: any, router: any) => {
+      router.push(`/art/filing_numbers/${patient.patient_id}?archive=true`)
+    },
     condition: (p: any) => {
       return p.program.filing_number.number != "N/A"
     },
