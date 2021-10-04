@@ -14,6 +14,10 @@ export class FilingNumberService extends Service {
         this.dormantPrefix = ''
     }
 
+    getPatientID() {
+        return this.patientID
+    }
+
     setPatientID(patientID: number) {
         this.patientID = patientID
     }
@@ -28,7 +32,7 @@ export class FilingNumberService extends Service {
     }
 
     async assignFilingNumber() {
-        return Service.postJson(`patients/${this.patientID}/filing_number`, true)
+        return Service.postJson(`patients/${this.patientID}/filing_number`, {})
     }
 
     async canUseFilingNumber() {
