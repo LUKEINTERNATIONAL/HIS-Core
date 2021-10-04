@@ -6,12 +6,13 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { FilingNumberService } from '@/apps/ART/services/filing_number_service'
-import { loadingController } from "@ionic/vue"
-import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { isEmpty } from 'lodash';
 import { Field } from '@/components/Forms/FieldInterface';
 import { FieldType } from '@/components/Forms/BaseFormElements';
+import { loadingController } from "@ionic/vue"
+import { Patientservice } from '@/services/patient_service';
+import { FilingNumberService } from '@/apps/ART/services/filing_number_service'
+import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -19,36 +20,28 @@ export default defineComponent({
         service: {} as any,
         patient: -1 as number,
         fields: [] as Array<Field>,
-        newFilingNumber: '' as string,
-        archivedFilingNumber: '' as string
+        assignFilingNum: false as boolean,
+        primaryPatientName: '' as string
     }),
     watch: {
         '$route': {
             async handler({query, params}: any) {
                 if (params && params.patient_id) {
+                    const patient = await Patientservice.findByID(params.patient_id)
+                    this.primaryPatientName = new Patientservice(patient).getFullName()
                     this.service = new FilingNumberService()
                     this.service.setPatientID(params.patient_id)
                 }
                 if (query) {
-                    if (query.assign === "true") {
-                       await this.assignFilingNumber()
-                    }
+                    this.assignFilingNum = query.assign === "true"
                 }
+                this.fields.push(this.getFilingNumberField())
             },
             immediate: true,
             deep: true
         }
     },
     methods: {
-        async assignFilingNumber() {
-            await this.presentLoading('Please wait, arranging filing numbers...')
-            const res = await this.service.assignFilingNumber()
-            if (!isEmpty(res.new_identifier)) {
-                this.newFilingNumber = res.new_identifier.identifier
-                this.fields.push(this.getFilingNumberField())
-            }
-            await loadingController.dismiss()
-        },
         async presentLoading(message="Please wait...") {
             const loading = await loadingController.create({ 
                 message, backdropDismiss: false 
@@ -60,14 +53,29 @@ export default defineComponent({
                 id: "filing_number_management",
                 type: FieldType.TT_FILING_NUMBER_VIEW,
                 helpText: "Filing Number Management",
-                options: () => {
+                condition: () => this.assignFilingNum,
+                options: async () => {
+                    await this.presentLoading('Please wait, arranging filing numbers...')
+                    const res = await this.service.assignFilingNumber()
+                    await loadingController.dismiss()
+                    let newFilingNum = ''
+                    let oldFilingNum = ''
+
+                    if (!isEmpty(res)) {
+                        newFilingNum = !isEmpty(res.new_identifier)
+                            ? res.new_identifier.identifier
+                            : ''
+                        oldFilingNum = !isEmpty(res.archived_identifier)
+                            ? res.archived_identifier.identifier
+                            : ''
+                    }
                     return [
                         {
                             label: 'Dormant → Active',
-                            value: '',
+                            value: this.primaryPatientName,
                             other: {
-                                activeNumber: this.newFilingNumber, 
-                                dormantNumber: ''
+                                activeNumber: newFilingNum, 
+                                dormantNumber: oldFilingNum
                             }
                         },
                         {
