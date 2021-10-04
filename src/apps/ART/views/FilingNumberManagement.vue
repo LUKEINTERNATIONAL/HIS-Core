@@ -75,7 +75,9 @@ export default defineComponent({
                                 res.new_identifier.patient_id
                             )
                             newPrimaryFilingNum = res.new_identifier.identifier
-                            await this.service.printFilingNumber(newPrimaryFilingNum)
+                            await this.service.printFilingNumber(
+                                res.new_identifier.patient_id
+                            )
                         }
                         if (res.archived_identifier) {
                             secondaryPatientName = await this.getPatientName(
