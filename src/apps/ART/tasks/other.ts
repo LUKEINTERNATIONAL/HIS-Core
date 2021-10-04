@@ -111,7 +111,7 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     name: "Assign filing number",
     description: "Assign a new filing number",
     action: ({ patient }: any, router: any) => {
-      router.push({ path: `/art/filing_numbers/${patient.patient_id}`})
+      router.push({ path: `/art/filing_numbers/${patient.patient_id}?assign=true`})
     },
     icon: img("archive.png")
   },
