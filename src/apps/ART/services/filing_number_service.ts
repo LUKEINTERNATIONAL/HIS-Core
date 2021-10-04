@@ -6,6 +6,7 @@ export class FilingNumberService extends Service {
     patientID: number;
     activePrefix: string;
     dormantPrefix: string;
+
     constructor() {
         super()
         this.patientID = 0
@@ -20,10 +21,28 @@ export class FilingNumberService extends Service {
     async loadFilingPrefix() {
         const req = await GlobalPropertyService.get('filing.number.prefix')
         if (req) {
-            const [ activePrefix, dormantPrefix] = req['filing.number.prefix'].split(',')
+            const [activePrefix, dormantPrefix] = req['filing.number.prefix'].split(',')
             this.activePrefix = activePrefix
             this.dormantPrefix = dormantPrefix
         }
+    }
+
+    async assignFilingNumber() {
+        return Service.postJson(`patients/${this.patientID}/filing_number`, true)
+    }
+
+    async canUseFilingNumber() {
+        const req = await Service.getJson('filing_number/type=activate')
+        if (req && req['use.filing.numbers'] === 'true') {
+            return true
+        }
+        return false
+    }
+
+    getFilingNumber(filingNumber: string) {
+        return Service.getJson(`search/patients/by_identifier`, {
+            'type_id': 18, 'identifier': `${this.dormantPrefix}${filingNumber}`
+        })
     }
 
     archiveFilingNumber() {
@@ -39,7 +58,6 @@ export class FilingNumberService extends Service {
             identifier
         })
     }
-
 
     getArchivingCandidates(page=0, pageSize=10) {
         return Service.getJson(`archiving_candidates`, {
