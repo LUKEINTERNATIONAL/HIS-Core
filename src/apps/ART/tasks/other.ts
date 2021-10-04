@@ -110,7 +110,9 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     id: "assign_filing_number",
     name: "Assign filing number",
     description: "Assign a new filing number",
-    url: "/",
+    action: ({ patient }: any, router: any) => {
+      router.push({ path: `/art/filing_numbers/${patient.patient_id}`})
+    },
     icon: img("archive.png")
   },
   {

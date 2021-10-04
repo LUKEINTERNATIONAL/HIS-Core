@@ -45,7 +45,7 @@ import FilingNumberManagement from "@/apps/ART/views/FilingNumberManagement.vue"
 export default [
     {
         name: "filing management",
-        path: '/art/filing_numbers',
+        path: '/art/filing_numbers/:patient_id',
         component: FilingNumberManagement
     },
     {
