@@ -27,15 +27,13 @@ export default defineComponent({
         '$route': {
             async handler({query, params}: any) {
                 if (params && params.patient_id) {
-                    const patient = await Patientservice.findByID(params.patient_id)
-                    this.primaryPatientName = new Patientservice(patient).getFullName()
                     this.service = new FilingNumberService()
                     this.service.setPatientID(params.patient_id)
                 }
                 if (query) {
                     this.assignFilingNum = query.assign === "true"
+                    this.fields.push(this.getFilingNumberField())
                 }
-                this.fields.push(this.getFilingNumberField())
             },
             immediate: true,
             deep: true
@@ -43,10 +41,17 @@ export default defineComponent({
     },
     methods: {
         async presentLoading(message="Please wait...") {
-            const loading = await loadingController.create({ 
-                message, backdropDismiss: false 
+            const loading = await loadingController.create({
+                message, backdropDismiss: false
             })
             await loading.present()
+        },
+        async getPatientName(patientID: number) {
+            const patient = await Patientservice.findByID(patientID)
+            if (patient) {
+                return new Patientservice(patient).getFullName()
+            }
+            return ''
         },
         getFilingNumberField(): Field {
             return {
@@ -55,35 +60,46 @@ export default defineComponent({
                 helpText: "Filing Number Management",
                 condition: () => this.assignFilingNum,
                 options: async () => {
-                    await this.presentLoading('Please wait, arranging filing numbers...')
+                    await this.presentLoading('Arranging filing numbers...')
                     const res = await this.service.assignFilingNumber()
                     await loadingController.dismiss()
-                    let newFilingNum = ''
-                    let oldFilingNum = ''
+                    let primaryPatientName = ''
+                    let secondaryPatientName = ''
+                    let newPrimaryFilingNum = ''
+                    let newSecondaryFilingNumber = ''
+                    let dormantSecondaryFilingNumber = ''
 
                     if (!isEmpty(res)) {
-                        newFilingNum = !isEmpty(res.new_identifier)
-                            ? res.new_identifier.identifier
-                            : ''
-                        oldFilingNum = !isEmpty(res.archived_identifier)
-                            ? res.archived_identifier.identifier
-                            : ''
+                        if (res.new_identifier) {
+                            primaryPatientName = await this.getPatientName(
+                                res.new_identifier.patient_id
+                            )
+                            newPrimaryFilingNum = res.new_identifier.identifier
+                            await this.service.printFilingNumber(newPrimaryFilingNum)
+                        }
+                        if (res.archived_identifier) {
+                            secondaryPatientName = await this.getPatientName(
+                                res.archived_identifier.patient_id
+                            )
+                            newSecondaryFilingNumber = res.archived_identifier.identifier
+                            dormantSecondaryFilingNumber = newPrimaryFilingNum
+                        }
                     }
                     return [
                         {
                             label: 'Dormant → Active',
-                            value: this.primaryPatientName,
+                            value: primaryPatientName,
                             other: {
-                                activeNumber: newFilingNum, 
-                                dormantNumber: oldFilingNum
+                                activeNumber: newPrimaryFilingNum, 
+                                dormantNumber: ''
                             }
                         },
                         {
                             label: 'Active → Dormant',
-                            value: '',
+                            value: secondaryPatientName,
                             other: {
-                                activeNumber: '', 
-                                dormantNumber: ''
+                                activeNumber: newSecondaryFilingNumber, 
+                                dormantNumber: dormantSecondaryFilingNumber
                             }
                         }
                     ]
