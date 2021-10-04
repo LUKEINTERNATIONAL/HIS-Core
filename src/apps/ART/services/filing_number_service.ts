@@ -73,8 +73,8 @@ export class FilingNumberService extends Service {
         return Service.getJson(`patients/${this.patientID}/past_filing_numbers`)
     }
 
-    printFilingNumber(filingNumber: number) {
+    printFilingNumber() {
         const printer = new PrintoutService()
-        return printer.printLbl(`patients/${filingNumber}/labels/filing_number`) 
+        return printer.printLbl(`patients/${this.patientID}/labels/filing_number`) 
     }
 }

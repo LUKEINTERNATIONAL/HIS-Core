@@ -21,7 +21,6 @@ export default defineComponent({
         patient: -1 as number,
         fields: [] as Array<Field>,
         assignFilingNum: false as boolean,
-        primaryPatientName: '' as string
     }),
     watch: {
         '$route': {
@@ -62,12 +61,13 @@ export default defineComponent({
                 options: async () => {
                     await this.presentLoading('Arranging filing numbers...')
                     const res = await this.service.assignFilingNumber()
-                    await loadingController.dismiss()
                     let primaryPatientName = ''
                     let secondaryPatientName = ''
                     let newPrimaryFilingNum = ''
                     let newSecondaryFilingNumber = ''
                     let dormantSecondaryFilingNumber = ''
+
+                    await loadingController.dismiss()
 
                     if (!isEmpty(res)) {
                         if (res.new_identifier) {
@@ -75,9 +75,7 @@ export default defineComponent({
                                 res.new_identifier.patient_id
                             )
                             newPrimaryFilingNum = res.new_identifier.identifier
-                            await this.service.printFilingNumber(
-                                res.new_identifier.patient_id
-                            )
+                            await this.service.printFilingNumber()
                         }
                         if (res.archived_identifier) {
                             secondaryPatientName = await this.getPatientName(
@@ -103,6 +101,25 @@ export default defineComponent({
                                 activeNumber: newSecondaryFilingNumber, 
                                 dormantNumber: dormantSecondaryFilingNumber
                             }
+                        }
+                    ]
+                },
+                config: {
+                    hiddenFooterBtns: [
+                        'Cancel',
+                        'Clear'
+                    ],
+                    footerBtns: [
+                        {
+                            name: 'Print #',
+                            size: 'large',
+                            slot: 'start',
+                            color: 'primary',
+                            visible: true,
+                            visibleOnStageChange: (state: any) => {
+                                return state.field.id === 'filing_number_management'
+                            },
+                            onClick: async () => this.service.printFilingNumber()
                         }
                     ]
                 }
