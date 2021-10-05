@@ -1,6 +1,7 @@
 import { TaskInterface } from "../../interfaces/TaskInterface"
 import { PatientPrintoutService } from "@/services/patient_printout_service"
 import { FieldType } from "../preferences"
+import { FilingNumberService } from "../services/filing_number_service"
 
 const BASE_URL_PATH = '/assets/images/'
 
@@ -106,8 +107,21 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     action: ({ patient }: any, router: any) => {
       router.push(`/art/filing_numbers/${patient.patient_id}?archive=true`)
     },
-    condition: (p: any) => {
-      return p.program.filing_number.number != "N/A"
+    condition: async (p: any) => {
+      const f: any = new FilingNumberService()
+      try {
+        const filingNum = p.program.filing_number.number
+        if (filingNum != "N/A") {
+          await f.loadFilingPrefix()
+          const dormantPrx = f.getDormantPrx()
+          if (dormantPrx && filingNum.match(new RegExp(dormantPrx), 'i')) {
+            return false
+          }
+        }
+      }catch(e) {
+        console.error(e)
+      }
+      return true
     },
     icon: img("archive.png")
   },
@@ -115,8 +129,24 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     id: "assign_filing_number",
     name: "Assign filing number",
     description: "Assign a new filing number",
-    condition: (p: any) => {
-      return p.program.filing_number.number === "N/A"
+    condition: async (p: any) => {
+      const f: any = new FilingNumberService()
+      try {
+        const filingNum = p.program.filing_number.number
+        if (filingNum != "N/A") {
+          await f.loadFilingPrefix()
+          const dormantPrx = f.getDormantPrx()
+          if (dormantPrx 
+            && !(filingNum.match(
+                  new RegExp(dormantPrx), 'i'))
+              ) {
+            return false
+          }
+        }
+      }catch(e) {
+        console.error(e)
+      }
+      return true
     },
     action: ({ patient }: any, router: any) => {
       router.push(`/art/filing_numbers/${patient.patient_id}?assign=true`)

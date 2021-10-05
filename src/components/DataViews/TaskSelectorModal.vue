@@ -28,7 +28,6 @@ import TaskCard from "@/components/DataViews/TaskCard.vue";
 import { IonGrid, IonRow, IonCol, modalController } from "@ionic/vue"; 
 import { TaskInterface } from "@/apps/interfaces/TaskInterface";
 import Transformer from "@/utils/Transformers"
-import { GlobalPropertyService } from "@/services/global_property_service"
 
 export default defineComponent({
   components: { IonGrid, IonRow, IonCol, TaskCard },
@@ -77,13 +76,19 @@ export default defineComponent({
     items: {
       async handler(items: Array<any>) {
         if (items) {
-          const displayableItems = this.items.filter((i: any) => {
-            return i.condition 
-            ? i.condition(this.taskParams)
-            : true
+          const _items = this.items.map(async (i: any) => {
+            if(i.condition && typeof i.condition === 'function') {
+              const condition = await i.condition(this.taskParams)
+              i.condition = condition
+            }
+            return i
           })
+          const displayableItems = (await Promise.all(_items))
+            .filter((i: any) => 'condition' in i 
+            ? i.condition
+            : true)
           this.showableItems = Transformer.convertArrayToTurples(
-            (await Promise.all(displayableItems)), this.itemsPerRow
+            displayableItems, this.itemsPerRow
           )
         }
       },
