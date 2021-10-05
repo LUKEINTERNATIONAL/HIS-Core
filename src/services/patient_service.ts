@@ -8,7 +8,7 @@ import { Service } from "@/services/service"
 import HisDate from "@/utils/Date"
 import {Observation} from "@/interfaces/observation"
 import  { BMIService } from "@/services/bmi_service"
-import { isEmpty } from 'lodash';
+import { find, isEmpty } from 'lodash';
 
 export class Patientservice extends Service {
     patient: Patient;
@@ -186,6 +186,23 @@ export class Patientservice extends Service {
     
     getArvNumber() {
         return this.findIdentifierByType('ARV Number')
+    }
+
+    hasActiveFilingNumber() {
+        return this.hasIdentifierType('Filing number')
+    }
+
+    hasDormantFilingNumber() {
+        return this.hasIdentifierType('Archived filing number')
+    }
+
+    private hasIdentifierType(identifierType: string) {
+        const id = find(this.patient.patient_identifiers, { 
+            type: { 
+                name : identifierType
+            }
+        })
+        return id ? true : false
     }
 
     getFilingNumber() {
