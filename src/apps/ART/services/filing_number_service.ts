@@ -39,6 +39,19 @@ export class FilingNumberService extends Service {
         }
     }
 
+    isActiveFilingNum(filingNumber: string) {
+        return filingNumber.match(new RegExp(this.activePrefix, 'i'))
+            ? true
+            : false
+    }
+
+    isDormantFilingNum(filingNumber: string) {
+        console.log(filingNumber)
+        return filingNumber.match(new RegExp(this.dormantPrefix, 'i'))
+            ? true
+            : false
+    }
+
     async assignFilingNumber() {
         return Service.postJson(`patients/${this.patientID}/filing_number`, {})
     }
