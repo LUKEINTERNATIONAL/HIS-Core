@@ -5,5 +5,5 @@ export interface TaskInterface {
     url?: string;
     action?: Function;
     icon: string;
-    condition?: (globalPropertyService: any, otherParams: any) => boolean;
+    condition?: (globalPropertyService: any, otherParams: any) => boolean | Promise<boolean>;
 }
