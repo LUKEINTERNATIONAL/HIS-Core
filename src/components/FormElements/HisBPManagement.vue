@@ -66,6 +66,9 @@ import { IonToolbar, IonHeader, IonContent, IonGrid, IonRow, IonCol, IonRadioGro
 import RiskFactorModal from "../DataViews/RiskFactorModal.vue";
 import { ConceptService } from "@/services/concept_service";
 import { ObservationService } from "@/services/observation_service";
+import { BPManagementService } from "@/apps/ART/services/htn_service";
+import HisDate from "@/utils/Date";
+import { Service } from "@/services/service";
 export default defineComponent({
   components: { ViewPort, HisTable, IonToolbar, IonHeader, IonContent, IonGrid, IonRow,  IonButton, IonRadioGroup, IonRadio},
   mixins: [FieldMixinVue],
@@ -77,18 +80,34 @@ export default defineComponent({
     styles: [] as Array<string>,
     patientID: 0 as any,
     riskFactors: [] as any,
-    action: null as any
+    action: null as any,
+    trail: [] as any,
+    htn: {} as any,
+    date: null as any
   }),
   async activated() {
     const data = await this.options(this.fdata, this.cdata, this);
     if (isEmpty(data)) return;
     this.patientID = this.$route.params.patient_id;
+    this.htn = new BPManagementService(this.patientID, -1);
+
     this.riskFactors = await this.getRiskFactors();
+    this.rows = await this.formatTrail();
+    this.date = HisDate.toStandardHisDisplayFormat(Service.getSessionDate());
   },
   computed: {
      totalRiskFactors(): any {
        return this.riskFactors.filter((d: any) => d.value === "Yes").length;
      }
+   },
+   watch: {
+    action: {
+        handler() {
+            this.$emit('onValue', this.action)
+        },
+        deep: true,
+        immediate: true
+    }
    },
  methods: {
    async getRiskFactors() {
@@ -101,6 +120,18 @@ export default defineComponent({
       }
     })
     return Promise.all(j);
+   },
+   async formatTrail() {
+    const trail = await this.htn.getBPTrail();
+    return Object.keys(trail).map(m => {
+      const date = HisDate.toStandardHisDisplayFormat(m);
+
+      return {
+        ...trail[m],
+        date: date,
+        drugs: trail[m]['drugs'].join('')
+      }
+    })
    },
    
 async showRiskFactors() {

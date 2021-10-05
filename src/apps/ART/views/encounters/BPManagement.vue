@@ -23,7 +23,7 @@ export default defineComponent({
   mixins: [EncounterMixinVue],
   components: { HisStandardForm },
   data: () => ({
-    reception: {} as any,
+    htn: {} as any,
     activeField: "",
     hasARVNumber: true,
     suggestedNumber: "" as any,
@@ -32,18 +32,7 @@ export default defineComponent({
     patient: {
       async handler(patient: any) {
         console.log('Reception', this.providerID)
-        this.reception = new ReceptionService(patient.getID(), this.providerID)
-
-        await this.reception.loadSitePrefix()
-
-        const ARVNumber = patient.getPatientIdentifier(4);
-  
-        if (ARVNumber === "") {
-          this.hasARVNumber = false;
-
-          const j = await ProgramService.getNextSuggestedARVNumber();
-          this.suggestedNumber = j.arv_number.replace(/^\D+/g, "");
-        }
+        this.htn = new ReceptionService(patient.getID(), this.providerID)
         this.fields = this.getFields();
       },
       deep: true
@@ -51,21 +40,15 @@ export default defineComponent({
   },
   methods: {
     async onFinish(formData: any, computedData: any) {
-      const encounter = await this.reception.createEncounter()
+      const encounter = await this.htn.createEncounter()
 
       if (!encounter) return toastWarning('Unable to create encounter')
 
       const registrationObs = await this.resolveObs(computedData, 'obs')
 
-      const obs = await this.reception.saveObservationList(registrationObs)
+      const obs = await this.htn.saveObservationList(registrationObs)
 
       if (!obs) return toastWarning('Unable to create Obs')
-
-      if (formData.capture_arv && formData.capture_arv.value === 'Yes') {
-        const arv = await this.reception.createArvNumber(computedData.arv_number)
-
-        if (!arv) return toastWarning('Unable to save Arv number')
-      }
 
       toastSuccess('Encounter created')
 
@@ -77,33 +60,16 @@ export default defineComponent({
           id: "bp_management",
           helpText: "Hiv Reception",
           type: FieldType.TT_BP_MANAGEMENT,
-          validation: (val: any) => Validation.required(val) || Validation.neitherOr(val) || Validation.anyEmpty(val),
-          computedValue: (d: Array<Option>) => {
-            return {
-              tag: 'obs',
-              obs: d.map(({ other, value }: Option) => this.reception.buildValueCoded(other.concept, value))
-            }
-          },
-          options: () => [
-            {
-              label: "Patient Present?",
-              value: "",
-              other: {
-                concept: "Patient Present",
-                property: "patient_present",
-                values: this.yesNoOptions(),
-              },
-            },
-            {
-              label: "Guardian Present?",
-              value: "",
-              other: {
-                concept: "Guardian Present",
-                property: "guardian_present",
-                values: this.yesNoOptions(),
-              },
-            }
-          ]
+          validation: (val: any) => Validation.required(val),
+          options: () => ([
+                        {
+                            label: '',
+                            value: '',
+                            other: {
+                                values: this.yesNoOptions(),
+                            }
+                        }
+                    ])
         },
       ]
     }
