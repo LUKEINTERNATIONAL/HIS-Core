@@ -14,6 +14,14 @@ export class FilingNumberService extends Service {
         this.dormantPrefix = ''
     }
 
+    getActivePrx() {
+        return this.activePrefix
+    }
+
+    getDormantPrx() {
+        return this.dormantPrefix
+    }
+
     getPatientID() {
         return this.patientID
     }
@@ -23,9 +31,9 @@ export class FilingNumberService extends Service {
     }
 
     async loadFilingPrefix() {
-        const req = await GlobalPropertyService.get('filing.number.prefix')
-        if (req) {
-            const [activePrefix, dormantPrefix] = req['filing.number.prefix'].split(',')
+        const prx = await GlobalPropertyService.get('filing.number.prefix')
+        if (prx) {
+            const [activePrefix, dormantPrefix] = prx.split(',')
             this.activePrefix = activePrefix
             this.dormantPrefix = dormantPrefix
         }
