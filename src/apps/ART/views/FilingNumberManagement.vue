@@ -7,6 +7,7 @@
     :fields="fields">
   </his-standard-form>
 </template>
+
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { isEmpty } from 'lodash';
@@ -16,9 +17,8 @@ import { loadingController } from "@ionic/vue"
 import { Patientservice } from '@/services/patient_service';
 import { FilingNumberService } from '@/apps/ART/services/filing_number_service'
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
-import { toastDanger } from '@/utils/Alerts';
 import Validation from "@/components/Forms/validations/StandardValidations"
-import { alertConfirmation } from "@/utils/Alerts"
+import { alertConfirmation, toastDanger, toastWarning  } from "@/utils/Alerts"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -121,6 +121,12 @@ export default defineComponent({
                         value: candidate.patient_id,
                         other: candidate
                     }))
+                },
+                config: {
+                    hiddenFooterBtns: [
+                        'Clear',
+                        'Back'
+                    ]
                 }
             }
         },
@@ -156,6 +162,15 @@ export default defineComponent({
                     if (!this.service.isActiveFilingNum(this.patient.filingID)) {
                         try {
                             const f = await this.service.assignFilingNumber()
+
+                            loadingController.dismiss()
+
+                            if (isEmpty(f)) {
+                                this.fieldComponent = 'select_candidate_to_swap'
+                                toastWarning('Out of filing numbers, Please select eligible candidate')
+                                return []
+                            }
+
                             assignment.primary
                                 .other
                                 .activeNumber = f.new_identifier.identifier
@@ -166,7 +181,6 @@ export default defineComponent({
                                     ? this.patient.filingID
                                     : 'N/A'
 
-                            loadingController.dismiss()
 
                             await this.service.printFilingNumber()
 
@@ -183,9 +197,8 @@ export default defineComponent({
                                     .dormantNumber = f.new_identifier.identifier
                             }
                         }catch(e) {
-                            toastDanger('Unable to give filing number, try swapping with eligible candidate')
+                            toastDanger(e)
                             loadingController.dismiss()
-                            this.fieldComponent = 'select_candidate_to_swap'
                         }
                     } else {
                         loadingController.dismiss()
