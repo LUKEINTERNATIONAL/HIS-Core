@@ -148,8 +148,8 @@ export const OTHER_TASKS: Array<TaskInterface> = [
       }
       return true
     },
-    action: ({ patient }: any, router: any) => {
-      router.push(`/art/filing_numbers/${patient.patient_id}?assign=true`)
+    action: ({ patient, program }: any, router: any) => {
+      router.push(`/art/filing_numbers/${patient.patient_id}?assign=true&file=${program?.filing_number?.number || ''}`)
     },
     icon: img("archive.png")
   },
