@@ -1,6 +1,7 @@
 <template>
   <his-standard-form
     :skipSummary="true" 
+    @onFinish="onFinish"
     :fields="fields">
   </his-standard-form>
 </template>
@@ -21,6 +22,7 @@ export default defineComponent({
         service: {} as any,
         patient: -1 as number,
         fields: [] as Array<Field>,
+        currentFilingNum: '' as string,
         assignFilingNum: false as boolean,
     }),
     watch: {
@@ -31,6 +33,7 @@ export default defineComponent({
                     this.service.setPatientID(params.patient_id)
                 }
                 if (query) {
+                    this.currentFilingNum = query.file || ''
                     if (query.archive === "true") {
                         await this.archiveFilingNumber()
                         return 
@@ -46,6 +49,9 @@ export default defineComponent({
         }
     },
     methods: {
+        onFinish() {
+            this.$router.push(`/patient/dashboard/${this.service.getPatientID()}`)
+        },
         async presentLoading(message="Please wait...") {
             const loading = await loadingController.create({
                 message, backdropDismiss: false
@@ -78,7 +84,12 @@ export default defineComponent({
                 condition: () => this.assignFilingNum,
                 options: async () => {
                     await this.presentLoading('Arranging filing numbers...')
-                    const res = await this.service.assignFilingNumber()
+                    let res: any = {}
+                    try {
+                        res = await this.service.assignFilingNumber()
+                    }catch(e) {
+                        toastDanger(e)
+                    }
                     let primaryPatientName = ''
                     let secondaryPatientName = ''
                     let newPrimaryFilingNum = ''
@@ -109,7 +120,7 @@ export default defineComponent({
                             value: primaryPatientName,
                             other: {
                                 activeNumber: newPrimaryFilingNum, 
-                                dormantNumber: ''
+                                dormantNumber: this.currentFilingNum
                             }
                         },
                         {
