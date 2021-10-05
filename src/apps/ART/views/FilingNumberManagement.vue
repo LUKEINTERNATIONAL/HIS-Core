@@ -20,9 +20,8 @@ export default defineComponent({
     components: { HisStandardForm },
     data: () => ({
         service: {} as any,
-        patient: -1 as number,
+        patient: {} as any,
         fields: [] as Array<Field>,
-        currentFilingNum: '' as string,
         assignFilingNum: false as boolean,
     }),
     watch: {
@@ -31,15 +30,16 @@ export default defineComponent({
                 if (params && params.patient_id) {
                     this.service = new FilingNumberService()
                     this.service.setPatientID(params.patient_id)
+                    this.patient = await this.getPatient(params.patient_id)
+                    await this.service.loadFilingPrefix()
                 }
                 if (query) {
-                    this.currentFilingNum = query.file || ''
                     if (query.archive === "true") {
                         await this.archiveFilingNumber()
                         return 
                     }
                     if (query.assign === "true") {
-                        this.assignFilingNum = query.assign === "true"
+                       this.assignFilingNum = true
                     }
                     this.fields.push(this.getFilingNumberField())
                 }
@@ -58,12 +58,17 @@ export default defineComponent({
             })
             await loading.present()
         },
-        async getPatientName(patientID: number) {
+        async getPatient(patientID: number): Promise<Record<string, number | string>> {
             const patient = await Patientservice.findByID(patientID)
             if (patient) {
-                return new Patientservice(patient).getFullName()
+                const _patient = new Patientservice(patient)
+                return {
+                    id: _patient.getID(),
+                    filingID: _patient.getFilingNumber(),
+                    name: `${_patient.getGivenName()} ${_patient.getFamilyName()}`
+                }
             }
-            return ''
+            return {}
         },
         async archiveFilingNumber() {
             await this.presentLoading('Archiving filing number')
@@ -83,55 +88,66 @@ export default defineComponent({
                 helpText: "Filing Number Management",
                 condition: () => this.assignFilingNum,
                 options: async () => {
-                    await this.presentLoading('Arranging filing numbers...')
-                    let res: any = {}
-                    try {
-                        res = await this.service.assignFilingNumber()
-                    }catch(e) {
-                        toastDanger(e)
-                    }
-                    let primaryPatientName = ''
-                    let secondaryPatientName = ''
-                    let newPrimaryFilingNum = ''
-                    let newSecondaryFilingNumber = ''
-                    let dormantSecondaryFilingNumber = ''
-
-                    await loadingController.dismiss()
-
-                    if (!isEmpty(res)) {
-                        if (res.new_identifier) {
-                            primaryPatientName = await this.getPatientName(
-                                res.new_identifier.patient_id
-                            )
-                            newPrimaryFilingNum = res.new_identifier.identifier
-                            await this.service.printFilingNumber()
-                        }
-                        if (res.archived_identifier) {
-                            secondaryPatientName = await this.getPatientName(
-                                res.archived_identifier.patient_id
-                            )
-                            newSecondaryFilingNumber = res.archived_identifier.identifier
-                            dormantSecondaryFilingNumber = newPrimaryFilingNum
-                        }
-                    }
-                    return [
-                        {
+                    // Simple object to track filing number identifiers
+                    const assignment: any = {
+                        primary: {
                             label: 'Dormant → Active',
-                            value: primaryPatientName,
+                            value: this.patient.name,
                             other: {
-                                activeNumber: newPrimaryFilingNum, 
-                                dormantNumber: this.currentFilingNum
+                                activeNumber: this.patient.filingID || '', 
+                                dormantNumber: 'N/A'
                             }
                         },
-                        {
+                        archived:  {
                             label: 'Active → Dormant',
-                            value: secondaryPatientName,
+                            value: 'N/A',
                             other: {
-                                activeNumber: newSecondaryFilingNumber, 
-                                dormantNumber: dormantSecondaryFilingNumber
+                                activeNumber: 'N/A', 
+                                dormantNumber: 'N/A'
                             }
                         }
-                    ]
+                    }
+                    await this.presentLoading('Arranging filing numbers...')
+                    // Avoidig reassigning filing number to patient who already has one.
+                    // Not having this condition causes the backend to crash!!
+                    if (!this.service.isActiveFilingNum(this.patient.filingID)) {
+                        try {
+                            const f = await this.service.assignFilingNumber()
+                            assignment.primary
+                                .other
+                                .activeNumber = f.new_identifier.identifier
+                            assignment.primary
+                                .other
+                                .dormantNumber = this.service
+                                .isDormantFilingNum(this.patient.filingID) 
+                                    ? this.patient.filingID
+                                    : 'N/A'
+
+                            loadingController.dismiss()
+
+                            await this.service.printFilingNumber()
+
+                            if (!isEmpty(f.archived_identifier)) {
+                                const patient = await this.getPatient(
+                                    f.archived_identifier.patient_id
+                                )
+                                assignment.secondary.value = patient.name
+                                assignment.secondary
+                                    .other
+                                    .activeNumber = f.archived_identifier.identifier
+                                assignment.secondary
+                                    .other
+                                    .dormantNumber = f.new_identifier.identifier
+                            }
+                        }catch(e) {
+                            toastDanger(e)
+                            loadingController.dismiss()
+                        }
+                    } else {
+                        loadingController.dismiss()
+                    }
+
+                    return [ assignment.primary, assignment.archived ]
                 },
                 config: {
                     hiddenFooterBtns: [
