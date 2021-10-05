@@ -1,7 +1,7 @@
 import { TaskInterface } from "../../interfaces/TaskInterface"
 import { PatientPrintoutService } from "@/services/patient_printout_service"
 import { FieldType } from "../preferences"
-import { FilingNumberService } from "../services/filing_number_service"
+import { Patientservice } from "@/services/patient_service"
 
 const BASE_URL_PATH = '/assets/images/'
 
@@ -107,21 +107,8 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     action: ({ patient }: any, router: any) => {
       router.push(`/art/filing_numbers/${patient.patient_id}?archive=true`)
     },
-    condition: async (p: any) => {
-      const f: any = new FilingNumberService()
-      try {
-        const filingNum = p.program.filing_number.number
-        if (filingNum != "N/A") {
-          await f.loadFilingPrefix()
-          const dormantPrx = f.getDormantPrx()
-          if (dormantPrx && filingNum.match(new RegExp(dormantPrx), 'i')) {
-            return false
-          }
-        }
-      }catch(e) {
-        console.error(e)
-      }
-      return true
+    condition: async ({ patient }: any) => {
+      return new Patientservice(patient).hasActiveFilingNumber()
     },
     icon: img("archive.png")
   },
@@ -129,24 +116,9 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     id: "assign_filing_number",
     name: "Assign filing number",
     description: "Assign a new filing number",
-    condition: async (p: any) => {
-      const f: any = new FilingNumberService()
-      try {
-        const filingNum = p.program.filing_number.number
-        if (filingNum != "N/A") {
-          await f.loadFilingPrefix()
-          const dormantPrx = f.getDormantPrx()
-          if (dormantPrx 
-            && !(filingNum.match(
-                  new RegExp(dormantPrx), 'i'))
-              ) {
-            return false
-          }
-        }
-      }catch(e) {
-        console.error(e)
-      }
-      return true
+    condition: async ({patient}: any) => {
+      const _p = new Patientservice(patient)
+      return _p.hasDormantFilingNumber() || !_p.hasActiveFilingNumber()
     },
     action: ({ patient, program }: any, router: any) => {
       router.push(`/art/filing_numbers/${patient.patient_id}?assign=true&file=${program?.filing_number?.number || ''}`)
