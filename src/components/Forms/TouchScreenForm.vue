@@ -1,9 +1,21 @@
 <template>
+  <!-- 
+    HACK: dont remove the this, 
+    some components dont render without it's presence
+  --->
   {{currentField}}
+  <!-- END OF HACK --->
   <ion-page>
     <ion-header>
       <ion-toolbar>
-        <ion-title> {{ currentField.helpText }} </ion-title>
+        <ion-row> 
+          <ion-col>
+            <ion-title>{{ currentField.helpText }}</ion-title>
+          </ion-col>
+          <ion-col v-if="currentField?.config?.toolbarInfo">
+            <info-card :style="{height: '100%'}" :items="currentField?.config?.toolbarInfo"/>
+          </ion-col>
+        </ion-row>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -58,6 +70,7 @@ import {
 } from "./FieldInterface";
 import {
   IonPage,
+  IonButtons,
   IonContent,
   IonFooter,
   IonToolbar,
@@ -66,10 +79,13 @@ import {
   IonTitle,
 } from "@ionic/vue";
 import { alertConfirmation, toastWarning } from "@/utils/Alerts";
+import InfoCard from "@/components/DataViews/HisFormInfoCard.vue"
 
 export default defineComponent({
   name: "TouchscreenForm",
   components: {
+    InfoCard,
+    IonButtons,
     IonPage,
     IonContent,
     IonFooter,
