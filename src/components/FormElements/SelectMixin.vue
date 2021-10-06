@@ -2,14 +2,22 @@
 import { defineComponent } from 'vue'
 import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
-import { IonList, IonItem, IonLabel} from "@ionic/vue"
 import HisTextInput from "@/components/FormElements/BaseTextInput.vue";
 import { Option } from '../Forms/FieldInterface'
 import { QWERTY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue';
+import {
+    IonList, 
+    IonItem, 
+    IonLabel, 
+    IonGrid, 
+    IonRow, 
+    IonCol
+} from "@ionic/vue"
+
 export default defineComponent({
-    components: { IonList, IonItem, IonLabel, HisTextInput, HisKeyboard, ViewPort },
+    components: { IonList, IonItem, IonLabel, HisTextInput, HisKeyboard, ViewPort, IonGrid, IonRow, IonCol },
     mixins: [FieldMixinVue],
     data: () => ({ 
         showKeyboard: false,
