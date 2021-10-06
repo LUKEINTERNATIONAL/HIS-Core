@@ -8,10 +8,6 @@ export default defineComponent({
         'onFieldActivated'
     ],
     props: {
-        env: {
-            type: Object,
-            required: true
-        },
         config: {
             type: Object,
             default: () => ({})
