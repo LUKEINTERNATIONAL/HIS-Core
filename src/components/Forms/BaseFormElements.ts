@@ -1,5 +1,6 @@
 import BarcodeInput from "@/components/FormElements/HisBarcodeInput.vue"
 import SingleSelect from "@/components/FormElements/HisSelect.vue";
+import SingleSelectCards from "@/components/FormElements/HisCardSelector.vue";
 import MultipleSelect from "@/components/FormElements/HisMultipleSelect.vue";
 import TextInput from "@/components/FormElements/HisTextInput.vue"
 import NumberInput from "@/components/FormElements/HisNumberInput.vue"
@@ -51,7 +52,8 @@ export enum FieldType {
     TT_APPOINTMENT_PICKER = 'appointment-picker',
     TT_PERSON_RESULT_VIEW = 'PersonSearchView',
     TT_RELATION_SELECTION = 'RelationSelection',
-    TT_FILING_NUMBER_VIEW = 'FilingNumberView'
+    TT_FILING_NUMBER_VIEW = 'FilingNumberView',
+    TT_CARD_SELECTOR = 'SingleSelectCards'
 }
 // Components to be rendered
 export const BaseFormComponents = {
@@ -79,5 +81,6 @@ export const BaseFormComponents = {
     AppointmentPicker,
     PersonSearchView,
     RelationSelection,
-    FilingNumberView
+    FilingNumberView,
+    SingleSelectCards
 }
