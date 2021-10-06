@@ -34,11 +34,11 @@
             :key="index"
             :slot="btn.slot || 'start'"
             :class="btn.styleClass"
-            @click="btn.onClick(btn)"
+            @click="btn.onClick(formData, computedFormData)"
             :color="btn.color || 'primary'"
             :size="btn.size || 'large'"
-            :disabled="!runBtnState(btn, 'disabled')"
-            v-show="runBtnState(btn, 'visible')"
+            :disabled="onDisabledBtnState(btn, 'disabled', false)"
+            v-show="onVisibleBtnState(btn, 'visible')"
           >
             {{ btn.name }}
           </ion-button>
@@ -147,16 +147,6 @@ export default defineComponent({
       return {
         name: "Cancel",
         color: "danger",
-        state: {
-          visible: {
-            onload: (field: Field) => {
-              if (field?.config?.hiddenFooterBtns) {
-                return field?.config?.hiddenFooterBtns.includes("Cancel");
-              }
-              return true;
-            },
-          },
-        },
         onClick: async () => {
           const confirmation = await alertConfirmation(
             "Are you sure you want to cancel?"
@@ -174,16 +164,6 @@ export default defineComponent({
         name: "Clear",
         color: "warning",
         slot: "end",
-        state: {
-          visible: {
-            onload: (field: Field) => {
-              if (field?.config?.hiddenFooterBtns) {
-                return !field?.config?.hiddenFooterBtns.includes("Clear");
-              }
-              return true;
-            },
-          },
-        },
         onClick: async () => {
           const confirmation = await alertConfirmation(
             "Are you sure you want to clear field data?"
@@ -193,71 +173,66 @@ export default defineComponent({
       };
     },
     getBackBtn() {
+      const visibleCondition = () => {
+        if (this.currentFields.length === 1 
+          || this.currentIndex <= 1) {
+            return false;
+          }
+        return true;
+      }
       return {
         name: "Back",
         slot: "end",
         state: {
           visible: {
-            onload: (field: Field) => {
-              if (this.currentFields.length === 1 || this.currentIndex <= 0) {
-                return false;
-              }
-              if (field?.config?.hiddenFooterBtns) {
-                return !field?.config?.hiddenFooterBtns.includes("Back");
-              }
-              return true;
-            },
-          },
+            onload: () => visibleCondition(),
+            default: () => visibleCondition()
+          }
         },
         onClick: () => this.goBack()
       };
     },
     getNextBtn() {
+      const visibleCondition = () => {
+        if (this.currentIndex + 1 >= this.currentFields.length 
+          || this.currentFields.length <= 1) {
+          return false;
+        }
+        return true;
+      }
       return {
-        index: 4,
         name: "Next",
         color: "success",
         slot: "end",
         state: {
-          visible: {
-            onload: (field: Field) => {
-              if (this.currentFields.length <= 1) {
-                return false;
+          disabled: {
+            onload(field: Field) {
+              if ('requireNext' in field) {
+                return !field.requireNext
               }
-              if ("requireNext" in field) {
-                return field.requireNext;
-              }
-              if (field?.config?.hiddenFooterBtns) {
-                return !field?.config?.hiddenFooterBtns.includes("Next");
-              }
-              return true;
-            },
-            onfinish(_: Field) {
-              return false;
-            },
+              return false
+            }
           },
+          visible: {
+            default: () => visibleCondition(),
+            onload: () => visibleCondition()
+          }
         },
         onClick: () => this.goNext(),
       };
     },
     getFinishBtn() {
+      const visibilityCondition = () => {
+        return this.currentIndex+1 >= this.currentFields.length
+      }
       return {
         name: "Finish",
         color: "success",
         slot: "end",
         state: {
           visible: {
-            default: (_: Field) => {
-              return false
-            },
-            onload: (field: Field) => {
-              if (field?.config?.hiddenFooterBtns) {
-                return this.state === 'onfinish' 
-                  && !field?.config?.hiddenFooterBtns.includes("Finish");
-              }
-              return false;
-            },
-            onfinish: () => true,
+            default:() => visibilityCondition(),
+            onload: () => visibilityCondition()
           },
         },
         onClick: () => {
@@ -265,23 +240,48 @@ export default defineComponent({
         },
       };
     },
-    runBtnState(btn: any, btnProp: "visible" | "disabled"): boolean {
-      // Check if the btn has states defined
-      if (btn.state && btnProp in btn.state) {
-        // Check if the current form state is being observed by the button
-        if (this.state in btn.state[btnProp]) {
-          return btn.state[btnProp][this.state](
-            this.currentField,
-            this.formData
-          );
-        } else if ('default' in btn.state[btnProp]) {
-          return btn.state[btnProp]['default'](
-            this.currentField,
-            this.formData
+    onVisibleBtnState(btn: any) {
+      // Hide buttton if the current field configured it to be hidden
+      try {
+        if (this.currentField
+            ?.config
+            ?.hiddenFooterBtns
+            .includes(btn.name)) {
+          return false
+        }
+      }catch(e) { 
+        //No hidden buttons i suppose
+      }
+      // Check for state observables in the button
+      if (btn?.state?.visible) {
+        if (this.state in btn.state.visible) {
+          return btn.state.visible[this.state] (
+            this.currentField, this.formData
+          )
+        }
+        if ('default' in btn.state.visible) {
+          return btn.state.visible['default'] (
+            this.currentField, this.formData
           )
         }
       }
       return true
+    },
+    onDisabledBtnState(btn: any) {
+      // Check for state observables in the button
+      if (btn?.state?.disabled) {
+        if (this.state in btn.state.disabled) {
+          return btn.state.disabled[this.state] (
+            this.currentField, this.formData
+          )
+        }
+        if ('default' in btn.state.disabled) {
+          return btn.state.disabled['default'] (
+            this.currentField, this.formData
+          )
+        }
+      }
+      return false
     },
     getDefaultSummaryField(): Field {
       return {
@@ -412,7 +412,8 @@ export default defineComponent({
       for (let i = this.currentIndex; i < totalFields; ++i) {
         const field = this.currentFields[i];
 
-        if (!isEmpty(this.currentField) && this.currentField.id === field.id)
+        if (!isEmpty(this.currentField) 
+          && this.currentField.id === field.id)
           continue;
 
         try {
@@ -429,16 +430,14 @@ export default defineComponent({
       this.onComputeValue();
       this.state = "onfinish";
     },
-    async setActiveField(
-      index: number,
-      state = "" as "init" | "next" | "prev"
-    ) {
+    async setActiveField(index: number, state = "" as "init" | "next" | "prev") {
       await this.onUnload(state);
+      // Do any data conversion process if applicable for the current Field
       this.onComputeValue();
       this.state = state;
       this.currentIndex = index;
       this.currentField = this.currentFields[this.currentIndex];
-      // create new instance of footer buttons for set fields
+      // create new instance of footer buttons for the current field
       this.footerBtns = [this.getCancelBtn()];
       // Load custom buttons defined in the field
       if (this.currentField.config && this.currentField.config.footerBtns) {
