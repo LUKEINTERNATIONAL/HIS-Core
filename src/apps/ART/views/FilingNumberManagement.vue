@@ -19,6 +19,7 @@ import { FilingNumberService } from '@/apps/ART/services/filing_number_service'
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { alertConfirmation, toastDanger, toastWarning  } from "@/utils/Alerts"
+import HisDate from "@/utils/Date"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -87,23 +88,64 @@ export default defineComponent({
             await loadingController.dismiss()
             this.$router.push(`/patient/dashboard/${this.service.getPatientID()}`)
         },
+        async getArchivingCandidateOptions(pageNumber=0): Promise<Array<Option>> {
+            const candidates = await this.service.getArchivingCandidates(pageNumber)
+            return candidates.map((candidate: any) => ({
+                label: `${candidate.given_name} ${candidate.family_name} (${candidate.state})`,
+                value: candidate.identifier,
+                other: {
+                    data: candidate,
+                    list: [
+                        {
+                            label: 'Filing #',
+                            value: candidate.identifier,
+                            style: {
+                                color: 'green', 
+                                fontWeight: 'bold'
+                            }
+                        },
+                        {
+                            label: 'Name',
+                            value: `${candidate.given_name} ${candidate.family_name}`
+                        },
+                        {
+                            label: 'Outcome',
+                            value: candidate.state
+                        },
+                        {
+                            label: 'LAD',
+                            value: HisDate.toStandardHisDisplayFormat(
+                                candidate.appointment_date
+                            )
+                        }
+                    ]   
+                }
+            }))
+        },
         getCandidateSelectionField(): Field {
+            let selectorInstance: any = {}
+            let pageNumber = 0
             return {
                 id: 'select_candidate_to_swap',
-                type: FieldType.TT_SELECT,
+                type: FieldType.TT_CARD_SELECTOR,
                 helpText: 'Filing Number (Archive)',
                 validation: (val: Option) => Validation.required(val),
+                onload: (instance: any) => {
+                    selectorInstance = instance
+                },
                 onValue: async (val: Option) => {
                     if(val) {
                         const confirmed = await alertConfirmation(
-                            `Are you sure you want to archive ${val.other.identifier}`
+                            `Are you sure you want to archive ${val.value}`
                         )
 
-                        if (!confirmed) return false
+                        if (!confirmed) {
+                            return false
+                        }
 
                         const res = await this.service
                             .archivePatient(
-                                val.value, val.other.identifier
+                                val.other.data.patient_id, val.value
                             )
                         if (res) {
                             this.patient = await this.getPatient(this.service.getPatientID())
@@ -114,18 +156,43 @@ export default defineComponent({
                     }
                     return true
                 },
-                options: async () => {
-                    const candidates = await this.service.getArchivingCandidates()
-                    return candidates.map((candidate: any) => ({
-                        label: `${candidate.given_name} ${candidate.family_name} (${candidate.state})`,
-                        value: candidate.patient_id,
-                        other: candidate
-                    }))
-                },
+                options: async () => await this.getArchivingCandidateOptions(),
                 config: {
                     hiddenFooterBtns: [
                         'Clear',
-                        'Back'
+                        'Back',
+                        'Finish',
+                        'Next'
+                    ],
+                    footerBtns: [
+                        {
+                            name: 'Previous batch',
+                            slot: 'end',
+                            state: {
+                                disabled: {
+                                    default: () => pageNumber <= 0
+                                }
+                            },
+                            onClick: async () => {
+                                pageNumber -= 1
+                                selectorInstance.listData = await this.getArchivingCandidateOptions(pageNumber)
+                            }
+                        },
+                        {
+                            name: 'Next batch',
+                            slot: 'end',
+                            state: {
+                                disabled: {
+                                    default: () => {
+                                        return selectorInstance.listData && selectorInstance.listData.length <= 1
+                                    }
+                                }
+                            },
+                            onClick: async () => {
+                                pageNumber += 1
+                                selectorInstance.listData = await this.getArchivingCandidateOptions(pageNumber)
+                            }
+                        }
                     ]
                 }
             }
@@ -213,13 +280,7 @@ export default defineComponent({
                     footerBtns: [
                         {
                             name: 'Print #',
-                            size: 'large',
                             slot: 'start',
-                            color: 'primary',
-                            visible: true,
-                            visibleOnStateChange: (state: any) => {
-                                return state.field.id === 'filing_number_management'
-                            },
                             onClick: async () => this.service.printFilingNumber()
                         }
                     ]
