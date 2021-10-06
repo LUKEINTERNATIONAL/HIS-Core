@@ -13,7 +13,6 @@ import MultiYesNo from "@/components/FormElements/MultiYesNoSelect.vue"
 import WeightChart from "@/components/FormElements/HisWeightChart.vue"
 import VitalsEntry from "@/components/FormElements/HisVitalsEntry.vue"
 import AppointmentsEntry from "@/components/FormElements/HisAppointments.vue"
-import BpManagement from "@/components/FormElements/HisBPManagement.vue"
 
 import SummaryPage from "@/components/FormElements/HisSummary.vue"
 import ArtStagingSummary from "@/components/FormElements/ArtStagingSummary.vue"
@@ -52,7 +51,6 @@ export enum FieldType {
     TT_APPOINTMENT_PICKER = 'appointment-picker',
     TT_PERSON_RESULT_VIEW = 'PersonSearchView',
     TT_RELATION_SELECTION = 'RelationSelection',
-    TT_BP_MANAGEMENT = 'bp-management'
 }
 // Components to be rendered
 export const BaseFormComponents = {
@@ -79,6 +77,5 @@ export const BaseFormComponents = {
     ProgamSelection,
     AppointmentPicker,
     PersonSearchView,
-    RelationSelection,
-    BpManagement
+    RelationSelection
 }

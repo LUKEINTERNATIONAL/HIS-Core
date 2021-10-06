@@ -35,8 +35,12 @@
 </template>
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import {
+  IonButton,
+} from "@ionic/vue";
 import { isEmpty } from "lodash";
 export default defineComponent({
+  components: {IonButton},
   props: {
     styles: {
       type: Array,
