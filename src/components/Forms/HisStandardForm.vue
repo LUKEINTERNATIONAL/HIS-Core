@@ -1,13 +1,14 @@
 <template>
-  <component
-    v-bind:is="formType"
-    :fields="fields"
-    :skipSummary="skipSumary"
-    :activeField="activeField"
-    :cancelDestinationPath="cancelDestinationPath"
-    @onFinish="onFinish"
-    >
-  </component>
+    <component
+        v-bind:is="formType"
+        :fields="fields"
+        :skipSummary="skipSummary"
+        :activeField="activeField"
+        :cancelDestinationPath="cancelDestinationPath"
+        @onFinish="onFinish"
+        @onIndex="onIndex"
+        >
+    </component>
 </template>
 
 <script lang="ts">
@@ -18,10 +19,12 @@ import { Field } from "./FieldInterface";
 export default defineComponent({
     name: "HisStandardForm",
     components: { TouchScreenForm },
+    emits: [
+        'onFinish',
+        'onIndex'
+    ],
     data: () => ({
-        formType: 'TouchScreenForm' as 
-            | 'TouchScreenForm' 
-            | 'MultiFieldForm'
+        formType: 'touch-screen-form' as string
     }),
     props: {
         skipSummary: {
@@ -38,6 +41,14 @@ export default defineComponent({
         cancelDestinationPath: {
             type: String,
             required: false,
+        }
+    },
+    methods: {
+        onFinish(formData: any, computedData: any) {
+            this.$emit('onFinish', formData, computedData)
+        },
+        onIndex(i: number) {
+            this.$emit('onIndex', i)
         }
     }
 })
