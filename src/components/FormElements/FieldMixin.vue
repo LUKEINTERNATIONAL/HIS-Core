@@ -2,11 +2,12 @@
 import { defineComponent } from 'vue'
 
 export default defineComponent({
+    emits: [
+        'onValue',
+        'onClear',
+        'onFieldActivated'
+    ],
     props: {
-        env: {
-            type: Object,
-            required: true
-        },
         config: {
             type: Object,
             default: () => ({})

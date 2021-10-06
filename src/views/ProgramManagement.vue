@@ -1,11 +1,11 @@
 <template>
     <his-standard-form
-        @onIndex="fieldComponent=''"
+        :key="hisFormKey"
         :activeField="fieldComponent"
         :skipSummary="true"
         :fields="fields"
+        @onIndex="fieldComponent=''"
         @onFinish="onFinish"
-        :key="hisFormKey"
     />
 </template>
 <script lang="ts">
@@ -19,9 +19,9 @@ import { ProgramService } from "@/services/program_service"
 import { PatientProgramService } from "@/services/patient_program_service"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { find, findIndex, isEmpty } from 'lodash'
-import {LocationService} from "@/services/location_service"
 import HisDate from "@/utils/Date"
 import popVoidReason from "@/utils/ActionSheetHelpers/VoidReason"
+import { getFacilities } from "@/utils/HisFormHelpers/LocationFieldOptions"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -44,7 +44,7 @@ export default defineComponent({
         activeField(field: string) {
             if (field === 'program_selection') {
                 // Recent hisFormKey to re-render everything
-                this.hisFormKey = Math.floor(Math.random() * 5000)
+                this.hisFormKey += 1
             }
         },
         '$route': {
@@ -52,7 +52,14 @@ export default defineComponent({
                 if (params && params.patient_id) {
                     this.patient = params.patient_id
                     this.patientProgram = new PatientProgramService(this.patient)
-                    this.fields = this.getFields()
+                    this.fields = [
+                        this.getProgramSelectionField(),
+                        this.getProgramEnrollmentField(),
+                        ...this.getProgramOutcomeDateFields(),
+                        this.getProgramStateField(),
+                        this.getTransferOutFacilityFields(),
+                        ...this.getStateOutcomeDateFields()
+                    ]
                 }
             },
             deep: true,
@@ -195,137 +202,144 @@ export default defineComponent({
                 }
             })
         },
-        async getFacilities(filter=''): Promise<Option[]> {
-            const facilities = await LocationService.getFacilities({name: filter})
-            return facilities.map((facility: any) => ({
-                label: facility.name,
-                value: facility.location_id,
-                other: facility
-            }))
+        getStateOutcomeDateFields(): Array<Field> {
+            return generateDateFields({
+                id: 'state_outcome_date',
+                helpText: 'State',
+                condition: (f: any) => f.program_state,
+                required: true,
+                minDate: () => this.patientProgram.getProgramDate(),
+                maxDate: () => ProgramService.getSessionDate(),
+                estimation: {
+                    allowUnknown: true,
+                    estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
+                },
+                computeValue: (date: string) => this.patientProgram.setStateDate(date)
+            }, this.patientProgram.getProgramDate() || ProgramService.getSessionDate())
         },
-        programNavButton(name: string, color: string, onClick: Function, fieldIndex=0) {
+        getTransferOutFacilityFields(): Field {
             return {
-                name,
-                color,
-                size: 'large',
-                slot: 'end',
-                visible: true,
-                onClick: onClick,
-                visibleOnStateChange: (state: any) => {
-                    return state.index === fieldIndex
+                id: "transfer_out_state",
+                helpText: 'Please Select facility name',
+                type: FieldType.TT_SELECT,
+                condition: (f: any) => f.program_state.label === 'Patient transferred out',
+                options: (_: any, filter='') => getFacilities(filter),
+                config: {
+                    showKeyboard: true,
+                    isFilterDataViaApi: true
                 }
             }
         },
-        getFields(): Array<Field> {
-            return [
-                {
-                    id: 'program_selection',
-                    helpText: 'Programs',
-                    type: FieldType.TT_PROGRAM_SELECTION,
-                    onload: (context: any) => {
-                        this.activeField = 'program_selection'
-                        this.programSelectionFieldContext = context
-                    },
-                    onValue: (val: Option) => {
-                        if (val) {
-                            this.activeProgram = val.other
-                            this.patientProgram.setProgramId(val.value)
-                            this.patientProgram.setPatientProgramId(val.other.patient_program_id)
-                            this.patientProgram.setProgramDate(
-                                HisDate.toStandardHisFormat(val.other.date_enrolled)
-                            )
+        getProgramStateField(): Field {
+            return {
+                id: "program_state",
+                helpText: "State",
+                type: FieldType.TT_SELECT,
+                options: () => this.programWorkflows(),
+                condition: () => this.activeField === 'program_state',
+                unload: (val: Option) => this.patientProgram.setStateId(val.value)
+            }
+        },
+        getProgramEnrollmentField(): Field {
+            return {
+                id: "program_enrollment",
+                helpText: "Please select a programme",
+                type: FieldType.TT_SELECT,
+                condition: () => this.activeField === 'program_enrollment',
+                unload: (val: Option) => this.patientProgram.setProgramId(val.value),
+                options: () => this.allPrograms(),
+                validation: (val: any) => Validation.required(val),
+                config: {
+                    showKeyboard: true
+                }
+            }
+        },
+        getProgramOutcomeDateFields(): Array<Field> {
+            return generateDateFields({
+                id: 'program_outcome_date',
+                helpText: 'Outcome',
+                required: true,
+                minDate: () => HisDate.estimateDateFromAge(100),
+                maxDate: () => ProgramService.getSessionDate(),
+                condition: () => this.activeField === 'program_enrollment',
+                estimation: {
+                    allowUnknown: true,
+                    estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
+                },
+                computeValue: (date: string) => this.patientProgram.setProgramDate(date)
+            }, ProgramService.getSessionDate())
+        },
+        getProgramSelectionField(): Field {
+            const btnVisibilityCondition = (form: any) => {
+                return !isEmpty(form.program_selection)
+            }
+            return {
+                id: 'program_selection',
+                helpText: 'Programs',
+                type: FieldType.TT_PROGRAM_SELECTION,
+                onload: (context: any) => {
+                    this.activeField = 'program_selection'
+                    this.programSelectionFieldContext = context
+                },
+                onValue: (val: Option) => {
+                    if (val) {
+                        this.activeProgram = val.other
+                        this.patientProgram.setProgramId(val.value)
+                        this.patientProgram.setPatientProgramId(val.other.patient_program_id)
+                        this.patientProgram.setProgramDate(
+                            HisDate.toStandardHisFormat(val.other.date_enrolled)
+                        )
+                    }
+                    return true
+                },
+                validation: (val: any) => Validation.required(val),
+                options: () => this.patientPrograms(),
+                config: {
+                    onVoidState: this.onVoidState,
+                    hiddenFooterBtns: [
+                        'Back',
+                        'Next',
+                        'Clear'
+                    ],
+                    footerBtns: [
+                        {
+                            name: 'Void Program',
+                            slot: 'end',
+                            color: 'danger',
+                            state: {
+                                visible: {
+                                    default: (_: any, form: any) => btnVisibilityCondition(form),
+                                    onValue: (_: any, form: any) => btnVisibilityCondition(form)
+                                }
+                            },
+                            onClick:  async () => {
+                                await this.onVoidProgram()
+                            }
+                        },
+                        {
+                            name: 'Update state',
+                            slot: 'end',
+                            state: {
+                                visible: {
+                                    default: (_: any, form: any) => btnVisibilityCondition(form),
+                                    onValue: (_: any, form: any) => btnVisibilityCondition(form)
+                                }
+                            },
+                            onClick: async () => {
+                                await this.onUpdateState()
+                            }
+                        },
+                        {
+                            name: 'Enroll',
+                            color: 'success',
+                            slot: 'end',
+                            onClick: () => {
+                                this.fieldComponent = 'program_enrollment'
+                            }
                         }
-                        return true
-                    },
-                    validation: (val: any) => Validation.required(val),
-                    options: () => this.patientPrograms(),
-                    config: {
-                       onVoidState: this.onVoidState,
-                       hiddenFooterBtns: [
-                           'Clear',
-                           'Finish',
-                           'Next',
-                           'Back'
-                       ],
-                       footerBtns: [
-                           this.programNavButton(
-                               'Void program',
-                               'danger',
-                               this.onVoidProgram
-                           ),
-                           this.programNavButton(
-                               'Update state',
-                               'primary',
-                               this.onUpdateState
-                           ),
-                           this.programNavButton(
-                               'Enroll',
-                               'success',
-                               () => {
-                                   this.fieldComponent = 'program_enrollment'
-                               }
-                           )
-                       ] 
-                    }
-                },
-                {
-                    id: "program_enrollment",
-                    helpText: "Please select a programme",
-                    type: FieldType.TT_SELECT,
-                    condition: () => this.activeField === 'program_enrollment',
-                    unload: (val: Option) => this.patientProgram.setProgramId(val.value),
-                    options: () => this.allPrograms(),
-                    validation: (val: any) => Validation.required(val),
-                    config: {
-                        showKeyboard: true
-                    }
-                },
-                ...generateDateFields({
-                    id: 'program_outcome_date',
-                    helpText: 'Outcome',
-                    required: true,
-                    minDate: () => HisDate.estimateDateFromAge(100),
-                    maxDate: () => ProgramService.getSessionDate(),
-                    condition: () => this.activeField === 'program_enrollment',
-                    estimation: {
-                        allowUnknown: true,
-                        estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
-                    },
-                    computeValue: (date: string) => this.patientProgram.setProgramDate(date),
-                }, ProgramService.getSessionDate()),
-                {
-                    id: "program_state",
-                    helpText: "State",
-                    type: FieldType.TT_SELECT,
-                    options: () => this.programWorkflows(),
-                    condition: () => this.activeField === 'program_state',
-                    unload: (val: Option) => this.patientProgram.setStateId(val.value)
-                },
-                {
-                    id: "transfer_out_state",
-                    helpText: 'Please Select facility name',
-                    type: FieldType.TT_SELECT,
-                    condition: (f: any) => f.program_state.label === 'Patient transferred out',
-                    options: (_: any, filter='') => this.getFacilities(filter),
-                    config: {
-                        showKeyboard: true,
-                        isFilterDataViaApi: true
-                    }
-                },
-                ...generateDateFields({
-                    id: 'state_outcome_date',
-                    helpText: 'State',
-                    condition: (f: any) => f.program_state,
-                    required: true,
-                    minDate: () => this.patientProgram.getProgramDate(),
-                    maxDate: () => ProgramService.getSessionDate(),
-                    estimation: {
-                        allowUnknown: true,
-                        estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
-                    },
-                    computeValue: (date: string) => this.patientProgram.setStateDate(date)
-                }, this.patientProgram.getProgramDate() || ProgramService.getSessionDate())
-            ]
+                    ] 
+                }
+            }
         }
     }
 })

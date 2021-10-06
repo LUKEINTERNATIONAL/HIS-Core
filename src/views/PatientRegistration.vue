@@ -401,19 +401,6 @@ export default defineComponent({
             type: FieldType.TT_PERSON_RESULT_VIEW,
             appearInSummary: () => false,
             condition: () => !this.isEditMode(),
-            onValue: (val: Option, { env }: any) => {
-                const btns = env.footer.footerBtns
-                const confirmIndex = findIndex(btns, { name: 'Continue' })
-                if (!isEmpty(val)) {
-                    env.footer.footerBtns[confirmIndex].visible = true
-                    env.footer.footerBtns[confirmIndex].onClick = () => {
-                       return this.$router.push(`/patients/confirm?person_id=${val.value}`)
-                    }
-                } else {
-                    env.footer.footerBtns[confirmIndex].visible = false
-                }
-                return true
-            },
             validation: (val: Option) => Validation.required(val),
             options: async (form: any) => {
                 const patients = await Patientservice.search({
@@ -432,34 +419,33 @@ export default defineComponent({
                 footerBtns: [
                     {
                         name: 'Edit Search',
-                        size: 'large',
                         slot: 'end',
-                        visible: true,
                         onClick: () => {
                             this.fieldComponent = 'given_name'
-                        },
-                        visibleOnStateChange: (state: any) => {
-                            return state.field.id === 'results'
                         }
                     },
                     {
                         name: 'New Patient',
-                        size: 'large',
                         slot: 'end',
-                        visible: true,
                         onClick: () => {
                             this.fieldComponent = 'year_birth_date'
-                        },
-                        visibleOnStateChange: (state: any) => {
-                            return state.field.id === 'results'
                         }
                     },
                     {
                         name: 'Continue',
                         color: 'success',
-                        size: 'large',
                         slot: 'end',
-                        visible: false
+                        state: {
+                            disabled: {
+                                default: () => true,
+                                onValue(_: any,form: any) {
+                                    return isEmpty(form.results)
+                                }
+                            }
+                        },
+                        onClick: (form: any) => {
+                            return this.$router.push(`/patients/confirm?person_id=${form.results.value}`)
+                        }
                     }
                 ]
             }

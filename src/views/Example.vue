@@ -2,8 +2,6 @@
   <his-standard-form 
     :fields="fields" 
     :activeField="activeField" 
-    @onskip="activeField=''"
-    @onSubmit="onSubmit" 
     @onFinish="onFinish"> 
   </his-standard-form>
 </template> 
@@ -11,7 +9,7 @@
 import { defineComponent } from "vue";
 import { Field, Option } from "@/components/Forms/FieldInterface"
 import { FieldType } from "@/components/Forms/BaseFormElements"
-import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
+import HisStandardForm from "@/components/Forms/TouchScreenForm.vue";
 import MonthOptions from "@/components/FormElements/Presets/MonthOptions"
 import { findIndex } from "lodash"
 

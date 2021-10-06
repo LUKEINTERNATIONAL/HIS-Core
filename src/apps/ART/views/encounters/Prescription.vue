@@ -378,13 +378,7 @@ export default defineComponent({
                         footerBtns: [
                             {
                                 name: 'Custom Regimen',
-                                size: 'large',
                                 slot: 'end',
-                                color: 'primary',
-                                visible: false,
-                                visibleOnStateChange: (state: Record<string, any>) => {
-                                    return state.index === 0
-                                },
                                 onClick: () => {
                                     this.fieldComponent = 'custom_regimen'
                                 }
