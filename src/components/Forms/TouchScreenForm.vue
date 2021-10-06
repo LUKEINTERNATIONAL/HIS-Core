@@ -1,5 +1,6 @@
 <template>
-  <ion-app>
+  {{currentField}}
+  <ion-page>
     <ion-header>
       <ion-toolbar>
         <ion-title> {{ currentField.helpText }} </ion-title>
@@ -43,9 +44,8 @@
           </ion-button>
       </ion-toolbar>
     </ion-footer>
-  </ion-app>
+  </ion-page>
 </template>
-
 <script lang='ts'>
 import { defineComponent, PropType } from "vue";
 import { BaseFormComponents } from "@/components/Forms/BaseFormElements";
@@ -57,7 +57,7 @@ import {
   FormFooterBtns
 } from "./FieldInterface";
 import {
-  IonApp,
+  IonPage,
   IonContent,
   IonFooter,
   IonToolbar,
@@ -70,7 +70,7 @@ import { alertConfirmation, toastWarning } from "@/utils/Alerts";
 export default defineComponent({
   name: "TouchscreenForm",
   components: {
-    IonApp,
+    IonPage,
     IonContent,
     IonFooter,
     IonToolbar,
