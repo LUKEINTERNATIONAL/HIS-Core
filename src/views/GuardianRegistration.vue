@@ -229,21 +229,17 @@ export default defineComponent({
             },
             config: {
                 hiddenFooterBtns: [
-                    'Clear'
+                    'Clear',
+                    'Next'
                 ],
                 footerBtns : [
                     {
                         name: 'Find or Register Guardian',
-                        size: 'large',
                         color: 'success',
                         slot: 'end',
-                        visible: true,
                         onClick: () => {
                             this.fieldAction = 'Search'
                             this.fieldComponent = 'given_name'
-                        },
-                        visibleOnStateChange: (state: any) => {
-                            return state.field.id === 'scan'
                         }
                     }
                 ]
@@ -251,29 +247,12 @@ export default defineComponent({
         }
     },
     searchResultField(): Field {
-        let footerBtns: Array<any> = []
-        const newGuardianIndex = () => findIndex(footerBtns, { name: 'Continue Guardian' })
         return {
             id: 'results',
             helpText: 'Search results',
             type: FieldType.TT_PERSON_RESULT_VIEW,
             appearInSummary: () => false,
             condition: () => this.isSearchMode(),
-            onValue: (val: Option, { env }: any) => {
-                footerBtns = env.footer.footerBtns
-                if (!isEmpty(val)) {
-                    footerBtns[newGuardianIndex()].visible = true
-                    footerBtns[newGuardianIndex()].onClick = () => {
-                       this.guardianData = this.toPersonData(val.other.person.person)
-                       this.fieldComponent = 'relations'
-                       this.fieldAction = 'Search'
-                    }
-                } else {
-                    footerBtns[newGuardianIndex()].visible = false
-                }
-                return true
-            },
-            unload: () => footerBtns[newGuardianIndex()].visible = false,
             validation: (val: Option) => Validation.required(val),
             options: async (form: any) => {
                 const patients = await Patientservice.search({
@@ -292,36 +271,39 @@ export default defineComponent({
                 footerBtns: [
                     {
                         name: 'Edit Search',
-                        size: 'large',
                         slot: 'end',
-                        visible: true,
                         onClick: () => {
                             this.fieldAction = 'Search'
                             this.fieldComponent = 'given_name'
-                        },
-                        visibleOnStateChange: (state: any) => {
-                            return state.field.id === 'results'
                         }
                     },
                     {
                         name: 'New Guardian',
-                        size: 'large',
                         slot: 'end',
-                        visible: true,
                         onClick: () => {
                             this.fieldAction = 'Registration'
                             this.fieldComponent = 'year_birth_date'
-                        },
-                        visibleOnStateChange: (state: any) => {
-                            return state.field.id === 'results'
                         }
                     },
                     {
                         name: 'Continue Guardian',
                         color: 'success',
-                        size: 'large',
                         slot: 'end',
-                        visible: false
+                        state: {
+                            disabled: {
+                                default: () => true,
+                                onValue(_: any,form: any) {
+                                    return isEmpty(form.results)
+                                }
+                            }
+                        },
+                        onClick: (form: any) => {
+                            this.guardianData = this.toPersonData(
+                                form.results.other.person.person
+                            )
+                            this.fieldComponent = 'relations'
+                            this.fieldAction = 'Search'
+                        }
                     }
                 ]
             }
