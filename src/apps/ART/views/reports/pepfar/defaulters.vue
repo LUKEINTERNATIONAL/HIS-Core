@@ -30,13 +30,15 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('ARV#'),
-            table.thTxt('First name'),
-            table.thTxt('Last name'),
-            table.thTxt('Gender'),
-            table.thDate('birthdate'),
-            table.thDate('Date defaulted'),
-            table.thTxt('Address')
+            [
+                table.thTxt('ARV#'),
+                table.thTxt('First name'),
+                table.thTxt('Last name'),
+                table.thTxt('Gender'),
+                table.thDate('birthdate'),
+                table.thDate('Date defaulted'),
+                table.thTxt('Address')
+            ]
         ]
     }),
     created() {
@@ -46,6 +48,7 @@ export default defineComponent({
         async onPeriod(_: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.report = new DefaulterReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)

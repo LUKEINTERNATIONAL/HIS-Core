@@ -33,13 +33,15 @@ export default defineComponent({
         rows: [] as Array<any>,
         outcome: '' as string,
         isLoading: false as boolean,
-        columns: [
-            table.thTxt('ARV#'),
-            table.thTxt('First name'),
-            table.thTxt('Last name'), 
-            table.thTxt('Birthdate'), 
-            table.thTxt('Gender'), 
-            table.thTxt('Outcome date')
+        columns:[ 
+            [
+                table.thTxt('ARV#'),
+                table.thTxt('First name'),
+                table.thTxt('Last name'), 
+                table.thTxt('Birthdate'), 
+                table.thTxt('Gender'), 
+                table.thTxt('Outcome date')
+            ]
         ]
     }),
     created() {
@@ -71,6 +73,7 @@ export default defineComponent({
         async onPeriod({outcome}: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
@@ -83,9 +86,9 @@ export default defineComponent({
         async setRows(data: Array<any>) {
             const isTransferOut = this.outcome.match(/trans/i)
             if (isTransferOut) {
-                this.columns.push(table.thTxt('TO Location'))
+                this.columns[0].push(table.thTxt('TO Location'))
             }
-            this.columns.push(table.thTxt('Action'))
+            this.columns[0].push(table.thTxt('Action'))
             data.forEach((d: any) => {
                const row = []
                row.push(table.td(d.identifier))

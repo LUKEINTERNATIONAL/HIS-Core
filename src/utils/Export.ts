@@ -8,7 +8,7 @@ function convertToCsv(list: Array<any>) {
 }
 
 export function toCsv(header: Array<any>, rows: Array<any>, fileName='document') {
-    const csvContent = convertToCsv([header].concat(rows))
+    const csvContent = convertToCsv(header.concat(rows))
     const csvData = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.setAttribute('id', 'csv')
@@ -21,8 +21,10 @@ export function toCsv(header: Array<any>, rows: Array<any>, fileName='document')
 
 export function toTablePDF(tableColumns: Array<any>, tableRows: Array<any>, fileName='document') {
     const doc = new jsPDF()
+    // Important note: only rendering the last array of headers. was experiencing bugs 
+    // rendering multiple headers... maybe this can be improved later
     autoTable(doc, {
-      head: [tableColumns],
+      head: [tableColumns[tableColumns.length-1]],
       body: tableRows
     })
     doc.save(`${fileName}.pdf`)

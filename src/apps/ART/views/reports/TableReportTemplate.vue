@@ -1,17 +1,11 @@
 <template>
-  <ion-loading
-    v-if="isLoading"
-    :is-open="true"
-    message="Please wait..."
-  >
-  </ion-loading>
   <his-standard-form
-    v-if="!reportReady"
-    @onFinish="onReportConfiguration"
+    v-if="!canShowReport"
+    @onFinish="onFinish"
     :skipSummary="true" 
     :fields="fields">
   </his-standard-form>
-  <ion-page v-if="reportReady">
+  <ion-page v-if="canShowReport">
     <ion-header>
       <ion-toolbar>
         <ion-row> 
@@ -20,12 +14,12 @@
           </ion-col>
           <ion-col>
             <ion-row>
-              <ion-col size="2"><b>Title</b></ion-col> 
-              <ion-col> {{ title }} </ion-col>
+              <ion-col size="2">Title</ion-col> 
+              <ion-col> <b>{{ title }}</b> </ion-col>
             </ion-row>
             <ion-row> 
-              <ion-col size="2"><b>Period</b></ion-col> 
-              <ion-col> {{ period }} </ion-col>
+              <ion-col size="2">Period</ion-col> 
+              <ion-col> <b>{{ period }}</b> </ion-col>
             </ion-row>
           </ion-col>
         </ion-row>
@@ -47,14 +41,22 @@
 import { defineComponent, PropType } from "vue";
 import HisFooter from "@/components/HisDynamicNavFooter.vue";
 import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
-import { IonLoading, IonPage, IonContent, IonToolbar, IonRow, IonCol} from "@ionic/vue"
 import { Field } from '@/components/Forms/FieldInterface'
 import { toCsv, toTablePDF } from "@/utils/Export"
 import { toExportableFormat, ColumnInterface, RowInterface} from "@/components/DataViews/tables/ReportDataTable" 
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
+import { 
+  IonPage,
+  IonContent,
+  IonToolbar, 
+  IonRow,
+  IonCol,
+  loadingController
+} from "@ionic/vue"
+import { toastDanger } from "@/utils/Alerts";
 
 export default defineComponent({
-  components: { IonLoading, HisStandardForm, ReportTable, HisFooter, IonPage, IonContent, IonToolbar, IonRow, IonCol},
+  components: { HisStandardForm, ReportTable, HisFooter, IonPage, IonContent, IonToolbar, IonRow, IonCol},
   props: {
     title: {
       type: String,
@@ -69,7 +71,7 @@ export default defineComponent({
       required: true
     },
     columns: {
-      type: Object as PropType<ColumnInterface[]>,
+      type: Object as PropType<Array<ColumnInterface[]>>,
       required: true
     },
     rows: {
@@ -79,15 +81,6 @@ export default defineComponent({
     customBtns: {
       type: Array,
       default: () => []
-    },
-    isLoading: {
-      type: Boolean,
-      default: false
-    },
-    reportReady: {
-      type: Boolean,
-      required: true,
-      default: false
     },
     canExportPDf: {
       type: Boolean,
@@ -103,12 +96,40 @@ export default defineComponent({
     }
   },
   data: () => ({
+    formData: {} as any,
+    computeFormData: {} as any,
     btns: [] as Array<any>,
+    isLoadingData: false as boolean,
+    canShowReport: false as boolean,
     logo: "/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png" as string
   }),
   methods: {
     getFileName() {
       return `${this.title}-${this.period}`
+    },
+    async onFinish(formData: any, computedData: any) {
+      this.formData = formData
+      this.computeFormData = computedData
+      this.canShowReport = true
+      await this.presentLoading()
+      try {
+        await this.onReportConfiguration(this.formData, this.computeFormData)
+        loadingController.dismiss ()
+      }catch(e) {
+        toastDanger(e)
+        loadingController.dismiss()
+      }
+    },
+    async reloadReport() {
+      await this.onFinish(this.formData, this.computeFormData)
+    },
+    async presentLoading() {
+      const loading = await loadingController
+        .create({
+          message: 'Please wait...',
+          backdropDismiss: false
+        })
+      await loading.present()
     }
   },
   created() {
@@ -140,10 +161,26 @@ export default defineComponent({
       })
     }
     this.btns.push({
+      name: "Back",
+      size: "large",
+      slot: "end",
+      color: "warning",
+      visible: true,
+      onClick: () => this.canShowReport = false
+    })
+    this.btns.push({
+      name: "Rebuild",
+      size: "large",
+      slot: "end",
+      color: "danger",
+      visible: true,
+      onClick: async () => this.reloadReport()
+    })
+    this.btns.push({
       name: "Finish",
       size: "large",
       slot: "end",
-      color: "primary",
+      color: "success",
       visible: true,
       onClick: async () => this.$router.push({ path:'/' })
     })

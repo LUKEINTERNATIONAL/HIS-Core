@@ -29,11 +29,13 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('First name'),
-            table.thTxt('Last name'),
-            table.thTxt('Role'),
-            table.thDate('Registered on'),
-            table.thDate('Encounters created'),
+            [
+                table.thTxt('First name'),
+                table.thTxt('Last name'),
+                table.thTxt('Role'),
+                table.thDate('Registered on'),
+                table.thDate('Encounters created')
+            ]
         ]
     }),
     created() {
@@ -43,6 +45,7 @@ export default defineComponent({
         async onPeriod(_: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             const data = await UserService.getSystemUsageByUsers(config.start_date, config.end_date)
             this.period = `${HisDate.toStandardHisDisplayFormat(config.start_date)}-${HisDate.toStandardHisDisplayFormat(config.end_date)}`
             this.setRows(data)

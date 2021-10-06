@@ -34,9 +34,13 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.tool-bar-medium-card {
+  height: 100%;
+}
 .col {
-    margin: 0;
-    padding: 2px;
-    text-align: left;
+  margin: auto;
+  margin: 0;
+  padding: 1px;
+  text-align: left;
 }
 </style>

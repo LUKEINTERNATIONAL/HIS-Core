@@ -4,6 +4,10 @@ import HisApp from "@/apps/app_lib"
 import { AppInterface } from "@/apps/interfaces/AppInterface"
 
 export class Service {
+    static ajxGet(url: string, params={}) {
+        return ApiClient.get(`${url}?${Url.parameterizeObjToString(params)}`)
+    }
+
     static async getText(url: string) {
         const req = await ApiClient.get(url)
 
@@ -13,8 +17,9 @@ export class Service {
     static async getJson(url: string, params = {} as Record<string, any>) {
         const transformedUrl = `${url}?${Url.parameterizeObjToString(params)}`
         const req = await ApiClient.get(transformedUrl)
-
-        if (req && req.ok) return req?.json()
+        if (req && req.ok && [200, 201].includes(req.status)) {
+            return req?.json()
+        } 
     }
 
     static async postJson(url: string, data: any, genericError='Unable to save record') {

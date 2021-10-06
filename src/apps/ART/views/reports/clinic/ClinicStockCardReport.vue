@@ -22,9 +22,11 @@ export default defineComponent({
         rows: [] as Array<any>,
         stock: [] as Array<any>,
         columns: [
-            table.thTxt('Medication'), 
-            table.thTxt('Earliest Expiry date'), 
-            table.thTxt('Stock on hand(Tins)')
+            [
+                table.thTxt('Medication'), 
+                table.thTxt('Earliest Expiry date'), 
+                table.thTxt('Stock on hand(Tins)')
+            ]
         ]
     }),
     async created() {

@@ -32,18 +32,24 @@ export default defineComponent({
         rows: [] as Array<any>,
         reportReady: false as boolean,
         isLoading: false as boolean,
-        columns: [
-            table.thTxt('Reg cohort'),
-            table.thTxt('Interval (months)'),
-            table.thTxt('Sub group'),
-            table.thTxt('Total Reg (database)'),
-            table.thTxt('Total Reg (Confirmed)'),
-            table.thTxt('Alive'),
-            table.thTxt('Died'),
-            table.thTxt('Defaulted'),
-            table.thTxt('Stopped'),
-            table.thTxt('TO'),
-            table.thTxt('Unknown')
+        columns:[ 
+            [
+                table.thTxt('Reg cohort'),
+                table.thTxt('Interval (months)'),
+                table.thTxt('Sub group'),
+                table.thTxt('Total Reg (database)'),
+                table.thTxt('Total Reg (Confirmed)', {
+                    style: {
+                        borderRight: '5px solid black !important'
+                    }
+                }),
+                table.thTxt('Alive'),
+                table.thTxt('Died'),
+                table.thTxt('Defaulted'),
+                table.thTxt('Stopped'),
+                table.thTxt('TO'),
+                table.thTxt('Unknown')
+            ]
         ]
     }),
     created() {
@@ -75,6 +81,7 @@ export default defineComponent({
         async onPeriod({ quarter, group }: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.period = quarter.label
             this.report = new SurvivalAnalysisReportService()
             this.report.setQuarter(quarter.label)
@@ -115,7 +122,11 @@ export default defineComponent({
                     table.td(qInterval),
                     table.td(this.report.getAgeGroup()),
                     table.td(totalRegInQuarter),
-                    table.td(0), // This column is there for show according to Mwatha
+                    table.td(0, {
+                        style: {
+                            'border-right': '5px solid black'
+                        }
+                    }), // This column is there for show according to Mwatha
                     table.td(outcomeRef['On antiretrovirals']),
                     table.td(outcomeRef['Patient died']),
                     table.td(outcomeRef['Defaulted']),

@@ -34,15 +34,17 @@ export default defineComponent({
         reportType: '' as string,
         reportReady: false as boolean,
         columns: [] as Array<any>,
-        patientLevelColumns: [
-            table.thTxt('ARV#'), 
-            table.thTxt('Gender'), 
-            table.thTxt('Birthdate'), 
-            table.thTxt('Ordered'), 
-            table.thTxt('Specimen'), 
-            table.thTxt('Test'), 
-            table.thTxt('Result'), 
-            table.thTxt('Released')
+        patientLevelColumns:[ 
+            [
+                table.thTxt('ARV#'), 
+                table.thTxt('Gender'), 
+                table.thTxt('Birthdate'), 
+                table.thTxt('Ordered'), 
+                table.thTxt('Specimen'), 
+                table.thTxt('Test'), 
+                table.thTxt('Result'), 
+                table.thTxt('Released')
+            ]
         ],
         disaggregatedColumns: [
             table.thTxt('Age group'), 
@@ -135,7 +137,7 @@ export default defineComponent({
         setDisaggregatedRows(results: Array<Option>) {
             const males = []
             const females = []
-            this.columns = this.disaggregatedColumns.concat(results.map((i: any) => table.thTxt(i.label)))
+            this.columns = [this.disaggregatedColumns.concat(results.map((i: any) => table.thTxt(i.label)))]
             for(const ageGroupIndex in AGE_GROUPS) {
                 const group = AGE_GROUPS[ageGroupIndex]
                 const maleRow: any = [table.td(group), table.td('M')]
@@ -154,7 +156,7 @@ export default defineComponent({
             }
         },
         setPatientLevelRows(results: Array<Option>) {
-            this.columns = this.patientLevelColumns
+            this.columns = [this.patientLevelColumns]
             results.forEach(({other}: Option)  => {
                 other.forEach((d: any) => {
                     this.rows.push([

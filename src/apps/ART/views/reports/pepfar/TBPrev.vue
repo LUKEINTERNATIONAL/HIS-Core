@@ -29,16 +29,52 @@ export default defineComponent({
         reportReady: false as boolean,
         isLoading: false as boolean,
         columns: [
-            table.thTxt('Age group'),
-            table.thTxt('Gender'),
-            table.thNum('3HP'),
-            table.thNum('6HP'),
-            table.thNum('3HP'),
-            table.thNum('6HP'),
-            table.thNum('3HP'),
-            table.thNum('6HP'),
-            table.thNum('3HP'),
-            table.thNum('6HP')
+            [
+                table.thTxt('', { 
+                    sortable: false,
+                    exportable: false 
+                }),
+                table.thTxt('', { 
+                    sortable: false,
+                    exportable: false 
+                }),
+                table.thTxt('', { 
+                    sortable: false,
+                    exportable: false  
+                }),
+                table.thTxt('Started new on ART', { 
+                    colspan: 2, 
+                    sortable: false,
+                    exportable: false 
+                }),
+                table.thTxt('Started previously on ART', { 
+                    colspan: 2, 
+                    sortable: false,
+                    exportable: false 
+                }),
+                table.thTxt('Completed New on ART', { 
+                    colspan: 2, 
+                    sortable: false,
+                    exportable: false 
+                }),
+                table.thTxt('Completed previously on ART', { 
+                    colspan: 2, 
+                    sortable: false,
+                    exportable: false
+                })
+            ],
+            [
+                table.thTxt('Age group'),
+                table.thTxt('Gender'),
+                table.thNum('3HP', { value: '3HP (Started new on ART)'}),
+                table.thNum('6HP', { value: '6HP (Started new on ART)'}),
+                table.thNum('3HP', { value: '3HP (Started previously on ART)'}),
+                table.thNum('6HP', { value: '6HP (Started previously on ART)'}),
+                table.thNum('3HP', { value: '3HP (Completed New on ART)'}),
+                table.thNum('6HP', { value: '6HP (Completed New on ART)'}),
+                table.thNum('3HP', { value: '3HP (Completed previously on ART)'}),
+                table.thNum('6HP', { value: '6HP (Completed previously on ART)'})
+            ]
         ]
     }),
     created() {
@@ -48,6 +84,7 @@ export default defineComponent({
         async onPeriod(_: any, config: any) {
             this.reportReady = true
             this.isLoading = true
+            this.rows = []
             this.report = new TbPrevReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)

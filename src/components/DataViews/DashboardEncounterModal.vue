@@ -11,7 +11,7 @@
           <ion-item
             v-for="(item, index) in items"
             :key="index"
-            :color="item.other.id === active.id ? 'light' : ''"
+            :color="item.other.id === active.id ? 'primary' : ''"
             :detail="true"
             @click="() => showDetails(item.label, item.other)"
           >
@@ -137,7 +137,7 @@ export default defineComponent({
 </script>
 <style scoped>
   .tb {
-    height: 480px;
+    height: 80vh;
     overflow-y: auto;
   }
 </style>

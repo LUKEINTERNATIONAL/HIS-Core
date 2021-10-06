@@ -6,7 +6,7 @@
                     <ion-list>
                         <ion-item
                             v-for="(program, pIndex) in listData" 
-                            :color="program.label === activeProgram.label ? 'light': ''" 
+                            :color="program.label === activeProgram.label ? 'primary': ''" 
                             :key="pIndex"
                             @click="onselect(program)"
                             detail> 
@@ -15,9 +15,11 @@
                     </ion-list>
                 </ion-col>
                 <ion-col size="8">
-                    <center v-if="activeProgram.label && states.length <= 0"> 
-                        <h3> Program has no states </h3>
-                    </center>
+                    <h3 
+                        v-if="activeProgram.label && states.length <= 0"
+                        :style="{textAlign:'center'}"> 
+                        Program has no states 
+                    </h3>
                     <table class="his-table" v-if="activeProgram.label && states.length > 0"> 
                         <tr>
                             <th>State</th>
@@ -51,9 +53,20 @@ import { Option } from '../Forms/FieldInterface'
 import { isEmpty } from 'lodash'
 import HisDate from "@/utils/Date"
 import FieldMixinVue from './FieldMixin.vue'
+import ViewPort from "@/components/DataViews/ViewPort.vue"
+import {
+    IonCol,
+    IonRow,
+    IonButton,
+    IonLabel,
+    IonList,
+    IonItem,
+} from "@ionic/vue"
 
 export default defineComponent({
     name: "HisSelect",
+    components: { ViewPort, IonCol, IonRow, IonLabel, IonList, IonButton, IonItem,
+ },
     mixins: [FieldMixinVue],
     watch: {
         clear(val: boolean){ 
@@ -96,9 +109,11 @@ export default defineComponent({
 </script>
 <style scoped>
     .view-port-content {
-        height: 89%;
+        height: 98%;
+        background: white;
     }
     ion-col {
         border-right: solid 1px #ccc;
+        height: 75vh;
     }
 </style>
