@@ -288,7 +288,7 @@ export default defineComponent({
             const modal = await modalController.create({
                 component: component,
                 backdropDismiss: false,
-                cssClass: "custom-modal",
+                cssClass: "large-modal",
                 componentProps: {
                     items,
                     title: `${title}: ${date}`,
