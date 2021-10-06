@@ -46,7 +46,6 @@ export class FilingNumberService extends Service {
     }
 
     isDormantFilingNum(filingNumber: string) {
-        console.log(filingNumber)
         return filingNumber.match(new RegExp(this.dormantPrefix, 'i'))
             ? true
             : false
