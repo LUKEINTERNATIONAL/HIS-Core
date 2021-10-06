@@ -41,6 +41,7 @@ import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
 import StockCardReport from "@/apps/ART/views/reports/clinic/ClinicStockCardReport.vue"
 import ClinicAppointments from "@/apps/ART/views/reports/clinic/ClinicAppointments.vue"
 import DataCleaning from "@/apps/ART/views/reports/inconsistencies/DataCleaning.vue"
+import HyperTensionDiagnosis from "@/apps/ART/views/encounters/hypertension_diagnosis.vue"
 
 export default [
     {
@@ -107,6 +108,11 @@ export default [
         name: "BP management",
         path: "/art/encounters/bp_management/:patient_id",
         component: BPManagment
+    },
+    {
+        name: "Hypertesnion diagnosis",
+        path: "/art/encounters/hypertension_diagnosis/:patient_id",
+        component: HyperTensionDiagnosis
     },
     {
         name: "lab activities",

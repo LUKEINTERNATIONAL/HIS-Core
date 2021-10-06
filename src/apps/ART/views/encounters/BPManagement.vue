@@ -66,6 +66,9 @@
         <ion-button size="large" color="danger" slot="start" v-if="showClinicianButton">
           Refer to clinician 
         </ion-button>
+        <ion-button size="large" slot="start" @click="goToDiagnosis" v-if="!patientHasHyperTensionObs" >
+          Hypertension Diagnosis 
+        </ion-button>
         <ion-button size="large" color="danger" slot="start" @click="gotoPatientDashboard">
           cancel
         </ion-button>
@@ -194,6 +197,9 @@ export default defineComponent({
         toastWarning("Please select an action");
     
       }
+    },
+    goToDiagnosis() {
+      return this.$router.push({path: `/art/encounters/hypertension_diagnosis/${this.patientID}`}) 
     },
     nextAction(state: string) {
       // TODO: replace commented out parts below with finalized routes

@@ -4,6 +4,7 @@
     @onFinish="onFinish"
     :skipSummary="true"
     :cancelDestinationPath="cancelDestination"
+    :activeField="fieldComponent" 
   >
   </his-standard-form>
 </template> 
@@ -13,19 +14,21 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import EncounterMixinVue from "./EncounterMixin.vue";
-import { FastTrackService } from "@/apps/ART/services/fast_track_service";
+import { ConsultationService } from "@/apps/ART/services/consultation_service";
 import { toastSuccess, toastWarning } from "@/utils/Alerts";
-import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
+import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper";
+import { ObservationService } from "@/services/observation_service";
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: { HisStandardForm },
   data: () => ({
     fields: [] as any,
-    fastTrack: {} as any,
+    consultation: {} as any,
     options: [] as any,
     values: [] as any,
     gender: null as any,
+    activeField: '' as string,
   }),
   watch: {
     patient: {
@@ -36,12 +39,26 @@ export default defineComponent({
     },
   },
   methods: {
+    
     async onFinish(formData: any, computedData: any) {
-      const encounter = await this.fastTrack.createEncounter();
-	const date = computedData.session_date
+      const encounter = await this.consultation.createEncounter();
+      const val = formData.has_hypertension.value;
       if (encounter) {
-        const obs = await this.buildObs(formData);
-        const observations = await this.fastTrack.saveObservationList(obs);
+        const enc = [];
+        const hyperTensionOb = await ObservationService.buildValueCoded(
+          "Patient has hypertension",
+          formData.has_hypertension.value
+        );
+        enc.push(hyperTensionOb);
+        if (val === "Yes") {
+          const date = computedData.hypertension_diagnosis;
+          const dateOb = await ObservationService.buildValueDate(
+            "Hypertension diagnosis date",
+            date
+          );
+          enc.push(dateOb);
+        }
+        const observations = await this.consultation.saveObservationList(enc);
         if (!observations)
           return toastWarning("Unable to save patient observations");
 
@@ -52,32 +69,11 @@ export default defineComponent({
       }
     },
     async init(patient: any) {
-      this.gender = patient.getGender();
-      this.fields = this.getFields();
-    },
-    async buildObs(formData: any) {
-      const observations = [];
-      observations.push(
-        await this.fastTrack.buildValueCoded(
-          "Assess for fast track",
-          formData.ft_assessment.value
-        )
+      this.consultation = new ConsultationService(
+        this.patientID,
+        this.providerID
       );
-      if (formData.ft_questions) {
-        await formData.ft_questions.forEach(async (element: any) => {
-          observations.push(
-            await this.fastTrack.buildValueCoded(element.label, element.value)
-          );
-        });
-
-        observations.push(
-          await this.fastTrack.buildValueCoded(
-            "Fast track",
-            formData.book_client.value
-          )
-        );
-      }
-      return observations;
+      this.fields = this.getFields();
     },
     getYesNo() {
       return [
@@ -92,7 +88,7 @@ export default defineComponent({
       ];
     },
     getFields(): any {
-      return [
+      const f = [
         {
           id: "has_hypertension",
           helpText: "Does the patient have hypertension",
@@ -100,16 +96,21 @@ export default defineComponent({
           validation: (val: any) => Validation.required(val),
           options: () => this.getYesNo(),
         },
-        generateDateFields({
-            id: 'hypertension_diagnosis',
-            helpText: 'Date the patient was diagnosed with hypertension',
+        ...generateDateFields(
+          {
+            condition: (f: any) => f.has_hypertension.value === 'Yes',
+            id: "hypertension_diagnosis",
+            helpText: "Date the patient was diagnosed with hypertension",
             required: true,
             estimation: {
-                allowUnknown: false
+              allowUnknown: false,
             },
             computeValue: (date: string) => date,
-        }, '')
+          },
+          ""
+        ),
       ];
+      return f;
     },
   },
 });
