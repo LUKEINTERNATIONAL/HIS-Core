@@ -4,7 +4,7 @@
         <ion-list class='view-port-content'>
             <ion-item 
                 button v-for="(item, index) in filtered" 
-                :color="item.label === selected ? 'light': ''" 
+                :color="item.label === selected ? 'primary': ''" 
                 :key="index"
                 :disabled="'disabled' in item && item.disabled ? true: false"
                 @click="onselect(item)"> 

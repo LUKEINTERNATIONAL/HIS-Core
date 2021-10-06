@@ -6,6 +6,20 @@ export interface OptionDescriptionInterface {
     text: string;
 }
 
+export interface BtnStates {
+    visible?: Record<string, (formData: any, computedData: any) => boolean>;
+    disabled?: Record<string, (formData: any, computedData: any) => boolean>;
+}
+
+export interface FormFooterBtns {
+    name: string;
+    size?: 'large' | 'small';
+    slot?: 'start' | 'end';
+    color?: 'success' | 'primary' | 'warning' | 'secondary' | 'danger';
+    state?: BtnStates;
+    onClick: (btn: FormFooterBtns, formData: any) => void;
+
+}
 export interface Option {
     label: string;
     value: string | number;

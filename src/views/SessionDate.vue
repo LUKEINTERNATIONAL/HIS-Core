@@ -33,12 +33,12 @@ export default defineComponent({
                 footerBtns: [
                     {
                         name: 'Reset',
-                        size: 'large',
                         slot: 'end',
                         color: 'success',
-                        visible: false,
-                        visibleOnStateChange: (state: Record<string, any>) => {
-                            return state.index === 0 && Service.isBDE()
+                        state: {
+                            visible: {
+                                default: () => Service.isBDE() 
+                            }
                         },
                         onClick: async () => {
                             await this.resetSessionDate()
