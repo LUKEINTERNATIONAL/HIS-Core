@@ -99,7 +99,7 @@ const routes: Array<RouteRecordRaw> = [
     component: PatientRegistration
   },
   {
-    path: '/guardian/registration',
+    path: '/guardian/registration/:patient_id',
     name: 'Guardian Registration',
     component: GuardianRegistration
   },

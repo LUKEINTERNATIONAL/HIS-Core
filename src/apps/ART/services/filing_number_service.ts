@@ -104,10 +104,6 @@ export class FilingNumberService extends Service {
         })
     }
 
-    getArchived() {
-        return Service.getJson(``)
-    }
-
     getPastFilingNumbers() {
         return Service.getJson(`patients/${this.patientID}/past_filing_numbers`)
     }

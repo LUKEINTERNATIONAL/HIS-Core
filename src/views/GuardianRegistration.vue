@@ -19,7 +19,7 @@ import HisDate from "@/utils/Date"
 import { toastDanger } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
 import { RelationsService } from "@/services/relations_service"
-import { isEmpty, findIndex } from "lodash"
+import { isEmpty } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
 import { PatientRegistrationService } from "@/services/patient_registration_service"
 
@@ -35,9 +35,9 @@ export default defineComponent({
   }),
   watch: {
     '$route': {
-        async handler({query}: any) {
-            if (query.patient) {
-                const patient = await Patientservice.findByID(query.patient)
+        async handler({params}: any) {
+            if (params.patient_id) {
+                const patient = await Patientservice.findByID(params.patient_id)
                 if (patient) {
                     this.patientData = this.toPersonData(patient.person)
                     this.fields = this.getFields()
