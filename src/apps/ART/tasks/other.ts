@@ -113,6 +113,15 @@ export const OTHER_TASKS: Array<TaskInterface> = [
     icon: img("archive.png")
   },
   {
+    id: "filing_number_trail",
+    name: "View filing number trail",
+    description: "view trail",
+    action: ({ patient }: any, router: any) => {
+      router.push(`/art/filing_numbers/${patient.patient_id}?trail=true`)
+    },
+    icon: img("folder.png")
+  },
+  {
     id: "assign_filing_number",
     name: "Assign filing number",
     description: "Assign a new filing number",
@@ -120,8 +129,8 @@ export const OTHER_TASKS: Array<TaskInterface> = [
       const _p = new Patientservice(patient)
       return _p.hasDormantFilingNumber() || !_p.hasActiveFilingNumber()
     },
-    action: ({ patient, program }: any, router: any) => {
-      router.push(`/art/filing_numbers/${patient.patient_id}?assign=true&file=${program?.filing_number?.number || ''}`)
+    action: ({ patient }: any, router: any) => {
+      router.push(`/art/filing_numbers/${patient.patient_id}?assign=true`)
     },
     icon: img("archive.png")
   },
