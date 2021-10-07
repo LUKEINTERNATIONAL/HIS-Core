@@ -28,9 +28,6 @@ export default defineComponent({
             type: Function,
             required: true,
         },
-        onDone: {
-            type: Function
-        },
         strictNumbers: {
             type: Boolean,
             default: false
@@ -52,14 +49,7 @@ export default defineComponent({
     methods: {
         async keypress(key: any) {
             if (key.match(/done/i)) {
-                await modalController.dismiss()
-                if (this.onDone) {
-                    this.onDone(
-                        this.strictNumbers 
-                        ? parseInt(this.value)
-                        : this.value
-                    )
-                }
+                await modalController.dismiss(this.value)
             } else {
                 if (this.strictNumbers) {
                     if (key.includes('.') && this.value.includes('.')) return
