@@ -1,6 +1,7 @@
 import { Service } from "@/services/service";
 import { PrintoutService } from "@/services/printout_service";
 import { GlobalPropertyService } from "@/services/global_property_service";
+import { Patientservice } from "@/services/patient_service";
 
 export class FilingNumberService extends Service {
     patientID: number;
@@ -63,10 +64,24 @@ export class FilingNumberService extends Service {
         return false
     }
 
-    getFilingNumber(filingNumber: string) {
-        return Service.getJson(`search/patients/by_identifier`, {
-            'type_id': 18, 'identifier': `${this.dormantPrefix}${filingNumber}`
+    async getFilingNumber(filingNumber: string) {
+        const identifier = `${this.dormantPrefix}${filingNumber}`
+        const res = await Service.getJson(`search/patients/by_identifier`, {
+            'type_id': 18, 'identifier': identifier
         })
+        if (res) {
+            return res.map((person: any) => {
+                const patient = new Patientservice(person)
+                return {
+                    identifier,
+                    'given_name': patient.getGivenName(),
+                    'family_name': patient.getFamilyName(),
+                    'state': 'N/A',
+                    'appointment_date': ''
+                }
+            })
+        }
+        return []
     }
 
     archiveFilingNumber() {
