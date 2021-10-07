@@ -99,7 +99,7 @@ import {
   IonItem,
   IonLabel,
 } from "@ionic/vue";
-import { toastWarning, toastSuccess } from "@/utils/Alerts";
+import { toastWarning, toastSuccess, alertAction } from "@/utils/Alerts";
 import EncounterMixinVue from "./EncounterMixin.vue";
 import RiskFactorModal from "@/components/DataViews/RiskFactorModal.vue";
 import { ObservationService } from "@/services/observation_service";
@@ -109,6 +109,9 @@ import HisDate from "@/utils/Date";
 import { isEmpty } from "lodash";
 import { BPManagementService } from "../../services/htn_service";
 import { UserService } from "@/services/user_service";
+import { ProgramService } from "@/services/program_service";
+import { Patientservice } from "@/services/patient_service";
+import { Program } from "@/interfaces/program";
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
@@ -154,6 +157,10 @@ export default defineComponent({
     patientHasHyperTensionObs: false,
     currentDrugs: [],
     items: [] as any,
+    isEnrolledInHTN: false,
+    isAliveOnHTN: false,
+    HTNProgramID: 20,
+    aliveState: 160
   }),
   watch: {
     patient: {
@@ -164,8 +171,10 @@ export default defineComponent({
         this.date = HisDate.toStandardHisDisplayFormat(
           Service.getSessionDate()
         );
+        await this.isTransfered();
         await this.hasHyperTenstion();
         await this.getTreatmentStatus();
+        await this.getProgramStatus();
         this.getItems();
       },
       deep: true,
@@ -190,13 +199,16 @@ export default defineComponent({
       const patientState = {
         state: this.action.value
       }
-      const state = await Service.postJson(`/patients/${this.patientID}/update_or_create_htn_state`, patientState);
+        await this.enrollPatient(patientState);
         this.nextAction(this.action.value);
         console.log(this.action);
       } else {
         toastWarning("Please select an action");
     
       }
+    },
+    async enrollPatient(state: any) {
+      return await Service.postJson(`/patients/${this.patientID}/update_or_create_htn_state`, state);
     },
     goToDiagnosis() {
       return this.$router.push({path: `/art/encounters/hypertension_diagnosis/${this.patientID}`}) 
@@ -232,9 +244,25 @@ export default defineComponent({
       this.patientHasHyperTensionObs = ob === "Yes";
 
     },
+    async isTransfered() {
+      const ob = await ObservationService.getFirstValueCoded(this.patientID, 'Transferred');
+      this.patientFirstVisit = ob !== "Yes";
+
+    },
     async getTreatmentStatus() {
       const ob = await ObservationService.getFirstValueText(this.patientID, 'Treatment status');
-      this.patientOnBPDrugs = ob.match(/BP Drugs started/i);
+      this.patientOnBPDrugs = ob && ob.match(/BP Drugs started/i);
+    },
+    async getProgramStatus() {
+      const programs: any[] = await ProgramService.getPatientPrograms(this.patientID);
+      this.isEnrolledInHTN = programs.filter(program => program.program.name === "HYPERTENSION PROGRAM").length > 0;
+      if(this.isEnrolledInHTN) {
+        await this.programState();
+      }
+    },
+    async programState() {
+      const programs: any[] = await ProgramService.getPatientStates(this.patientID, this.HTNProgramID);
+      this.isAliveOnHTN = programs.filter(program => program.name === "Alive").length > 0;
     },
     async getRiskFactors() {
       const concepts = ConceptService.getConceptsByCategory("risk factors");
@@ -285,10 +313,39 @@ export default defineComponent({
         // this.rows = [...this.formatOrders(data), ...this.rows]
       }
     },
+    async enrollInHTN() {
+
+      const sessionDate = ProgramService.getSessionDate();
+      await ProgramService.enrollProgram(this.patientID, this.HTNProgramID, sessionDate);
+      await ProgramService.createState(this.patientID, this.HTNProgramID, {
+        "state": this.aliveState
+      })
+    },
     async getItems() {
       if (this.patientOnBPDrugs && this.patientFirstVisit) {
         //Add enroll modal here for patient
+
+        if(!this.isEnrolledInHTN) {
+
+        alertAction('Do you want to enroll this client in the HTN program?', [
+        {
+          text: 'Yes',
+          handler: async () =>  {
+            await this.enrollInHTN()
+            this.patientFirstVisit = false;
+            await this.getItems();
+          }
+        },
+        {
+          text: 'No',
+          handler: () => this.nextTask()
+        }
+        ])
         
+        }else {
+          this.patientFirstVisit = false;
+          await this.getItems(); 
+        }        
       } else {
         if (this.currentDrugs.length > 0) {
           this.items = [
