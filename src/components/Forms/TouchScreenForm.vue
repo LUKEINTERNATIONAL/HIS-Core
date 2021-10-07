@@ -413,19 +413,6 @@ export default defineComponent({
       this.state = "onload";
       if (this.currentField.onload) this.currentField.onload(fieldContext);
     },
-    onComputeValue() {
-      if (this.currentField.computedValue) {
-        const id = this.currentField.id;
-        if (this.formData[id]) {
-          this.computedFormData[id] = this.currentField.computedValue(
-            this.formData[id],
-            this.formData
-          );
-        } else {
-          this.computedFormData[id] = null;
-        }
-      }
-    },
     /**
      * Callback before the active field is replaced
      */
@@ -450,7 +437,21 @@ export default defineComponent({
     },
     async setActiveFieldValue(value: any) {
       this.state = "onValue";
-      this.formData[this.currentField.id] = value;
+      const id = this.currentField.id;
+      this.formData[id] = value;
+      /**
+       * Run computedValue callback and store data in a parallel
+       * Object
+       */
+      if (this.currentField.computedValue) {
+        if (value) {
+          this.computedFormData[id] = this.currentField.computedValue(
+            value, this.formData
+          );
+        } else {
+          this.computedFormData[id] = null;
+        }
+      }
     },
     /**
      * Determine which field to show next by it's condition
@@ -475,7 +476,6 @@ export default defineComponent({
         await this.setActiveField(i, "next");
         return;
       }
-      this.onComputeValue();
       this.$emit("onFinish", this.formData, this.computedFormData);
       this.state = "onfinish";
     },
@@ -484,7 +484,6 @@ export default defineComponent({
      */
     async setActiveField(index: number, state = "" as "init" | "next" | "prev") {
       await this.onUnload(state);
-      this.onComputeValue();
       this.state = state;
       this.currentIndex = index;
       this.currentField = this.currentFields[this.currentIndex];
