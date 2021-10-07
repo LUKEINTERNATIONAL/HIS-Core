@@ -52,8 +52,12 @@ export default defineComponent({
                     if (query.assign === "true") {
                        this.assignFilingNum = true
                     }
+                    if (query.trail === "true") {
+                       this.fieldComponent = 'view_filing_history'
+                    }
                     this.fields.push(this.getFilingNumberField())
                     this.fields.push(this.getCandidateSelectionField())
+                    this.fields.push(this.getFilingNumberHistoryField())
                 }
             },
             immediate: true,
@@ -143,6 +147,47 @@ export default defineComponent({
                     ]   
                 }
             }))
+        },
+        getFilingNumberHistoryField(): Field {
+            return {
+                id: 'view_filing_history',
+                type: FieldType.TT_TABLE_VIEWER,
+                helpText: 'Filing Number Trail',
+                options: async () => {
+                    const columns = ['Status', 'Filing #', 'Date Created', 'Date voided', 'Action']
+                    const data = await this.service.getPastFilingNumbers()
+                    const rows = data.map((d: any) => ([
+                        d.voided === 1 ? 'Voided' : 'Active',
+                        d.identifier,
+                        HisDate.toStandardHisDisplayFormat(d.date_created),
+                        HisDate.toStandardHisDisplayFormat(d.date_voided),
+                        ''
+                    ]))
+                    return [
+                        {
+                            label: 'Filing Number Trail',
+                            value: 'Trail',
+                            other: { columns, rows }
+                        }
+                    ]
+                },
+                config: {
+                    hiddenFooterBtns: [
+                        'Clear',
+                        'Next',
+                        'Back',
+                        'Finish'
+                    ],
+                    footerBtns: [
+                        {
+                            name: 'Get filing #',
+                            onClick: () => {
+                                this.fieldComponent = 'filing_number_management'
+                            }
+                        }
+                    ]
+                }
+            }
         },
         getCandidateSelectionField(): Field {
             // Keeps track of the component object that's presented on the screen
