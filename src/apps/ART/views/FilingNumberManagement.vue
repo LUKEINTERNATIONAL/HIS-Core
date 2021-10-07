@@ -30,6 +30,7 @@ export default defineComponent({
         fieldComponent: '' as string,
         fields: [] as Array<Field>,
         assignFilingNum: false as boolean,
+        nextWorkflowRouteName: '' as string,
     }),
     watch: {
         /**
@@ -54,6 +55,9 @@ export default defineComponent({
                     }
                     if (query.trail === "true") {
                        this.fieldComponent = 'view_filing_history'
+                    }
+                    if (query.next_workflow_task) {
+                        this.nextWorkflowRouteName = query.next_workflow_task
                     }
                     this.fields.push(this.getFilingNumberField())
                     this.fields.push(this.getCandidateSelectionField())
@@ -245,23 +249,21 @@ export default defineComponent({
                         const confirmed = await alertConfirmation(
                             `Are you sure you want to archive ${val.value}`
                         )
-
                         if (!confirmed) {
                             return false
                         }
-
-                        const res = await this.service
-                            .archivePatient(
+                        const res = await this.service.archivePatient(
                                 val.other.data.patient_id, val.value
                             )
                         if (res) {
-                            this.patient = await this.getPatient(this.service.getPatientID())
+                            this.patient = await this.getPatient(
+                                this.service.getPatientID()
+                            )
                             this.fieldComponent = 'filing_number_management'
                             return true
                         }
-                        return false
                     }
-                    return true
+                    return false
                 },
                 options: () => this.getArchivingCandidates(),
                 config: {
@@ -454,6 +456,18 @@ export default defineComponent({
                             color: 'success',
                             slot: 'end',
                             onClick: async () => {
+                                // Go to a specic route
+                                if (this.nextWorkflowRouteName) {
+                                    /**
+                                     * By default, we append patient_id to nextWorkflowRouteName.
+                                     */
+                                    return this.$router.push({
+                                        name: this.nextWorkflowRouteName,
+                                        params: {
+                                            'patient_id': this.service.getPatientID()
+                                        }
+                                    })
+                                }
                                 const nextTask = await WorkflowService.getNextTaskParams(
                                     this.service.getPatientID()
                                 )

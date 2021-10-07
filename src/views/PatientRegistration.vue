@@ -21,7 +21,7 @@ import { GlobalPropertyService } from "@/services/global_property_service"
 import { ProgramService } from "@/services/program_service";
 import { toastWarning, toastDanger } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
-import { isPlainObject, isEmpty, findIndex } from "lodash"
+import { isPlainObject, isEmpty } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
 import { PatientRegistrationService } from "@/services/patient_registration_service"
 
@@ -56,7 +56,7 @@ export default defineComponent({
   watch: {
     '$route': {
         async handler({query}: any) {
-            if (query.edit_person) {
+           if (query.edit_person) {
                 await this.initEditMode(query.edit_person)
             } else {
                 this.presets = query
@@ -147,11 +147,33 @@ export default defineComponent({
             const registration: any = new PatientRegistrationService()
             await registration.registerPatient(person, attributes)
             let nextTask: any = {}
+            
+            // HACK: Check if filing numbers is enabled for ART programme
+            if (PatientRegistrationService.getProgramID() === 1) {
+                const filingNumberEnabled = await GlobalPropertyService.filingNumbersEnabled()
+                if (filingNumberEnabled) {
+                    nextTask = { 
+                        name: 'filing management',
+                        params: {
+                            'patient_id': registration.getPersonID()
+                        },
+                        query: {
+
+                        }
+                    }
+                    nextTask.query.assign = true
+                    if (form.relationship.value === 'Yes') {
+                        nextTask.query['next_workflow_task'] = 'Guardian Registration' 
+                    }
+                    return this.$router.push(nextTask)
+                }
+            }
+
             if (form.relationship.value === 'Yes') {
                 nextTask = { 
                     path: '/guardian/registration', 
-                    query: {
-                        patient: registration.getPersonID() 
+                    params: {
+                        'patient_id': registration.getPersonID() 
                     }
                 }
             } else {
