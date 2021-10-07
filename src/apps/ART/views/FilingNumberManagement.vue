@@ -21,6 +21,8 @@ import Validation from "@/components/Forms/validations/StandardValidations"
 import { alertConfirmation, toastDanger, toastWarning  } from "@/utils/Alerts"
 import HisDate from "@/utils/Date"
 import Keypad from "@/components/Keyboard/HisKeypad.vue"
+import { WorkflowService } from "@/services/workflow_service"
+
 export default defineComponent({
     components: { HisStandardForm },
     data: () => ({
@@ -359,13 +361,25 @@ export default defineComponent({
                 config: {
                     hiddenFooterBtns: [
                         'Cancel',
-                        'Clear'
+                        'Clear',
+                        'Next'
                     ],
                     footerBtns: [
                         {
                             name: 'Print #',
                             slot: 'start',
                             onClick: async () => this.service.printFilingNumber()
+                        },
+                        {
+                            name: 'Continue',
+                            color: 'success',
+                            slot: 'end',
+                            onClick: async () => {
+                                const nextTask = await WorkflowService.getNextTaskParams(
+                                    this.service.getPatientID()
+                                )
+                                this.$router.push(nextTask)
+                            }
                         }
                     ]
                 }
