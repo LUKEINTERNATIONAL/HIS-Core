@@ -143,9 +143,13 @@ export default defineComponent({
             }))
         },
         getCandidateSelectionField(): Field {
+            // Keeps track of the component object that's presented on the screen
             let selectorInstance: any = {}
+            // Candidate list is paginated, tracking page here
             let pageNumber = 0
             let filingNumbeSearchTerm = ''
+            // Restore point for archived candidates
+            let filingOptionsBackup: Option[] = []
 
             return {
                 id: 'select_candidate_to_swap',
@@ -187,6 +191,30 @@ export default defineComponent({
                         'Next'
                     ],
                     footerBtns: [
+                        /**
+                         * Resets listData to previous state after a search term was triggerred.
+                         * Note: Only visible when users searches filing numbers
+                         */
+                        {
+                            name: 'Reset',
+                            slot: 'end',
+                            color: 'warning',
+                            state: {
+                                visible: {
+                                    default: () => filingNumbeSearchTerm ? true : false 
+                                }
+                            },
+                            onClick: () => {
+                                // Clear values and restore previous listData prior to search 
+                                // results
+                                filingNumbeSearchTerm = ''
+                                selectorInstance.listData = filingOptionsBackup
+                                filingOptionsBackup = []
+                            }
+                        },
+                        /**
+                         * Loads a key pad for searching for a filing candidate
+                         */
                         {
                             name: 'Specify',
                             slot: 'end',
@@ -197,10 +225,17 @@ export default defineComponent({
                                     const filingNumbers = await this.service.getFilingNumber(
                                         filingNumbeSearchTerm
                                     )
+                                    // Create a restore point for archived candidates
+                                    filingOptionsBackup = [...selectorInstance.listData]
                                     selectorInstance.listData = this.formatCandidateOptions(filingNumbers)
                                 }
                             }
                         },
+                        /**
+                         * List pagination button that decrements the page number.
+                         * Note: this button will only appear when no filing number were manually searched.
+                         * It will also appear when pageNumber is greater than 1
+                         */
                         {
                             name: 'Previous batch',
                             slot: 'end',
@@ -217,6 +252,11 @@ export default defineComponent({
                                 selectorInstance.listData = await this.getArchivingCandidates(pageNumber)
                             }
                         },
+                        /**
+                         * List pagination button that increments the page number.
+                         * Note: this button will only appear when no filing number were manually searched
+                         * and if the list has 10 or more items
+                         */
                         {
                             name: 'Next batch',
                             slot: 'end',
