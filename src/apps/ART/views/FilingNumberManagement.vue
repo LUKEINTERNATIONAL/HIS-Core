@@ -2,7 +2,6 @@
   <his-standard-form
     :skipSummary="true" 
     :activeField="fieldComponent"
-    @onFinish="onFinish"
     @onIndex="fieldComponent=''"
     :fields="fields">
   </his-standard-form>
@@ -33,6 +32,10 @@ export default defineComponent({
         assignFilingNum: false as boolean,
     }),
     watch: {
+        /**
+         * Initiates service and Detects parameters 
+         * in the url and switch to appropriate actions
+         */
         '$route': {
             async handler({query, params}: any) {
                 if (params && params.patient_id) {
@@ -58,9 +61,6 @@ export default defineComponent({
         }
     },
     methods: {
-        onFinish() {
-            this.$router.push(`/patient/dashboard/${this.service.getPatientID()}`)
-        },
         async presentLoading(message="Please wait...") {
             const loading = await loadingController.create({
                 message, backdropDismiss: false
