@@ -149,7 +149,6 @@ export default defineComponent({
             }))
         },
         getFilingNumberHistoryField(): Field {
-            let hasActiveFilingNumber = false
             return {
                 id: 'view_filing_history',
                 type: FieldType.TT_TABLE_VIEWER,
@@ -159,9 +158,6 @@ export default defineComponent({
                     const data = await this.service.getPastFilingNumbers()
                     const rows = data.map((d: any) => {
                         const isActive = d.voided === 0
-                        if (!hasActiveFilingNumber) {
-                            hasActiveFilingNumber = isActive
-                        }
                         return [
                             isActive ? 'Active' : 'Voided',
                             d.identifier,
@@ -178,6 +174,27 @@ export default defineComponent({
                     ]
                 },
                 config: {
+                    toolbarInfo: [
+                        {
+                            label: 'Current filing #',
+                            value: this.patient.filingID
+                        },
+                        {
+                            label: 'Status',
+                            value: this.service.isActiveFilingNum(
+                                this.patient.filingID
+                            )
+                            ?
+                            'Active'
+                            : this.service.isDormantFilingNum(
+                                this.patient.filingID
+                            )
+                            ?
+                            'Dormant'
+                            :
+                            'N/A'
+                        }
+                    ],
                     hiddenFooterBtns: [
                         'Clear',
                         'Next',
@@ -185,6 +202,9 @@ export default defineComponent({
                         'Finish'
                     ],
                     footerBtns: [
+                        /**
+                         * Navigate to get new filing number if they have dormant one.
+                         */
                         {
                             name: 'Get filing #',
                             slot: 'end',
