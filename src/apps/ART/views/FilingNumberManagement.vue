@@ -13,14 +13,14 @@ import { defineComponent } from 'vue'
 import { isEmpty } from 'lodash';
 import { Field, Option } from '@/components/Forms/FieldInterface';
 import { FieldType } from '@/components/Forms/BaseFormElements';
-import { loadingController } from "@ionic/vue"
+import { loadingController, modalController } from "@ionic/vue"
 import { Patientservice } from '@/services/patient_service';
 import { FilingNumberService } from '@/apps/ART/services/filing_number_service'
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { alertConfirmation, toastDanger, toastWarning  } from "@/utils/Alerts"
 import HisDate from "@/utils/Date"
-
+import Keypad from "@/components/Keyboard/HisKeypad.vue"
 export default defineComponent({
     components: { HisStandardForm },
     data: () => ({
@@ -88,8 +88,28 @@ export default defineComponent({
             await loadingController.dismiss()
             this.$router.push(`/patient/dashboard/${this.service.getPatientID()}`)
         },
-        async getArchivingCandidateOptions(pageNumber=0): Promise<Array<Option>> {
+        async filingNumberSearchKeypad() {
+            const modal = await modalController.create({
+                component: Keypad,
+                backdropDismiss: false,
+                cssClass: 'keypad-modal',
+                componentProps: {
+                    title: 'Find dormant',
+                    strictNumbers: false,
+                    onKeyPress: () => {
+                        //TODO: do nothing!
+                    }
+                }
+            })
+            await modal.present()
+            const { data } = await modal.onDidDismiss()
+            return data
+        },
+        async getArchivingCandidates(pageNumber=0): Promise<Option[]> {
             const candidates = await this.service.getArchivingCandidates(pageNumber)
+            return this.formatCandidateOptions(candidates)
+        },
+        formatCandidateOptions(candidates: Array<any>): Option[] {
             return candidates.map((candidate: any) => ({
                 label: `${candidate.given_name} ${candidate.family_name} (${candidate.state})`,
                 value: candidate.identifier,
@@ -125,6 +145,8 @@ export default defineComponent({
         getCandidateSelectionField(): Field {
             let selectorInstance: any = {}
             let pageNumber = 0
+            let filingNumbeSearchTerm = ''
+
             return {
                 id: 'select_candidate_to_swap',
                 type: FieldType.TT_CARD_SELECTOR,
@@ -156,7 +178,7 @@ export default defineComponent({
                     }
                     return true
                 },
-                options: async () => await this.getArchivingCandidateOptions(),
+                options: () => this.getArchivingCandidates(),
                 config: {
                     hiddenFooterBtns: [
                         'Clear',
@@ -166,31 +188,53 @@ export default defineComponent({
                     ],
                     footerBtns: [
                         {
+                            name: 'Specify',
+                            slot: 'end',
+                            color: 'success',
+                            onClick: async () => {
+                                filingNumbeSearchTerm = await this.filingNumberSearchKeypad()
+                                if (filingNumbeSearchTerm) {
+                                    const filingNumbers = await this.service.getFilingNumber(
+                                        filingNumbeSearchTerm
+                                    )
+                                    selectorInstance.listData = this.formatCandidateOptions(filingNumbers)
+                                }
+                            }
+                        },
+                        {
                             name: 'Previous batch',
                             slot: 'end',
                             state: {
+                                visible: {
+                                    default: () => !filingNumbeSearchTerm
+                                },
                                 disabled: {
-                                    default: () => pageNumber <= 0
+                                    default: () => pageNumber <= 0 
                                 }
                             },
                             onClick: async () => {
                                 pageNumber -= 1
-                                selectorInstance.listData = await this.getArchivingCandidateOptions(pageNumber)
+                                selectorInstance.listData = await this.getArchivingCandidates(pageNumber)
                             }
                         },
                         {
                             name: 'Next batch',
                             slot: 'end',
                             state: {
+                                visible: {
+                                    default: () => !filingNumbeSearchTerm
+                                },
                                 disabled: {
                                     default: () => {
-                                        return selectorInstance.listData && selectorInstance.listData.length <= 1
+                                        return selectorInstance.listData 
+                                        && selectorInstance.listData.length <= 1
+                                        
                                     }
                                 }
                             },
                             onClick: async () => {
                                 pageNumber += 1
-                                selectorInstance.listData = await this.getArchivingCandidateOptions(pageNumber)
+                                selectorInstance.listData = await this.getArchivingCandidates(pageNumber)
                             }
                         }
                     ]
