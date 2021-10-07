@@ -317,7 +317,9 @@ export default defineComponent({
                             const f = await this.service.assignFilingNumber()
 
                             loadingController.dismiss()
-
+                            /**
+                             * Go to candidate selector screen if the request was empty
+                             */
                             if (isEmpty(f)) {
                                 this.fieldComponent = 'select_candidate_to_swap'
                                 toastWarning('Out of filing numbers, Please select eligible candidate')
@@ -333,9 +335,6 @@ export default defineComponent({
                                 .isDormantFilingNum(this.patient.filingID) 
                                     ? this.patient.filingID
                                     : 'N/A'
-
-
-                            await this.service.printFilingNumber()
 
                             if (!isEmpty(f.archived_identifier)) {
                                 const patient = await this.getPatient(
@@ -356,6 +355,7 @@ export default defineComponent({
                     } else {
                         loadingController.dismiss()
                     }
+                    await this.service.printFilingNumber()
                     return [ assignment.primary, assignment.archived ]
                 },
                 config: {
