@@ -149,20 +149,26 @@ export default defineComponent({
             }))
         },
         getFilingNumberHistoryField(): Field {
+            let hasActiveFilingNumber = false
             return {
                 id: 'view_filing_history',
                 type: FieldType.TT_TABLE_VIEWER,
                 helpText: 'Filing Number Trail',
                 options: async () => {
-                    const columns = ['Status', 'Filing #', 'Date Created', 'Date voided', 'Action']
+                    const columns = ['Status', 'Filing #', 'Date Created', 'Date voided']
                     const data = await this.service.getPastFilingNumbers()
-                    const rows = data.map((d: any) => ([
-                        d.voided === 1 ? 'Voided' : 'Active',
-                        d.identifier,
-                        HisDate.toStandardHisDisplayFormat(d.date_created),
-                        HisDate.toStandardHisDisplayFormat(d.date_voided),
-                        ''
-                    ]))
+                    const rows = data.map((d: any) => {
+                        const isActive = d.voided === 0
+                        if (!hasActiveFilingNumber) {
+                            hasActiveFilingNumber = isActive
+                        }
+                        return [
+                            isActive ? 'Active' : 'Voided',
+                            d.identifier,
+                            HisDate.toStandardHisDisplayFormat(d.date_created),
+                            !isActive ? HisDate.toStandardHisDisplayFormat(d.date_voided): 'N/A'
+                        ]
+                    })
                     return [
                         {
                             label: 'Filing Number Trail',
@@ -181,6 +187,14 @@ export default defineComponent({
                     footerBtns: [
                         {
                             name: 'Get filing #',
+                            slot: 'end',
+                            state: {
+                                visible: {
+                                    default: () => this.service.isDormantFilingNum(
+                                        this.patient.filingID
+                                    )
+                                }
+                            },
                             onClick: () => {
                                 this.fieldComponent = 'filing_number_management'
                             }
