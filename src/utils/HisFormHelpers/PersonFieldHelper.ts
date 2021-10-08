@@ -167,7 +167,10 @@ export default {
             type: FieldType.TT_SELECT,
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
-            options: () => getRegions()
+            options: async () => {
+                const regions = await getRegions()
+                return regions.filter((d: any) => !d.label.match(/Foreign/i))
+            } 
         }
     },
     getCurrentDistrictField() {
