@@ -31,6 +31,15 @@ export class FilingNumberService extends Service {
         this.patientID = patientID
     }
 
+    formatNumber(num: string) {
+        const prefix = num.search(this.activePrefix) >= 0 
+            ? this.activePrefix
+            : num.search(this.dormantPrefix) >= 0 
+            ? this.dormantPrefix
+            : ''
+        return prefix ? num.substring(prefix.length, num.length) : num
+    }
+
     async loadFilingPrefix() {
         const prx = await GlobalPropertyService.get('filing.number.prefix')
         if (prx) {
