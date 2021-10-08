@@ -69,6 +69,9 @@ export default defineComponent({
         }
     },
     methods: {
+        toFID(filingID: string) {
+            return this.service.formatNumber(filingID)
+        },
         async presentLoading(message="Please wait...") {
             const loading = await loadingController.create({
                 message, backdropDismiss: false
@@ -128,7 +131,7 @@ export default defineComponent({
                     list: [
                         {
                             label: 'Filing #',
-                            value: candidate.identifier,
+                            value: this.toFID(candidate.identifier),
                             style: {
                                 color: 'green', 
                                 fontWeight: 'bold'
@@ -164,7 +167,7 @@ export default defineComponent({
                         const isActive = d.voided === 0
                         return [
                             isActive ? 'Active' : 'Voided',
-                            d.identifier,
+                            this.toFID(d.identifier),
                             HisDate.toStandardHisDisplayFormat(d.date_created),
                             !isActive ? HisDate.toStandardHisDisplayFormat(d.date_voided): 'N/A'
                         ]
@@ -181,7 +184,7 @@ export default defineComponent({
                     toolbarInfo: [
                         {
                             label: 'Current filing #',
-                            value: this.patient.filingID
+                            value: this.toFID(this.patient.filingID)
                         },
                         {
                             label: 'Status',
@@ -377,7 +380,7 @@ export default defineComponent({
                             label: 'Dormant → Active',
                             value: this.patient.name,
                             other: {
-                                activeNumber: this.patient.filingID || '', 
+                                activeNumber: this.toFID(this.patient.filingID) || '', 
                                 dormantNumber: 'N/A'
                             }
                         },
@@ -409,12 +412,12 @@ export default defineComponent({
 
                             assignment.primary
                                 .other
-                                .activeNumber = f.new_identifier.identifier
+                                .activeNumber = this.toFID(f.new_identifier.identifier)
                             assignment.primary
                                 .other
                                 .dormantNumber = this.service
                                 .isDormantFilingNum(this.patient.filingID) 
-                                    ? this.patient.filingID
+                                    ? this.toFID(this.patient.filingID)
                                     : 'N/A'
 
                             if (!isEmpty(f.archived_identifier)) {
@@ -424,10 +427,10 @@ export default defineComponent({
                                 assignment.secondary.value = patient.name
                                 assignment.secondary
                                     .other
-                                    .activeNumber = f.archived_identifier.identifier
+                                    .activeNumber = this.toFID(f.archived_identifier.identifier)
                                 assignment.secondary
                                     .other
-                                    .dormantNumber = f.new_identifier.identifier
+                                    .dormantNumber = this.toFID(f.new_identifier.identifier)
                             }
                         }catch(e) {
                             toastDanger(e)
@@ -468,9 +471,15 @@ export default defineComponent({
                                         }
                                     })
                                 }
-                                const nextTask = await WorkflowService.getNextTaskParams(
+                                const nextTask: any = await WorkflowService.getNextTaskParams(
                                     this.service.getPatientID()
                                 )
+                                if (!nextTask.name) {
+                                    nextTask.name = 'Patient Dashboard'
+                                    nextTask.params = {
+                                        'id': this.service.getPatientID()
+                                    }
+                                }
                                 this.$router.push(nextTask)
                             }
                         }
