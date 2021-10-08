@@ -17,6 +17,7 @@ export interface EstimationInterface {
 export interface DateFieldInterface {
     id: string;
     helpText: string;
+    summaryLabel?: string;
     condition?: Function;
     required?: boolean;
     defaultValue?: Function;
@@ -52,7 +53,8 @@ export function getDayField(id: string, name: string): Field {
     return {
         id,
         helpText: `${name} Day`,
-        type: FieldType.TT_MONTHLY_DAYS
+        type: FieldType.TT_MONTHLY_DAYS,
+        appearInSummary: () => false
     }
 }
 
@@ -61,6 +63,7 @@ export function getMonthDurationEstimateField(id: string, name: string): Field {
         id,
         helpText: `${name} Estimated period`,
         type: FieldType.TT_SELECT,
+        appearInSummary: () => false,
         options: () => ([
             { label: '6 months ago', value: 180 },
             { label: '12 months ago', value: 365 },
@@ -75,7 +78,8 @@ export function getAgeEstimateField(id: string, name: string): Field {
     return {
         id,
         helpText: `${name} Age Estimate`,
-        type: FieldType.TT_NUMBER
+        type: FieldType.TT_NUMBER,
+        appearInSummary: () => false
     }
 }
 
@@ -147,18 +151,18 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         return field.condition ? field.condition(f) : true
     }
 
+    year.proxyID = field.id
+
     year.unload = (v: Option) => yearValue = v.value.toString()
  
     // YEAR CONFIG
     year.config = field.config
 
-    year.defaultValue = () => {
-        return getDefaultDate(field, 'Year')
-    }
+    year.defaultValue = () => getDefaultDate(field, 'Year')
 
-    year.condition = (f: any) => {
-        return field.condition ? field.condition(f) : true
-    }
+    year.condition = (f: any) => field.condition 
+        ? field.condition(f) 
+        : true
 
     year.validation = (v: Option) => {
         if (field.required && StandardValidations.required(v)) {
@@ -176,53 +180,79 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         }
         return null
     }
+    /**
+     * Year Proxy field will be our reference point of 
+     * how data should appear on the summary
+     * @returns 
+     */
+    year.summaryMapValue = () => ({
+        label: field.summaryLabel || field.helpText, 
+        value: d(fullDate)
+    })
+
+    // To avoid the year from appearing on the summary, 
+    // match the ref against the proxyID itself
+    year.appearInSummary = (_: any, ref: string) => ref === field.id
+
+    /**
+     * This helps to keep computeValue of the dateProxy up-to-date when year changes
+     * @param val 
+     * @returns 
+     */
+    year.computedValue = (val: Option) => {
+        if (fullDate) {
+            const [_, month, day] = fullDate.split('-')
+            fullDate = `${val.value}-${month}-${day}`
+            return field.computeValue(fullDate, false)
+        }
+    }
 
     // MONTH CONFIG
+    month.proxyID = field.id
+
     month.unload = (v: Option) => monthValue = appendLeadingZero(v.value.toString())
 
-    month.condition = (f: any) => {
-        return datePartCondition(f)
+    month.condition = (f: any) =>  datePartCondition(f)
+
+    month.validation = (v: Option) => StandardValidations.required(v)
+
+    month.defaultValue = () => getDefaultDate(field, 'Month')
+
+    /**
+     * This helps to keep compute value up to date when month changes
+     * @param val
+     * @returns
+     */
+    month.computedValue = (val: Option) => {
+        if (fullDate) {
+            const [year, _, day] = fullDate.split('-')
+            fullDate = `${year}-${appendLeadingZero(val.value.toString())}-${day}`
+            return field.computeValue(fullDate, false)
+        }
     }
 
-    month.validation = (v: Option) => {
-        return StandardValidations.required(v)
-    }
-
-    month.defaultValue = () => {
-        return getDefaultDate(field, 'Month')
-    }
+    day.proxyID = field.id
 
     // DAY CONFIG
-    day.condition = (f: any) => {
-        return datePartCondition(f) 
-    }
+    day.condition = (f: any) => datePartCondition(f) 
 
     day.validation =  (v: Option, f: any, c: any) => {
         if (StandardValidations.required(v)) {
             return ['Day is required for date']
         }
-        dayValue = appendLeadingZero(v.value.toString())
-        fullDate = `${yearValue}-${monthValue}-${dayValue}`
         return validateMinMax(fullDate, field, f, c)
     }
 
-    day.defaultValue = () => {
-        return getDefaultDate(field, 'Day')
-    }
+    day.defaultValue = () => getDefaultDate(field, 'Day')
 
-    day.computedValue = () => {
+    day.computedValue = (v: Option) => {
+        dayValue = appendLeadingZero(v.value.toString())
+        fullDate = `${yearValue}-${monthValue}-${dayValue}`
         return field.computeValue(fullDate, false)
     }
 
-    day.summaryMapValue = () => ({
-        label: `${field.helpText} Date`,
-        value: d(fullDate)
-    })
-
     day.unload = (d: any, s: any, f: any, c: any) => {
-        if (field.unload) {
-            field.unload(d, s, f, c)
-        }
+        if (field.unload) field.unload(d, s, f, c)
     }
 
     day.config = { 
@@ -248,6 +278,8 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     }
 
     // AGE ESTIMATE CONFIG
+    ageEstimate.proxyID = field.id
+
     ageEstimate.validation = validateValueEstimate
 
     ageEstimate.condition = (form: any) => valueEstimateCondition(
@@ -262,13 +294,9 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         return field.computeValue(fullDate, true)
     }
 
-    ageEstimate.summaryMapValue = ({ label }: Option) => ({ 
-        label: `${field.helpText} Date Estimate`,
-        value: `${label} (${d(fullDate)})`
-    })
-
-
     // DURATION ESTIMATE
+    durationEstimate.proxyID = field.id
+
     durationEstimate.validation = validateValueEstimate
 
     durationEstimate.condition = (form: any) => valueEstimateCondition(
@@ -282,11 +310,6 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         fullDate = `${year}-07-15`
         return field.computeValue(fullDate, true)
     }
-
-    durationEstimate.summaryMapValue = ({ label }: Option) => ({ 
-        label: `${field.helpText} Date Estimate`,
-        value: `${label} (${d(fullDate)})`
-    })
 
     return [
         year,
