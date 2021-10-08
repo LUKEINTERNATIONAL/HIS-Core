@@ -493,8 +493,9 @@ export default defineComponent({
         }
         if (proxyID) {
           this.computedFormData[proxyID] = computeValue
+        } else {
+          this.computedFormData[id] = computeValue
         }
-        this.computedFormData[id] = computeValue
       }
     },
     /**
