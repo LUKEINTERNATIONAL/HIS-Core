@@ -288,8 +288,9 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
 
     ageEstimate.computedValue = (val: Option) => {
         const [year] = HisDate.estimateDateFromAge(
-            parseInt(val.value.toString()
-        )).split('-')
+            parseInt(val.value.toString())
+            )
+            .split('-')
         fullDate = `${year}-07-15`
         return field.computeValue(fullDate, true)
     }
@@ -306,7 +307,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     durationEstimate.computedValue = (val: Option) => {
         const [year] = HisDate.getDateBeforeByDays(
             refDate, parseInt(val.value.toString()
-        )).split('-')
+            )).split('-')
         fullDate = `${year}-07-15`
         return field.computeValue(fullDate, true)
     }
