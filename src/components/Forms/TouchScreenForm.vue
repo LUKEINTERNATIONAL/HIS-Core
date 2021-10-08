@@ -70,6 +70,8 @@ import {
 } from "./FieldInterface";
 import {
   IonPage,
+  IonCol,
+  IonRow,
   IonButtons,
   IonContent,
   IonFooter,
@@ -93,6 +95,8 @@ export default defineComponent({
     IonButton,
     IonHeader,
     IonTitle,
+    IonCol,
+    IonRow,
     ...BaseFormComponents,
   },
   emits: [
@@ -135,7 +139,7 @@ export default defineComponent({
   }),
   watch: {
     /**
-     * Build data objects for form fields and load the active field
+     * Initiate the form if all fields are available
      */
     fields: {
       async handler(fields: Array<Field>) {
@@ -153,7 +157,7 @@ export default defineComponent({
       deep: true
     },
     /**
-     * Change to the fields specified by the parent component
+     * Switch the view to a target field
     */
     activeField: {
       handler(field: string) {
@@ -168,6 +172,9 @@ export default defineComponent({
     }
   },
   methods: {
+    /**
+     * Redirects to a specified route or defaults to the previous view
+     */
     getCancelBtn(): FormFooterBtns {
       return {
         name: "Cancel",
@@ -184,6 +191,10 @@ export default defineComponent({
         }
       }
     },
+    /**
+     * Clear the current's field value. However this depends if 
+     * the field supports this feature
+     */
     getClearBtn(): FormFooterBtns {
       return {
         name: "Clear",
@@ -197,6 +208,9 @@ export default defineComponent({
         },
       };
     },
+    /**
+     * Go to the previous page on the form
+     */
     getBackBtn(): FormFooterBtns {
       const visibleCondition = () => {
         if (this.currentFields.length === 1 
@@ -217,6 +231,9 @@ export default defineComponent({
         onClick: () => this.goBack()
       };
     },
+    /**
+     * Go to the next index in the array of fields
+     */
     getNextBtn(): FormFooterBtns {
       const visibleCondition = () => {
         if (this.currentIndex + 1 >= this.currentFields.length 
@@ -247,6 +264,9 @@ export default defineComponent({
         onClick: () => this.goNext(),
       };
     },
+    /**
+     * When clicked it notifies the parent that form has been submitted
+     */
     getFinishBtn(): FormFooterBtns {
       const visibilityCondition = () => {
         return this.currentIndex+1 >= this.currentFields.length
@@ -317,7 +337,8 @@ export default defineComponent({
       return false
     },
     /**
-     * An off the shelf field that displays summary for all data entered
+     * Built in field to consolidates and displays all data that were
+     * entered on the form
      */
     getDefaultSummaryField(): Field {
       return {
@@ -333,21 +354,27 @@ export default defineComponent({
         ) => {
           const data: Array<Option> = [];
           for (const ref in formData) {
+            // We need to retrieve field configuration 
+            // inorder to map labels to helpText and 
+            // to check if the field should be visible on the summary...e.t.c
             const field = this.currentFields.filter(
-              (i: Field) => i.id === ref
+              (i: Field) => i.id === ref || i.proxyID === ref
             )[0];
             const fdata = formData[ref];
-
+            // A field has the right to disable itself from appearing on the
+            // summary
             if (
               !fdata ||
               (field.appearInSummary != undefined &&
-                !field.appearInSummary(formData))
+                !field.appearInSummary(formData, ref))
             )
               continue;
             const values = Array.isArray(fdata) ? fdata : [fdata];
 
             values.forEach((item) => {
               if (field.summaryMapValue) {
+                // A field can configure how it's data should appear on the 
+                // summary page. This overrides the default process of showing values
                 data.push(
                   field.summaryMapValue(item, formData, computedData[ref])
                 );
@@ -407,7 +434,9 @@ export default defineComponent({
       }
     },
     /**
-     * Callback when the field component has been activated
+     * Callback when the field component has been activated.
+     * if  a callback is defined, we pass an instance of the active field
+     * so that it can be manipulated by the parent.
      */
     onFieldActivated(fieldContext: any) {
       this.state = "onload";
@@ -433,24 +462,39 @@ export default defineComponent({
     },
     buildFormData(fields: Array<Field>): void {
       this.formData = {};
-      fields.forEach((field) => (this.formData[field.id] = null));
+      fields.forEach((field) => {
+        /**
+         * Fields with proxyIDs write their values in the same place
+         * unlike normal IDs !!
+        */
+       if (field.proxyID) {
+        this.formData[field.proxyID] = null
+       }
+       this.formData[field.id] = null
+      })
     },
     async setActiveFieldValue(value: any) {
       this.state = "onValue";
-      const id = this.currentField.id;
+      const proxyID = this.currentField.proxyID
+      const id = this.currentField.id
+
+      if (proxyID) this.formData[proxyID] = value
+
       this.formData[id] = value;
-      /**
-       * Run computedValue callback and store data in a parallel
-       * Object
-       */
+
+      let computeValue: any = null
+
       if (this.currentField.computedValue) {
+        //Avoid sending null values to avoid crashing the callback
         if (value) {
-          this.computedFormData[id] = this.currentField.computedValue(
-            value, this.formData
+          computeValue = this.currentField.computedValue(
+            value, this.formData, this.computedFormData
           );
-        } else {
-          this.computedFormData[id] = null;
         }
+        if (proxyID) {
+          this.computedFormData[proxyID] = computeValue
+        }
+        this.computedFormData[id] = computeValue
       }
     },
     /**
@@ -490,7 +534,8 @@ export default defineComponent({
       // create new instance of footer buttons all new fields
       this.footerBtns = [this.getCancelBtn()];
       // Load custom buttons defined in the field
-      if (this.currentField.config && this.currentField.config.footerBtns) {
+      if (this.currentField.config 
+        && this.currentField.config.footerBtns) {
         this.footerBtns = this.footerBtns.concat(
           this.currentField.config.footerBtns
         )
