@@ -136,17 +136,20 @@ export default defineComponent({
     },
     homeDistrictField(): Field {
         const district: Field = PersonField.getHomeDistrictField()
-        district.condition = () => this.isRegistrationMode()
+        district.condition = (form: any) => this.isRegistrationMode()
+            && !form.home_region.label.match(/foreign/i)
         return district
     },
     homeTAField(): Field {
         const ta: Field =  PersonField.getHomeTaField()
-        ta.condition = () => this.isRegistrationMode()
+        ta.condition = (form: any) => this.isRegistrationMode()
+            && !form.home_region.label.match(/foreign/i)
         return ta
     },
     homeVillageField(): Field {
         const village: Field = PersonField.getHomeVillageField()
-        village.condition = () => this.isRegistrationMode()
+        village.condition = (form: any) => this.isRegistrationMode()
+            && !form.home_region.label.match(/foreign/i)
         return village
     },
     currentRegionField(): Field {

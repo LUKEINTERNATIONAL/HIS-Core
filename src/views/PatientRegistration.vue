@@ -234,17 +234,20 @@ export default defineComponent({
     },
     homeDistrictField(): Field {
         const district: Field = PersonField.getHomeDistrictField()
-        district.condition = () => this.editConditionCheck(this.addressAttributes)
+        district.condition = (form: any) => this.editConditionCheck(this.addressAttributes)
+            && !form.home_region.label.match(/foreign/i)
         return district
     },
     homeTAField(): Field {
         const homeTA: Field = PersonField.getHomeTaField()
-        homeTA.condition = () => this.editConditionCheck(this.addressAttributes)
+        homeTA.condition = (form: any) => this.editConditionCheck(this.addressAttributes)
+            && !form.home_region.label.match(/foreign/i)
         return homeTA
     },
     homeVillageField(): Field {
         const homeVillage: Field = PersonField.getHomeVillageField()
-        homeVillage.condition = () => this.editConditionCheck(this.addressAttributes)
+        homeVillage.condition = (form: any) => this.editConditionCheck(this.addressAttributes)
+            && !form.home_region.label.match(/foreign/i)
         return homeVillage
     },
     currentRegionField(): Field {
