@@ -399,6 +399,11 @@ export default defineComponent({
             id: 'results',
             helpText: 'Search results',
             type: FieldType.TT_PERSON_RESULT_VIEW,
+            dynamicHelpText: (f: any) => {
+                return `Search results for 
+                "${f.given_name.value} ${f.family_name.value} | ${f.gender.label}"
+                `
+            },
             appearInSummary: () => false,
             condition: () => !this.isEditMode(),
             validation: (val: Option) => Validation.required(val),

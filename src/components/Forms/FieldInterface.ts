@@ -32,6 +32,7 @@ export interface Option {
 export interface Field {
     id: string | number;
     helpText: string;
+    dynamicHelpText?: (form: any) => string;
     type: FieldType;
     group?: string;  // Categories fields with related data
     computedValue?: Function;

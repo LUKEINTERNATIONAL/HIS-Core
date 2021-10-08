@@ -10,7 +10,7 @@
       <ion-toolbar>
         <ion-row> 
           <ion-col>
-            <ion-title>{{ currentField.helpText }}</ion-title>
+            <ion-title>{{ helpText }}</ion-title>
           </ion-col>
           <ion-col v-if="currentField?.config?.toolbarInfo">
             <info-card :style="{height: '100%'}" :items="currentField?.config?.toolbarInfo"/>
@@ -133,6 +133,13 @@ export default defineComponent({
       | "onValue"
       | "default"
   }),
+  computed: {
+    helpText(): string {
+      return this.currentField.dynamicHelpText
+        ? this.currentField.dynamicHelpText(this.formData)
+        : this.currentField.helpText
+    }
+  },
   watch: {
     /**
      * Build data objects for form fields and load the active field
