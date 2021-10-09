@@ -51,7 +51,7 @@ export default defineComponent({
                         return 
                     }
                     if (query.assign === "true") {
-                       this.assignFilingNum = true
+                       this.fieldComponent = 'filing_number_management'
                     }
                     if (query.trail === "true") {
                        this.fieldComponent = 'view_filing_history'
@@ -59,9 +59,11 @@ export default defineComponent({
                     if (query.next_workflow_task) {
                         this.nextWorkflowRouteName = query.next_workflow_task
                     }
-                    this.fields.push(this.getFilingNumberField())
-                    this.fields.push(this.getCandidateSelectionField())
-                    this.fields.push(this.getFilingNumberHistoryField())
+                    this.fields = [
+                        this.getFilingNumberField(),
+                        this.getCandidateSelectionField(),
+                        this.getFilingNumberHistoryField()
+                    ]
                 }
             },
             immediate: true,
@@ -69,6 +71,10 @@ export default defineComponent({
         }
     },
     methods: {
+        /**
+         * Helper method for formatting filing numbers 
+         * for display purposes only!
+         */
         toFID(filingID: string) {
             return this.service.formatNumber(filingID)
         },
@@ -90,6 +96,9 @@ export default defineComponent({
             }
             return {}
         },
+        /**
+         * Archives currrent patient and routes to the previous page view
+         */
         async archiveFilingNumber() {
             await this.presentLoading('Archiving filing number')
             try {
@@ -99,7 +108,7 @@ export default defineComponent({
                 toastDanger(e)
             }
             await loadingController.dismiss()
-            this.$router.push(`/patient/dashboard/${this.service.getPatientID()}`)
+            this.$router.back()
         },
         async filingNumberSearchKeypad() {
             const modal = await modalController.create({
@@ -122,6 +131,9 @@ export default defineComponent({
             const candidates = await this.service.getArchivingCandidates(pageNumber)
             return this.formatCandidateOptions(candidates)
         },
+        /**
+         * Converts array of objects with candidates to a list options array
+         */
         formatCandidateOptions(candidates: Array<any>): Option[] {
             return candidates.map((candidate: any) => ({
                 label: `${candidate.given_name} ${candidate.family_name} (${candidate.state})`,
@@ -155,6 +167,9 @@ export default defineComponent({
                 }
             }))
         },
+        /*
+        * Form field that a table of all filing numbers assigned to a patient
+         */
         getFilingNumberHistoryField(): Field {
             return {
                 id: 'view_filing_history',
@@ -230,6 +245,10 @@ export default defineComponent({
                 }
             }
         },
+        /**
+         * A form field that displays a list of patients with filing numbers
+         * to swap with
+         */
         getCandidateSelectionField(): Field {
             // Keeps track of the component object that's presented on the screen
             let selectorInstance: any = {}
@@ -367,12 +386,15 @@ export default defineComponent({
                 }
             }
         },
+        /**
+         * Form field that displays new filing number assigned to a
+         * Patient
+         */
         getFilingNumberField(): Field {
             return {
                 id: "filing_number_management",
                 type: FieldType.TT_FILING_NUMBER_VIEW,
                 helpText: "Filing Number Management",
-                condition: () => this.assignFilingNum,
                 options: async () => {
                     // Simple object to track filing number identifiers
                     const assignment: any = {
