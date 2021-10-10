@@ -19,7 +19,7 @@ import HisDate from "@/utils/Date"
 import { toastDanger } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
 import { RelationsService } from "@/services/relations_service"
-import { isEmpty, findIndex } from "lodash"
+import { isEmpty } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
 import { PatientRegistrationService } from "@/services/patient_registration_service"
 
@@ -136,8 +136,7 @@ export default defineComponent({
     },
     homeDistrictField(): Field {
         const district: Field = PersonField.getHomeDistrictField()
-        district.condition = (form: any) => this.isRegistrationMode()
-            && !form.home_region.label.match(/foreign/i)
+        district.condition = () => this.isRegistrationMode()
         return district
     },
     homeTAField(): Field {
@@ -164,12 +163,14 @@ export default defineComponent({
     },
     currentTAField(): Field {
         const currentTA: Field = PersonField.getCurrentTAfield()
-        currentTA.condition = () => this.isRegistrationMode()
+        currentTA.condition = (form: any) => this.isRegistrationMode()
+            && !form.current_region.label.match(/foreign/i)
         return currentTA
     },
     currentVillage(): Field {
         const currentVillage: Field = PersonField.getCurrentVillageField()
-        currentVillage.condition = () => this.isRegistrationMode()
+        currentVillage.condition = (form: any) => this.isRegistrationMode()
+            && !form.current_region.label.match(/foreign/i)
         return currentVillage
     },
     cellPhoneField(): Field {

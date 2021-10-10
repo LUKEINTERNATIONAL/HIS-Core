@@ -234,8 +234,7 @@ export default defineComponent({
     },
     homeDistrictField(): Field {
         const district: Field = PersonField.getHomeDistrictField()
-        district.condition = (form: any) => this.editConditionCheck(this.addressAttributes)
-            && !form.home_region.label.match(/foreign/i)
+        district.condition = () => this.editConditionCheck(this.addressAttributes)
         return district
     },
     homeTAField(): Field {
@@ -262,12 +261,14 @@ export default defineComponent({
     },
     currentTAField(): Field {
         const currentTA: Field = PersonField.getCurrentTAfield()
-        currentTA.condition = () => this.editConditionCheck(this.addressAttributes)
+        currentTA.condition = (form: any) => this.editConditionCheck(this.addressAttributes)
+            && !form.current_region.label.match(/foreign/i)
         return currentTA
     },
     currentVillage(): Field {
         const currentVillage: Field = PersonField.getCurrentVillageField()
-        currentVillage.condition = () => this.editConditionCheck(this.addressAttributes)
+        currentVillage.condition = (form: any) => this.editConditionCheck(this.addressAttributes)
+            && !form.current_region.label.match(/foreign/i)
         return currentVillage
     },
     cellPhoneField(): Field {
