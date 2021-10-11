@@ -31,7 +31,6 @@ export default defineComponent({
   watch: {
     patient: {
       async handler(patient: any) {
-        console.log('Reception', this.providerID)
         this.reception = new ReceptionService(patient.getID(), this.providerID)
 
         await this.reception.loadSitePrefix()
@@ -123,13 +122,10 @@ export default defineComponent({
           },
           validation: (val: any) => Validation.required(val),
           condition: (f: any) => !this.hasARVNumber && f.capture_arv.value === "Yes",
+          defaultValue: () => this.suggestedNumber,
           config: {
             prepend: true,
             prependValue: `${this.reception.getSitePrefix()}-ARV-`,
-          },
-          preset: {
-            label: this.suggestedNumber,
-            value: this.suggestedNumber,
           }
         }
       ]
