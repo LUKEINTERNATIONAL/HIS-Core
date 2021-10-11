@@ -297,6 +297,8 @@ ion-button {
   font-size: 3em;
   width: 100%;
   height: 90%;
+  color: black;
+  background-color: white;
 }
 input {
   border: none;
