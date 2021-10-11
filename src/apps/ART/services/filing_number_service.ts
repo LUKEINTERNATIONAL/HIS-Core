@@ -74,9 +74,10 @@ export class FilingNumberService extends Service {
     }
 
     async getFilingNumber(filingNumber: string) {
-        const identifier = `${this.dormantPrefix}${filingNumber}`
+        const identifier = `${this.activePrefix}${filingNumber}`
         const res = await Service.getJson(`search/patients/by_identifier`, {
-            'type_id': 18, 'identifier': identifier
+            'type_id': 17, 
+            'identifier': identifier
         })
         if (res) {
             return res.map((person: any) => {
