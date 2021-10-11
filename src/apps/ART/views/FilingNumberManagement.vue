@@ -150,12 +150,20 @@ export default defineComponent({
                             }
                         },
                         {
-                            label: 'Name',
-                            value: `${candidate.given_name} ${candidate.family_name}`
+                            label: 'Given name',
+                            value: candidate.given_name
+                        },
+                        {
+                            label: 'Family name',
+                            value: candidate.family_name
                         },
                         {
                             label: 'Outcome',
-                            value: candidate.state
+                            value: candidate.state.match(/trans/i)
+                                ? 'TO'
+                                : candidate.state.match(/stop/i) 
+                                ? 'Tx stopped'
+                                : candidate.state
                         },
                         {
                             label: 'LAD',

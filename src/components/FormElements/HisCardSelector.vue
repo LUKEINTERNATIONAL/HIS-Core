@@ -4,6 +4,7 @@
             <ion-grid> 
                 <ion-row> 
                     <ion-col
+                        size="4"
                         v-for="(item, index) in filtered"
                         :key="index"> 
                         <div class="his-card clickable"
