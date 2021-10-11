@@ -6,15 +6,17 @@
           <ion-col>
             <div class="tool-bar-medium-card">
               <ion-row> 
-                <ion-col> 
-                  <ion-icon
-                    :icon="barcode"
-                    size="large"
-                    style="height: 100%"
-                  ></ion-icon>
+                <ion-col size-lg="5" size-sm="4"> 
+                  <img 
+                    :style="{
+                      width: '230px', 
+                      height: '90px',
+                      margin: '0'
+                    }"
+                    src="/assets/images/barcode.svg"/>
                 </ion-col>
-                <ion-col> 
-                  <ion-input autofocus v-model="patientBarcode" class="barcode-input" ref="scanBarcode"></ion-input>
+                <ion-col size-lg="7" size-sm="8"> 
+                  <input v-model="patientBarcode" class="barcode-input" ref="scanBarcode"/>
                 </ion-col>
               </ion-row>
             </div>
@@ -91,8 +93,6 @@ import {
   IonFooter,
   IonPage,
   IonToolbar,
-  IonIcon,
-  IonInput,
   IonRow,
   IonCol,
   IonButton,
@@ -121,8 +121,6 @@ export default defineComponent({
     IonHeader,
     IonPage,
     IonToolbar,
-    IonIcon,
-    IonInput,
     IonRow,
     IonCol,
     IonButton,
@@ -227,6 +225,14 @@ export default defineComponent({
       }
     }
   },
+  created() {
+    setInterval(() => {
+      const barcodeElement = this.$refs.scanBarcode as HTMLInputElement
+      if (barcodeElement) {
+        barcodeElement.focus()
+      }
+    }, 1500)
+  },
   mounted(){
     const app = HisApp.getActiveApp()
     if (!app) {
@@ -288,7 +294,16 @@ ion-button {
   text-decoration: none;
 }
 .barcode-input{
-  height: 100%;
-  font-size: 100%;
+  font-size: 3em;
+  width: 100%;
+  height: 90%;
+  color: black;
+  background-color: white;
+}
+input {
+  border: none;
+}
+input:focus {
+  outline: none;
 }
 </style>
