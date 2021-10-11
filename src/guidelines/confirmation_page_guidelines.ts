@@ -16,10 +16,20 @@ export enum FlowState {
     ENROLL = 'enroll',
     EXIT = 'exit',
     ACTIVATE_FN = 'activateFn',
-    ASSIGN_NPID = 'assignNpid'
+    ASSIGN_NPID = 'assignNpid',
+    UPDATE_DMG = 'updateDemographics'
 }
 
 export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = {
+    "Re-check Client's physical addresses after a year": {
+        priority: 4,
+        actions: {
+
+        },
+        conditions: {
+
+        }
+    },
     "Warn if patient is missing National ID and assign them one": {
         priority: 1,
         actions: {
@@ -134,7 +144,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         priority: 4,
         targetEvent: TargetEvent.ONLOAD,
         conditions: {
-            patientIdentifier: () => 
+            patientIdentifier: () => ''
         }
     },
     "Prompt patient enrollment in current programme if not enrolled" : {
@@ -209,7 +219,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         actions: {
             alert: async () => {
                 await infoActionSheet(
-                    'Viral Laod',
+                    'Viral Load',
                     'Patient has High viral load, please take action',
                     '',
                     [
