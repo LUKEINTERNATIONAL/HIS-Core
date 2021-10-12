@@ -47,6 +47,7 @@ import { toExportableFormat, ColumnInterface, RowInterface} from "@/components/D
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { 
   IonPage,
+  IonHeader,
   IonContent,
   IonToolbar, 
   IonRow,
@@ -56,7 +57,17 @@ import {
 import { toastDanger } from "@/utils/Alerts";
 
 export default defineComponent({
-  components: { HisStandardForm, ReportTable, HisFooter, IonPage, IonContent, IonToolbar, IonRow, IonCol},
+  components: { 
+    HisStandardForm,   
+    IonHeader,
+    ReportTable, 
+    HisFooter, 
+    IonPage, 
+    IonContent, 
+    IonToolbar, 
+    IonRow, 
+    IonCol
+  },
   props: {
     title: {
       type: String,

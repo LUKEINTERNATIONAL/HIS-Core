@@ -31,6 +31,11 @@ export interface Option {
 
 export interface Field {
     id: string | number;
+    /**
+     * proxyID allows multiple form fields to write to the same
+     * value block 
+     */
+    proxyID?: string | number;
     helpText: string;
     dynamicHelpText?: (form: any) => string;
     type: FieldType;

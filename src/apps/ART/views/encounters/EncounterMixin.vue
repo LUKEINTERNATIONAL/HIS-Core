@@ -98,8 +98,9 @@ export default defineComponent({
         },
         resolveObs(obs: any, tag='') {
             let values: Array<any> = []
+            console.log(Object.values(obs))
             Object.values(obs)
-                  .filter((d: any) => d.tag === tag || tag === '')
+                  .filter((d: any) => d && (d.tag === tag || tag === ''))
                   .forEach((data: any) => {
                     if (Array.isArray(data.obs)) {
                         values = [...values, ...data.obs]

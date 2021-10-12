@@ -89,6 +89,7 @@ export default {
     getDobConfig(): DateFieldInterface {
         return  {
             id: 'birth_date',
+            summaryLabel: 'Date of Birth',
             helpText: 'Birth',
             required: true,
             minDate: () => HisDate.estimateDateFromAge(100),

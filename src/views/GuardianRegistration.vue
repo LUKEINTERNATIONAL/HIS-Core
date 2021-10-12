@@ -141,12 +141,14 @@ export default defineComponent({
     },
     homeTAField(): Field {
         const ta: Field =  PersonField.getHomeTaField()
-        ta.condition = () => this.isRegistrationMode()
+        ta.condition = (form: any) => this.isRegistrationMode()
+            && !form.home_region.label.match(/foreign/i)
         return ta
     },
     homeVillageField(): Field {
         const village: Field = PersonField.getHomeVillageField()
-        village.condition = () => this.isRegistrationMode()
+        village.condition = (form: any) => this.isRegistrationMode()
+            && !form.home_region.label.match(/foreign/i)
         return village
     },
     currentRegionField(): Field {
@@ -161,12 +163,14 @@ export default defineComponent({
     },
     currentTAField(): Field {
         const currentTA: Field = PersonField.getCurrentTAfield()
-        currentTA.condition = () => this.isRegistrationMode()
+        currentTA.condition = (form: any) => this.isRegistrationMode()
+            && !form.current_region.label.match(/foreign/i)
         return currentTA
     },
     currentVillage(): Field {
         const currentVillage: Field = PersonField.getCurrentVillageField()
-        currentVillage.condition = () => this.isRegistrationMode()
+        currentVillage.condition = (form: any) => this.isRegistrationMode()
+            && !form.current_region.label.match(/foreign/i)
         return currentVillage
     },
     cellPhoneField(): Field {
