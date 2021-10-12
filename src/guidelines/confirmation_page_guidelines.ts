@@ -189,7 +189,12 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         },
         conditions: {
             programName: (programName: string) => programName === 'HIV PROGRAM',
-            identifiers: (identifiers: string[]) => identifiers.includes('Archived filing number')
+            identifiers: (identifiers: string[]) => identifiers.includes('Archived filing number'),
+            currentOutcome: (outcome: string) => ![
+                'Treatment stopped', 
+                'Patient transferred out', 
+                'Patient died'
+            ].includes(outcome)  
         }
     },
     "(ART) Warn if Viral load is High": {
