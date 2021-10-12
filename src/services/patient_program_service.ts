@@ -60,7 +60,7 @@ export class PatientProgramService extends ProgramService {
              * end_date is empty
              */
             const availableStates = p.patient_states.filter(
-                (s: any) => !isEmpty(s.end_date)    
+                (s: any) => s.end_date === null
             )
             const outcome = isEmpty(availableStates) 
                 ? 'N/A' 
