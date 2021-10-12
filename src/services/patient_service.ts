@@ -59,6 +59,10 @@ export class Patientservice extends Service {
         })
     }
 
+    assignNpid() {
+       return Patientservice.assignNHID(this.getID()) 
+    }
+
     isMale() {
         return ['Male', 'M'].includes(this.getGender())
     }

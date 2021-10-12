@@ -33,7 +33,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                     'The system is going to assign the patient with a new ID',
                     [
                         { 
-                            name: 'Confirm', 
+                            name: 'OK', 
                             slot: 'start', 
                             color: 'primary'
                         }

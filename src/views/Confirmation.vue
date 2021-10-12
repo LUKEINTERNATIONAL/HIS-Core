@@ -277,13 +277,8 @@ export default defineComponent({
     },
     async runFlowState(state: FlowState) {
       const states: Record<string, Function> = {
-        'enroll': async () => this.program.enrollProgram(),
-        'activateFn': () => {
-          //Activate FN
-        },
-        'assignNpid': () => {
-          //assign FN
-        }
+        'enroll': () => this.program.enrollProgram(),
+        'assignNpid': () => this.patient.assignNpid() 
       }
       if (state in states) {
         await this.presentLoading()
