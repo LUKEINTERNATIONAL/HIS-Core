@@ -164,7 +164,7 @@ export default defineComponent({
   watch: {
     '$route': {
       async handler({query}: any) {
-        if (query) {
+        if (!isEmpty(query)) {
           await this.setPatient(
             query.person_id, 
             query.patient_barcode
@@ -231,7 +231,6 @@ export default defineComponent({
       this.facts.currentDistrict = this.patient.getCurrentDistrict()
       this.facts.currentTA = this.patient.getCurrentTA()
       this.facts.currentVillage = this.patient.getHomeVillage()
-      this.facts.npID = this.patient.getNationalID()
       this.facts.identifiers = this.getStrIdentifierTypes()
     },
     async setProgramFacts() {
@@ -255,6 +254,9 @@ export default defineComponent({
         })
       await loading.present()
     },
+    /**
+     * Checks Confirmation page guidelines for patient observations
+    */
     async onEvent(targetEvent: TargetEvent) {
       const findings = matchToGuidelines(
         this.facts, 
@@ -281,10 +283,10 @@ export default defineComponent({
       return this.patient.getIdentifiers().map((id: any) => id.type.name)
     },
     async nextTask() {
-      const flowState: any = await this.onEvent(TargetEvent.ON_CONTINUE)
-
-      if (flowState === FlowState.FORCE_EXIT) return
-
+      const ok: any = await this.onEvent(TargetEvent.ON_CONTINUE)
+      if (!ok) {
+        return
+      }      
       const params = await WorkflowService.getNextTaskParams(this.patient.getID())
       if(params.name) {
         this.$router.push(params)
