@@ -267,10 +267,14 @@ export default defineComponent({
           const finding = findings[index]
           if (finding?.actions?.alert) {
             const state = await finding?.actions?.alert(this.facts)
-            if (state === FlowState.EXIT) {
-              continue
+            switch(state) {
+              case FlowState.EXIT:
+                continue
+              case FlowState.FORCE_EXIT:
+                return false
+              default:
+                await this.runFlowState(state)
             }
-            await this.runFlowState(state)
           }
       }
       return true
