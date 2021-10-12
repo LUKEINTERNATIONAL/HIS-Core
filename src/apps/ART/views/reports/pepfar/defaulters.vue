@@ -7,8 +7,6 @@
         :columns="columns"
         :canExportCsv="false"
         :canExportPDf="false"
-        :isLoading="isLoading"
-        :reportReady="reportReady"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>

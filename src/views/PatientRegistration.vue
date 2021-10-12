@@ -239,12 +239,14 @@ export default defineComponent({
     },
     homeTAField(): Field {
         const homeTA: Field = PersonField.getHomeTaField()
-        homeTA.condition = () => this.editConditionCheck(this.addressAttributes)
+        homeTA.condition = (form: any) => this.editConditionCheck(this.addressAttributes)
+            && !form.home_region.label.match(/foreign/i)
         return homeTA
     },
     homeVillageField(): Field {
         const homeVillage: Field = PersonField.getHomeVillageField()
-        homeVillage.condition = () => this.editConditionCheck(this.addressAttributes)
+        homeVillage.condition = (form: any) => this.editConditionCheck(this.addressAttributes)
+            && !form.home_region.label.match(/foreign/i)
         return homeVillage
     },
     currentRegionField(): Field {
@@ -259,12 +261,14 @@ export default defineComponent({
     },
     currentTAField(): Field {
         const currentTA: Field = PersonField.getCurrentTAfield()
-        currentTA.condition = () => this.editConditionCheck(this.addressAttributes)
+        currentTA.condition = (form: any) => this.editConditionCheck(this.addressAttributes)
+            && !form.current_region.label.match(/foreign/i)
         return currentTA
     },
     currentVillage(): Field {
         const currentVillage: Field = PersonField.getCurrentVillageField()
-        currentVillage.condition = () => this.editConditionCheck(this.addressAttributes)
+        currentVillage.condition = (form: any) => this.editConditionCheck(this.addressAttributes)
+            && !form.current_region.label.match(/foreign/i)
         return currentVillage
     },
     cellPhoneField(): Field {
@@ -399,6 +403,11 @@ export default defineComponent({
             id: 'results',
             helpText: 'Search results',
             type: FieldType.TT_PERSON_RESULT_VIEW,
+            dynamicHelpText: (f: any) => {
+                return `Search results for 
+                "${f.given_name.value} ${f.family_name.value} | ${f.gender.label}"
+                `
+            },
             appearInSummary: () => false,
             condition: () => !this.isEditMode(),
             validation: (val: Option) => Validation.required(val),

@@ -1,6 +1,7 @@
 import { ProgramService } from "./program_service";
 import { AppEncounterService } from "./app_encounter_service";
 import { PrintoutService } from "@/services/printout_service"
+import { isEmpty } from "lodash";
 
 export class PatientProgramService extends ProgramService {
     patientId: number
@@ -13,9 +14,9 @@ export class PatientProgramService extends ProgramService {
         super()
         this.patientId = patientId
         this.patientProgramId = -1
-        this.programId = -1
+        this.programId = ProgramService.getProgramID()
         this.stateId = -1
-        this.programDate = ''
+        this.programDate = ProgramService.getSessionDate()
         this.stateDate = ''
     }
 
@@ -37,6 +38,40 @@ export class PatientProgramService extends ProgramService {
 
     getPrograms() {
         return ProgramService.getPatientPrograms(this.patientId)
+    }
+    /**
+     * Get Patient program information by Session Program ID
+     * @returns 
+     */
+    async getProgram() {
+        const defaults = { program: 'Not available', outcome: 'Not available' }
+        const req = await this.getPrograms()
+        if (isEmpty(req)) {
+            return defaults
+        }
+        /**
+         * Filter programs by sessionID
+         */
+        const programs = req.filter((p: any) => {
+            return p.program.program_id === ProgramService.getProgramID()
+        }).map((p: any) => {
+            /**
+             * Find active state/outcome by checking if the 
+             * end_date is empty
+             */
+            const availableStates = p.patient_states.filter(
+                (s: any) => s.end_date === null
+            )
+            const outcome = isEmpty(availableStates) 
+                ? 'N/A' 
+                : availableStates[0].name 
+            return {
+                program: p.program.name, outcome
+            }
+        })
+        return !isEmpty(programs) 
+            ? programs[0] 
+            : defaults
     }
 
     getProgramStates() {
