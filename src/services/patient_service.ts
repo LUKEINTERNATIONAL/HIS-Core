@@ -192,8 +192,16 @@ export class Patientservice extends Service {
         return ids.length >= 1 ? ids[0].identifier : 'Unknown'
     }
 
+    getIdentifiers() {
+        return this.patient.patient_identifiers
+    }
+
     getHomeDistrict() {
         return this.getAddresses().ancestryDistrict
+    }
+
+    getHomeTA() {
+        return this.getAddresses().ancestryTA
     }
 
     getHomeVillage() {
