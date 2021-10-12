@@ -80,7 +80,7 @@ import { OrderService } from "@/services/order_service";
 import { UserService } from "@/services/user_service";
 import { RelationshipService } from "@/services/relationship_service";
 import { ConceptService } from "@/services/concept_service"
-import { alertAction, toastDanger, toastSuccess } from "@/utils/Alerts"
+import { alertAction, alertConfirmation, toastDanger, toastSuccess } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
 import PatientAlerts from "@/services/patient_alerts"
 import HisDate from "@/utils/Date"
@@ -109,6 +109,7 @@ import {
   TargetEvent,
   CONFIRMATION_PAGE_GUIDELINES
 } from "@/guidelines/confirmation_page_guidelines"
+import { PatientPrintoutService } from "@/services/patient_printout_service";
 export default defineComponent({
   name: "Patient Confirmation",
   components: {
@@ -281,8 +282,20 @@ export default defineComponent({
     },
     async runFlowState(state: FlowState) {
       const states: Record<string, Function> = {
-        'enroll': () => this.program.enrollProgram(),
-        'assignNpid': () => this.patient.assignNpid() 
+        'enroll': () => {
+          return this.program.enrollProgram()
+        },
+        'assignNpid': async () => {
+          const req = await this.patient.assignNpid()
+          loadingController.dismiss()
+          if (req) {
+            const ok = await alertConfirmation('Do you want to print National ID?')
+            if (ok) {
+              const print = new PatientPrintoutService(this.patient.getID())
+              await print.printNidLbl()
+            }
+          }
+        }
       }
       if (state in states) {
         await this.presentLoading()
