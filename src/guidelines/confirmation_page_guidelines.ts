@@ -54,7 +54,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             alert: async () => {
                 const action = await infoActionSheet(
                     'Deceased Patient',
-                    'Patient outcout is Died!',
+                    'Patient outcome is Died!',
                     'Do you want to continue?',
                     [
                         { 
@@ -111,7 +111,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         actions: {
             alert: async () => {
                 const action = await infoActionSheet(
-                    'Transferredout Patient',
+                    'Transferred out Patient',
                     'Patient was transferred out',
                     'Do you want to continue?',
                     [
