@@ -1,39 +1,32 @@
 <template>
   <ion-page>
-  <ion-loading
-    :is-open="isOpenRef"
-    cssClass="my-custom-class"
-    message="Please wait..."
-  >
-  </ion-loading>
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-row> 
           <ion-col> 
             <div class="tool-bar-medium-card"> 
-              <b> Patient Name:</b> {{patientName}} <p/>
-              <b> Birthdate: </b> {{birthdate}} <p/>
-              <b> Gender: </b> {{gender}}
+              Patient Name: <b> {{facts.patientName}}</b> <p/>
+              Birthdate: <b> {{birthdate}} </b> <p/>
+              Gender:  <b>{{facts.gender}} </b>
             </div>
           </ion-col>
           <ion-col> 
             <div class="tool-bar-medium-card"> 
-              <b>Ancestry district:</b> {{ ancestryDistrict }}<p/>
-              <b>Ancestry TA:</b> {{ ancestryTA }}<p/>
-              <b>Ancestry village:</b> {{ ancestryVillage }}<p/>
+              Ancestry district: <b>{{ facts.ancestryDistrict }}</b> <p/>
+              Ancestry TA: <b>{{ facts.ancestryTA }}</b> <p/>
+              Ancestry village: <b>{{ facts.ancestryVillage }}</b> <p/>
             </div>
           </ion-col>
           <ion-col> 
             <div class="tool-bar-medium-card"> 
-              <b>Current District:</b> {{ currentDistrict }}<p/>
-              <b>Current TA:</b> {{ currentTA }}<p/>
-              <b>Current Village:</b> {{ currentVillage }}<p/>
+              Current District: <b> {{ facts.currentDistrict }}</b><p/>
+              Current TA: <b> {{ facts.currentTA }}</b><p/>
+              Current Village: <b> {{ facts.currentVillage }}</b><p/>
             </div>
           </ion-col>
         </ion-row>
       </ion-toolbar>
     </ion-header>
-
     <ion-content>
       <ion-row>
         <ion-col size="4" v-for="(card, index) in cards" :key="index">
@@ -44,8 +37,8 @@
             <ion-card-content>
               <ul class="card-content"> 
                 <li class='li-item' v-for="(info, id) in card.data" :key="id"> 
-                  <strong v-if="info.label">{{ info.label }} &nbsp; </strong>
-                  {{ info.value }}
+                  <span v-if="info.label"> {{ info.label }} &nbsp;</span>
+                  <strong>{{ info.value }} </strong>
                 </li>
               </ul>
             </ion-card-content>
@@ -78,6 +71,22 @@ interface DataInterface {
   label: string;
   value: string;
 }
+import { defineComponent } from "vue";
+import { Observation } from "@/interfaces/observation";
+import { ObservationService } from "@/services/observation_service";
+import { Patientservice } from "@/services/patient_service";
+import { ProgramService } from "@/services/program_service";
+import { OrderService } from "@/services/order_service";
+import { UserService } from "@/services/user_service";
+import { RelationshipService } from "@/services/relationship_service";
+import { ConceptService } from "@/services/concept_service"
+import { alertAction } from "@/utils/Alerts"
+import { WorkflowService } from "@/services/workflow_service"
+import PatientAlerts from "@/services/patient_alerts"
+import HisDate from "@/utils/Date"
+import { PatientProgramService } from "@/services/patient_program_service"
+import { voidWithReason } from "@/utils/VoidHelper"
+import { isEmpty } from "lodash";
 import {
   IonContent,
   IonHeader,
@@ -91,290 +100,168 @@ import {
   IonCardContent,
   IonCardTitle,
   IonCardHeader,
-  IonLoading,
+  loadingController
 } from "@ionic/vue";
-import { defineComponent, ref } from "vue";
-import { barcode, man, woman } from "ionicons/icons";
-import ApiClient from "@/services/api_client";
-import { Patient } from "@/interfaces/patient";
-import { Observation } from "@/interfaces/observation";
-import { ObservationService } from "@/services/observation_service";
-import { Patientservice } from "@/services/patient_service";
-import { ProgramService } from "@/services/program_service";
-import { OrderService } from "@/services/order_service";
-import { UserService } from "@/services/user_service";
-import { RelationshipService } from "@/services/relationship_service";
-import { ConceptService } from "@/services/concept_service"
-import { alertAction } from "@/utils/Alerts"
-import { WorkflowService } from "@/services/workflow_service"
-import PatientAlerts from "@/services/patient_alerts"
-import HisDate from "@/utils/Date"
-import { PatientPrintoutService } from "@/services/patient_printout_service";
-import { voidWithReason } from "@/utils/VoidHelper"
-
 export default defineComponent({
-  name: "Home",
+  name: "Patient Confirmation",
   components: {
     IonContent,
     IonHeader,
+    IonFooter,
     IonPage,
     IonToolbar,
     IonRow,
     IonCol,
     IonButton,
-    IonFooter,
     IonCard,
     IonCardContent,
     IonCardTitle,
-    IonCardHeader, 
-    IonLoading
+    IonCardHeader
   },
-  data() {
-    return {
-      patientBarcode: "" as any,
-      patientName: "",
-      landmark: "",
-      phoneNumber: "",
-      currentDistrict: "",
-      currentTA: "",
-      currentVillage: "",
-      ancestryDistrict: "",
-      ancestryTA: "",
-      ancestryVillage: "",
-      gender: "",
-      birthdate: "",
-      cards: [] as any,
-      ARVNumber: "",
-      NPID: "",
-      patientID: "" as any
-    };
+  data: () => ({
+    program: {} as any,
+    patient: {} as any,
+    cards: [] as any[],
+    facts: {
+      programName: '' as string,
+      currentOutcome: '' as string,
+      viralLoadStatus: '' as 'High' | 'Low' | '',
+      programs: [] as string[],
+      identifiers: [] as string[],
+      givenName: '' as string,
+      familyName: '' as string,
+      patientName: '' as string,
+      landmark: '' as string,
+      phoneNumber: '' as string,
+      currentDistrict: '' as string,
+      currentTA: '' as string,
+      currentVillage: '' as string,
+      ancestryDistrict: '' as string,
+      ancestryTA: '' as string,
+      ancestryVillage: '' as string,
+      gender: '' as string,
+      birthdate: '' as string,
+      npID: '' as string
+    }
+  }),
+  computed: {
+    birthdate(): string {
+      return HisDate.toStandardHisDisplayFormat(
+        this.facts.birthdate
+      )
+    },
+    isAdmin() {
+      return UserService.isAdmin()
+    }
+  },
+  watch: {
+    '$route': {
+      async handler({query}: any) {
+        if (query) {
+          await this.setPatient(
+            query.person_id, 
+            query.patient_barcode
+          )
+        }
+      },
+      immediate: true
+    },
+    async patient() {
+      await this.presentLoading()
+      await this.setProgram()
+      this.setPatientFacts()
+      this.setProgramFacts()
+      await this.drawPatientCards()
+      loadingController.dismiss()
+    }
   },
   methods: {
+    setProgram() {
+      this.program = new PatientProgramService(this.patient.getID())
+    },
+    /**
+     * Resolve patient by either patient ID or NpID 
+     * depending on search criteria
+     */
+    async setPatient(id: any, npid: any) {
+      let data: any = {}
+      await this.presentLoading()
+
+      if (id) {
+        data = await Patientservice.findByID(id)
+      } else if (npid) {
+        data = await Patientservice.findByNpid(npid)
+      }
+
+      if (isEmpty(data)) {
+        return alertAction('Patient not found', [
+          {
+            text: 'Home',
+            handler: () => this.$router.push('/')
+          },
+          {
+            text: 'Back',
+            handler: () => this.$router.back()
+          }
+        ])
+      }
+      loadingController.dismiss()
+      this.patient = new Patientservice(data)
+    },
+    setPatientFacts() {
+      this.facts.patientName = this.patient.getFullName()
+      this.facts.givenName = this.patient.getGivenName()
+      this.facts.familyName = this.patient.getFamilyName()
+      this.facts.landmark = this.patient.getAttribute(19)
+      this.facts.phoneNumber = this.patient.getAttribute(12)
+      this.facts.gender = this.patient.getGender()
+      this.facts.birthdate = this.patient.getBirthdate()
+      this.facts.ancestryDistrict = this.patient.getHomeDistrict()
+      this.facts.ancestryTA = this.patient.getHomeTA()
+      this.facts.ancestryVillage = this.patient.getHomeVillage()
+      this.facts.currentDistrict = this.patient.getCurrentDistrict()
+      this.facts.currentTA = this.patient.getCurrentTA()
+      this.facts.currentVillage = this.patient.getHomeVillage()
+      this.facts.npID = this.patient.getNationalID()
+    },
+    async setProgramFacts() {
+      const { program, outcome }: any =  await this.program.getProgram()
+      this.facts.currentOutcome = outcome
+      this.facts.programName = program
+    },
+    drawPatientCards() {
+      return this.getProgramInfoCard()
+        .then(this.getAlertCard)
+        .then(this.getLabOrdersCard)
+        .then(this.getIdentifiersCard)
+        .then(this.getOucomeCard)
+        .then(this.getGuardianCard)
+    },
+    async presentLoading() {
+      const loading = await loadingController
+        .create({
+          message: 'Please wait...',
+          backdropDismiss: false
+        })
+      await loading.present()
+    },
     async onVoid() {
       voidWithReason(async (reason: string) => {
-        await Patientservice.voidPatient(this.patientID, reason)
+        await Patientservice.voidPatient(this.patient.getID(), reason)
         this.$router.push('/')        
       })
     },
     async nextTask() {
-      const params = await WorkflowService.getNextTaskParams(this.patientID)
+      const params = await WorkflowService.getNextTaskParams(this.patient.getID())
       if(params.name) {
         this.$router.push(params)
       }else {
-        this.$router.push(`/patient/dashboard/${this.patientID}`)
+        this.$router.push(`/patient/dashboard/${this.patient.getID()}`)
       }
     },
-    alertPatientNotFound() {
-      alertAction('Patient not found', [
-        {
-          text: 'Home',
-          handler: () => this.$router.push('/')
-        },
-        {
-          text: 'Back',
-          handler: () => this.$router.back()
-        }
-      ])
-    },
-    fetchPatient: async function () {
-      const response = await ApiClient.get(`/patients/${this.patientID}`);
-
-      this.setOpen(true);
-      if (!response || response.status !== 200) {
-        this.setOpen(false);
-        this.alertPatientNotFound();
-
-      } // NOTE: Targeting Firefox 65, can't `response?.status`
-      else {
-        const data: Patient = await response.json();
-        this.parsePatient(data);
-      }
-    },
-    fetchPatientByID: async function() {
-      this.setOpen(true);
-      const response = await ApiClient.get(`/search/patients/by_npid?npid=${this.patientBarcode}`);
-
-      if (!response || response.status !== 200) {
-        this.setOpen(false);
-        this.alertPatientNotFound();
-      } 
-      else {
-        const data: Patient[] = await response.json();
-
-        switch (data.length) {
-          case 0:
-            this.alertPatientNotFound();
-            this.setOpen(false);
-            break;
-          case 1:
-            this.patientID = data[0].patient_id; 
-            this.parsePatient(data[0]);
-            break;
-          default:
-            console.log('duplicates');
-            break;
-        }
-      }
-    },
-    parsePatient: async function(data: Patient) {
-        this.cards = [];
-        const patient = new Patientservice(data);
-        this.patientName = patient.getFullName();
-        this.landmark = patient.getAttribute(19);
-        this.phoneNumber = patient.getAttribute(12);
-        const addresses = patient.getAddresses();
-        this.gender = data.person.gender;
-        this.birthdate = HisDate.toStandardHisDisplayFormat(data.person.birthdate);
-        this.ancestryDistrict = addresses.ancestryDistrict;
-        this.ancestryTA = addresses.ancestryTA;
-        this.ancestryVillage = addresses.ancestryVillage;
-        this.currentDistrict = addresses.currentDistrict;
-        this.currentTA = addresses.currentTA;
-        this.currentVillage = addresses.ancestryVillage;
-        this.ARVNumber = patient.getPatientIdentifier(4);
-        const ARVNumber = patient.getPatientIdentifier(4);
-        const NPID = await this.getNPID(patient);
-        this.cards.push({
-          title: "PATIENT IDENTIFIERS",
-          data: [
-            {
-              label: "ARV Number",
-              value: ARVNumber,
-            },
-            {
-              label: "NPID",
-              value: NPID,
-            },
-          ],
-        });
-        
-        await this.fetchAlerts()
-          .then(this.fetchLabOrders)
-          .then(this.fetchProgramInfo)
-          .then(this.fetchGuardians)
-
-          this.setOpen(false);
-    },
-    async getNPID(patient: any) {
-      this.setOpen(false)
-      const NPID = patient.getPatientIdentifier(3)
-      if(NPID ==="") {
-          const f = await this.assignNHID(patient.getID());
-          this.printNHID();
-          return f.new_identifier.identifier;
-        }
-      this.setOpen(true)
-      return NPID;
-    },
-    async assignNHID(patientID: number) {
-      await alertAction("Patient was found BUT has no National ID.<br />The system is going to assign the patient with a new ID", [
-        {
-          text: "OK",
-          handler: async () => {
-            null
-          },
-        },
-      ]);
-      return await Patientservice.assignNHID(patientID);
-    },
-    async printNHID() {
-     const p = new PatientPrintoutService(this.patientID);
-     await p.printNidLbl()
-  },
-    fetchAlerts: async function () {
-      const sideEffects: Observation[] = await PatientAlerts.alertSideEffects(this.patientID)
-      const displayData = {
-        title: "ALERTS",
-        data: [
-          {
-            label: "Side effects",
-            value: sideEffects.length,
-          },
-        ],
-      };
-
-      this.cards.push(displayData);
-    },
-    fetchLabOrders: async function () {
-      const displayData = {
-        title: "Labs",
-        data: [] as DataInterface[],
-      };
-      await OrderService.getOrders(this.patientID).then((orders) => {
-        const VLOrders = OrderService.getViralLoadOrders(orders);
-        VLOrders.forEach((element) => {
-          displayData.data.push({
-            value: OrderService.formatOrders(element),
-            label: ``,
-          });
-        });
-      });
-
-      this.cards.push(displayData);
-    },
-    fetchProgramInfo: async function () {
-      const displayData = {
-        title: "PROGRAM INFORMATION",
-        data: [] as DataInterface[],
-      };
-      let outcome = "";
-
-      const params = await WorkflowService.getNextTaskParams(this.patientID)
-      let task = 'NONE'      
-      if(params.name) {
-        task = params.name
-      }
-      displayData.data.push({
-            label: "Next Task",
-            value: `${task}`,
-      });
-      await ProgramService.getProgramInformation(this.patientID).then(
-        (task) => {
-          displayData.data.push({
-            label: "ART Duration",
-            value: `${task.art_duration} month(s) `,
-          });
-          outcome = task.current_outcome;
-        }
-      );
-      await ProgramService.getFastTrackStatus(this.patientID).then(
-        (task) => {
-          const data = task["Continue FT"] === true ? "Yes" : "No";
-          displayData.data.push({
-            label: "On Fast Track",
-            value: data,
-          });
-        }
-      );
-      const appointMentObs: Observation[] = await ObservationService.getObservations(
-        this.patientID,
-        ConceptService.getCachedConceptID('appointment date')
-      );
-      if (appointMentObs.length > 0) {
-        const nextAPPT = HisDate.toStandardHisDisplayFormat(appointMentObs[0].value_datetime);
-        displayData.data.push({
-          label: "Next Appointment",
-          value: nextAPPT,
-        });
-      }
-      this.cards.push(displayData);
-      this.fetchOutCome(outcome);
-    },
-    fetchOutCome: async function (outcome: string) {
-      const displayData = {
-        title: "Outcome",
-        data: [
-          {
-            label: "Current Outcome",
-            value: outcome,
-          },
-        ] as DataInterface[],
-      };
-      this.cards.push(displayData);
-    },
-    fetchGuardians: async function () {
+    getGuardianCard() {
       RelationshipService.getGuardianDetails(
-        this.patientID
+        this.patient.getID()
       ).then((relationship: any) => {
         const rel: DataInterface[] = relationship.map((r: any) => {
           return {
@@ -389,65 +276,111 @@ export default defineComponent({
         this.cards.push(displayData);
       });
     },
-    setupconfirmation(query: any) {
-      this.resetState();
-      if(query.person_id) {
-        const patientID = query.person_id as any;
-        this.patientID = parseInt(patientID);
-        this.fetchPatient();
-      }else if(query.patient_barcode) {
-        const patientBarcode = query.patient_barcode as any;
-        this.patientBarcode = patientBarcode.replace(/-/g, "");
-        this.fetchPatientByID();
+    getOucomeCard() {
+      const displayData = {
+        title: "Outcome",
+        data: [
+          {
+            label: "Current Outcome",
+            value: this.facts.currentOutcome,
+          },
+        ] as DataInterface[],
+      };
+      this.cards.push(displayData);
+    },
+    async getLabOrdersCard() {
+      const displayData = {
+        title: "Labs",
+        data: [] as DataInterface[],
+      };
+      await OrderService.getOrders(this.patient.getID()).then((orders) => {
+        const VLOrders = OrderService.getViralLoadOrders(orders);
+        VLOrders.forEach((element) => {
+          displayData.data.push({
+            value: OrderService.formatOrders(element),
+            label: ``,
+          });
+        });
+      });
+      this.cards.push(displayData);
+    },
+    async getAlertCard() {
+      const sideEffects: Observation[] = await PatientAlerts.alertSideEffects(this.patient.getID())
+      const displayData = {
+        title: "ALERTS",
+        data: [
+          {
+            label: "Side effects",
+            value: sideEffects.length,
+          },
+        ],
+      };
+      this.cards.push(displayData);
+    },
+    getIdentifiersCard() {
+      this.cards.push({
+        title: "PATIENT IDENTIFIERS",
+        data: [
+          {
+            label: "ARV Number",
+            value: this.patient.getArvNumber(),
+          },
+          {
+            label: "NPID",
+            value: this.patient.getNationalID(),
+          },
+        ],
+      });
+    },
+    async getProgramInfoCard() {
+      const patientID = this.patient.getID()
+      const displayData = {
+        title: "PROGRAM INFORMATION",
+        data: [] as DataInterface[],
+      };
+      const params = await WorkflowService.getNextTaskParams(patientID)
+      let task = 'NONE'      
+      if(params.name) {
+        task = params.name
       }
-    },
-    resetState() {
-       this.patientBarcode = "";
-        this.patientName =  "";
-        this.landmark = "";
-        this.phoneNumber = "";
-        this.currentDistrict = "";
-        this.currentTA = "";
-        this.currentVillage = "";
-        this.ancestryDistrict = "";
-        this.ancestryTA = "";
-        this.ancestryVillage = "";
-        this.gender = "";
-        this.birthdate = "";
-        this.cards =  [];
-        this.ARVNumber = "";
-        this.NPID = "";
-        this.patientID =  "";
+      displayData.data.push({
+        label: "Next Task",
+        value: `${task}`,
+      });
+      await ProgramService.getProgramInformation(patientID)
+        .then(
+        (task) => {
+          displayData.data.push({
+            label: "ART Duration",
+            value: `${task.art_duration} month(s) `,
+          });
+        }
+      );
+      await ProgramService.getFastTrackStatus(patientID).then(
+        (task) => {
+          const data = task["Continue FT"] === true ? "Yes" : "No";
+          displayData.data.push({
+            label: "On Fast Track",
+            value: data,
+          });
+        }
+      );
+      const appointMentObs: Observation[] = await ObservationService.getObservations(
+        patientID,
+        ConceptService.getCachedConceptID('appointment date')
+      );
+      if (appointMentObs.length > 0) {
+        const nextAPPT = HisDate.toStandardHisDisplayFormat(appointMentObs[0].value_datetime);
+        displayData.data.push({
+          label: "Next Appointment",
+          value: nextAPPT,
+        });
+      }
+      this.cards.push(displayData);
     }
-     
-  },
-  setup() {
-    const isOpenRef = ref(true);
-    const setOpen = (state: boolean) => isOpenRef.value = state;
-
-    return { isOpenRef, setOpen,
-      barcode,
-      man,
-      woman,
-    };
-  },
-   watch: {
-    $route: {
-      async handler({ query }: any) {
-       this.setupconfirmation(query);
-      },
-      deep: true,
-      immediate: true,
-    },
-  },
-  computed: {
-    isAdmin() {
-      return UserService.isAdmin;
-    },
-  },
-});
+  }
+})
 </script>
-
 <style scoped>
 .card-content {
   height: 200px;
