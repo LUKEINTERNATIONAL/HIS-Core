@@ -87,6 +87,8 @@ import HisDate from "@/utils/Date"
 import { PatientProgramService } from "@/services/patient_program_service"
 import { voidWithReason } from "@/utils/VoidHelper"
 import { isEmpty } from "lodash";
+import { matchToGuidelines } from "@/utils/GuidelineEngine"
+
 import {
   IonContent,
   IonHeader,
@@ -102,6 +104,11 @@ import {
   IonCardHeader,
   loadingController
 } from "@ionic/vue";
+import {
+  FlowState, 
+  TargetEvent,
+  CONFIRMATION_PAGE_GUIDELINES
+} from "@/guidelines/confirmation_page_guidelines"
 export default defineComponent({
   name: "Patient Confirmation",
   components: {
@@ -173,6 +180,8 @@ export default defineComponent({
       this.setProgramFacts()
       await this.drawPatientCards()
       loadingController.dismiss()
+      // Check guidelines for any observations for the patient
+      await this.onEvent(TargetEvent.ONLOAD)
     }
   },
   methods: {
@@ -223,6 +232,7 @@ export default defineComponent({
       this.facts.currentTA = this.patient.getCurrentTA()
       this.facts.currentVillage = this.patient.getHomeVillage()
       this.facts.npID = this.patient.getNationalID()
+      this.facts.identifiers = this.getStrIdentifierTypes()
     },
     async setProgramFacts() {
       const { program, outcome }: any =  await this.program.getProgram()
@@ -245,13 +255,36 @@ export default defineComponent({
         })
       await loading.present()
     },
+    async onEvent(targetEvent: TargetEvent) {
+      const findings = matchToGuidelines(
+        this.facts, 
+        CONFIRMATION_PAGE_GUIDELINES, 
+        '', 
+        targetEvent
+      )
+      for(const index in findings) {
+          const finding = findings[index]
+          if (finding?.actions?.alert) {
+            const state = await finding?.actions?.alert(this.facts)
+            if (state === FlowState.EXIT) continue
+          }
+      }
+      return true
+    },
     async onVoid() {
       voidWithReason(async (reason: string) => {
         await Patientservice.voidPatient(this.patient.getID(), reason)
         this.$router.push('/')        
       })
     },
+    getStrIdentifierTypes() {
+      return this.patient.getIdentifiers().map((id: any) => id.type.name)
+    },
     async nextTask() {
+      const flowState: any = await this.onEvent(TargetEvent.ON_CONTINUE)
+
+      if (flowState === FlowState.FORCE_EXIT) return
+
       const params = await WorkflowService.getNextTaskParams(this.patient.getID())
       if(params.name) {
         this.$router.push(params)
