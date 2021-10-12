@@ -29,8 +29,8 @@ export default defineComponent({
         patient: {} as any,
         fieldComponent: '' as string,
         fields: [] as Array<Field>,
-        assignFilingNum: false as boolean,
         nextWorkflowRouteName: '' as string,
+        filingNumberAssignment: {} as Record<string, Option>,
     }),
     watch: {
         /**
@@ -46,12 +46,17 @@ export default defineComponent({
                     await this.service.loadFilingPrefix()
                 }
                 if (query) {
+                    this.fields = [
+                        this.getFilingNumberField(),
+                        this.getCandidateSelectionField(),
+                        this.getFilingNumberHistoryField()
+                    ]
                     if (query.archive === "true") {
                         await this.archiveFilingNumber()
                         return 
                     }
                     if (query.assign === "true") {
-                       this.fieldComponent = 'filing_number_management'
+                        await this.onAssignFilingNumber()
                     }
                     if (query.trail === "true") {
                        this.fieldComponent = 'view_filing_history'
@@ -59,11 +64,6 @@ export default defineComponent({
                     if (query.next_workflow_task) {
                         this.nextWorkflowRouteName = query.next_workflow_task
                     }
-                    this.fields = [
-                        this.getFilingNumberField(),
-                        this.getCandidateSelectionField(),
-                        this.getFilingNumberHistoryField()
-                    ]
                 }
             },
             immediate: true,
@@ -77,6 +77,113 @@ export default defineComponent({
          */
         toFID(filingID: string) {
             return this.service.formatNumber(filingID)
+        },
+        async onAssignFilingNumber() {
+            const assigned = await this.newFilingNumber()
+            if (assigned) {
+                this.filingNumberAssignment = assigned
+                this.fieldComponent = 'filing_number_management'
+            } else {
+                this.fieldComponent = 'select_candidate_to_swap'
+                toastWarning('Out of filing numbers, Please select eligible candidate')
+            }
+        },
+        /**
+         * Assigns and creates filing number assignment object
+         */
+        async newFilingNumber(): Promise<Record<string, Option> | undefined> {
+            const assignment: Record<string, Option> = {
+                primary: {
+                    label: 'Dormant → Active',
+                    value: this.patient.name,
+                    other: {
+                        activeNumber: this.patient.filingID 
+                            ? this.toFID(this.patient.filingID)
+                            : 'N/A', 
+                        dormantNumber: 'N/A'
+                    }
+                },
+                archived:  {
+                    label: 'Active → Dormant',
+                    value: 'N/A',
+                    other: {
+                        activeNumber: 'N/A', 
+                        dormantNumber: 'N/A'
+                    }
+                }
+            }
+            /**
+             * Do assign a new filing number if the patient already
+             * has one
+             */
+            if (this.service.isActiveFilingNum(this.patient.filingID)) {
+                return assignment
+            }
+
+            await this.presentLoading()
+
+            const assigned = await this.service.assignFilingNumber()
+
+            loadingController.dismiss()
+
+            if (isEmpty(assigned)) return
+
+            assignment.primary.other = {
+                activeNumber: this.toFID(
+                    assigned.new_identifier.identifier
+                ),
+                dormantNumber: this.service
+                    .isDormantFilingNum(this.patient.filingID) 
+                    ? this.toFID(this.patient.filingID)
+                    : 'N/A'
+            }
+
+            if (!isEmpty(assigned.archived_identifier)) {
+                const patient = await this.getPatient(
+                    assigned.archived_identifier.patient_id
+                )
+                assignment.archived = {
+                    label: 'Active → Dormant',
+                    value: patient.name,
+                    other: {
+                        activeNumber: this.toFID(
+                            assigned.archived_identifier.identifier
+                        ), 
+                        dormantNumber: this.toFID(
+                            assigned.new_identifier.identifier
+                        )
+                    }
+                }
+            }
+            return assignment
+        },
+        /**
+         * Swap filing numbers between an active candidate with a dormant candidate
+        */
+        async swapExistingFilingNumbers(candidate: any) {
+            const swapped = await this.service.archivePatient(
+               candidate.patientID, candidate.identifier
+            )
+            if (swapped) {
+                return {
+                    primary: {
+                        label: 'Dormant → Active',
+                        value: this.patient.name,
+                        other: {
+                            activeNumber: this.toFID(swapped.active_number), 
+                            dormantNumber: this.toFID(this.patient.filingID) || 'N/A'
+                        }
+                    },
+                    archived:  {
+                        label: 'Active → Dormant',
+                        value: `${candidate.given_name} ${candidate.family_name}`,
+                        other: {
+                            activeNumber: this.toFID(swapped.dormant_number), 
+                            dormantNumber:this.toFID(swapped.active_number)
+                        }
+                    }
+                }
+            }
         },
         async presentLoading(message="Please wait...") {
             const loading = await loadingController.create({
@@ -183,6 +290,7 @@ export default defineComponent({
                 id: 'view_filing_history',
                 type: FieldType.TT_TABLE_VIEWER,
                 helpText: 'Filing Number Trail',
+                condition: () => false,
                 options: async () => {
                     const columns = ['Status', 'Filing #', 'Date Created', 'Date voided']
                     const data = await this.service.getPastFilingNumbers()
@@ -270,27 +378,21 @@ export default defineComponent({
                 id: 'select_candidate_to_swap',
                 type: FieldType.TT_CARD_SELECTOR,
                 helpText: 'Filing Number (Archive)',
+                condition: () => false,
                 validation: (val: Option) => Validation.required(val),
-                onload: (instance: any) => {
-                    selectorInstance = instance
-                },
+                onload: (instance: any) => selectorInstance = instance,
                 onValue: async (val: Option) => {
                     if(val) {
-                        const confirmed = await alertConfirmation(
-                            `Are you sure you want to archive ${val.value}`
-                        )
-                        if (!confirmed) {
-                            return false
-                        }
-                        const res = await this.service.archivePatient(
-                                val.other.data.patient_id, val.value
+                        const ok = await alertConfirmation(`Do you want to archive ${val.value}`)
+                        if (ok) {
+                            const swapped = await this.swapExistingFilingNumbers(
+                                val.other.data
                             )
-                        if (res) {
-                            this.patient = await this.getPatient(
-                                this.service.getPatientID()
-                            )
-                            this.fieldComponent = 'filing_number_management'
-                            return true
+                            if (swapped) {
+                                this.filingNumberAssignment = swapped
+                                this.fieldComponent = 'filing_number_management'
+                                return true
+                            }                     
                         }
                     }
                     return false
@@ -403,75 +505,14 @@ export default defineComponent({
                 id: "filing_number_management",
                 type: FieldType.TT_FILING_NUMBER_VIEW,
                 helpText: "Filing Number Management",
-                options: async () => {
-                    // Simple object to track filing number identifiers
-                    const assignment: any = {
-                        primary: {
-                            label: 'Dormant → Active',
-                            value: this.patient.name,
-                            other: {
-                                activeNumber: this.toFID(this.patient.filingID) || '', 
-                                dormantNumber: 'N/A'
-                            }
-                        },
-                        archived:  {
-                            label: 'Active → Dormant',
-                            value: 'N/A',
-                            other: {
-                                activeNumber: 'N/A', 
-                                dormantNumber: 'N/A'
-                            }
-                        }
-                    }
-                    await this.presentLoading('Arranging filing numbers...')
-                    // Avoidig reassigning filing number to patient who already has one.
-                    // Not having this condition causes the backend to crash!!
-                    if (!this.service.isActiveFilingNum(this.patient.filingID)) {
-                        try {
-                            const f = await this.service.assignFilingNumber()
-
-                            loadingController.dismiss()
-                            /**
-                             * Go to candidate selector screen if the request was empty
-                             */
-                            if (isEmpty(f)) {
-                                this.fieldComponent = 'select_candidate_to_swap'
-                                toastWarning('Out of filing numbers, Please select eligible candidate')
-                                return []
-                            }
-
-                            assignment.primary
-                                .other
-                                .activeNumber = this.toFID(f.new_identifier.identifier)
-                            assignment.primary
-                                .other
-                                .dormantNumber = this.service
-                                .isDormantFilingNum(this.patient.filingID) 
-                                    ? this.toFID(this.patient.filingID)
-                                    : 'N/A'
-
-                            if (!isEmpty(f.archived_identifier)) {
-                                const patient = await this.getPatient(
-                                    f.archived_identifier.patient_id
-                                )
-                                assignment.secondary.value = patient.name
-                                assignment.secondary
-                                    .other
-                                    .activeNumber = this.toFID(f.archived_identifier.identifier)
-                                assignment.secondary
-                                    .other
-                                    .dormantNumber = this.toFID(f.new_identifier.identifier)
-                            }
-                        }catch(e) {
-                            toastDanger(e)
-                            loadingController.dismiss()
-                        }
-                    } else {
-                        loadingController.dismiss()
-                    }
+                onload: async () => {
                     await this.service.printFilingNumber()
-                    return [ assignment.primary, assignment.archived ]
                 },
+                condition: () => false,
+                options: () => [ 
+                    this.filingNumberAssignment.primary, 
+                    this.filingNumberAssignment.archived 
+                ],
                 config: {
                     hiddenFooterBtns: [
                         'Cancel',

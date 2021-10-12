@@ -83,6 +83,7 @@ export class FilingNumberService extends Service {
             return res.map((person: any) => {
                 const patient = new Patientservice(person)
                 return {
+                    patientID: patient.getID(),
                     identifier,
                     'given_name': patient.getGivenName(),
                     'family_name': patient.getFamilyName(),
