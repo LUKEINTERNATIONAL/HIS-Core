@@ -14,9 +14,9 @@ export class PatientProgramService extends ProgramService {
         super()
         this.patientId = patientId
         this.patientProgramId = -1
-        this.programId = -1
+        this.programId = ProgramService.getProgramID()
         this.stateId = -1
-        this.programDate = ''
+        this.programDate = ProgramService.getSessionDate()
         this.stateDate = ''
     }
 
@@ -44,9 +44,10 @@ export class PatientProgramService extends ProgramService {
      * @returns 
      */
     async getProgram() {
+        const defaults = { program: 'Not available', outcome: 'Not available' }
         const req = await this.getPrograms()
         if (isEmpty(req)) {
-            return
+            return defaults
         }
         /**
          * Filter programs by sessionID
@@ -70,7 +71,7 @@ export class PatientProgramService extends ProgramService {
         })
         return !isEmpty(programs) 
             ? programs[0] 
-            : { program: '', outcome: '' }
+            : defaults
     }
 
     getProgramStates() {
