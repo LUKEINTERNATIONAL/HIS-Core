@@ -52,7 +52,10 @@
           </ion-segment-button>
         </ion-segment>
         <div>
-          <overview v-show="activeTab == 1"> </overview>
+          <component 
+            v-show="activeTab == 1" 
+            v-bind:is="app.appOverviewComponent"> 
+          </component>
           <reports v-show="activeTab == 2"></reports>
           <administration v-show="activeTab == 3"></administration>
         </div>
@@ -107,7 +110,6 @@ import { GlobalPropertyService } from "@/services/global_property_service"
 import ApiClient from "@/services/api_client";
 import Administration from "@/components/ART/administration.vue";
 import Reports from "@/components/ART/reports.vue";
-import Overview from "@/components/ART/overview.vue";
 import HisDate from "@/utils/Date"
 import { AppInterface } from "@/apps/interfaces/AppInterface";
 import { Service } from "@/services/service"
@@ -129,7 +131,6 @@ export default defineComponent({
     Reports,
     IonSegment,
     IonSegmentButton,
-    Overview,
     IonLabel
   },
   data() {
