@@ -5,6 +5,7 @@
 */
 import { GuideLineInterface } from "@/utils/GuidelineEngine"
 import { infoActionSheet } from "@/utils/ActionSheets"
+import { isEmpty } from "lodash"
 
 export enum TargetEvent {
     ON_CONTINUE = 'oncontinue',
@@ -195,6 +196,39 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                 'Patient transferred out', 
                 'Patient died'
             ].includes(outcome)  
+        }
+    },
+    "Prompt the user to update patient demographics when data is incomplete": {
+        priority: 2,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async () => {
+                const action = await infoActionSheet(
+                    'Demographics',
+                    'Patient data is incomplete data',
+                    'Do you want to review and update now?',
+                    [
+                        { 
+                            name: 'Yes', 
+                            slot: 'start', 
+                            color: 'success'
+                        },
+                        { 
+                            name: 'No',  
+                            slot: 'end', 
+                            color: 'danger'
+                        }
+                    ])
+                return action === 'Yes' ? FlowState.UPDATE_DMG : FlowState.EXIT
+            }
+        },
+        conditions: {
+            demographics: (data: Record<string, any>) => {
+                const checks = Object.values(data).map(
+                    (d: any) => isEmpty(d) || d.match(/n\/a/i)
+                )
+                return checks.some(Boolean)
+            }
         }
     },
     "(ART) Warn if Viral load is High": {

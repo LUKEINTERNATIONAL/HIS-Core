@@ -5,23 +5,23 @@
         <ion-row> 
           <ion-col> 
             <div class="tool-bar-medium-card"> 
-              Patient Name: <b> {{facts.patientName}}</b> <p/>
+              Patient Name: <b> {{demographics.patientName}}</b> <p/>
               Birthdate: <b> {{birthdate}} </b> <p/>
-              Gender:  <b>{{facts.gender}} </b>
+              Gender:  <b>{{demographics.gender}} </b>
             </div>
           </ion-col>
           <ion-col> 
             <div class="tool-bar-medium-card"> 
-              Ancestry district: <b>{{ facts.ancestryDistrict }}</b> <p/>
-              Ancestry TA: <b>{{ facts.ancestryTA }}</b> <p/>
-              Ancestry village: <b>{{ facts.ancestryVillage }}</b> <p/>
+              Ancestry district: <b>{{ demographics.ancestryDistrict }}</b> <p/>
+              Ancestry TA: <b>{{ demographics.ancestryTA }}</b> <p/>
+              Ancestry village: <b>{{ demographics.ancestryVillage }}</b> <p/>
             </div>
           </ion-col>
           <ion-col> 
             <div class="tool-bar-medium-card"> 
-              Current District: <b> {{ facts.currentDistrict }}</b><p/>
-              Current TA: <b> {{ facts.currentTA }}</b><p/>
-              Current Village: <b> {{ facts.currentVillage }}</b><p/>
+              Current District: <b> {{ demographics.currentDistrict }}</b><p/>
+              Current TA: <b> {{ demographics.currentTA }}</b><p/>
+              Current Village: <b> {{ demographics.currentVillage }}</b><p/>
             </div>
           </ion-col>
         </ion-row>
@@ -136,26 +136,30 @@ export default defineComponent({
       viralLoadStatus: '' as 'High' | 'Low' | '',
       programs: [] as string[],
       identifiers: [] as string[],
-      givenName: '' as string,
-      familyName: '' as string,
-      patientName: '' as string,
-      landmark: '' as string,
-      phoneNumber: '' as string,
-      currentDistrict: '' as string,
-      currentTA: '' as string,
-      currentVillage: '' as string,
-      ancestryDistrict: '' as string,
-      ancestryTA: '' as string,
-      ancestryVillage: '' as string,
-      gender: '' as string,
-      birthdate: '' as string,
-      npID: '' as string
+      demographics: {
+        givenName: '' as string,
+        familyName: '' as string,
+        patientName: '' as string,
+        landmark: '' as string,
+        phoneNumber: '' as string,
+        currentDistrict: '' as string,
+        currentTA: '' as string,
+        currentVillage: '' as string,
+        ancestryDistrict: '' as string,
+        ancestryTA: '' as string,
+        ancestryVillage: '' as string,
+        gender: '' as string,
+        birthdate: '' as string,
+      },
     }
   }),
   computed: {
+    demographics(): any {
+      return this.facts.demographics
+    },
     birthdate(): string {
       return HisDate.toStandardHisDisplayFormat(
-        this.facts.birthdate
+        this.facts.demographics.birthdate
       )
     },
     isAdmin() {
@@ -165,7 +169,10 @@ export default defineComponent({
   watch: {
     '$route': {
       async handler({query}: any) {
-        if (!isEmpty(query)) {
+        if (!isEmpty(query) && (
+          query.person_id 
+          || query.patient_barcode)) 
+          {
           await this.setPatient(
             query.person_id, 
             query.patient_barcode
@@ -218,19 +225,19 @@ export default defineComponent({
       this.patient = new Patientservice(data)
     },
     setPatientFacts() {
-      this.facts.patientName = this.patient.getFullName()
-      this.facts.givenName = this.patient.getGivenName()
-      this.facts.familyName = this.patient.getFamilyName()
-      this.facts.landmark = this.patient.getAttribute(19)
-      this.facts.phoneNumber = this.patient.getAttribute(12)
-      this.facts.gender = this.patient.getGender()
-      this.facts.birthdate = this.patient.getBirthdate()
-      this.facts.ancestryDistrict = this.patient.getHomeDistrict()
-      this.facts.ancestryTA = this.patient.getHomeTA()
-      this.facts.ancestryVillage = this.patient.getHomeVillage()
-      this.facts.currentDistrict = this.patient.getCurrentDistrict()
-      this.facts.currentTA = this.patient.getCurrentTA()
-      this.facts.currentVillage = this.patient.getHomeVillage()
+      this.facts.demographics.patientName = this.patient.getFullName()
+      this.facts.demographics.givenName = this.patient.getGivenName()
+      this.facts.demographics.familyName = this.patient.getFamilyName()
+      this.facts.demographics.landmark = this.patient.getAttribute(19)
+      this.facts.demographics.phoneNumber = this.patient.getAttribute(12)
+      this.facts.demographics.gender = this.patient.getGender()
+      this.facts.demographics.birthdate = this.patient.getBirthdate()
+      this.facts.demographics.ancestryDistrict = this.patient.getHomeDistrict()
+      this.facts.demographics.ancestryTA = this.patient.getHomeTA()
+      this.facts.demographics.ancestryVillage = this.patient.getHomeVillage()
+      this.facts.demographics.currentDistrict = this.patient.getCurrentDistrict()
+      this.facts.demographics.currentTA = this.patient.getCurrentTA()
+      this.facts.demographics.currentVillage = this.patient.getHomeVillage()
       this.facts.identifiers = this.getStrIdentifierTypes()
     },
     async setProgramFacts() {
@@ -284,6 +291,9 @@ export default defineComponent({
       const states: Record<string, Function> = {
         'enroll': () => {
           return this.program.enrollProgram()
+        },
+        'updateDemographics': () => {
+          return this.$router.push(`/patient/registration?edit_person=${this.patient.getID()}`)
         },
         'assignNpid': async () => {
           const req = await this.patient.assignNpid()
