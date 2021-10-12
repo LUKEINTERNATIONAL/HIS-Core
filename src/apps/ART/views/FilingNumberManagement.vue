@@ -229,7 +229,7 @@ export default defineComponent({
                 backdropDismiss: false,
                 cssClass: 'keypad-modal',
                 componentProps: {
-                    title: 'Find dormant',
+                    title: 'Find Active number',
                     strictNumbers: false,
                     onKeyPress: () => {
                         //TODO: do nothing!
@@ -484,11 +484,10 @@ export default defineComponent({
                                     default: () => !filingNumbeSearchTerm
                                 },
                                 disabled: {
-                                    default: () => {
-                                        return selectorInstance.listData 
+                                    default: () => (
+                                        selectorInstance.listData 
                                         && selectorInstance.listData.length <= 1
-                                        
-                                    }
+                                    ) 
                                 }
                             },
                             onClick: async () => {
@@ -509,9 +508,7 @@ export default defineComponent({
                 id: "filing_number_management",
                 type: FieldType.TT_FILING_NUMBER_VIEW,
                 helpText: "Filing Number Management",
-                onload: async () => {
-                    await this.service.printFilingNumber()
-                },
+                onload: async () => await this.service.printFilingNumber(),
                 condition: () => false,
                 options: () => [ 
                     this.filingNumberAssignment.primary, 
