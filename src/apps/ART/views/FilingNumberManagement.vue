@@ -359,9 +359,7 @@ export default defineComponent({
                                     )
                                 }
                             },
-                            onClick: () => {
-                                this.fieldComponent = 'filing_number_management'
-                            }
+                            onClick: async () => await this.onAssignFilingNumber()
                         }
                     ]
                 }
