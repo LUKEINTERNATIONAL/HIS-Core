@@ -45,6 +45,7 @@ export interface AppInterface {
     readonly applicationIcon: string;
     readonly applicationDescription: string;
     readonly appRoutes: Array<RouteRecordRaw>;
+    readonly appOverviewComponent: any;
     readonly patientDashboard: PatientDashboarInterface;
     readonly reports: Array<ReportGroupInterface>;
     activities: Array<ActivityInterface>;

@@ -5,6 +5,8 @@ import { AppInterface } from "../interfaces/AppInterface";
 import PatientAlerts from "@/services/patient_alerts";
 import appRoutes from "./routes"
 import {BasePrefernceComponents} from '@/apps/ART/preferences'
+import appOverviewComponent from '@/apps/ART/Components/OverviewComponent.vue'
+
 const BASE_URL_PATH = '/assets/images/'
 
 function img(image: string) { return `${BASE_URL_PATH}${image}` }
@@ -15,6 +17,7 @@ const ART: AppInterface = {
     applicationIcon: img('aids.png'),
     applicationDescription: "HIV Client management app",
     appRoutes,
+    appOverviewComponent,
     patientDashboard: {
         tasks: {
             encounters: ENCOUNTERS,
