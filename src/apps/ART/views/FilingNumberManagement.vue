@@ -22,6 +22,11 @@ import HisDate from "@/utils/Date"
 import Keypad from "@/components/Keyboard/HisKeypad.vue"
 import { WorkflowService } from "@/services/workflow_service"
 
+/**
+ * Manages filing number assignment
+ * Can view filing number trail
+ * Can swap filing numbers between candidates
+ */
 export default defineComponent({
     components: { HisStandardForm },
     data: () => ({
