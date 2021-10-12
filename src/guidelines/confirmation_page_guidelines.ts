@@ -134,7 +134,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         }
     },
     "Prompt patient enrollment in current programme if not enrolled" : {
-        priority: 2,
+        priority: 1,
         targetEvent: TargetEvent.ONLOAD,
         actions: {
             alert: async () => {
@@ -146,12 +146,12 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                         { 
                             name: 'Yes', 
                             slot: 'start', 
-                            color: 'danger'
+                            color: 'success'
                         },
                         { 
                             name: 'No',  
                             slot: 'end', 
-                            color: 'success'
+                            color: 'danger'
                         }
                     ]
                 )
@@ -159,7 +159,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             }
         },
         conditions: {
-            programName: (name: string) => !name
+            programName: (name: string) => name === 'Not available'
         }
     },
     "(ART Filing numbers) Prompt dormant filing number reactivation if patient has a dormant filing number": {

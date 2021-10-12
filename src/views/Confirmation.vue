@@ -80,7 +80,7 @@ import { OrderService } from "@/services/order_service";
 import { UserService } from "@/services/user_service";
 import { RelationshipService } from "@/services/relationship_service";
 import { ConceptService } from "@/services/concept_service"
-import { alertAction } from "@/utils/Alerts"
+import { alertAction, toastDanger, toastSuccess } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
 import PatientAlerts from "@/services/patient_alerts"
 import HisDate from "@/utils/Date"
@@ -130,7 +130,7 @@ export default defineComponent({
     patient: {} as any,
     cards: [] as any[],
     facts: {
-      programName: '' as string,
+      programName: 'Not available' as string,
       currentOutcome: '' as string,
       viralLoadStatus: '' as 'High' | 'Low' | '',
       programs: [] as string[],
@@ -180,7 +180,6 @@ export default defineComponent({
       this.setProgramFacts()
       await this.drawPatientCards()
       loadingController.dismiss()
-      // Check guidelines for any observations for the patient
       await this.onEvent(TargetEvent.ONLOAD)
     }
   },
@@ -259,7 +258,7 @@ export default defineComponent({
     */
     async onEvent(targetEvent: TargetEvent) {
       const findings = matchToGuidelines(
-        this.facts, 
+        this.facts,
         CONFIRMATION_PAGE_GUIDELINES, 
         '', 
         targetEvent
@@ -268,15 +267,39 @@ export default defineComponent({
           const finding = findings[index]
           if (finding?.actions?.alert) {
             const state = await finding?.actions?.alert(this.facts)
-            if (state === FlowState.EXIT) continue
+            if (state === FlowState.EXIT) {
+              continue
+            }
+            await this.runFlowState(state)
           }
       }
       return true
     },
+    async runFlowState(state: FlowState) {
+      const states: Record<string, Function> = {
+        'enroll': async () => this.program.enrollProgram(),
+        'activateFn': () => {
+          //Activate FN
+        },
+        'assignNpid': () => {
+          //assign FN
+        }
+      }
+      if (state in states) {
+        await this.presentLoading()
+        try {
+          await states[state]()  
+          toastSuccess('Operation successful')
+        }catch(e) {
+          toastDanger(e)
+        }
+        loadingController.dismiss()
+      }
+    },
     async onVoid() {
       voidWithReason(async (reason: string) => {
         await Patientservice.voidPatient(this.patient.getID(), reason)
-        this.$router.push('/')        
+        this.$router.push('/')
       })
     },
     getStrIdentifierTypes() {
