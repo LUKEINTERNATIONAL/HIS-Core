@@ -12,6 +12,7 @@ export enum TargetEvent {
 }
 
 export enum FlowState {
+    FORCE_EXIT = 'forceExit',
     CONTINUE = 'continue',
     ENROLL = 'enroll',
     EXIT = 'exit',
@@ -21,17 +22,9 @@ export enum FlowState {
 }
 
 export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = {
-    "Re-check Client's physical addresses after a year": {
-        priority: 4,
-        actions: {
-
-        },
-        conditions: {
-
-        }
-    },
     "Warn if patient is missing National ID and assign them one": {
         priority: 1,
+        targetEvent: TargetEvent.ONLOAD,
         actions: {
             alert: async () => {
                 await infoActionSheet(
@@ -50,7 +43,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             }
         },
         conditions: {
-            identifiers: (identifiers: Array<string>) => identifiers.includes('National health ID')
+            identifiers: (ids: string[]) => !ids.includes('National id')
         }
     },
     "Warn before proceeding if patient is deceased based on current Patient state": {
@@ -75,11 +68,11 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                         }
                     ]
                 )
-                return action === 'Yes' ? FlowState.CONTINUE : FlowState.EXIT
+                return action === 'Yes' ? FlowState.CONTINUE : FlowState.FORCE_EXIT
             }
         },
         conditions: { 
-            patientState: (state: string) => state === 'Patient died' 
+            currentOutcome: (outcome: string) => outcome === 'Patient died' 
         }
     },
     "Warn before proceeding if patient stopped treatment based on current Patient state": {
@@ -104,11 +97,11 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                         }
                     ]
                 )
-                return action === 'Yes' ? FlowState.CONTINUE : FlowState.EXIT
+                return action === 'Yes' ? FlowState.CONTINUE : FlowState.FORCE_EXIT
             }
         },
         conditions: {
-            patientState: (state: string) => state === 'Treatment stopped' 
+            currentOutcome: (outcome: string) => outcome === 'Treatment stopped' 
         }
     },
     "Warn before proceeding if patient is transferred out based on current patient state": {
@@ -133,18 +126,11 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                         }
                     ]
                 )
-                return action === 'Yes' ? FlowState.CONTINUE : FlowState.EXIT
+                return action === 'Yes' ? FlowState.CONTINUE : FlowState.FORCE_EXIT
             }
         },
         conditions: {
-            patientState: (state: string) => state === 'Patient transferred out'
-        }
-    },
-    "Ask to print Barcode if NPID changed": {
-        priority: 4,
-        targetEvent: TargetEvent.ONLOAD,
-        conditions: {
-            patientIdentifier: () => ''
+            currentOutcome: (outcome: string) => outcome === 'Patient transferred out'
         }
     },
     "Prompt patient enrollment in current programme if not enrolled" : {
@@ -173,14 +159,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             }
         },
         conditions: {
-            patientProgram: (program: string) => program === '' 
-        }
-    },
-    "Prompt action when patient demographics are incomplete" : {
-        priority: 3,
-        targetEvent: TargetEvent.ONLOAD,
-        conditions: {
-
+            programName: (name: string) => !name
         }
     },
     "(ART Filing numbers) Prompt dormant filing number reactivation if patient has a dormant filing number": {
@@ -209,8 +188,8 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             }
         },
         conditions: {
-            patientProgram: (program: string) => program === 'HIV PROGRAM',
-            filingNumber: (type: string) => type === 'Archived filing number'
+            programName: (programName: string) => programName === 'HIV PROGRAM',
+            identifiers: (identifiers: string[]) => identifiers.includes('Archived filing number')
         }
     },
     "(ART) Warn if Viral load is High": {
@@ -234,8 +213,8 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             }
         },
         conditions: {
-            patientProgram: (program: string) => program === 'HIV PROGRAM',
-            viralLoad: (viralLoad: string) => viralLoad === 'High'
+            programName: (programName: string) => programName === 'HIV PROGRAM',
+            viralLoadStatus: (viralLoadStatus: string) => viralLoadStatus === 'High'
         }
     }
 }
