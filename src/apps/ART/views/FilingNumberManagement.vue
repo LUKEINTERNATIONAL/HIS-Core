@@ -178,6 +178,7 @@ export default defineComponent({
                         label: 'Active → Dormant',
                         value: `${candidate.given_name} ${candidate.family_name}`,
                         other: {
+                            patientID: candidate.patientID,
                             activeNumber: this.toFID(swapped.dormant_number), 
                             dormantNumber:this.toFID(swapped.active_number)
                         }
@@ -524,6 +525,28 @@ export default defineComponent({
                             name: 'Print #',
                             slot: 'start',
                             onClick: async () => this.service.printFilingNumber()
+                        },
+                        {
+                            name: 'Print Dormant#',
+                            slot: 'start',
+                            state: {
+                                visible: {
+                                    default: () => this.filingNumberAssignment
+                                        ?.archived
+                                        ?.other
+                                        ?.patientID ? true : false
+                                }
+                            },
+                            onClick: async () => {
+                                const dormantPatient = new FilingNumberService()
+                                dormantPatient.setPatientID(
+                                    this.filingNumberAssignment
+                                    .archived
+                                    .other
+                                    .patientID
+                                )
+                                await dormantPatient.printFilingNumber()
+                            }
                         },
                         {
                             name: 'Continue',
