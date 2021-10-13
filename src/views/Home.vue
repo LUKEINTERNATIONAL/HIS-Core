@@ -56,7 +56,7 @@
           v-bind:is="appOverview"
           > 
         </component>
-        <home-folder 
+        <home-folder
           v-if="activeTab == 2"
           :items="appReports"
           >
@@ -77,7 +77,7 @@
               >Logout</ion-button
             >
           </ion-col>
-          <ion-col>
+          <ion-col v-if="canFindByIdentifier">
             <ion-button color="primary" size="large" router-link="/patients/search/by_arv">Find By</ion-button>
           </ion-col>
           <ion-col>
@@ -169,7 +169,10 @@ export default defineComponent({
     },
     appAdministration(): FolderInterface[] {
       return this.app.globalPropertySettings ? this.app.globalPropertySettings: []
-    } 
+    },
+    canFindByIdentifier(): boolean {
+      return this.app.programPatientIdentifiers ? true : true
+    }
   },
   methods: {
     fetchLocationID: async function () {
