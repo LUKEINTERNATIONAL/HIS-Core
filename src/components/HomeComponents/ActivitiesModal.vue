@@ -30,7 +30,11 @@ import {
 import { defineComponent, PropType } from "vue";
 import { toastWarning } from "@/utils/Alerts"
 import ApiClient from "@/services/api_client";
-import { ActivityInterface } from "@/apps/interfaces/AppInterface"
+
+interface ActivityInterface {
+  value: string;
+  selected: boolean;
+}
 
 export default defineComponent({
   name: "Modal",

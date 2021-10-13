@@ -3,7 +3,6 @@ import ApplicationModal from "@/components/ApplicationModal.vue";
 import ActivitiesModal from "@/components/ART/ActivitiesModal.vue";
 import OrdersModal from "@/components/ART/OrdersModal.vue";
 import { modalController } from "@ionic/vue";
-import { ActivityInterface } from './interfaces/AppInterface';
 import { find, isEmpty } from 'lodash';
 
 function getActiveApp() {
@@ -23,12 +22,6 @@ function openModal(component: any, props = {}, cssClass = "large-modal") {
     });
 }
 
-async function selectTasks(activities: Array<ActivityInterface>) {
-    const modal = await openModal(ActivitiesModal, {activities})
-    modal.present();
-    return modal;
-}
-
 async function selectApplication() {
     const modal = await openModal(ApplicationModal)
 
@@ -38,9 +31,7 @@ async function selectApplication() {
 
     if (!data || isEmpty(data)) return
 
-    const activities = await selectTasks(data.activities)
-
-    await activities.onDidDismiss()
+    if (data.init) await data.init()
 
     sessionStorage.setItem('applicationName', data.applicationName)
 
