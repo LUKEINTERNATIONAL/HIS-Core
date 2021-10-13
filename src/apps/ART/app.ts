@@ -6,6 +6,7 @@ import { REPORTS } from "@/apps/ART/Config/ArtProgramReports"
 import {PROPERTIES} from "@/apps/ART/Config/ArtGlobalPropertySettings"
 import { PRIMARY_ACTIVITIES, SECONDARY_ACTIVITIES } from "@/apps/ART/Config/ArtProgramActivities"
 import { init } from "@/apps/ART/Config/ArtAppScripts"
+import { GlobalPropertyService } from "@/services/global_property_service"
 
 const ART: AppInterface = {
     patientDashboard: {},
@@ -27,14 +28,17 @@ const ART: AppInterface = {
             name: 'ARV Number',
             isPrimary: true,
             useForSearch: true,
-            prefix: () => 'ARV'
+            prefix: async () => {
+                const prefix = await GlobalPropertyService.getSitePrefix()
+                return `${prefix}-ARV-`
+            }
         },
         'Archived filing number': {
             id: 18,
             name: 'Archived filing number',
             isPrimary: false,
             useForSearch: false,
-            prefix: () => 'FN',
+            prefix: () => '',
             globalPropertySetting: 'use.filing.number=true',
         },
         'Filing number': {
@@ -42,7 +46,7 @@ const ART: AppInterface = {
             name: 'Filing number',
             isPrimary: false,
             useForSearch: false,
-            prefix: () => 'FN',
+            prefix: () => '',
             globalPropertySetting: 'use.filing.number=true',
         }
     },
