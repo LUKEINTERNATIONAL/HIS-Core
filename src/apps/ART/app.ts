@@ -1,212 +1,54 @@
-import { Option } from "@/components/Forms/FieldInterface";
-import { ENCOUNTERS } from "./tasks/encounters";
-import { OTHER_TASKS, PREFERENCES } from "./tasks/other";
 import { AppInterface } from "../interfaces/AppInterface";
-import PatientAlerts from "@/services/patient_alerts";
-import appRoutes from "./routes"
-import {BasePrefernceComponents} from '@/apps/ART/preferences'
-import appOverviewComponent from '@/apps/ART/Components/OverviewComponent.vue'
-
-const BASE_URL_PATH = '/assets/images/'
-
-function img(image: string) { return `${BASE_URL_PATH}${image}` }
+import appRoutes from "./Config/ArtRoutes"
+import homeOverviewComponent from "@/apps/ART/Components/ArtOverviewComponent.vue"
+import patientDashboardComponent from "@/apps/ART/Components/ArtPatientDashboardComponent.vue"
+import { REPORTS } from "@/apps/ART/Config/ArtProgramReports"
+import globalPropertySettings from "@/apps/ART/Config/ArtGlobalPropertySettings"
+import { PRIMARY_ACTIVITIES, SECONDARY_ACTIVITIES } from "@/apps/ART/Config/ArtProgramActivities"
 
 const ART: AppInterface = {
     programID: 1,
     applicationName: 'ART',
-    applicationIcon: img('aids.png'),
+    applicationIcon: 'aids.png',
     applicationDescription: "HIV Client management app",
     appRoutes,
-    appOverviewComponent,
-    patientDashboard: {
-        tasks: {
-            encounters: ENCOUNTERS,
-            other: OTHER_TASKS
+    primaryPatientActivites: PRIMARY_ACTIVITIES,
+    secondaryPatientActivites: SECONDARY_ACTIVITIES,
+    globalPropertySettings,
+    patientDashboardComponent,
+    homeOverviewComponent,
+    programReports: REPORTS,
+    programPatientIdentifiers: {
+        'ARV Number': {
+            id: 4,
+            name: 'ARV Number',
+            isPrimary: true,
+            useForSearch: true,
+            prefix: () => 'ARV'
         },
-        async alerts(patientId: number): Promise<Option[]> {
-            const sideEffects = await PatientAlerts.alertSideEffects(patientId)
-            return [
-                { label: `Patient has ${sideEffects.length} side effects`, value: ''}
-            ]
+        'Archived filing number': {
+            id: 18,
+            name: 'Archived filing number',
+            isPrimary: false,
+            useForSearch: false,
+            prefix: () => 'FN',
+            globalPropertySetting: 'use.filing.number=true',
         },
-        programCardInfo(data: any): Array<Option> {
-            return  [
-                { label: "ART- Start Date", value: data.art_start_date},
-                { label: "ARV Number", value: `${data.arv_number} | Regimen: ${data.current_regimen}` },
-                { label: "File Number", value: data.filing_number.number},
-                { label: "Current Outcome", value: data.current_outcome},
-            ]
+        'Filing number': {
+            id: 17,
+            name: 'Filing number',
+            isPrimary: false,
+            useForSearch: false,
+            prefix: () => 'FN',
+            globalPropertySetting: 'use.filing.number=true',
         }
     },
-    activities: [
-        { value: "ART adherence", selected: false },
-        { value: "HIV clinic consultations", selected: false },
-        { value: "HIV first visits", selected: false },
-        { value: "HIV reception visits", selected: false },
-        { value: "HIV staging visits", selected: false },
-        { value: "Manage Appointments", selected: false },
-        { value: "Drug Dispensations", selected: false },
-        { value: "Prescriptions", selected: false },
-        { value: "Vitals", selected: false },
-        { value: "Patient Type", selected: false }
-    ],
-    reports:[
-        {
-            name: 'MoH',
-            icon: img('login-logos/Malawi-Coat_of_arms_of_arms.png'),
-            files: [
-                {
-                    name: 'Cohort',
-                    icon: img('reports.png'),
-                    pathName: 'moh_cohort'
-                },
-                {
-                    name: 'Cohort / disaggregated',
-                    icon: img('reports.png'),
-                    pathName: 'moh_disaggregated'
-                },
-                {
-                    name: 'Survival analysis',
-                    icon: img('reports.png'),
-                    pathName: 'moh_survial_analysis' 
-                },
-                {
-                    name: 'TPT new initiations',
-                    icon: img('reports.png'),
-                    pathName: 'moh_tpt_new_initiations'
-                },
-                {
-                    name: 'TX CURR MMD',
-                    icon: img('reports.png'),
-                    pathName: 'moh_tx_curr_mmd'
-                }
-            ]
-        },
-        {
-            name: 'Clinic',
-            icon: img('reports.png'),
-            files: [
-                {
-                    name: 'Defaulter list',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_defaulters_report'
-                },
-                {
-                    name: 'Regimen report',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_regimen_report'
-                },
-                {
-                    name: 'Lab results',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_lab_results'
-                },
-                {
-                    name: 'Regimen switch',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_regimen_switch'
-                },
-                {
-                    name: 'Clients due for VL',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_due_viral_load_report'
-                },
-                {
-                    name: 'External consultation clients',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_external_consultation_report'
-                },
-                {
-                    name: 'Retention report',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_retention_report'
-                },
-                {
-                    name: 'Pregnant Patient',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_pregnant_patients'
-                },
-                {
-                    name: 'Missed Appointment',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_missed_appointments'
-                },
-                {
-                    name: 'VL results',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_viral_load'
-                },
-                {
-                    name: 'Other outcome list',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_other_outcome_list'
-                },
-                {
-                    name: 'Regimns and Formulation',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_regimen_formulation'
-                },
-                {
-                    name: 'Appointments',
-                    icon: img('reports.png'),
-                    pathName: 'clinic_appointments'
-                },
-                {
-                    name: 'Stock card report',
-                    icon: img('reports.png'),
-                    pathName: 'stock_card_report'
-                }
-            ]
-        },
-        {
-            name: 'PEPFAR',
-            icon: img('login-logos/PEPFAR.png'),
-            files: [
-                {
-                    name: 'Defaulter list',
-                    icon: img('reports.png'),
-                    pathName: 'pepfar_defaulters_report'
-                },
-                {
-                    name: 'Disaggregated',
-                    icon: img('reports.png'),
-                    pathName: 'pepfar_disaggregated_report'
-                },
-                {
-                    name: 'Regimen Report',
-                    icon: img('reports.png'),
-                    pathName: 'pepfar_regimen_report'
-                },
-                {
-                    name: 'Regimen Switch',
-                    icon: img('reports.png'),
-                    pathName: 'pepfar_regimen_switch'
-                },
-                {
-                    name: 'TB PREV',
-                    icon: img('reports.png'),
-                    pathName: 'pepfar_tb_prev_report'
-                },
-                {
-                    name: 'TX CURR MMD',
-                    icon: img('reports.png'),
-                    pathName: 'pepfar_tx_curr_mmd_report'
-                },
-                {
-                    name: 'TX ML',
-                    icon: img('reports.png'),
-                    pathName: 'pepfar_tx_ml_report'
-                },
-                {
-                    name: 'TX RTT',
-                    icon: img('reports.png'),
-                    pathName: 'pepfar_tx_rtt'
-                }
-            ]
-        }
-    ],
-    preferences: PREFERENCES,
-    preferenceComponents: BasePrefernceComponents
-
+    onStartUp: () => {
+        //TODO: initialise activities here
+    },
+    getPatientProgramSummary: (p: number) => {
+        //TODO: format an object with patient program summary
+        return {}
+    }
 }
-export default ART 
+export default ART

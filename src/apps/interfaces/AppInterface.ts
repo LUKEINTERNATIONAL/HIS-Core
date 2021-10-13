@@ -21,7 +21,10 @@ export interface PreferenceInterface {
 export interface IdentifierInterface {
     id: number;
     name: string;
+    isPrimary: boolean;
     useForSearch: boolean;
+    prefix: () => string;
+    globalPropertySetting?: string;
 }
 
 export interface GeneralDataInterface {
@@ -55,7 +58,7 @@ export interface AppInterface {
     /**
      * Identifiers available for search / reference that are unique to this programme
     */
-    readonly patientIdentifiers?: IdentifierInterface;
+    readonly programPatientIdentifiers?: Record<string, IdentifierInterface>;
     /**
      * Component that is rendered on the landing page that'll typically
      * show some sort of summary of activities
@@ -68,11 +71,11 @@ export interface AppInterface {
     /**
      * Define all reports available for program
     */
-    readonly reports?: ReportGroupInterface[];
+    readonly programReports?: ReportGroupInterface[];
     /**
      * Define list of all application configurations
      */
-    readonly preferences?: PreferenceInterface[];
+    readonly globalPropertySettings?: Record<string, PreferenceInterface[]>;
     /**
      * primary patient activities
      */
@@ -84,7 +87,7 @@ export interface AppInterface {
     /**
      * Onload event when the program is selected
     */
-    readonly onLoad?: () => void;
+    readonly onStartUp?: () => void;
     /**
      * Overrall summary/state of the patient on this program
      */
