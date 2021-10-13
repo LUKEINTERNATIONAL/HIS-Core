@@ -67,10 +67,7 @@
 </template>
 
 <script lang="ts">
-interface DataInterface {
-  label: string;
-  value: string;
-}
+import HisApp from "@/apps/app_lib"
 import { defineComponent } from "vue";
 import { Patientservice } from "@/services/patient_service";
 import { UserService } from "@/services/user_service";
@@ -81,8 +78,6 @@ import { PatientProgramService } from "@/services/patient_program_service"
 import { voidWithReason } from "@/utils/VoidHelper"
 import { isEmpty } from "lodash";
 import { matchToGuidelines } from "@/utils/GuidelineEngine"
-import HisApp from "@/apps/app_lib"
-
 import {
   IonContent,
   IonHeader,
@@ -150,10 +145,9 @@ export default defineComponent({
     }
   }),
   created() {
-    const app = HisApp.getActiveApp() 
-    if (app) {
-      this.app = app
-    }
+    const app = HisApp.getActiveApp()
+
+    if (app) this.app = app
   },
   computed: {
     demographics(): any {
@@ -226,6 +220,12 @@ export default defineComponent({
       loadingController.dismiss()
       this.patient = new Patientservice(data)
     },
+    /**
+     * Facts are used by the Guideline Engine to crosscheck 
+     * conditions to execute. The more the data the better
+     * the decision support. These facts are also presented 
+     * on the User interface
+     */
     setPatientFacts() {
       this.facts.demographics.patientName = this.patient.getFullName()
       this.facts.demographics.givenName = this.patient.getGivenName()
@@ -247,6 +247,10 @@ export default defineComponent({
       this.facts.currentOutcome = outcome
       this.facts.programName = program
     },
+    /**
+     * The Application/Program determines which cards to
+     * render on the view
+     */
     async drawPatientCards() {
       if (!this.app.confirmationSummary) return
 
@@ -292,6 +296,10 @@ export default defineComponent({
       }
       return true
     },
+    /**
+     * Maps FlowStates defined in the Guideline to
+     * Functions definitions that are executed.
+     */
     async runFlowState(state: FlowState) {
       const states: Record<string, Function> = {
         'enroll': () => {
