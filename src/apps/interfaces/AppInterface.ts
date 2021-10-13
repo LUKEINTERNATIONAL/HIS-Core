@@ -89,7 +89,7 @@ export interface AppInterface {
     /**
      * Get program specific patient dashboard alerts
      */
-    readonly getPatientDashboardAlerts: (patient: any) => Promise<GeneralDataInterface[]> | GeneralDataInterface[];
+    readonly getPatientDashboardAlerts?: (patient: any) => Promise<GeneralDataInterface[]> | GeneralDataInterface[];
     /**
      * Onload event when the program is selected
     */
@@ -98,7 +98,7 @@ export interface AppInterface {
      * Parse summary data object based on program specific definition and
      * return generic object to be displayed on patient dashboard
      */
-    readonly formatPatientProgramSummary: (programInfo: any) => Promise<GeneralDataInterface[]> | GeneralDataInterface[];
+    readonly formatPatientProgramSummary?: (programInfo: any) => Promise<GeneralDataInterface[]> | GeneralDataInterface[];
     /**
      * Summary data that is rendered on patient confirmation page
     */
