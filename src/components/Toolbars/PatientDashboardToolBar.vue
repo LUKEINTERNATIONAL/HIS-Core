@@ -9,7 +9,7 @@
                     <info-card :items="programCardInfo"/> 
                 </ion-col>
                 <ion-col size="2"> 
-                    <icon-card :icon="appIcon"> </icon-card>
+                    <icon-card :icon="logo"> </icon-card>
                 </ion-col>
             </ion-row>
         </ion-toolbar>
@@ -20,6 +20,8 @@ import { defineComponent } from 'vue'
 import InfoCard from "@/components/DataViews/DashboardSecondaryInfoCard.vue"
 import IconCard from "@/components/DataViews/DashboardAppIcon.vue"
 import { IonHeader, IonToolbar, IonCol, IonRow } from "@ionic/vue"
+import Img from "@/utils/Img"
+
 export default defineComponent({
     components: {IonHeader, IonToolbar, IonCol, IonRow, InfoCard, IconCard },
     props: {
@@ -35,6 +37,11 @@ export default defineComponent({
            type: String,
            required: true
        }
+    },
+    computed: {
+        logo(): string {
+            return Img(this.appIcon)
+        }
     }
 })
 </script>

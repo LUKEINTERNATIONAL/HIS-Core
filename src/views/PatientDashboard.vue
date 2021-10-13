@@ -173,9 +173,9 @@ export default defineComponent({
             this.patientProgram = await ProgramService.getProgramInformation(this.patientId)
             this.nextTask = await this.getNextTask(this.patientId)
             this.visitDates = await this.getPatientVisitDates(this.patientId)
-            this.alertCardItems = await this.getPatientAlertCardInfo(this.patientId) || []
+            this.alertCardItems = await this.getPatientAlertCardInfo() || []
             this.patientCardInfo = this.getPatientCardInfo(this.patient)
-            this.programCardInfo = this.getProgramCardInfo(this.patientProgram) || []
+            this.programCardInfo = await this.getProgramCardInfo(this.patientProgram) || []
             this.programID = ProgramService.getProgramID()
             this.currentDate = HisDate.currentDisplayDate()
             this.sessionDate = HisDate.toStandardHisDisplayFormat(ProgramService.getSessionDate())
@@ -213,8 +213,8 @@ export default defineComponent({
             ]
         },
         getProgramCardInfo(info: any) {
-           if ('patientDashboard' in this.app) {
-             return this.app.patientDashboard?.programCardInfo(info)
+           if ('formatPatientDashboardSummary' in this.app) {
+             return this.app.formatPatientDashboardSummary(info)
            }
         },
         getActivitiesCardInfo(encounters: Array<Encounter>) {
@@ -261,9 +261,9 @@ export default defineComponent({
                 value: HisDate.toStandardHisTimeFormat(labOrder.order_date)
             }))
         },
-        async getPatientAlertCardInfo(patientId: number){
-            if ('patientDashboard' in this.app) {
-                return [] //this.app.patientDashboard?.alerts(patientId)
+        async getPatientAlertCardInfo(){
+            if ('getPatientDashboardAlerts' in this.app) {
+                return this.app.getPatientDashboardAlerts(this.patient)
             }
         },
         async changeApp() {
@@ -272,13 +272,13 @@ export default defineComponent({
             if (app.programID != this.programID) this.init()
         },
         async showTasks() {
-            if ('patientDashboard' in this.app) {
+            if ('primaryPatientActivites' in this.app) {
                 const encounters = this.app.primaryPatientActivites
                 this.openModal(encounters, 'Select Task', TaskSelector)
             }
         },
         async showOptions() {
-            if ('patientDashboard' in this.app) {
+            if ('secondaryPatientActivites' in this.app) {
                 const other = this.app.secondaryPatientActivites
                 this.openModal(other, 'Select Activity', TaskSelector)
             }

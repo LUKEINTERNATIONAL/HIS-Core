@@ -25,7 +25,6 @@ export interface GeneralDataInterface {
 }
 
 export interface AppInterface {
-    patientDashboard: any;
     /**
      * Map primary key value of a program here. All records will
      * associate with this program ID
@@ -68,9 +67,9 @@ export interface AppInterface {
      */
     readonly homeOverviewComponent: any; //Vue component
     /**
-     * Component that is rendered on the patient dashboard
+     * Overwrites main patient dashboard component with specified one
      */
-    readonly patientDashboardComponent: any; // Vue component
+    readonly patientDashboardComponent?: any; // Vue component
     /**
      * Define all reports available for program
     */
@@ -88,11 +87,20 @@ export interface AppInterface {
      */
     readonly secondaryPatientActivites: TaskInterface[];
     /**
+     * Get program specific patient dashboard alerts
+     */
+    readonly getPatientDashboardAlerts: (patient: any) => Promise<GeneralDataInterface[]> | GeneralDataInterface[];
+    /**
      * Onload event when the program is selected
     */
     readonly init?: () => void;
     /**
-     * Summary data of the patient that should appear on the dashboaerd
+     * Parse summary data object based on program specific definition and
+     * return generic object to be displayed on patient dashboard
+     */
+    readonly formatPatientDashboardSummary: (programInfo: any) => Promise<GeneralDataInterface[]> | GeneralDataInterface[];
+    /**
+     * Summary data that is rendered on patient confirmation page
     */
     readonly confirmationSummary?: (patient: any, program: any) => Record<string, Function>;
 }

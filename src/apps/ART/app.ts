@@ -1,16 +1,18 @@
 import { AppInterface } from "../interfaces/AppInterface";
 import appRoutes from "./Config/ArtRoutes"
 import homeOverviewComponent from "@/apps/ART/Components/ArtOverviewComponent.vue"
-import patientDashboardComponent from "@/apps/ART/Components/ArtPatientDashboardComponent.vue"
 import { REPORTS } from "@/apps/ART/Config/ArtProgramReports"
 import {PROPERTIES} from "@/apps/ART/Config/ArtGlobalPropertySettings"
 import { PRIMARY_ACTIVITIES, SECONDARY_ACTIVITIES } from "@/apps/ART/Config/ArtProgramActivities"
-import { init } from "@/apps/ART/Config/ArtAppScripts"
 import { GlobalPropertyService } from "@/services/global_property_service"
-import { confirmationSummary } from "@/apps/ART/Config/ArtAppScripts"
+import { 
+    init, 
+    confirmationSummary, 
+    formatPatientDashboardSummary,
+    getPatientDashboardAlerts
+} from "@/apps/ART/Config/ArtAppScripts"
 
 const ART: AppInterface = {
-    patientDashboard: {},
     init,
     programID: 1,
     applicationName: 'ART',
@@ -20,10 +22,11 @@ const ART: AppInterface = {
     primaryPatientActivites: PRIMARY_ACTIVITIES,
     secondaryPatientActivites: SECONDARY_ACTIVITIES,
     globalPropertySettings: PROPERTIES,
-    patientDashboardComponent,
-    homeOverviewComponent,
     programReports: REPORTS,
+    homeOverviewComponent,
     confirmationSummary,
+    formatPatientDashboardSummary,
+    getPatientDashboardAlerts,
     programPatientIdentifiers: {
         'ARV Number': {
             id: 4,

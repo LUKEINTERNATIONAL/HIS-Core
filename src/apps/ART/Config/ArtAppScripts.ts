@@ -11,6 +11,7 @@ import { Observation } from "@/interfaces/observation";
 import { ObservationService } from "@/services/observation_service";
 import { ConceptService } from "@/services/concept_service"
 import HisDate from "@/utils/Date"
+import { GeneralDataInterface } from "@/apps/interfaces/AppInterface";
 
 export async function init() {
     const activities = PRIMARY_ACTIVITIES
@@ -28,6 +29,28 @@ export async function init() {
     });
     modal.present();
     return modal;
+}
+
+export async function getPatientDashboardAlerts(patient: any): Promise<GeneralDataInterface[]>{
+    const sideEffects: Observation[] 
+    = await PatientAlerts.alertSideEffects(
+        patient.getID()
+    )
+    return [
+        {
+            label: "Side effects",
+            value: `${sideEffects.length}`,
+        }
+    ]
+}
+
+export function formatPatientDashboardSummary(data: any) {
+    return  [
+        { label: "ART- Start Date", value: data.art_start_date},
+        { label: "ARV Number", value: `${data.arv_number} | Regimen: ${data.current_regimen}` },
+        { label: "File Number", value: data.filing_number.number},
+        { label: "Current Outcome", value: data.current_outcome},
+    ]
 }
 
 export function confirmationSummary(patient: any, program: any) {
@@ -82,18 +105,7 @@ export function confirmationSummary(patient: any, program: any) {
                 }
             ]
         },
-        'ALERTS': async () => {
-            const sideEffects: Observation[] 
-                = await PatientAlerts.alertSideEffects(
-                    patient.getID()
-                )
-            return [
-                {
-                    label: "Side effects",
-                    value: sideEffects.length,
-                }
-            ]
-        },
+        'ALERTS': () => getPatientDashboardAlerts(patient),
         'LAB ORDERS': async () => {
             const data: any = []
             await OrderService.getOrders(patient.getID())
