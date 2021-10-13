@@ -2,8 +2,17 @@
     <ion-page> 
         <patient-header :appIcon="app.applicationIcon" :patientCardInfo="patientCardInfo" :programCardInfo="programCardInfo" />
         <ion-content>
-            <ion-grid class='grid-custom vertically-align'>
-                <ion-row> 
+            <!--RENDER PROGRAM CUSTOM DASHBOARD AS COMPONENT -->
+            <component
+                v-if="showCustomDashboard"
+                v-bind:is="dashboardComponent"
+                :patient="patient"
+                :program="patientProgram"
+                > 
+            </component>
+            <!-- RENDER DEFAULT PATIENT DASHBOARD -->
+            <ion-grid v-if="!showCustomDashboard" class='grid-custom vertically-align'>
+                <ion-row>
                     <ion-col size="2.4">
                         <visit-dates-card :title="visitDatesTitle" :items="visitDates" @onselect="onActiveVisitDate"> </visit-dates-card>
                     </ion-col>
@@ -53,9 +62,6 @@
         </ion-content>
         <ion-footer> 
             <ion-toolbar color="dark">
-                <ion-button color="danger" size="large" @click="onCancel"> 
-                    Finish
-                </ion-button>
                 <ion-button color="primary" size="large" slot="end" @click="showTasks"> 
                     Tasks
                 </ion-button>
@@ -65,13 +71,15 @@
                 <ion-button color="primary" size="large" slot="end" @click="changeApp"> 
                     Applications
                 </ion-button>
+                <ion-button color="success" size="large" slot="end" @click="onCancel"> 
+                    Finish
+                </ion-button>
             </ion-toolbar>
         </ion-footer>
     </ion-page>
 </template>
 <script lang="ts">
 import HisApp from "@/apps/app_lib"
-import { AppInterface } from "@/apps/interfaces/AppInterface"
 import { defineComponent } from 'vue'
 import PrimaryCard from "@/components/DataViews/DashboardPrimaryCard.vue"
 import VisitDatesCard from "@/components/DataViews/VisitDatesCard.vue"
@@ -119,7 +127,8 @@ export default defineComponent({
         IonCol,
     },
     data: () => ({
-        app: {} as AppInterface | {},
+        app: {} as any,
+        dashboardComponent: {} as any,
         isBDE: false as boolean,
         currentDate: '',
         sessionDate: '',
@@ -127,7 +136,7 @@ export default defineComponent({
         patientId: 0,
         programID : 0,
         patient: {} as any,
-        patientProgram: {} as Array<Option>,
+        patientProgram: {} as any,
         patientCardInfo: [] as Array<Option>,
         programCardInfo: [] as Array<Option> | [],
         encounters: [] as Array<Encounter>,
@@ -141,9 +150,15 @@ export default defineComponent({
         alertCardItems: [] as Array<Option>
     }),
     computed: {
+        showCustomDashboard(): boolean {
+            return !_.isEmpty(this.dashboardComponent)
+        },
         visitDatesTitle(): string {
             return `${this.visitDates.length} Visits`
         }
+    },
+    created() {
+        this.app = ProgramService.getActiveApp()
     },
     watch: {
         "$route" : {
@@ -152,7 +167,17 @@ export default defineComponent({
                 
                 this.patientId = parseInt(params.id)
 
-                if (this.patientId) this.init()
+                if (this.patientId) {
+                    this.patient = await this.fetchPatient(this.patientId)
+                    this.patientProgram = await ProgramService.getProgramInformation(this.patientId)
+                    this.patientCardInfo = this.getPatientCardInfo(this.patient)
+                    this.programCardInfo = await this.getProgramCardInfo(this.patientProgram) || []
+                    if (!_.isEmpty(this.app) && this.app.customPatientDashboardComponent) {
+                        this.dashboardComponent = this.app.customPatientDashboardComponent
+                    } else {
+                        this.initDefault()
+                    }
+                } 
             },
             deep: true,
             immediate: true
@@ -167,15 +192,10 @@ export default defineComponent({
         }
     },
     methods: {
-        async init() {
-            this.app = ProgramService.getActiveApp()
-            this.patient = await this.fetchPatient(this.patientId)
-            this.patientProgram = await ProgramService.getProgramInformation(this.patientId)
+        async initDefault() {
             this.nextTask = await this.getNextTask(this.patientId)
             this.visitDates = await this.getPatientVisitDates(this.patientId)
             this.alertCardItems = await this.getPatientAlertCardInfo() || []
-            this.patientCardInfo = this.getPatientCardInfo(this.patient)
-            this.programCardInfo = await this.getProgramCardInfo(this.patientProgram) || []
             this.programID = ProgramService.getProgramID()
             this.currentDate = HisDate.currentDisplayDate()
             this.sessionDate = HisDate.toStandardHisDisplayFormat(ProgramService.getSessionDate())
@@ -269,7 +289,7 @@ export default defineComponent({
         async changeApp() {
             const app = await HisApp.selectApplication();
 
-            if (app.programID != this.programID) this.init()
+            if (app.programID != this.programID) this.initDefault()
         },
         async showTasks() {
             if ('primaryPatientActivites' in this.app) {

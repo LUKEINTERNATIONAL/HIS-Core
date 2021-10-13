@@ -69,7 +69,7 @@ export interface AppInterface {
     /**
      * Overwrites main patient dashboard component with specified one
      */
-    readonly patientDashboardComponent?: any; // Vue component
+    readonly customPatientDashboardComponent?: any; // Vue component
     /**
      * Define all reports available for program
     */
