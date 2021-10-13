@@ -13,7 +13,7 @@
                       height: '90px',
                       margin: '0'
                     }"
-                    src="/assets/images/barcode.svg"/>
+                    :src="barcodeLogo"/>
                 </ion-col>
                 <ion-col size-lg="7" size-sm="8"> 
                   <input v-model="patientBarcode" class="barcode-input" ref="scanBarcode"/>
@@ -32,7 +32,7 @@
             </div>
           </ion-col>
           <ion-col size="3">
-            <program-icon :icon="app.applicationIcon"> </program-icon>
+            <program-icon :icon="appLogo"> </program-icon>
           </ion-col>
         </ion-row>
       </ion-toolbar>
@@ -53,15 +53,17 @@
         </ion-segment>
         <component 
           v-if ="activeTab == 1" 
-          v-bind:is="app.homeOverviewComponent"> 
+          v-bind:is="appOverview"
+          > 
         </component>
-        <home-folder
-          :items="app.programReports"
-          v-if="activeTab == 2 && app.programReports.length >= 1"
-          ></home-folder>
         <home-folder 
+          v-if="activeTab == 2"
+          :items="appReports"
+          >
+        </home-folder>
+        <home-folder 
+          v-if="activeTab == 3"
           :items="app.globalPropertySettings" 
-          v-if="activeTab == 3  && app.globalPropertySettings.length >= 1"
           >
         </home-folder>
       </div>
@@ -114,10 +116,11 @@ import { barcode } from "ionicons/icons";
 import { GlobalPropertyService } from "@/services/global_property_service"
 import ApiClient from "@/services/api_client";
 import HisDate from "@/utils/Date"
-import { AppInterface } from "@/apps/interfaces/AppInterface";
+import { AppInterface, FolderInterface } from "@/apps/interfaces/AppInterface";
 import { Service } from "@/services/service"
 import ProgramIcon from "@/components/DataViews/DashboardAppIcon.vue"
 import HomeFolder from "@/components/HomeComponents/HomeFolders.vue"
+import Img from "@/utils/Img"
 
 export default defineComponent({
   name: "Home",
@@ -150,6 +153,23 @@ export default defineComponent({
       overviewComponent: {} as any,
       isBDE: false
     };
+  },
+  computed: {
+    barcodeLogo(): string {
+      return Img('barcode.svg')
+    },
+    appOverview(): any {
+      return this.app.homeOverviewComponent
+    },
+    appLogo(): string {
+      return Img(this.app.applicationIcon)
+    },
+    appReports(): FolderInterface[] {
+      return this.app.programReports ? this.app.programReports: []
+    },
+    appAdministration(): FolderInterface[] {
+      return this.app.globalPropertySettings ? this.app.globalPropertySettings: []
+    } 
   },
   methods: {
     fetchLocationID: async function () {
