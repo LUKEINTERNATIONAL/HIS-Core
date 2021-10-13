@@ -78,7 +78,7 @@
             >
           </ion-col>
           <ion-col v-if="canFindByIdentifier">
-            <ion-button color="primary" size="large" router-link="/patients/search/by_arv">Find By</ion-button>
+            <ion-button color="primary" size="large" router-link="/patients/search/id">Find By</ion-button>
           </ion-col>
           <ion-col>
             <ion-button color="primary" size="large" router-link="/patient/registration"

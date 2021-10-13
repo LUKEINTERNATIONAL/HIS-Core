@@ -58,7 +58,7 @@ export interface AppInterface {
             name: string;
             isPrimary: boolean;
             useForSearch: boolean;
-            prefix: () => string;
+            prefix: () => Promise<string> | string;
             globalPropertySetting?: string;
         }
     >;

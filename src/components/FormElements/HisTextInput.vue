@@ -54,13 +54,13 @@ export default defineComponent({
             if (this.config.initialKb) {
                 this.initalKeyboardName = this.config.initialKb
             }
-            if (this.config.prependValue) {
-                this.prependValue = await this.config.prependValue()
-            }
         }
     },
     async activated(){
         this.$emit('onFieldActivated', this)
+        if (this.config && this.config.prependValue) {
+            this.prependValue = await this.config.prependValue(this.fdata)
+        }
         await this.setDefaultValue()
     },
     methods: {

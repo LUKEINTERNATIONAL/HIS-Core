@@ -11,7 +11,7 @@ import PatientRegistration from '../views/PatientRegistration.vue'
 import GuardianRegistration from '../views/GuardianRegistration.vue'
 import SearchResults from '../views/SearchResults.vue'
 import Example from '../views/Example.vue'
-import FindByARVNumber from '../views/FindByARVNumber.vue'
+import FindByID from '../views/FindByID.vue'
 import PatientDashboard from '../views/PatientDashboard.vue'
 import Configuration from '@/views/Configuration.vue'
 import Settings from '@/components/ART/Settings.vue'
@@ -114,9 +114,9 @@ const routes: Array<RouteRecordRaw> = [
     component: SearchResults
   },
   {
-    path: '/patients/search/by_arv',
-    name: 'find patient by ARV number',
-    component: FindByARVNumber
+    path: '/patients/search/id',
+    name: 'ID Search',
+    component: FindByID
   },
   {
     path: '/patients/confirm',
