@@ -290,6 +290,8 @@ export default defineComponent({
             const app = await HisApp.selectApplication();
             if (app.programID != this.programID){
                 return this.$router.push(`/patients/confirm?person_id=${this.patientId}`)
+            } else {
+                await this.initDefault()
             }
         },
         async showTasks() {
