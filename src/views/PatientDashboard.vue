@@ -233,8 +233,8 @@ export default defineComponent({
             ]
         },
         getProgramCardInfo(info: any) {
-           if ('formatPatientDashboardSummary' in this.app) {
-             return this.app.formatPatientDashboardSummary(info)
+           if ('formatPatientProgramSummary' in this.app) {
+             return this.app.formatPatientProgramSummary(info)
            }
         },
         getActivitiesCardInfo(encounters: Array<Encounter>) {
@@ -288,8 +288,9 @@ export default defineComponent({
         },
         async changeApp() {
             const app = await HisApp.selectApplication();
-
-            if (app.programID != this.programID) this.initDefault()
+            if (app.programID != this.programID){
+                return this.$router.push(`/patients/confirm?person_id=${this.patientId}`)
+            }
         },
         async showTasks() {
             if ('primaryPatientActivites' in this.app) {

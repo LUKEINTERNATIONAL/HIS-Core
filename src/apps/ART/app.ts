@@ -8,7 +8,7 @@ import { GlobalPropertyService } from "@/services/global_property_service"
 import { 
     init, 
     confirmationSummary, 
-    formatPatientDashboardSummary,
+    formatPatientProgramSummary,
     getPatientDashboardAlerts
 } from "@/apps/ART/Config/ArtAppScripts"
 
@@ -25,7 +25,7 @@ const ART: AppInterface = {
     programReports: REPORTS,
     homeOverviewComponent,
     confirmationSummary,
-    formatPatientDashboardSummary,
+    formatPatientProgramSummary,
     getPatientDashboardAlerts,
     programPatientIdentifiers: {
         'ARV Number': {

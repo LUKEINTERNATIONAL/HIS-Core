@@ -98,7 +98,7 @@ export interface AppInterface {
      * Parse summary data object based on program specific definition and
      * return generic object to be displayed on patient dashboard
      */
-    readonly formatPatientDashboardSummary: (programInfo: any) => Promise<GeneralDataInterface[]> | GeneralDataInterface[];
+    readonly formatPatientProgramSummary: (programInfo: any) => Promise<GeneralDataInterface[]> | GeneralDataInterface[];
     /**
      * Summary data that is rendered on patient confirmation page
     */

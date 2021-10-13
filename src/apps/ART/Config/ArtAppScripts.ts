@@ -28,6 +28,7 @@ export async function init() {
         }
     });
     modal.present();
+    await modal.onDidDismiss()
     return modal;
 }
 
@@ -44,7 +45,7 @@ export async function getPatientDashboardAlerts(patient: any): Promise<GeneralDa
     ]
 }
 
-export function formatPatientDashboardSummary(data: any) {
+export function formatPatientProgramSummary(data: any) {
     return  [
         { label: "ART- Start Date", value: data.art_start_date},
         { label: "ARV Number", value: `${data.arv_number} | Regimen: ${data.current_regimen}` },
