@@ -263,7 +263,7 @@ export default defineComponent({
         },
         async getPatientAlertCardInfo(patientId: number){
             if ('patientDashboard' in this.app) {
-                return this.app.patientDashboard?.alerts(patientId)
+                return [] //this.app.patientDashboard?.alerts(patientId)
             }
         },
         async changeApp() {
@@ -273,13 +273,13 @@ export default defineComponent({
         },
         async showTasks() {
             if ('patientDashboard' in this.app) {
-                const { encounters } = this.app.patientDashboard.tasks
+                const encounters = this.app.primaryPatientActivites
                 this.openModal(encounters, 'Select Task', TaskSelector)
             }
         },
         async showOptions() {
             if ('patientDashboard' in this.app) {
-                const  { other } = this.app.patientDashboard.tasks
+                const other = this.app.secondaryPatientActivites
                 this.openModal(other, 'Select Activity', TaskSelector)
             }
         },
