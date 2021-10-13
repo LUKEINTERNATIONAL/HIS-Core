@@ -167,7 +167,7 @@ export default defineComponent({
         */
         async swapExistingFilingNumbers(candidate: any) {
             const swapped = await this.service.archivePatient(
-               candidate.patientID, candidate.identifier
+               candidate.patient_id, candidate.identifier
             )
             if (swapped) {
                 return {
@@ -183,7 +183,7 @@ export default defineComponent({
                         label: 'Active → Dormant',
                         value: `${candidate.given_name} ${candidate.family_name}`,
                         other: {
-                            patientID: candidate.patientID,
+                            patientID: candidate.patient_id,
                             activeNumber: this.toFID(swapped.dormant_number), 
                             dormantNumber:this.toFID(swapped.active_number)
                         }
