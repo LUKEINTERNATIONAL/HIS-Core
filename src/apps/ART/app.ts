@@ -43,10 +43,10 @@ const ART: AppInterface = {
             globalPropertySetting: 'use.filing.number=true',
         }
     },
-    onStartUp: () => {
+    init: () => {
         //TODO: initialise activities here
     },
-    getPatientProgramSummary: (p: number) => {
+    patientSummary: (p: number) => {
         //TODO: format an object with patient program summary
         return {}
     }

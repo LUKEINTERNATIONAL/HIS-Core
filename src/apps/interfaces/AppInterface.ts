@@ -87,9 +87,9 @@ export interface AppInterface {
     /**
      * Onload event when the program is selected
     */
-    readonly onStartUp?: () => void;
+    readonly init?: () => void;
     /**
      * Overrall summary/state of the patient on this program
      */
-    readonly getPatientProgramSummary?: (patientID: number) => Record<string, GeneralDataInterface[]>;
+    readonly patientSummary?: (patientID: number) => Record<string, GeneralDataInterface[]>;
 }
