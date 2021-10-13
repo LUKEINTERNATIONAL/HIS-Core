@@ -51,14 +51,19 @@
             <ion-label>Administration</ion-label>
           </ion-segment-button>
         </ion-segment>
-        <div>
-          <component 
-            v-show="activeTab == 1" 
-            v-bind:is="app.appOverviewComponent"> 
-          </component>
-          <reports v-show="activeTab == 2"></reports>
-          <administration v-show="activeTab == 3"></administration>
-        </div>
+        <component 
+          v-if ="activeTab == 1" 
+          v-bind:is="app.homeOverviewComponent"> 
+        </component>
+        <home-folder
+          :items="app.programReports"
+          v-if="activeTab == 2 && app.programReports.length >= 1"
+          ></home-folder>
+        <home-folder 
+          :items="app.globalPropertySettings" 
+          v-if="activeTab == 3  && app.globalPropertySettings.length >= 1"
+          >
+        </home-folder>
       </div>
     </ion-content>
 
@@ -108,17 +113,17 @@ import { defineComponent } from "vue";
 import { barcode } from "ionicons/icons";
 import { GlobalPropertyService } from "@/services/global_property_service"
 import ApiClient from "@/services/api_client";
-import Administration from "@/components/ART/administration.vue";
-import Reports from "@/components/ART/reports.vue";
 import HisDate from "@/utils/Date"
 import { AppInterface } from "@/apps/interfaces/AppInterface";
 import { Service } from "@/services/service"
 import ProgramIcon from "@/components/DataViews/DashboardAppIcon.vue"
+import HomeFolder from "@/components/HomeComponents/HomeFolders.vue"
 
 export default defineComponent({
   name: "Home",
   components: {
     ProgramIcon,
+    HomeFolder,
     IonContent,
     IonHeader,
     IonPage,
@@ -127,8 +132,6 @@ export default defineComponent({
     IonCol,
     IonButton,
     IonFooter,
-    Administration,
-    Reports,
     IonSegment,
     IonSegmentButton,
     IonLabel
@@ -144,6 +147,7 @@ export default defineComponent({
       activeTab: 1,
       ready: false,
       patientBarcode: "",
+      overviewComponent: {} as any,
       isBDE: false
     };
   },

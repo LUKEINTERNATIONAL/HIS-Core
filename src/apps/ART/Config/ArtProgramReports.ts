@@ -1,6 +1,6 @@
-import { ReportGroupInterface } from "@/apps/interfaces/AppInterface"
+import { FolderInterface } from "@/apps/interfaces/AppInterface"
 
-export const REPORTS: ReportGroupInterface[] = [
+export const REPORTS: FolderInterface[] = [
     {
         name: 'MoH',
         icon: 'login-logos/Malawi-Coat_of_arms_of_arms.png',

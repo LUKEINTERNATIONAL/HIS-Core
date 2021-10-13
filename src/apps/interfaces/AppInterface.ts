@@ -1,30 +1,22 @@
 import { RouteRecordRaw } from 'vue-router';
 import { TaskInterface } from './TaskInterface';
 
-export interface ReportGroupInterface {
-    name: string;
-    icon: string;
-    files: Array<ReportInterface>;
+export interface ActivityInterface {
+    value: string;
+    selected: boolean;
 }
-export interface ReportInterface {
+
+export interface FolderInterface {
     name: string;
     icon?: string;
-    pathName?: string;
-    pathUrl?: string;    
-}
-
-export interface PreferenceInterface {
-    name: string;
-    route: string;
-}
-
-export interface IdentifierInterface {
-    id: number;
-    name: string;
-    isPrimary: boolean;
-    useForSearch: boolean;
-    prefix: () => string;
-    globalPropertySetting?: string;
+    files: Array<
+        {
+            name: string;
+            icon?: string;
+            pathName?: string;
+            pathUrl?: string;
+        }
+    >;
 }
 
 export interface GeneralDataInterface {
@@ -33,6 +25,7 @@ export interface GeneralDataInterface {
 }
 
 export interface AppInterface {
+    patientDashboard: any;
     /**
      * Map primary key value of a program here. All records will
      * associate with this program ID
@@ -58,7 +51,17 @@ export interface AppInterface {
     /**
      * Identifiers available for search / reference that are unique to this programme
     */
-    readonly programPatientIdentifiers?: Record<string, IdentifierInterface>;
+    readonly programPatientIdentifiers?: Record<
+        string, 
+        {
+            id: number;
+            name: string;
+            isPrimary: boolean;
+            useForSearch: boolean;
+            prefix: () => string;
+            globalPropertySetting?: string;
+        }
+    >;
     /**
      * Component that is rendered on the landing page that'll typically
      * show some sort of summary of activities
@@ -71,11 +74,11 @@ export interface AppInterface {
     /**
      * Define all reports available for program
     */
-    readonly programReports?: ReportGroupInterface[];
+    readonly programReports?: FolderInterface[];
     /**
      * Define list of all application configurations
      */
-    readonly globalPropertySettings?: Record<string, PreferenceInterface[]>;
+    readonly globalPropertySettings?: FolderInterface[];
     /**
      * primary patient activities
      */
