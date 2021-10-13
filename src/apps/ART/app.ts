@@ -7,6 +7,7 @@ import {PROPERTIES} from "@/apps/ART/Config/ArtGlobalPropertySettings"
 import { PRIMARY_ACTIVITIES, SECONDARY_ACTIVITIES } from "@/apps/ART/Config/ArtProgramActivities"
 import { init } from "@/apps/ART/Config/ArtAppScripts"
 import { GlobalPropertyService } from "@/services/global_property_service"
+import { confirmationSummary } from "@/apps/ART/Config/ArtAppScripts"
 
 const ART: AppInterface = {
     patientDashboard: {},
@@ -22,6 +23,7 @@ const ART: AppInterface = {
     patientDashboardComponent,
     homeOverviewComponent,
     programReports: REPORTS,
+    confirmationSummary,
     programPatientIdentifiers: {
         'ARV Number': {
             id: 4,
@@ -50,9 +52,5 @@ const ART: AppInterface = {
             globalPropertySetting: 'use.filing.number=true',
         }
     },
-    patientSummary: (p: number) => {
-        //TODO: format an object with patient program summary
-        return {}
-    }
 }
 export default ART

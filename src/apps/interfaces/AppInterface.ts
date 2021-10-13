@@ -92,7 +92,7 @@ export interface AppInterface {
     */
     readonly init?: () => void;
     /**
-     * Overrall summary/state of the patient on this program
-     */
-    readonly patientSummary?: (patientID: number) => Record<string, GeneralDataInterface[]>;
+     * Summary data of the patient that should appear on the dashboaerd
+    */
+    readonly confirmationSummary?: (patient: any, program: any) => Record<string, Function>;
 }
