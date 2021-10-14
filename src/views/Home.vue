@@ -44,7 +44,7 @@
           <ion-segment-button value="1" @click="activeTab = 1">
             <ion-label>Overview</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="2" @click="activeTab = 2">
+          <ion-segment-button v-if="canReport" value="2" @click="activeTab = 2">
             <ion-label>Reports</ion-label>
           </ion-segment-button>
           <ion-segment-button value="3" @click="activeTab = 3">
@@ -172,6 +172,9 @@ export default defineComponent({
     },
     canFindByIdentifier(): boolean {
       return this.app.programPatientIdentifiers ? true : false
+    },
+    canReport(): boolean {
+      return this.app.programReports ? true : false
     }
   },
   methods: {
