@@ -48,7 +48,8 @@ export default defineComponent({
         drawnColumns: [
             [
                 table.thTxt('Accession #'),
-                table.thTxt('Test')
+                table.thTxt('Test'),
+                table.thTxt('Actions')
             ]
         ] as Array<ColumnInterface[]>,
         openColumns: [
@@ -99,7 +100,10 @@ export default defineComponent({
         getDrawnRows(data: any): Array<RowInterface[]> {
             return data.map((d: any) => ([
                 table.td(d.accession_number),
-                table.td(d.tests[0].name)
+                table.td(d.tests[0].name),
+                table.tdBtn('Print', () => {
+                    this.service.printSpecimenLabel(d.order_id)
+                })
             ]))
         }
     },

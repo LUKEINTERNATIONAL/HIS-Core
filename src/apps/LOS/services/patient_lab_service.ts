@@ -1,4 +1,5 @@
 import { OrderService } from "@/services/order_service";
+import { PrintoutService } from "@/services/printout_service";
 
 export class PatientLabService extends OrderService  {
     patientID: number;
@@ -20,5 +21,10 @@ export class PatientLabService extends OrderService  {
                 status,
                 date: this.date
             })
+    }
+
+    printSpecimenLabel(orderID: number) {
+        return new PrintoutService()
+            .printLbl(`lab/labels/order?order_id=${orderID}`)
     }
 }
