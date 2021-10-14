@@ -29,11 +29,13 @@ import table from "@/components/DataViews/tables/ReportDataTable"
 import { ColumnInterface, RowInterface } from '@/components/DataViews/tables/ReportDataTable';
 import { PatientLabService} from "@/apps/LOS/services/patient_lab_service"
 import { isEmpty } from "lodash"
+import { voidWithReason } from "@/utils/VoidHelper"
 import {
     IonSegment,
     IonLabel,
     IonSegmentButton,
 } from "@ionic/vue";
+import { toastWarning } from '@/utils/Alerts';
 
 export default defineComponent({
     components: {
@@ -93,15 +95,34 @@ export default defineComponent({
             this.drawnRows = this.getDrawnRows(drawn)
         },
         getOpenRows(data: any): Array<RowInterface[]> {
-            return data.map((d: any) => ([
+            return data.map((d: any, index: number) => ([
                 table.td(d.accession_number),
                 table.td(d.tests.map((t: any) => t.name).join(',')),
                 table.td(d.reason_for_test.name || 'N/A'),
                 table.tdBtn('Drawn', () => {
                     console.log('Yay!! am drawn')
                 }, {}, 'success'),
-                table.tdBtn('Void', () => {
-                    console.log('That sucks!')
+                /**
+                 * Order delete button
+                 */
+                table.tdBtn('Void', async () => {
+                    voidWithReason(
+                        async (reason: string) => {
+                            const res = await this.service.voidOrder(
+                                d.order_id, 
+                                reason
+                            )
+                            if (res) {
+                                this.openRows.splice(index, 1)
+                            } else {
+                                toastWarning('Unable to void order. Try again later')
+                            }
+                        },
+                        [
+                            'Duplicate order',
+                            'Wrong client'
+                        ]
+                    )
                 }, {}, 'danger')
             ]))
         },

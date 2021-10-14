@@ -23,6 +23,10 @@ export class PatientLabService extends OrderService  {
             })
     }
 
+    async voidOrder(orderID: number, reason: string) {
+        return OrderService.void(`lab/orders/${orderID}`,{reason})
+    }
+
     printSpecimenLabel(orderID: number) {
         return new PrintoutService()
             .printLbl(`lab/labels/order?order_id=${orderID}`)
