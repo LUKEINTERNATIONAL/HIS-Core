@@ -57,6 +57,8 @@ export default defineComponent({
                 table.thTxt('Accession #'),
                 table.thTxt('Test'),
                 table.thTxt('Reason for test'),
+                table.thTxt('Drawn'),
+                table.thTxt('Void')
             ]
         ] as Array<ColumnInterface[]>,
         drawnRows: [] as Array<RowInterface[]>,
@@ -93,14 +95,20 @@ export default defineComponent({
         getOpenRows(data: any): Array<RowInterface[]> {
             return data.map((d: any) => ([
                 table.td(d.accession_number),
-                table.td(d.tests[0].name),
-                table.td(d.reason_for_test.name || 'N/A')
+                table.td(d.tests.map((t: any) => t.name).join(',')),
+                table.td(d.reason_for_test.name || 'N/A'),
+                table.tdBtn('Drawn', () => {
+                    console.log('Yay!! am drawn')
+                }, {}, 'success'),
+                table.tdBtn('Void', () => {
+                    console.log('That sucks!')
+                }, {}, 'danger')
             ]))
         },
         getDrawnRows(data: any): Array<RowInterface[]> {
             return data.map((d: any) => ([
                 table.td(d.accession_number),
-                table.td(d.tests[0].name),
+                table.td(d.tests.map((t: any) => t.name).join(',')),
                 table.tdBtn('Print', () => {
                     this.service.printSpecimenLabel(d.order_id)
                 })

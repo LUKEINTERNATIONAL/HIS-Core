@@ -30,6 +30,7 @@
                         {{ item.td }}
                     </a>
                     <ion-button
+                        :color="item?.event?.color || ''"
                         :class="item.cssClass"
                         :style="item.style"
                         v-if="item.event.obj === 'button'"

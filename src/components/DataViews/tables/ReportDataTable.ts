@@ -18,6 +18,7 @@ export interface ColumnInterface {
 }
 export interface EventInterface {
     obj: 'button' | 'link' | 'cell';
+    color?: string;
     click: Function;
 }
 export interface RowInterface {
@@ -150,11 +151,12 @@ function tdLink(td: string | number | Date, click: Function, params={}): RowInte
     }
 }
 
-function tdBtn(td: string | number | Date, click: Function, params={}): RowInterface {
+function tdBtn(td: string | number | Date, click: Function, params={}, color=''): RowInterface {
     return {
         td,
         event: {
             click,
+            color: color,
             obj: 'button'
         },
         ...params
