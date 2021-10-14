@@ -1,4 +1,5 @@
 import { AppInterface } from "../interfaces/AppInterface";
+import homeOverviewComponent from "@/apps/LOS/Components/losHomeOverviewComponent.vue";
 
 const LOS: AppInterface = {
     programID: 23,
@@ -9,7 +10,7 @@ const LOS: AppInterface = {
     primaryPatientActivites: [],
     secondaryPatientActivites: [],
     globalPropertySettings: [],
-    homeOverviewComponent: {},
+    homeOverviewComponent,
     confirmationSummary: () => ({}),
 }
 export default LOS
