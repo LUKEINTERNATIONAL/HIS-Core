@@ -31,7 +31,7 @@ export default defineComponent({
         },
     },
     data: () => ({
-        value: '0',
+        value: '',
         keypad: DEFAULT_KEYPAD,
         keyboard: [
             CHARACTERS_AND_NUMBERS_LO, 
@@ -54,7 +54,7 @@ export default defineComponent({
     methods: {
         async keypress(key: any) {
             if (key.match(/done/i)) {
-                await modalController.dismiss()
+                await modalController.dismiss(this.value)
             } else {
                 if (key.includes('.') && this.value.includes('.')) return
                 

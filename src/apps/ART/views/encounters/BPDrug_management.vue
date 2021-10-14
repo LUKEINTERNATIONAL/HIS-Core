@@ -30,10 +30,14 @@
                       <ion-col size="12"><p>{{d.drugName}}</p></ion-col>
                       <ion-col size="12"><ion-checkbox>{{d.cirrent}}</ion-checkbox> </ion-col>
                       <ion-col size="12"><ion-checkbox>{{d.selected}}</ion-checkbox> </ion-col>
-                      <ion-col size="12"><ion-button size="small" @click="addNote(drug, i)">Add notes</ion-button> </ion-col>
+                      <ion-col size="12"><ion-button size="small" @click="launchKeyPad(drug, i)">Add notes</ion-button> </ion-col>
                       <ion-col size="12">
                         <ion-item v-for="(note, ind) in d.notes" :key="note">
-                          <p>{{note}}</p> <button @click="removeNote(drug, i, ind)"> x</button>
+                            <p>{{note}}</p>
+                            <ion-button @click="removeNote(drug, i, ind)" color="danger">
+                              X
+                            </ion-button>
+                          
                         </ion-item>
                       </ion-col>
                        </ion-row> 
@@ -68,20 +72,6 @@
         </div>
          
       </view-port>
-<div class="mod">
-              <ion-grid>
-                <ion-row>
-                  <ion-col size="12">
-
-              <ion-input v-model="input"></ion-input>
-                  </ion-col>
-                  <ion-col size="12">
-
-              <his-keyboard  :kbConfig="keyboard" :onKeyPress="keypress"> </his-keyboard>
-                  </ion-col>
-                </ion-row>
-              </ion-grid>
-            </div>
     </ion-content>
     <ion-footer>
       <ion-toolbar color="black">
@@ -154,8 +144,7 @@ export default defineComponent({
     IonFooter,
     IonPage,
     IonItem,
-    IonLabel,
-    HisKeyboard
+    IonLabel
   },
   data: () => {
     return {
@@ -175,7 +164,7 @@ keyboard: [
             drugID: 275,
             current: false,
             selected: false,
-            notes: ['aaaa', 'assa']
+            notes: []
           },
         ],
         'Enalapril': [
@@ -233,10 +222,7 @@ keyboard: [
     removeNote(d: any, i: any, ind: any) {
       this.drugs[d][i].notes.splice(ind, 1);
     },
-    async addNote(d: any, i: any) {
-      this.drugs[d][i].notes.push('aaasa');
-      await this.launchKeyPad();
-    },
+    
 async keypress(text: string) {
             // if (!this.inputFocus) {
             //     return
@@ -248,14 +234,17 @@ async keypress(text: string) {
                 this.input = input
             }
         },
-  async launchKeyPad() {
+  async launchKeyPad(d: any,i: any) {
         const modal = await modalController.create({
             component: KeyBoardModal,
             backdropDismiss: false,
-            cssClass: '.large-modal',
+            cssClass: 'large-modal',
             
         })
         modal.present()
+        const { data } = await modal.onDidDismiss()
+        this.drugs[d][i].notes.push(data)
+        return data
     }
 }
   // components: {  },
