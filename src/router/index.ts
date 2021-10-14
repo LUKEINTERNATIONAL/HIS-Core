@@ -14,7 +14,6 @@ import Example from '../views/Example.vue'
 import FindByID from '../views/FindByID.vue'
 import PatientDashboard from '../views/PatientDashboard.vue'
 import Configuration from '@/views/Configuration.vue'
-import Settings from '@/components/ART/Settings.vue'
 import HisApps from '@/apps/his_apps';
 import SessionDate from "@/views/SessionDate.vue"
 import SystemUsage from "@/views/SystemUsage.vue"
@@ -137,11 +136,6 @@ const routes: Array<RouteRecordRaw> = [
     path: '/preferences',
     name: 'Preferences',
     component: Configuration
-  },
-  {
-    path: '/settings',
-    name: 'settings',
-    component: Settings
   },
   {
     path: '/user',

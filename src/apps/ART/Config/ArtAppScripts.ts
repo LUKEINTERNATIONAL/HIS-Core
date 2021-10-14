@@ -1,5 +1,5 @@
 import { modalController } from "@ionic/vue";
-import ActivitiesModal from "@/components/ART/ActivitiesModal.vue";
+import ActivitiesModal from "@/apps/ART/Components/ActivitiesSelection.vue";
 import { PRIMARY_ACTIVITIES } from "./ArtProgramActivities";
 import {TaskInterface} from "./../../interfaces/TaskInterface"
 import { WorkflowService } from "@/services/workflow_service"
