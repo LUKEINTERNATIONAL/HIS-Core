@@ -28,8 +28,8 @@
                       <ion-col v-for="(d, i) in drugs[drug]" :key="i" :size="drugs[drug].length > 1 ? 6 : 12">
                      <ion-row>
                       <ion-col size="12"><p>{{d.drugName}}</p></ion-col>
-                      <ion-col size="12"><ion-checkbox>{{d.cirrent}}</ion-checkbox> </ion-col>
-                      <ion-col size="12"><ion-checkbox>{{d.selected}}</ion-checkbox> </ion-col>
+                      <ion-col size="12"><ion-checkbox v-model="d.current"></ion-checkbox> </ion-col>
+                      <ion-col size="12"><ion-checkbox v-model="d.isChecked"></ion-checkbox> </ion-col>
                       <ion-col size="12"><ion-button size="small" @click="launchKeyPad(drug, i)">Add notes</ion-button> </ion-col>
                       <ion-col size="12">
                         <ion-item v-for="(note, ind) in d.notes" :key="note">
@@ -113,6 +113,7 @@ import {
   IonPage,
   IonItem,
   IonLabel,
+  IonCheckbox
 } from "@ionic/vue";
 import { toastWarning, toastSuccess, alertAction } from "@/utils/Alerts";
 import EncounterMixinVue from "./EncounterMixin.vue";
@@ -144,7 +145,8 @@ export default defineComponent({
     IonFooter,
     IonPage,
     IonItem,
-    IonLabel
+    IonLabel,
+    IonCheckbox
   },
   data: () => {
     return {
@@ -164,6 +166,7 @@ keyboard: [
             drugID: 275,
             current: false,
             selected: false,
+            isChecked: false,
             notes: []
           },
         ],
@@ -173,6 +176,7 @@ keyboard: [
             drugID: 942,
             current: false,
             selected: false,
+            isChecked: false,
             notes: []
           },
           {
@@ -180,6 +184,7 @@ keyboard: [
             drugID: 943,
             current: false,
             selected: false,
+            isChecked: false,
             notes: []
           },
         ],
@@ -189,6 +194,7 @@ keyboard: [
             drugID: 558,
             current: false,
             selected: false,
+            isChecked: false,
             notes: []
           },
           {
@@ -196,6 +202,7 @@ keyboard: [
             drugID: 559,
             current: false,
             selected: false,
+            isChecked: false,
             notes: []
           },
         ],
@@ -205,6 +212,7 @@ keyboard: [
             drugID: 117,
             current: false,
             selected: false,
+            isChecked: false,
             notes: []
           },
           {
@@ -212,6 +220,7 @@ keyboard: [
             drugID: 11,
             current: false,
             selected: false,
+            isChecked: false,
             notes: []
           },
         ],
@@ -244,9 +253,22 @@ async keypress(text: string) {
         modal.present()
         const { data } = await modal.onDidDismiss()
         this.drugs[d][i].notes.push(data)
+        console.log(this.selectedDrugs);
         return data
     }
+},
+computed: {
+  selectedDrugs(): any {
+    let drugs: any[] = [];
+    const selectedDrugs = Object.keys(this.drugs).forEach((d: any) => {
+      const dr =  this.drugs[d].filter((d: any) => d.isChecked === true)
+      console.log(dr)
+      drugs = [...drugs, ...dr];
+    });
+    return drugs;
+  }
 }
+
   // components: {  },
 });
 </script>
