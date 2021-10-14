@@ -171,7 +171,7 @@ export default defineComponent({
       return this.app.globalPropertySettings ? this.app.globalPropertySettings: []
     },
     canFindByIdentifier(): boolean {
-      return this.app.programPatientIdentifiers ? true : true
+      return this.app.programPatientIdentifiers ? true : false
     }
   },
   methods: {
