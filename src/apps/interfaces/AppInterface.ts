@@ -71,6 +71,10 @@ export interface AppInterface {
      */
     readonly customPatientDashboardComponent?: any; // Vue component
     /**
+     * Overrites patient dashboard content component
+     */
+    readonly customPatientDashboardContentComponent?: any;
+    /**
      * Define all reports available for program
     */
     readonly programReports?: FolderInterface[];

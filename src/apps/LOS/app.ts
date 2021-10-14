@@ -1,6 +1,6 @@
 import { AppInterface } from "../interfaces/AppInterface";
 import homeOverviewComponent from "@/apps/LOS/Components/losHomeOverviewComponent.vue";
-import customPatientDashboardComponent from "@/apps/LOS/Components/losCustomPatientDashboard.vue"
+import customPatientDashboardContentComponent from "@/apps/LOS/Components/losCustomDashboardContent.vue"
 
 const LOS: AppInterface = {
     programID: 23,
@@ -12,7 +12,7 @@ const LOS: AppInterface = {
     secondaryPatientActivites: [],
     globalPropertySettings: [],
     homeOverviewComponent,
-    customPatientDashboardComponent,
+    customPatientDashboardContentComponent,
     confirmationSummary: () => ({}),
 }
 export default LOS

@@ -4,8 +4,8 @@
         <ion-content>
             <!--RENDER PROGRAM CUSTOM DASHBOARD AS COMPONENT -->
             <component
-                v-if="showCustomDashboard"
-                v-bind:is="dashboardComponent"
+                v-if="appHasCustomDashboard"
+                v-bind:is="customDashboard"
                 :patient="patient"
                 :program="patientProgram"
                 :currentDate="currentDate"
@@ -14,7 +14,7 @@
                 > 
             </component>
             <!-- RENDER DEFAULT PATIENT DASHBOARD -->
-            <ion-grid v-if="!showCustomDashboard" class='grid-custom vertically-align'>
+            <ion-grid v-if="!appHasCustomDashboard" class='grid-custom vertically-align'>
                 <ion-row>
                     <ion-col size="2.4">
                         <visit-dates-card :title="visitDatesTitle" :items="visitDates" @onselect="onActiveVisitDate"> </visit-dates-card>
@@ -42,6 +42,16 @@
                                 </span>
                             </ion-col>
                         </ion-row>
+                        <!--Custom Dashboard content-->
+                        <component
+                            v-if="appHasCustomContent" 
+                            v-bind:is="customDashboardContent"
+                            :patient="patient"
+                            :visitDate="activeVisitDate"
+                            >  
+                        </component>
+                        <!--Default patient dashboard content-->
+                        <div v-if="!appHasCustomContent">
                         <ion-row> 
                             <ion-col size-md="6" size-sm="12">
                                 <primary-card :counter="encountersCardItems.length" title="Activities" :items="encountersCardItems" titleColor="#658afb" @click="showAllEncounters"> </primary-card>
@@ -58,6 +68,7 @@
                                 <primary-card :counter="medicationCardItems.length" title="Medications" :items="medicationCardItems" titleColor="#fdb044" @click="showAllMedications"> </primary-card>
                             </ion-col>
                         </ion-row>
+                        </div>
                         </div>
                     </ion-col>
                 </ion-row>
@@ -102,7 +113,7 @@ import CardDrilldown from "@/components/DataViews/DashboardTableModal.vue"
 import { man, woman } from "ionicons/icons";
 import { WorkflowService } from "@/services/workflow_service"
 import { toastSuccess, toastDanger, alertConfirmation } from "@/utils/Alerts";
-import _ from "lodash"
+import _, { isEmpty } from "lodash"
 import {
   IonPage,
   IonContent,
@@ -153,8 +164,24 @@ export default defineComponent({
         alertCardItems: [] as Array<Option>
     }),
     computed: {
-        showCustomDashboard(): boolean {
-            return !_.isEmpty(this.dashboardComponent)
+        isset(i: any) {
+            return isEmpty(i)
+        },
+        appHasCustomContent(): boolean {
+            return !_.isEmpty(this.app.customPatientDashboardContentComponent)
+                ? true
+                : false
+        },
+        appHasCustomDashboard(): boolean {
+            return !_.isEmpty(this.app.customPatientDashboardComponent)
+                ? true
+                : false
+        },
+        customDashboardContent(): any {
+            return this.app.customPatientDashboardContentComponent
+        },
+        customDashboard(): boolean {
+            return this.app.customPatientDashboardComponent
         },
         visitDatesTitle(): string {
             return `${this.visitDates.length} Visits`
@@ -167,38 +194,34 @@ export default defineComponent({
         "$route" : {
             async handler({params}: any) {
                 if (!params) return
-                
+
                 this.patientId = parseInt(params.id)
 
-                if (this.patientId) {
-                    this.patient = await this.fetchPatient(this.patientId)
-                    this.patientProgram = await ProgramService.getProgramInformation(this.patientId)
-                    this.patientCardInfo = this.getPatientCardInfo(this.patient)
-                    this.programCardInfo = await this.getProgramCardInfo(this.patientProgram) || []
-                    this.currentDate = HisDate.currentDisplayDate()
-                    this.sessionDate = HisDate.toStandardHisDisplayFormat(ProgramService.getSessionDate())
-                    this.isBDE = ProgramService.isBDE() || false
-                    if (!_.isEmpty(this.app) && this.app.customPatientDashboardComponent) {
-                        this.dashboardComponent = this.app.customPatientDashboardComponent
-                    } else {
-                        this.initDefault()
-                    }
-                } 
+                if (this.patientId) await this.init()
             },
             deep: true,
             immediate: true
         },
         async activeVisitDate(date: string) {
-            this.encounters = await EncounterService.getEncounters(this.patientId, {date})
-            this.medications = await DrugOrderService.getOrderByPatient(this.patientId, {'start_date': date})
-            this.labOrders = await OrderService.getOrders(this.patientId, {date})
-            this.encountersCardItems = this.getActivitiesCardInfo(this.encounters)
-            this.medicationCardItems = this.getMedicationCardInfo(this.medications)
-            this.labOrderCardItems = this.getLabOrderCardInfo(this.labOrders)
+            if (!(this.appHasCustomContent || this.appHasCustomDashboard)) {
+                this.encounters = await EncounterService.getEncounters(this.patientId, {date})
+                this.medications = await DrugOrderService.getOrderByPatient(this.patientId, {'start_date': date})
+                this.labOrders = await OrderService.getOrders(this.patientId, {date})
+                this.encountersCardItems = this.getActivitiesCardInfo(this.encounters)
+                this.medicationCardItems = this.getMedicationCardInfo(this.medications)
+                this.labOrderCardItems = this.getLabOrderCardInfo(this.labOrders)
+            }
         }
     },
     methods: {
-        async initDefault() {
+        async init() {
+            this.patient = await this.fetchPatient(this.patientId)
+            this.patientProgram = await ProgramService.getProgramInformation(this.patientId)
+            this.patientCardInfo = this.getPatientCardInfo(this.patient)
+            this.programCardInfo = await this.getProgramCardInfo(this.patientProgram) || []
+            this.currentDate = HisDate.currentDisplayDate()
+            this.sessionDate = HisDate.toStandardHisDisplayFormat(ProgramService.getSessionDate())
+            this.isBDE = ProgramService.isBDE() || false
             this.nextTask = await this.getNextTask(this.patientId)
             this.visitDates = await this.getPatientVisitDates(this.patientId)
             this.alertCardItems = await this.getPatientAlertCardInfo() || []
@@ -294,7 +317,7 @@ export default defineComponent({
             if (app.programID != this.programID){
                 return this.$router.push(`/patients/confirm?person_id=${this.patientId}`)
             } else {
-                await this.initDefault()
+                await this.init()
             }
         },
         async showTasks() {
@@ -383,7 +406,7 @@ export default defineComponent({
         font-size: 0.9em;
     }
     .his-card {
-        height: 100%;
+        height: 75vh;
         padding: 1.0%;
     }
     @media (min-width: 1278px) {
