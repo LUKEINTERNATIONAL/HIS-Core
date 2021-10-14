@@ -285,7 +285,7 @@ export default defineComponent({
       } catch (error) {
         return "";
       }
-    },
+    },  
     async showMore(date: any) {
       const title = "Visit details for";
       const data = await this.getExtras(date);
