@@ -8,6 +8,9 @@
                 v-bind:is="dashboardComponent"
                 :patient="patient"
                 :program="patientProgram"
+                :currentDate="currentDate"
+                :sessionDate="sessionDate"
+                :isBDE="isBDE"
                 > 
             </component>
             <!-- RENDER DEFAULT PATIENT DASHBOARD -->
@@ -172,6 +175,9 @@ export default defineComponent({
                     this.patientProgram = await ProgramService.getProgramInformation(this.patientId)
                     this.patientCardInfo = this.getPatientCardInfo(this.patient)
                     this.programCardInfo = await this.getProgramCardInfo(this.patientProgram) || []
+                    this.currentDate = HisDate.currentDisplayDate()
+                    this.sessionDate = HisDate.toStandardHisDisplayFormat(ProgramService.getSessionDate())
+                    this.isBDE = ProgramService.isBDE() || false
                     if (!_.isEmpty(this.app) && this.app.customPatientDashboardComponent) {
                         this.dashboardComponent = this.app.customPatientDashboardComponent
                     } else {
@@ -197,9 +203,6 @@ export default defineComponent({
             this.visitDates = await this.getPatientVisitDates(this.patientId)
             this.alertCardItems = await this.getPatientAlertCardInfo() || []
             this.programID = ProgramService.getProgramID()
-            this.currentDate = HisDate.currentDisplayDate()
-            this.sessionDate = HisDate.toStandardHisDisplayFormat(ProgramService.getSessionDate())
-            this.isBDE = ProgramService.isBDE() || false
         },
         async fetchPatient(patientId: number | string){
             const patient: Patient = await Patientservice.findByID(patientId);

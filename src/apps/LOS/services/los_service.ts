@@ -9,7 +9,6 @@ export class LosService extends Service {
         const stats: Record<string, any> = { }
         const ordered = await this.ordersMade('ordered')
         const drawn = await this.ordersMade('drawn')
-
         ordered.forEach((o: any) => {
             if (!(o.name in stats)) {
                 stats[o.name] = {
