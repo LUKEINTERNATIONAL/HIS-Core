@@ -40,26 +40,22 @@ export class PatientLabService extends AppEncounterService  {
 
         if (!encounter) throw 'Unable to create encounter'
 
+        const payload: any = {
+            'encounter_id': encounter.encounter_id,
+            'date': this.date,
+            ...params
+        }
+        if (!payload.requesting_clinician) {
+            payload['requesting_clinician'] = OrderService.getUserName()
+        }
         if (params.combine_tests) {
-            orders = [
-                {
-                    'encounter_id': encounter.encounter_id,
-                    'date': this.date,
-                    'reason_for_test_id': params.reason_for_test_id,
-                    'target_lab': params.target_lab,
-                    'tests': params.tests,
-                    'requesting_clinician': OrderService.getUserName()
-                }
-            ]
+            orders = [ payload ]
         } else {
-            orders = params.tests.map((test: any) => ({
-                'encounter_id': encounter.encounter_id,
-                'date': sessionStorage.sessionDate,
-                'reason_for_test_id': params.reason_for_test_id,
-                'target_lab': params.target_lab,
-                'tests': [test],
-                'requesting_clinician': OrderService.getUserName()
-            }));
+            orders = payload.tests.map((test: any) => {
+                const data ={...payload}
+                data.tests = [test]
+                return data
+            })
         }
         return OrderService.postJson('lab/orders', {orders})
     }
