@@ -34,10 +34,6 @@ export default {
         {
           name: "Set Site Code",
           pathUrl:"/location/update/code",
-        },
-        {
-          name: "Set site as Military",
-          pathUrl: "/location/update/military"
         }
       ]
     },

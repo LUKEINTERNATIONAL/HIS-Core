@@ -19,8 +19,6 @@ export default defineComponent({
       .then(() => this.$router.push('/'))
     },
     async getFields  (){
-
-      
       this.fields =  [
         {
           id: "preference",

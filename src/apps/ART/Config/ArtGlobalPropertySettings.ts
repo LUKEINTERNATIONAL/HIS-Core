@@ -1,5 +1,12 @@
 import { FolderInterface } from "@/apps/interfaces/AppInterface";
 
+function globalPropConfig(label: string, prop: string) {
+    return {
+        name: label,
+        pathUrl: `/preferences?label=${label}&property=${prop}`
+    }
+}
+
 export const PROPERTIES: FolderInterface[] = [
     {
         name: "Drug Management",
@@ -29,34 +36,50 @@ export const PROPERTIES: FolderInterface[] = [
     {
         name: 'System Preferences',
         files: [
-            {
-                name: "Ask pills remaining at home",
-                pathUrl: "ask_pills_remaining_at_home"
-            },
-            {
-                name: "Activate Filing Numbers",
-                pathUrl: "use_filing_numbers"
-            },
-            {
-                name: "Activate extended labs",
-                pathUrl: "extended_labs"
-            },
-            {
-                name: "Activate drug management",
-                pathUrl: "activate_drug_management"
-            },
-            {
-                name: "Activate Hypertension screening",
-                pathUrl: "activate.htn.enhancement"
-            },
-            {
-                name: "Activate fast track",
-                pathUrl: "ask_pills_remaining_at_home"
-            },
-            {
-                name: "Activate 3HP auto select",
-                pathUrl: "activate_3hp_auto_select"
-            },
+            globalPropConfig(
+                'Activate Extended Lab',
+                'extended_labs'
+            ),
+            globalPropConfig(
+                'Activate VL routine check',
+                'activate_vl_routine_check'
+            ),
+            globalPropConfig(
+                "Ask pills remaining at home", 
+                "ask_pills_remaining_at_home"
+            ),
+            globalPropConfig(
+                "Activate Filing Numbers", 
+                "use_filing_numbers"
+            ),
+            globalPropConfig(
+                "Activate extended labs", 
+                "extended_labs"
+            ),
+            globalPropConfig(
+                "Activate drug management", 
+                "activate_drug_management"
+            ),
+            globalPropConfig(
+                "Activate Hypertension screening", 
+                "activate.htn.enhancement"
+            ),
+            globalPropConfig(
+                "Activate fast track", 
+                "enable_fast_track"
+            ),
+            globalPropConfig(
+                "Activate 3HP auto select", 
+                "activate_3hp_auto_select"
+            ),
+            globalPropConfig(
+                "Filing numbers (activate)",
+                "use_filing_numbers"
+            ),
+            globalPropConfig(
+                "Is this a military site?",
+                "military_site"
+            ),
             {
                 name: "Set Clinic Days",
                 pathUrl: "/art/preferences/clinic_days"
