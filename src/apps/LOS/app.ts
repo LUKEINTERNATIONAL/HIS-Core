@@ -15,7 +15,16 @@ const LOS: AppInterface = {
     globalPropertySettings: [],
     homeOverviewComponent,
     customPatientDashboardContentComponent,
-    confirmationSummary: () => ({}),
+    confirmationSummary: (patient: any) => ({
+        'PATIENT IDENTIFIERS': () => {
+            return [
+                {
+                  label: "NPID",
+                  value: patient.getNationalID(),
+                }
+            ]
+        },
+    }),
     programReports: [
         {
             name: 'Clinical',
