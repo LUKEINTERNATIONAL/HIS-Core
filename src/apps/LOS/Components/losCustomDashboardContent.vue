@@ -179,16 +179,20 @@ export default defineComponent({
         },
         async drawOrder() {
             try {
-                this.service.updateOrderSpecimen(
+                const req = await this.service.updateOrderSpecimen(
                     this.order.order_id, this.selectedSpecimen.concept_id
                 )
-                this.openRows.splice(this.order.orderIndex, 1)
-                this.showSpecimenModal = false
-                toastSuccess('Sample has been drawn')
+                if (req) {
+                    this.drawnRows = this.drawnRows.concat(this.getDrawnRows([req]))
+                    this.openRows.splice(this.order.orderIndex, 1)
+                    
+                    this.showSpecimenModal = false
+                    return toastSuccess('Sample has been drawn')
+                }
             }catch(e) {
                 console.error(e)
-                toastDanger('Unable to draw sample')
             }
+            toastDanger('Unable to draw sample')
         },
         getOpenRows(data: any): Array<RowInterface[]> {
             return data.map((d: any, index: number) => ([
