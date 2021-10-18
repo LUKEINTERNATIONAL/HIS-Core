@@ -18,29 +18,35 @@ import { isEmpty } from 'lodash'
 export default defineComponent({
     mixins: [EncounterMixinVue],
     data: () => ({
+        patientID: -1,
         service: {} as any,
-        fields: [] as Field[]
+        fields: [] as Field[],
+        activityType: '' as 'DRAW_SAMPLES' | 'ORDER_TESTS',
     }),
     watch: {
-        patient: {
-            async handler(patient: any) {
-                this.service = new PatientLabService(patient.getID())
-                this.fields = [
-                    this.getClinianGivenNameField(),
-                    this.getClinianFamilyNameField(),
-                    this.getFacililityLocationField(),
-                    this.getReasonForTestField(),
-                    this.getTestSpecimensField(),
-                    this.getTestSelectionField(),
-                    this.getTestCombinationField()
-                ]
+        '$route': {
+            handler({query, params}: any) {
+                if (query && params) {
+                    this.patientID = params.patient_id
+                    this.activityType = query.type
+                    this.service = new PatientLabService(this.patientID)
+                    this.fields = [
+                        this.getClinianGivenNameField(),
+                        this.getClinianFamilyNameField(),
+                        this.getFacililityLocationField(),
+                        this.getReasonForTestField(),
+                        this.getTestSpecimensField(),
+                        this.getTestSelectionField(),
+                        this.getTestCombinationField()
+                    ]
+                }
             },
+            immediate: true,
             deep: true
-        }
+        },
     },
     methods: {
         async onSubmit(_: any, computed: any) {
-            console.log(computed)
             const req = await this.service.placeOrder(computed)
             if (req) {
                 await this.service.printSpecimenLabel(req[0].order_id)
@@ -66,6 +72,7 @@ export default defineComponent({
             const field = PersonField.getGivenNameField()
             field.helpText = 'Requesting clinician - First name'
             field.proxyID = 'requesting_clinician'
+            field.condition = () => this.activityType === 'DRAW_SAMPLES'
             field.appearInSummary = () => false
             return field
         },
@@ -73,6 +80,7 @@ export default defineComponent({
             const field = PersonField.getFamilyNameField()
             field.helpText = 'Requesting clinician - Last name'
             field.proxyID = 'requesting_clinician'
+            field.condition = () => this.activityType === 'DRAW_SAMPLES'
             field.summaryMapValue = (v: any, f: any) => {
                 return {
                     label: 'Clinician name', 
@@ -105,6 +113,7 @@ export default defineComponent({
                 id: 'specimen',
                 helpText: 'Select specimen',
                 type: FieldType.TT_SELECT,
+                condition: () => this.activityType === 'DRAW_SAMPLES',
                 validation: (val: Option) => Validation.required(val),
                 computedValue: (v: Option) => ({'concept_id': v.value}),
                 options: async () => {

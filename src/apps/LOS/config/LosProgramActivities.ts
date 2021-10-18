@@ -4,11 +4,17 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
   {
     id: "order tests",
     name: "Order Tests",
-    icon: "adherence.png"
+    icon: "social_history.png",
+    action: ({patient}: any, router: any) => {
+      router.push(`/los/forms/order/${patient.patient_id}?type=ORDER_TESTS`)
+    }
   },
   {
-    id: "draw sample",
+    id: "draw samples",
     name: "Draw Samples",
-    icon: "consultation.png"
+    icon: "hts.png",
+    action: ({patient}: any, router: any) => {
+      router.push(`/los/forms/order/${patient.patient_id}?type=DRAW_SAMPLES`)
+    }
   }
 ]
