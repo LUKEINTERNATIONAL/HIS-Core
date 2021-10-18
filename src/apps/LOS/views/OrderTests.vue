@@ -69,7 +69,7 @@ export default defineComponent({
                     const req = await PatientLabService.getTestTypes()
                     return req.map((t: any) => ({
                         label: t.name,
-                        value: '',
+                        value: t.concept_id,
                         other: t
                     }))
                 }
