@@ -3,30 +3,35 @@ import ApplicationModal from "@/components/ApplicationModal.vue";
 import { modalController } from "@ionic/vue";
 import { find, isEmpty } from 'lodash';
 import GlobalApp from "@/apps/GLOBAL_APP/global_app"
+import { AppInterface } from "./interfaces/AppInterface";
 
-function getActiveApp() {
+/**
+* Merge global configurations with app configurations
+*/
+function applyGlobalConfig(app: AppInterface) {
+    const _app = {...app}
+    _app.secondaryPatientActivites = [
+        ...GlobalApp.GlobalProgramActivities,
+        ..._app.secondaryPatientActivites
+    ]
+    if (_app.globalPropertySettings) {
+        _app.globalPropertySettings = [
+            ...GlobalApp.GlobalAppSettings,
+            ..._app.globalPropertySettings
+        ]
+    } else {
+        _app.globalPropertySettings = GlobalApp.GlobalAppSettings
+    }
+    return _app
+}
+
+function getActiveApp(): AppInterface | undefined {
     const appName = sessionStorage.getItem('applicationName')
 
     if (appName) {
-        const app: any = {...find(Apps, { applicationName: appName })}
-        /**
-         * Merge global configurations with app configurations
-         */
-        app.secondaryPatientActivites = [
-            ...GlobalApp.GlobalProgramActivities,
-            ...app.secondaryPatientActivites
-        ]
-        if (app.globalPropertySettings) {
-            app.globalPropertySettings = [
-                ...GlobalApp.GlobalAppSettings,
-                ...app.globalPropertySettings
-            ]
-        } else {
-            app.globalPropertySettings = GlobalApp.GlobalAppSettings
-        }
-        return app
+        const app: AppInterface | undefined = find(Apps, { applicationName: appName })
+        if (app) return applyGlobalConfig(app)
     }
-    return {}
 }
 
 async function selectApplication() {
@@ -42,11 +47,13 @@ async function selectApplication() {
 
     if (!data || isEmpty(data)) return
 
-    if (data.init) await data.init()
+    const app: AppInterface = applyGlobalConfig(data)
+    
+    if (app.init) await app.init()
+    
+    sessionStorage.setItem('applicationName', app.applicationName)
 
-    sessionStorage.setItem('applicationName', data.applicationName)
-
-    return data
+    return app
 }
 export default {
     selectApplication,

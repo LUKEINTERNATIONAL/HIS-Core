@@ -234,8 +234,10 @@ export default defineComponent({
     },
     async openModal() {
       const data = await HisApp.selectApplication() 
-      this.app = data
-      this.loadApplicationData();
+      if (data) {
+        this.app = data
+        this.loadApplicationData();
+      }
     },
     checkForbarcode(){
       if(this.patientBarcode.match(/.+\$$/i) != null){

@@ -318,6 +318,9 @@ export default defineComponent({
         },
         async changeApp() {
             const app = await HisApp.selectApplication();
+
+            if (!app) return
+
             if (app.programID != this.programID){
                 return this.$router.push(`/patients/confirm?person_id=${this.patientId}`)
             } else {
