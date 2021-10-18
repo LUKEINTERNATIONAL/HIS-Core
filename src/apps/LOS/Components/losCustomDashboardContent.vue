@@ -12,12 +12,12 @@
     <!-- Action Table -->
     <report-table
         v-if="activeTab === 'openOrders'" 
-        :rows="openRows" :columns="openColumns"
+        :rows="labOrderRows" :columns="openColumns"
         >
     </report-table>
     <report-table
         v-if="activeTab === 'drawnOrders'" 
-        :rows="drawnRows" :columns="drawnColumns"
+        :rows="drawnOrders" :columns="drawnColumns"
         >
     </report-table>
     <!---Specimen selection modal--->
@@ -106,7 +106,7 @@ import {
     IonLabel,
     IonSegmentButton,
 } from "@ionic/vue";
-import { toastDanger, toastSuccess, toastWarning } from '@/utils/Alerts';
+import { toastDanger, toastWarning } from '@/utils/Alerts';
 
 export default defineComponent({
     components: {
@@ -146,8 +146,8 @@ export default defineComponent({
                 table.thTxt('Void')
             ]
         ] as Array<ColumnInterface[]>,
-        drawnRows: [] as Array<RowInterface[]>,
-        openRows: [] as Array<RowInterface[]>
+        drawnOrders: [] as Array<RowInterface[]>,
+        labOrderRows: [] as Array<RowInterface[]>
     }),
     watch: {
         patient: {
@@ -174,8 +174,8 @@ export default defineComponent({
         async init() {
             const drawn = await this.service.getOrders('drawn')
             const open = await this.service.getOrders('ordered')
-            this.openRows = this.getOpenRows(open)
-            this.drawnRows = this.getDrawnRows(drawn)
+            this.labOrderRows = this.getLabOrderRows(open)
+            this.drawnOrders = this.getdrawnOrders(drawn)
         },
         async drawOrder() {
             try {
@@ -183,8 +183,10 @@ export default defineComponent({
                     this.order.order_id, this.selectedSpecimen.concept_id
                 )
                 if (req) {
-                    this.drawnRows = this.drawnRows.concat(this.getDrawnRows([req]))
-                    this.openRows.splice(this.order.orderIndex, 1)
+                    // Update drawn order rows
+                    this.drawnOrders = this.drawnOrders.concat(this.getdrawnOrders([req]))
+                    // Remove drawn order from orders list
+                    this.labOrderRows.splice(this.order.orderIndex, 1)
                     this.showSpecimenModal = false
                     return this.service.printSpecimenLabel(this.order.order_id)
                 }
@@ -193,7 +195,7 @@ export default defineComponent({
             }
             toastDanger('Unable to draw sample')
         },
-        getOpenRows(data: any): Array<RowInterface[]> {
+        getLabOrderRows(data: any): Array<RowInterface[]> {
             return data.map((d: any, index: number) => ([
                 table.td(d.accession_number),
                 table.td(d.tests.map((t: any) => t.name).join(',')),
@@ -214,7 +216,7 @@ export default defineComponent({
                                 d.order_id, reason
                             )
                             res 
-                                ? this.openRows.splice(index, 1)
+                                ? this.labOrderRows.splice(index, 1)
                                 : toastWarning('Unable to void order. Try again later')
                         },
                         [
@@ -225,7 +227,7 @@ export default defineComponent({
                 }, {}, 'danger')
             ]))
         },
-        getDrawnRows(data: any): Array<RowInterface[]> {
+        getdrawnOrders(data: any): Array<RowInterface[]> {
             return data.map((d: any) => ([
                 table.td(d.accession_number),
                 table.td(d.tests.map((t: any) => t.name).join(',')),
