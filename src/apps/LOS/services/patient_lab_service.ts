@@ -1,14 +1,10 @@
+import { AppEncounterService } from "@/services/app_encounter_service";
 import { OrderService } from "@/services/order_service";
 import { PrintoutService } from "@/services/printout_service";
 
-export class PatientLabService extends OrderService  {
-    patientID: number;
-    date: string;
-
+export class PatientLabService extends AppEncounterService  {
     constructor(patientID: number) {
-        super()
-        this.patientID = patientID
-        this.date = OrderService.getSessionDate()
+        super(patientID, 57)
     }
 
     setDate(date: string) {
@@ -36,6 +32,36 @@ export class PatientLabService extends OrderService  {
     printSpecimenLabel(orderID: number) {
         return new PrintoutService()
             .printLbl(`lab/labels/order?order_id=${orderID}`)
+    }
+    
+    async placeOrder(params: any) {
+        let orders: any = []
+        const encounter: any = await this.createEncounter()
+
+        if (!encounter) throw 'Unable to create encounter'
+
+        if (params.combine_tests) {
+            orders = [
+                {
+                    'encounter_id': encounter.encounter_id,
+                    'date': this.date,
+                    'reason_for_test_id': params.reason_for_test_id,
+                    'target_lab': params.target_lab,
+                    'tests': params.tests,
+                    'requesting_clinician': OrderService.getUserName()
+                }
+            ]
+        } else {
+            orders = params.tests.map((test: any) => ({
+                'encounter_id': encounter.encounter_id,
+                'date': sessionStorage.sessionDate,
+                'reason_for_test_id': params.reason_for_test_id,
+                'target_lab': params.target_lab,
+                'tests': [test],
+                'requesting_clinician': OrderService.getUserName()
+            }));
+        }
+        return OrderService.postJson('lab/orders', {orders})
     }
 
     static async getSpecimensForTests(tests: any) {

@@ -1,6 +1,7 @@
 <template>
     <his-standard-form :fields="fields" @onFinish="onSubmit"/>
 </template>
+
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { FieldType } from "@/components/Forms/BaseFormElements"
@@ -9,12 +10,14 @@ import EncounterMixinVue from '@/apps/ART/views/encounters/EncounterMixin.vue'
 import {getFacilities} from "@/utils/HisFormHelpers/LocationFieldOptions"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { PatientLabService } from "@/apps/LOS/services/patient_lab_service"
+import { OrderService } from "@/services/order_service"
+import { ConceptService } from '@/services/concept_service'
 
 export default defineComponent({
     mixins: [EncounterMixinVue],
     data: () => ({
-        fields: [] as Field[],
-        service: {} as any
+        service: {} as any,
+        fields: [] as Field[]
     }),
     watch: {
         patient: {
@@ -31,13 +34,22 @@ export default defineComponent({
         }
     },
     methods: {
+        async onSubmit(_: any, computed: any) {
+            const req = await this.service.placeOrder(computed)
+            if (req) {
+                await this.service.printSpecimenLabel(req[0].order_id)
+                this.$router.push(`/patient/dashboard/${this.patientID}`)
+            } 
+        },
         getFacililityLocationField(): Field {
             return {
-                id: 'location',
+                id: 'target_lab',
                 helpText: 'Requesting location',
                 type: FieldType.TT_SELECT,
+                defaultValue: () => PatientLabService.getLocationName(),
                 validation: (val: Option) => Validation.required(val),
                 options: (_: any, filter='') => getFacilities(filter),
+                computedValue: (val: Option) => val.label,
                 config: {
                     showKeyboard: true,
                     isFilterDataViaApi: true
@@ -46,10 +58,13 @@ export default defineComponent({
         },
         getReasonForTestField(): Field {
             return {
-                id: 'reason_for_test',
+                id: 'reason_for_test_id',
                 helpText: 'Reason for test',
                 type: FieldType.TT_SELECT,
                 validation: (val: Option) => Validation.required(val),
+                computedValue: (val: any) => ConceptService.getCachedConceptID(
+                    val.value
+                ),
                 options: () => [
                     {label: 'Routine', value: 'Routine'},
                     {label: 'Targeted', value: 'Targeted'},
@@ -65,8 +80,11 @@ export default defineComponent({
                 helpText: 'Select tests',
                 type: FieldType.TT_MULTIPLE_SELECT,
                 validation: (val: Option) => Validation.required(val),
+                computedValue: (val: Array<Option>) => {
+                    return val.map(v => ({'concept_id': v.value}))
+                },
                 options: async () => {
-                    const req = await PatientLabService.getTestTypes()
+                    const req = await OrderService.getTestTypes()
                     return req.map((t: any) => ({
                         label: t.name,
                         value: t.concept_id,
@@ -77,9 +95,10 @@ export default defineComponent({
         },
         getTestCombinationField(): Field {
             return {
-                id: 'combine_tests_in_one_order',
+                id: 'combine_tests',
                 helpText: 'Combine test(s) in one order',
                 type: FieldType.TT_SELECT,
+                computedValue: (val: Option) => val.value === 'Yes',
                 condition: (f: any) => f.tests.length > 1,
                 validation: (val: Option) => Validation.required(val),
                 options: () => this.yesNoOptions()
