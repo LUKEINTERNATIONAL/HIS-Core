@@ -27,11 +27,8 @@ export default defineComponent({
         {
           id: "property",
           helpText: "Enter Appointment Limit",
-          preset: {
-            label: this.presetAppointmentLimit,
-            value: this.presetAppointmentLimit,
-          },
-          type: FieldType.TT_TEXT,
+          type: FieldType.TT_NUMBER,
+          defaultValue: () => this.presetAppointmentLimit,
           validation: (val: any) => Validation.required(val),
         },
       ];

@@ -27,12 +27,9 @@ export default defineComponent({
         {
           id: "property",
           helpText: "Enter Filing Number Limit",
-          preset: {
-            label: this.presetFilingNumberLimit,
-            value: this.presetFilingNumberLimit,
-          },
-          type: FieldType.TT_TEXT,
-          validation: (val: any) => Validation.required(val),
+          defaultValue: () => this.presetFilingNumberLimit,
+          type: FieldType.TT_NUMBER,
+          validation: (val: any) => Validation.required(val)
         },
       ];
     },
