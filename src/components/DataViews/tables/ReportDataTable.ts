@@ -62,7 +62,7 @@ function configCell(conf: any) {
             return conf.th ? conf.th : ''
         },
         td: () => {
-            return conf.th ? conf.th : ''
+            return conf.td ? conf.td : ''
         },
         value: () => {
             return conf.value ? conf.value : ''
@@ -130,9 +130,9 @@ function thNum(th: string | number | Date, params={} as any): ColumnInterface {
     return configCell(data)
 }
 
-function tdDate(td: string | number | Date, params={} as RowInterface): RowInterface {
+function tdDate(td: string, params={} as RowInterface): RowInterface {
     const data = params
-    data.td = HisDate.toStandardHisDisplayFormat(td.toString())
+    data.td = HisDate.toStandardHisDisplayFormat(td)
     return configCell(data)
 }
 
