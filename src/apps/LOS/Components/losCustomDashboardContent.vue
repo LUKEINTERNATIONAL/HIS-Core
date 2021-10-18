@@ -185,9 +185,8 @@ export default defineComponent({
                 if (req) {
                     this.drawnRows = this.drawnRows.concat(this.getDrawnRows([req]))
                     this.openRows.splice(this.order.orderIndex, 1)
-                    
                     this.showSpecimenModal = false
-                    return toastSuccess('Sample has been drawn')
+                    return this.service.printSpecimenLabel(this.order.order_id)
                 }
             }catch(e) {
                 console.error(e)
