@@ -54,18 +54,18 @@
                         <div v-if="!appHasCustomContent">
                         <ion-row> 
                             <ion-col size-md="6" size-sm="12">
-                                <primary-card :counter="encountersCardItems.length" title="Activities" :items="encountersCardItems" titleColor="#658afb" @click="showAllEncounters"> </primary-card>
+                                <primary-card :icon="timeIcon" :counter="encountersCardItems.length" title="Activities" :items="encountersCardItems" titleColor="#658afb" @click="showAllEncounters"> </primary-card>
                             </ion-col>
                             <ion-col size-md="6" size-sm="12">
-                                <primary-card :counter="labOrderCardItems.length" title="Lab Orders" :items="labOrderCardItems" titleColor="#69bb7b" @click="showAllLabOrders"> </primary-card>
+                                <primary-card :icon="timeIcon" :counter="labOrderCardItems.length" title="Lab Orders" :items="labOrderCardItems" titleColor="#69bb7b" @click="showAllLabOrders"> </primary-card>
                             </ion-col>
                         </ion-row>
                         <ion-row> 
                             <ion-col size-md="6" size-sm="12"> 
-                                <primary-card :counter="alertCardItems.length" title="Alerts" :items="alertCardItems" titleColor="#f95d5d"> </primary-card>
+                                <primary-card :icon="warningIcon" :counter="alertCardItems.length" title="Alerts" :items="alertCardItems" titleColor="#f95d5d"> </primary-card>
                             </ion-col>
                             <ion-col size-md="6" size-sm="12"> 
-                                <primary-card :counter="medicationCardItems.length" title="Medications" :items="medicationCardItems" titleColor="#fdb044" @click="showAllMedications"> </primary-card>
+                                <primary-card :icon="timeIcon" :counter="medicationCardItems.length" title="Medications" :items="medicationCardItems" titleColor="#fdb044" @click="showAllMedications"> </primary-card>
                             </ion-col>
                         </ion-row>
                         </div>
@@ -114,6 +114,8 @@ import { man, woman } from "ionicons/icons";
 import { WorkflowService } from "@/services/workflow_service"
 import { toastSuccess, toastDanger, alertConfirmation } from "@/utils/Alerts";
 import _, { isEmpty } from "lodash"
+import { time, warning } from "ionicons/icons";
+
 import {
   IonPage,
   IonContent,
@@ -141,6 +143,8 @@ export default defineComponent({
         IonCol,
     },
     data: () => ({
+        timeIcon: time,
+        warningIcon: warning,
         app: {} as any,
         dashboardComponent: {} as any,
         isBDE: false as boolean,
