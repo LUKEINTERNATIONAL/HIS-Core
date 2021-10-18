@@ -36,7 +36,7 @@ export default defineComponent({
       return this.days.map((day) => ({
         label: day,
         value: day,
-        isChecked: val.search(day) >= 0
+        // isChecked: val.search(day) >= 0
       }))
     },
     getFields() {

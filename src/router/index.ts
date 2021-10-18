@@ -53,6 +53,16 @@ const routes: Array<RouteRecordRaw> = [
     }, 
   },
   {
+    name: 'Update site location',
+    path:'/location/update/site',
+    component: () => import('@/views/SiteLocation.vue')
+  },
+  {
+    name: 'Update site code',
+    path:'/location/update/code',
+    component: () => import('@/views/SetSiteCode.vue')
+  },
+  {
     path: '/login',
     name: 'Login',
     component: Login

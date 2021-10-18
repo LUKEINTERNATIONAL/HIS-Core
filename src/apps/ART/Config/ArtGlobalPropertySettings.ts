@@ -54,36 +54,24 @@ export const PROPERTIES: FolderInterface[] = [
                 pathUrl: "ask_pills_remaining_at_home"
             },
             {
-                name: "Is this a military site",
-                pathUrl: "military.enabled"
-            },
-            {
                 name: "Activate 3HP auto select",
                 pathUrl: "activate_3hp_auto_select"
             },
             {
                 name: "Set Clinic Days",
-                pathUrl: "activate_3hp_auto_select"
+                pathUrl: "/art/preferences/clinic_days"
             },
             {
                 name: "Set HTN Age",
-                pathUrl: "activate_3hp_auto_select"
+                pathUrl: "/art/preferences/htn_age"
             },
             {
                 name: "Set Appointment Limit",
-                pathUrl: "activate_3hp_auto_select"
-            },
-            {
-                name: "Set Site Code",
-                pathUrl: "activate_3hp_auto_select"
+                pathUrl: "/art/preferences/appointment/limit"
             },
             {
                 name: "Set Filing Numbers Limit",
-                pathUrl: "activate_3hp_auto_select"
-            },
-            {
-                name: "Set Site Location",
-                pathUrl: "activate_3hp_auto_select"
+                pathUrl: "/art/preferences/fn/limit"
             }
         ]
     }

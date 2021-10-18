@@ -1,9 +1,10 @@
+
 <template>
   <his-standard-form
     :fields="fields"
+    @onSubmit="onSubmit"
     @onFinish="onFinish"
     :skipSummary="true"
-    v-if="fields.length > 0"
   />
 </template> 
 <script lang="ts">
@@ -18,19 +19,19 @@ export default defineComponent({
   components: { HisStandardForm },
   methods: {
     onFinish(formData: any) {
-      const property = `${formData.property.value}`.toUpperCase();
-      GlobalPropertyService.set(this.property, property)
+      const sitePrefix = `${formData.htn_age.value}`.toUpperCase();
+      GlobalPropertyService.set(this.property, sitePrefix)
         .then(() => toastSuccess("Property set"))
         .then(() => this.$router.push("/"));
     },
-    getFields() {
-      return [
+    async getFields() {
+      this.fields = [
         {
-          id: "property",
-          helpText: "Enter Filing Number Limit",
+          id: "htn_age",
+          helpText: "Enter HTN age Threshold",
           preset: {
-            label: this.presetFilingNumberLimit,
-            value: this.presetFilingNumberLimit,
+            label: this.htnThreshold,
+            value: this.htnThreshold,
           },
           type: FieldType.TT_TEXT,
           validation: (val: any) => Validation.required(val),
@@ -41,15 +42,15 @@ export default defineComponent({
   data() {
     return {
       fields: [] as any,
-      presetFilingNumberLimit: '',
-      property: "filing.number.limit",
+      property: "htn.screening.age.threshold",
+      htnThreshold: ''
     };
   },
   watch: {
     $route: {
       async handler() {
-        this.presetFilingNumberLimit = await GlobalPropertyService.get(this.property);
-        this.fields = this.getFields() 
+        this.htnThreshold = await GlobalPropertyService.get(this.property);
+        this.getFields();
       },
       deep: true,
       immediate: true,
@@ -57,3 +58,4 @@ export default defineComponent({
   },
 });
 </script>
+

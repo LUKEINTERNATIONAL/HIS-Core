@@ -1,11 +1,8 @@
-
 <template>
   <his-standard-form
     :fields="fields"
-    @onSubmit="onSubmit"
     @onFinish="onFinish"
     :skipSummary="true"
-    v-if="fields.length > 0"
   />
 </template> 
 <script lang="ts">
@@ -14,27 +11,28 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { GlobalPropertyService } from "@/services/global_property_service";
 import { toastSuccess } from "@/utils/Alerts";
+import Validation from "@/components/Forms/validations/StandardValidations"
 
 export default defineComponent({
   components: { HisStandardForm },
   methods: {
     onFinish(formData: any) {
-      const sitePrefix = `${formData.site_code.value}`.toUpperCase();
-      GlobalPropertyService.set(this.property, sitePrefix)
+      const property = `${formData.property.value}`.toUpperCase();
+      GlobalPropertyService.set(this.property, property)
         .then(() => toastSuccess("Property set"))
         .then(() => this.$router.push("/"));
     },
-    async setFields() {
-      const val = await GlobalPropertyService.get("site_prefix");
-      this.fields = [
+    getFields() {
+      return [
         {
-          id: "site_code",
-          helpText: "Enter Site Code",
-          defaultValue: () => val,
-          type: FieldType.TT_TEXT,
-          validation(value: any): null | Array<string> {
-            return !value ? ["Value is required"] : null;
+          id: "property",
+          helpText: "Enter Filing Number Limit",
+          preset: {
+            label: this.presetFilingNumberLimit,
+            value: this.presetFilingNumberLimit,
           },
+          type: FieldType.TT_TEXT,
+          validation: (val: any) => Validation.required(val),
         },
       ];
     },
@@ -42,13 +40,15 @@ export default defineComponent({
   data() {
     return {
       fields: [] as any,
-      property: "site_prefix",
+      presetFilingNumberLimit: '',
+      property: "filing.number.limit",
     };
   },
   watch: {
     $route: {
-      async handler({ query }: any) {
-        this.setFields();
+      async handler() {
+        this.presetFilingNumberLimit = await GlobalPropertyService.get(this.property);
+        this.fields = this.getFields() 
       },
       deep: true,
       immediate: true,
@@ -56,4 +56,3 @@ export default defineComponent({
   },
 });
 </script>
-
