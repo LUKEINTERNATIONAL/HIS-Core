@@ -17,19 +17,20 @@
             <div>
               <ion-grid>
                 <ion-row>
-                  <ion-col size="0.5"></ion-col>
-                  <ion-col  v-for="(drug, index) in Object.keys(drugs)" :key="index" :size="drugs[drug].length > 1 ? 3 : 2" class="items">
+                  <ion-col size="1">
+                  </ion-col>
+                  <ion-col  v-for="(drug, index) in Object.keys(drugs)" :key="index" :size="drugs[drug].drugs.length > 1 ? 3 : 2" class="items">
                     <ion-item>
 
                       <p >{{ drug }}</p> 
                     </ion-item>
                     <ion-row >
 
-                      <ion-col v-for="(d, i) in drugs[drug]" :key="i" :size="drugs[drug].length > 1 ? 6 : 12">
+                      <ion-col v-for="(d, i) in drugs[drug].drugs" :key="i" :size="drugs[drug].drugs.length > 1 ? 6 : 12">
                      <ion-row>
                       <ion-col size="12"><p>{{d.drugName}}</p></ion-col>
-                      <ion-col size="12"><ion-checkbox v-model="d.current"></ion-checkbox> </ion-col>
-                      <ion-col size="12"><ion-checkbox v-model="d.isChecked"></ion-checkbox> </ion-col>
+                      <ion-col size="12"><p>Current</p> <ion-checkbox v-model="d.current" disabled="true"></ion-checkbox> </ion-col>
+                      <ion-col size="12"><p>New</p> <ion-checkbox v-model="d.selected"  @ionChange="selectDrug(drug, i)" >></ion-checkbox> </ion-col>
                       <ion-col size="12"><ion-button size="small" @click="launchKeyPad(drug, i)">Add notes</ion-button> </ion-col>
                       <ion-col size="12">
                         <ion-item v-for="(note, ind) in d.notes" :key="note">
@@ -117,12 +118,6 @@ import {
 } from "@ionic/vue";
 import { toastWarning, toastSuccess, alertAction } from "@/utils/Alerts";
 import EncounterMixinVue from "./EncounterMixin.vue";
-import RiskFactorModal from "@/components/DataViews/RiskFactorModal.vue";
-import { ObservationService } from "@/services/observation_service";
-import { ConceptService } from "@/services/concept_service";
-import { Service } from "@/services/service";
-import HisDate from "@/utils/Date";
-import { isEmpty } from "lodash";
 import { BPManagementService } from "../../services/htn_service";
 import { UserService } from "@/services/user_service";
 import { ProgramService } from "@/services/program_service";
@@ -148,9 +143,19 @@ export default defineComponent({
     IonLabel,
     IonCheckbox
   },
+  watch: {
+        patient: {
+            async handler(patient: any) {
+              this.HTN = new BPManagementService(this.patientID, this.providerID);
+              await this.getCurrentDrugs();
+            },
+            deep: true
+        }
+    },
   data: () => {
     return {
       input: '',
+      HTN: {} as any,
 keyboard: [
             CHARACTERS_AND_NUMBERS_LO, 
             [
@@ -160,7 +165,9 @@ keyboard: [
             ]
         ] as any,
       drugs: {
-        'HCZ': [
+        'HCZ': 
+        {
+          drugs: [
           {
             drugName: "HCZ (25mg tablet)",
             drugID: 275,
@@ -168,9 +175,11 @@ keyboard: [
             selected: false,
             isChecked: false,
             notes: []
-          },
-        ],
-        'Enalapril': [
+          }],
+          selected: null
+        
+        },
+        'Enalapril': {drugs: [
           {
             drugName: "Enalapril (5mg tablet)",
             drugID: 942,
@@ -187,8 +196,12 @@ keyboard: [
             isChecked: false,
             notes: []
           },
+
         ],
-        'Amlodipine': [
+        selected: null
+        },
+        'Amlodipine': {
+        drugs: [
           {
             drugName: "Amlodipine (5mg tablet)",
             drugID: 558,
@@ -206,8 +219,11 @@ keyboard: [
             notes: []
           },
         ],
-        'Atenolol': [
-          {
+        selected: null
+        },
+        'Atenolol': 
+        {
+          drugs: [{
             drugName: "Atenolol (50mg tablet)",
             drugID: 117,
             current: false,
@@ -223,7 +239,9 @@ keyboard: [
             isChecked: false,
             notes: []
           },
-        ],
+          ],
+          selected: null
+        },
       } as any,
     };
   },
@@ -242,6 +260,29 @@ async keypress(text: string) {
             } else {
                 this.input = input
             }
+        },
+        async getCurrentDrugs() {
+          const drugs = await this.HTN.getCurrentDrugs();
+          drugs.drugs.forEach((drug: any) => {
+            for (const key in this.drugs) {
+             this.drugs[key].drugs.forEach((element: any, index: any) => {
+               if(drug.drug_id === element.drugID) {
+                 this.drugs[key].selected = drug.drug_id;
+               }
+             }); 
+            }
+          });
+        },
+        selectDrug(key: any, index: any) {
+          this.drugs[key].drugs.forEach((d: any, i: any) => {
+            if(i === index) {
+              this.drugs[key].drugs[index].selected = true;
+              this.drugs[key].selected = this.drugs[key].drugs[index].drugID;
+            }
+            else {
+              this.drugs[key].drugs[i].selected = false;
+            }
+          })
         },
   async launchKeyPad(d: any,i: any) {
         const modal = await modalController.create({
@@ -262,7 +303,6 @@ computed: {
     let drugs: any[] = [];
     const selectedDrugs = Object.keys(this.drugs).forEach((d: any) => {
       const dr =  this.drugs[d].filter((d: any) => d.isChecked === true)
-      console.log(dr)
       drugs = [...drugs, ...dr];
     });
     return drugs;

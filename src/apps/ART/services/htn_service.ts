@@ -8,4 +8,7 @@ export class BPManagementService extends AppEncounterService {
     async getBPTrail() {
         return await AppEncounterService.getJson(`/patients/${this.patientID}/bp_trail`);
     }
+    async getCurrentDrugs() {
+        return await AppEncounterService.getJson(`/patients/${this.patientID}/current_bp_drugs`);
+    }
 }
