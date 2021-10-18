@@ -10,6 +10,7 @@
     </ion-segment>
     <p/>
     <!-- Action Table -->
+    <div :style="{overflowX: 'auto', height:'84%'}"> 
     <report-table
         v-if="activeTab === 'openOrders'" 
         :rows="labOrderRows" :columns="openColumns"
@@ -20,6 +21,7 @@
         :rows="drawnOrders" :columns="drawnColumns"
         >
     </report-table>
+    </div>
     <!---Specimen selection modal--->
     <ion-modal :is-open="showSpecimenModal" class="custom-modal"> 
         <ion-page>
