@@ -11,8 +11,19 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-
+import {
+    IonCard,
+    IonThumbnail,
+    IonItem,
+    IonLabel
+} from "@ionic/vue"
 export default defineComponent({
+    components: {
+        IonCard, 
+        IonThumbnail, 
+        IonItem, 
+        IonLabel
+    },
     props: {
         title: {
             type: String,
