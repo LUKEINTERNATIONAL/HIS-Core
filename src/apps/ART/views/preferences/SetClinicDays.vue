@@ -14,6 +14,7 @@ import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { GlobalPropertyService } from "@/services/global_property_service";
 import { toastSuccess, toastWarning } from "@/utils/Alerts";
 import Validation from "@/components/Forms/validations/StandardValidations"
+import { isEmpty } from "lodash"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -36,7 +37,7 @@ export default defineComponent({
       return this.days.map((day) => ({
         label: day,
         value: day,
-        // isChecked: val.search(day) >= 0
+        isChecked: !isEmpty(val) && val.search(day) >= 0
       }))
     },
     getFields() {
