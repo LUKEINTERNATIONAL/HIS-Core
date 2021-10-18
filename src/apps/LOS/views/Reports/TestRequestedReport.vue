@@ -28,7 +28,7 @@ export default defineComponent({
     mixins: [ReportMixin],
     components: { ReportTemplate },
     data: () => ({
-        title: 'Lab test result(s)',
+        title: 'Tests requested',
         rows: [] as Array<any>,
         cohort: [] as Array<any>,
         reportType: '' as string,
