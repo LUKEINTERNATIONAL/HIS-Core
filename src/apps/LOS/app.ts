@@ -16,5 +16,21 @@ const LOS: AppInterface = {
     homeOverviewComponent,
     customPatientDashboardContentComponent,
     confirmationSummary: () => ({}),
+    programReports: [
+        {
+            name: 'Clinical',
+            icon: 'reports.png',
+            files: [
+                {
+                    name: 'Test requested',
+                    pathUrl: '/los/report/tests/requests'
+                },
+                {
+                    name: 'Test results',
+                    pathUrl: '/los/report/tests/results'
+                }
+            ]
+        }
+    ]
 }
 export default LOS
