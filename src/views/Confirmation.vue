@@ -122,7 +122,7 @@ export default defineComponent({
     patient: {} as any,
     cards: [] as any[],
     facts: {
-      programName: 'Not available' as string,
+      programName: 'N/A' as string,
       currentOutcome: '' as string,
       viralLoadStatus: '' as 'High' | 'Low' | '',
       programs: [] as string[],
@@ -181,7 +181,7 @@ export default defineComponent({
       await this.presentLoading()
       await this.setProgram()
       this.setPatientFacts()
-      this.setProgramFacts()
+      await this.setProgramFacts()
       await this.drawPatientCards()
       loadingController.dismiss()
       await this.onEvent(TargetEvent.ONLOAD)
