@@ -54,7 +54,7 @@
                             <ion-item 
                                 lines="none"
                                 :key="index"
-                                v-for="(test, index) in selectedTests"
+                                v-for="(test, index) in order.tests"
                                 >
                                 <ion-chip color="primary">{{test.name}}</ion-chip>
                             </ion-item>
@@ -106,7 +106,7 @@ import {
     IonLabel,
     IonSegmentButton,
 } from "@ionic/vue";
-import { toastWarning } from '@/utils/Alerts';
+import { toastDanger, toastSuccess, toastWarning } from '@/utils/Alerts';
 
 export default defineComponent({
     components: {
@@ -126,7 +126,7 @@ export default defineComponent({
     data: () => ({
         showSpecimenModal: false as boolean,
         specimens: [] as any,
-        selectedTests: [] as Array<any>,
+        order: {} as Record<string, any>,
         selectedSpecimen: {} as any,
         service: {} as any,
         activeTab: 'openOrders' as 'openOrders' | 'drawnOrders',
@@ -177,8 +177,18 @@ export default defineComponent({
             this.openRows = this.getOpenRows(open)
             this.drawnRows = this.getDrawnRows(drawn)
         },
-        drawOrder() {
-            //Draw the order
+        async drawOrder() {
+            try {
+                this.service.updateOrderSpecimen(
+                    this.order.order_id, this.selectedSpecimen.concept_id
+                )
+                this.openRows.splice(this.order.orderIndex, 1)
+                this.showSpecimenModal = false
+                toastSuccess('Sample has been drawn')
+            }catch(e) {
+                console.error(e)
+                toastDanger('Unable to draw sample')
+            }
         },
         getOpenRows(data: any): Array<RowInterface[]> {
             return data.map((d: any, index: number) => ([
@@ -186,7 +196,7 @@ export default defineComponent({
                 table.td(d.tests.map((t: any) => t.name).join(',')),
                 table.td(d.reason_for_test.name || 'N/A'),
                 table.tdBtn('Drawn', async () => {
-                    this.selectedTests= d.tests
+                    this.order = {...d, orderIndex: index }
                     this.showSpecimenModal = true
                     this.specimens = await PatientLabService
                         .getSpecimensForTests(d.tests)

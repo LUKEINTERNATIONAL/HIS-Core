@@ -27,6 +27,12 @@ export class PatientLabService extends OrderService  {
         return OrderService.void(`lab/orders/${orderID}`,{reason})
     }
 
+    async updateOrderSpecimen(orderID: number, specimenID: number) {
+        return OrderService.putJson(`lab/orders/${orderID}`,
+            {specimen: { 'concept_id': specimenID } }
+        )
+    }
+
     printSpecimenLabel(orderID: number) {
         return new PrintoutService()
             .printLbl(`lab/labels/order?order_id=${orderID}`)
