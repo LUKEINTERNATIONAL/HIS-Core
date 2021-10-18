@@ -2,13 +2,31 @@ import Apps from "@/apps/his_apps";
 import ApplicationModal from "@/components/ApplicationModal.vue";
 import { modalController } from "@ionic/vue";
 import { find, isEmpty } from 'lodash';
+import GlobalApp from "@/apps/GLOBAL_APP/global_app"
 
 function getActiveApp() {
     const appName = sessionStorage.getItem('applicationName')
 
     if (appName) {
-        return find(Apps, { applicationName: appName })
+        const app: any = {...find(Apps, { applicationName: appName })}
+        /**
+         * Merge global configurations with app configurations
+         */
+        app.secondaryPatientActivites = [
+            ...GlobalApp.GlobalProgramActivities,
+            ...app.secondaryPatientActivites
+        ]
+        if (app.globalPropertySettings) {
+            app.globalPropertySettings = [
+                ...GlobalApp.GlobalAppSettings,
+                ...app.globalPropertySettings
+            ]
+        } else {
+            app.globalPropertySettings = GlobalApp.GlobalAppSettings
+        }
+        return app
     }
+    return {}
 }
 
 async function selectApplication() {

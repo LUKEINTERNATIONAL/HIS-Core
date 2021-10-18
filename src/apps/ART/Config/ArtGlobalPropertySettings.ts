@@ -2,19 +2,6 @@ import { FolderInterface } from "@/apps/interfaces/AppInterface";
 
 export const PROPERTIES: FolderInterface[] = [
     {
-        name: 'Data management',
-        files: [
-            {
-                name: "Data Cleaning",
-                pathUrl: "/data_cleaning",
-            },
-            {
-                name: "Merge patients",
-                pathUrl: "/patients/merge",
-            }
-        ]
-    },
-    {
         name: "Drug Management",
         files: [
             {

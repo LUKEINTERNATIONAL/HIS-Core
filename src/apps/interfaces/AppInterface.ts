@@ -81,7 +81,7 @@ export interface AppInterface {
     /**
      * Define list of all application configurations
      */
-    readonly globalPropertySettings?: FolderInterface[];
+    globalPropertySettings?: FolderInterface[];
     /**
      * primary patient activities
      */
@@ -89,7 +89,7 @@ export interface AppInterface {
     /**
      * secondary patient activities
      */
-    readonly secondaryPatientActivites: TaskInterface[];
+    secondaryPatientActivites: TaskInterface[];
     /**
      * Get program specific patient dashboard alerts
      */
