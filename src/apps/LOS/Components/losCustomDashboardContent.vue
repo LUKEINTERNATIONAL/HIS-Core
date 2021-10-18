@@ -20,6 +20,69 @@
         :rows="drawnRows" :columns="drawnColumns"
         >
     </report-table>
+    <!---Specimen selection modal--->
+    <ion-modal :is-open="showSpecimenModal" class="custom-modal"> 
+        <ion-page>
+             <ion-header>
+                <ion-toolbar>
+                    <ion-title>                        
+                        <b>Select specimen</b>
+                    </ion-title>
+                </ion-toolbar>
+            </ion-header>
+            <ion-content class="ion-padding"> 
+                <ion-row>
+                    <ion-col> 
+                        <ion-list>
+                            <ion-radio-group>
+                                <ion-item
+                                    v-for="(specimen, index) in specimens"
+                                    :key="index"
+                                    >
+                                    <ion-label>{{specimen.name}}</ion-label>
+                                    <ion-radio
+                                        slot="start"
+                                        @click="selectedSpecimen=specimen"
+                                        >
+                                    </ion-radio>                            
+                                </ion-item>
+                            </ion-radio-group>
+                        </ion-list>
+                    </ion-col>
+                    <ion-col> 
+                        <ion-list>
+                            <ion-item 
+                                lines="none"
+                                :key="index"
+                                v-for="(test, index) in selectedTests"
+                                >
+                                <ion-chip color="primary">{{test.name}}</ion-chip>
+                            </ion-item>
+                        </ion-list>
+                    </ion-col>
+                </ion-row>
+            </ion-content>
+            <ion-footer> 
+                <ion-toolbar> 
+                    <ion-button 
+                        color="danger" 
+                        slot="start"
+                        @click="showSpecimenModal = false; selectedSpecimen = {};"
+                        > 
+                        Close 
+                    </ion-button>
+                    <ion-button
+                        :disabled="!selectedSpecimen.name"
+                        color="success" 
+                        slot="end"
+                        @click="drawOrder"
+                        > 
+                        Submit 
+                    </ion-button>
+                </ion-toolbar>
+            </ion-footer>
+        </ion-page>
+    </ion-modal>
 </template>
 
 <script lang="ts">
@@ -31,6 +94,14 @@ import { PatientLabService} from "@/apps/LOS/services/patient_lab_service"
 import { isEmpty } from "lodash"
 import { voidWithReason } from "@/utils/VoidHelper"
 import {
+    IonTitle,
+    IonButton,
+    IonFooter,
+    IonToolbar,
+    IonHeader,
+    IonModal,
+    IonPage,
+    IonContent,
     IonSegment,
     IonLabel,
     IonSegmentButton,
@@ -39,12 +110,24 @@ import { toastWarning } from '@/utils/Alerts';
 
 export default defineComponent({
     components: {
+        IonTitle,
+        IonButton,
+        IonFooter,
+        IonToolbar,
+        IonHeader,
+        IonModal,
+        IonContent,
+        IonPage,
         ReportTable,
         IonSegment,
         IonLabel,
         IonSegmentButton
     },
     data: () => ({
+        showSpecimenModal: false as boolean,
+        specimens: [] as any,
+        selectedTests: [] as Array<any>,
+        selectedSpecimen: {} as any,
         service: {} as any,
         activeTab: 'openOrders' as 'openOrders' | 'drawnOrders',
         drawnColumns: [
@@ -94,13 +177,19 @@ export default defineComponent({
             this.openRows = this.getOpenRows(open)
             this.drawnRows = this.getDrawnRows(drawn)
         },
+        drawOrder() {
+            //Draw the order
+        },
         getOpenRows(data: any): Array<RowInterface[]> {
             return data.map((d: any, index: number) => ([
                 table.td(d.accession_number),
                 table.td(d.tests.map((t: any) => t.name).join(',')),
                 table.td(d.reason_for_test.name || 'N/A'),
-                table.tdBtn('Drawn', () => {
-                    console.log('Yay!! am drawn')
+                table.tdBtn('Drawn', async () => {
+                    this.selectedTests= d.tests
+                    this.showSpecimenModal = true
+                    this.specimens = await PatientLabService
+                        .getSpecimensForTests(d.tests)
                 }, {}, 'success'),
                 /**
                  * Order delete button
@@ -109,14 +198,11 @@ export default defineComponent({
                     voidWithReason(
                         async (reason: string) => {
                             const res = await this.service.voidOrder(
-                                d.order_id, 
-                                reason
+                                d.order_id, reason
                             )
-                            if (res) {
-                                this.openRows.splice(index, 1)
-                            } else {
-                                toastWarning('Unable to void order. Try again later')
-                            }
+                            res 
+                                ? this.openRows.splice(index, 1)
+                                : toastWarning('Unable to void order. Try again later')
                         },
                         [
                             'Duplicate order',
@@ -134,7 +220,8 @@ export default defineComponent({
                     this.service.printSpecimenLabel(d.order_id)
                 })
             ]))
-        }
+        },
+
     },
     props: {
         patient: {
