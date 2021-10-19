@@ -160,12 +160,11 @@ export default defineComponent({
             }
         } else {
             nextTask = await WorkflowService.getNextTaskParams(patientID)
+            if (!nextTask.name) {
+                return this.$router.push(`/patient/dashboard/${patientID}`)
+            }
         }
-        if (!nextTask.name) {
-            return this.$router.push(`/patient/dashboard/${patientID}`)
-        } else {
-            this.$router.push(nextTask)
-        }
+        this.$router.push(nextTask)
     },
     async update(computedData: any) {
         const person: any = PersonField.resolvePerson(computedData)
