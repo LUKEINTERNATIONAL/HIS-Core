@@ -91,6 +91,10 @@ export interface AppInterface {
      */
     secondaryPatientActivites: TaskInterface[];
     /**
+     * Callback that runs after a patient has been successfully registered
+     */
+    readonly onRegisterPatient?: (patientID: number, person: any, attributes: any) => void;
+    /**
      * Get program specific patient dashboard alerts
      */
     readonly getPatientDashboardAlerts?: (patient: any) => Promise<GeneralDataInterface[]> | GeneralDataInterface[];
