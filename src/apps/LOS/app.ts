@@ -3,6 +3,8 @@ import homeOverviewComponent from "@/apps/LOS/Components/losHomeOverviewComponen
 import customPatientDashboardContentComponent from "@/apps/LOS/Components/losCustomDashboardContent.vue"
 import {PRIMARY_ACTIVITIES} from "@/apps/LOS/config/LosProgramActivities"
 import Routes from "@/apps/LOS/config/LosRoutes"
+import { OrderService } from "@/services/order_service";
+import HisDate from "@/utils/Date"
 
 const LOS: AppInterface = {
     programID: 23,
@@ -24,6 +26,13 @@ const LOS: AppInterface = {
                 }
             ]
         },
+        'LAB ORDERS': async () => {
+            const orders = await OrderService.getOrders(patient.getID())
+            return orders.map((t: any) => ({
+                label: t.specimen.name,
+                value: `${t.accession_number} - ${HisDate.toStandardHisDisplayFormat(t.order_date)}`
+            }))
+        }
     }),
     programReports: [
         {
