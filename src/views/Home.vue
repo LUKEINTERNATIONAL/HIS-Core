@@ -40,14 +40,14 @@
 
     <ion-content :fullscreen="true">
       <div id="container" class="his-card overview" v-if="ready">
-        <ion-segment scrollable value="1" class="ion-justify-content-center">
-          <ion-segment-button value="1" @click="activeTab = 1">
+        <ion-segment scrollable :value="activeTab" class="ion-justify-content-center">
+          <ion-segment-button :value="1" @click="activeTab = 1">
             <ion-label>Overview</ion-label>
           </ion-segment-button>
-          <ion-segment-button v-if="canReport" value="2" @click="activeTab = 2">
+          <ion-segment-button v-if="canReport" :value="2" @click="activeTab = 2">
             <ion-label>Reports</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="3" @click="activeTab = 3">
+          <ion-segment-button :value="3" @click="activeTab = 3">
             <ion-label>Administration</ion-label>
           </ion-segment-button>
         </ion-segment>

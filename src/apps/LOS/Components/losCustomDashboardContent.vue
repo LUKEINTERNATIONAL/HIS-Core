@@ -1,6 +1,6 @@
 <template>
     <p/>
-    <ion-segment mode="ios" scrollable value="openOrders" class="ion-justify-content-center">
+    <ion-segment mode="ios" scrollable :value="activeTab" class="ion-justify-content-center">
         <ion-segment-button value="openOrders" @click="activeTab='openOrders'">
             <ion-label>Open</ion-label>
         </ion-segment-button>
