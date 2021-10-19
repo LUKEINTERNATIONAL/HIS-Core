@@ -59,11 +59,11 @@ export default {
       files: [
         {
           name: "Data Cleaning",
-          route: "/data_cleaning",
+          pathUrl: "/data_cleaning",
         },
         {
           name: "Merge patients",
-          route: "/patients/merge",
+          pathUrl: "/patients/merge",
         }
       ]
     }
