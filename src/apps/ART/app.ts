@@ -7,7 +7,8 @@ import { PRIMARY_ACTIVITIES, SECONDARY_ACTIVITIES } from "@/apps/ART/Config/ArtP
 import { GlobalPropertyService } from "@/services/global_property_service"
 import { 
     init, 
-    confirmationSummary, 
+    confirmationSummary,
+    onRegisterPatient,
     formatPatientProgramSummary,
     getPatientDashboardAlerts
 } from "@/apps/ART/Config/ArtAppScripts"
@@ -27,6 +28,7 @@ const ART: AppInterface = {
     confirmationSummary,
     formatPatientProgramSummary,
     getPatientDashboardAlerts,
+    onRegisterPatient,
     programPatientIdentifiers: {
         'ARV Number': {
             id: 4,

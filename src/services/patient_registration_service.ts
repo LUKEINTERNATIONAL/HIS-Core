@@ -3,7 +3,6 @@ import { ProgramService } from "@/services/program_service";
 import { Person } from "@/interfaces/person"
 import { PersonService } from "@/services/person_service"
 import { PersonAttributeService } from '@/services/person_attributes_service'
-import { AppEncounterService } from "./app_encounter_service"
 import { PatientPrintoutService } from "@/services/patient_printout_service";
 
 export class PatientRegistrationService extends Service {
@@ -25,8 +24,6 @@ export class PatientRegistrationService extends Service {
         await this.createPerson(person)
         await this.createPersonAttributes(personAttributes)
         await this.createPatient()
-        await this.enrollPatient()
-        await this.createRegistrationEncounterObs(person.patient_type)
         await this.printPatient()
     }
 
@@ -48,10 +45,6 @@ export class PatientRegistrationService extends Service {
         return ProgramService.createPatient(this.personId)
     }
 
-    enrollPatient() {
-        return ProgramService.enrollPatient(this.personId)
-    }
-
     async createPersonAttributes(attributes: Array<any>) {
         for(const index in attributes) {
             await PersonAttributeService.create({
@@ -59,12 +52,6 @@ export class PatientRegistrationService extends Service {
                 'person_id': this.personId
             })
         }
-    }
-
-    async createRegistrationEncounterObs(patientType: string) {
-        const encounter = new AppEncounterService(this.personId, 5)
-        await encounter.createEncounter()
-        await encounter.saveValueCodedObs('Type of patient', patientType)
     }
 
     printPatient() {

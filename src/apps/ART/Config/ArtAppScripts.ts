@@ -12,11 +12,13 @@ import { ObservationService } from "@/services/observation_service";
 import { ConceptService } from "@/services/concept_service"
 import HisDate from "@/utils/Date"
 import { GeneralDataInterface } from "@/apps/interfaces/AppInterface";
+import { AppEncounterService } from "@/services/app_encounter_service"
 
 export async function init() {
     const activities = PRIMARY_ACTIVITIES
         .map((activity: TaskInterface)=> ({
-            value: activity.name,
+            value: activity.workflowID 
+                || activity.name,
             selected: false
         }))
     const modal = await modalController.create({
@@ -30,6 +32,19 @@ export async function init() {
     modal.present();
     await modal.onDidDismiss()
     return modal;
+}
+
+export async function onRegisterPatient(patientID: number, person: any) {
+    const enroll = await ProgramService.enrollPatient(patientID)
+    if (enroll) {
+        // TODO: Change state to Pre-ART
+    }
+    // Create registration encounter
+    const encounter = new AppEncounterService(patientID, 5)
+    await encounter.createEncounter()
+    await encounter.saveValueCodedObs(
+        'Type of patient', person.patient_type
+    )
 }
 
 export async function getPatientDashboardAlerts(patient: any): Promise<GeneralDataInterface[]>{
