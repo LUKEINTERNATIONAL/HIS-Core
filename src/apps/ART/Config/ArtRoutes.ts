@@ -43,6 +43,7 @@ import ClinicAppointments from "@/apps/ART/views/reports/clinic/ClinicAppointmen
 import DataCleaning from "@/apps/ART/views/reports/inconsistencies/DataCleaning.vue"
 import HyperTensionDiagnosis from "@/apps/ART/views/encounters/hypertension_diagnosis.vue"
 import BPPrescription from "@/apps/ART/views/encounters/BPDrug_management.vue"
+import SocialHistory from "@/apps/ART/views/encounters/SocialHistory.vue"
 
 export default [
     {
@@ -139,6 +140,11 @@ export default [
         name: "BP prescription",
         path: "/art/encounters/bp_prescription/:patient_id",
         component: BPPrescription
+    },
+    {
+        name: "Social history",
+        path: "/art/encounters/social_history/:patient_id",
+        component: SocialHistory
     },
     {
         name: "lab activities",
