@@ -25,7 +25,7 @@ export default {
       files: [
         {
           name: "Print Location",
-          pathUrl: "/location/print",
+          pathUrl: "/print/location",
         },
         {
           name: "Set Site Location",
