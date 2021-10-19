@@ -2,7 +2,7 @@
 <template>
   <his-standard-form
     :fields="fields"
-    @onFinish="onFinish"
+    :onFinishAction="onFinish"
     :skipSummary="true"
     v-if="fields.length > 0"
   />

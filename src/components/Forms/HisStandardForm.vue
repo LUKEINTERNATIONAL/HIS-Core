@@ -6,6 +6,7 @@
         :activeField="activeField"
         :cancelDestinationPath="cancelDestinationPath"
         @onFinish="onFinish"
+        :onFinish="onFinishAction"
         @onIndex="onIndex"
         >
     </component>
@@ -27,6 +28,9 @@ export default defineComponent({
         formType: 'touch-screen-form' as string
     }),
     props: {
+        onFinishAction: {
+            type: Function
+        },
         skipSummary: {
             type: Boolean,
             default: false

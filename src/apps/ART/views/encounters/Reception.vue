@@ -2,7 +2,7 @@
   <his-standard-form
     :fields="fields"
     :activeField="activeField"
-    @onFinish="onFinish"
+    :onFinishAction="onFinish"
     :skipSummary="true"
     :cancelDestinationPath="cancelDestination"
   >

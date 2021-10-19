@@ -2,8 +2,7 @@
 <template>
   <his-standard-form
     :fields="fields"
-    @onSubmit="onSubmit"
-    @onFinish="onFinish"
+    :onFinishAction="onFinish"
     :skipSummary="true"
   />
 </template> 

@@ -1,7 +1,7 @@
 <template>
   <his-standard-form
     :fields="fields"
-    @onFinish="onFinish"
+    :onFinishAction="onFinish"
     :skipSummary="true"
   />
 </template> 
