@@ -40,7 +40,7 @@
 
     <ion-content :fullscreen="true">
       <div id="container" class="his-card overview" v-if="ready">
-        <ion-segment scrollable :value="activeTab" class="ion-justify-content-center">
+        <ion-segment mode="ios" scrollable :value="activeTab" class="ion-justify-content-center">
           <ion-segment-button :value="1" @click="activeTab = 1">
             <ion-label>Overview</ion-label>
           </ion-segment-button>
