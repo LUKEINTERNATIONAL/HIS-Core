@@ -236,6 +236,7 @@ export default defineComponent({
       const data = await HisApp.selectApplication() 
       if (data) {
         this.app = data
+        this.activeTab = 1
         this.loadApplicationData();
       }
     },
