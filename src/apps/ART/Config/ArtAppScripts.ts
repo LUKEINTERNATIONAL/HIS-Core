@@ -5,6 +5,7 @@ import {TaskInterface} from "./../../interfaces/TaskInterface"
 import { WorkflowService } from "@/services/workflow_service"
 import PatientAlerts from "@/services/patient_alerts"
 import { RelationshipService } from "@/services/relationship_service";
+import { PatientProgramService } from "@/services/patient_program_service";
 import { ProgramService } from "@/services/program_service";
 import { OrderService } from "@/services/order_service";
 import { Observation } from "@/interfaces/observation";
@@ -35,9 +36,12 @@ export async function init() {
 }
 
 export async function onRegisterPatient(patientID: number, person: any) {
-    const enroll = await ProgramService.enrollPatient(patientID)
+    const program = new PatientProgramService(patientID)
+    const enroll = await program.enrollProgram()
     if (enroll) {
-        // TODO: Change state to Pre-ART
+        //Create pre-art state
+        program.setStateId(1) 
+        await program.updateState()
     }
     // Create registration encounter
     const encounter = new AppEncounterService(patientID, 5)
