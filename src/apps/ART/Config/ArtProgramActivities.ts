@@ -63,6 +63,11 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
     id: "fast track assesment",
     name: "Fast Track assesment",
     icon: "fast-track.png"
+  },
+  {
+    id: "BP management",
+    name: "BP management",
+    icon: "dispensing.png"
   }
 ]
 
