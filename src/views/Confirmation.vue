@@ -67,28 +67,17 @@
 </template>
 
 <script lang="ts">
-interface DataInterface {
-  label: string;
-  value: string;
-}
+import HisApp from "@/apps/app_lib"
 import { defineComponent } from "vue";
-import { Observation } from "@/interfaces/observation";
-import { ObservationService } from "@/services/observation_service";
 import { Patientservice } from "@/services/patient_service";
-import { ProgramService } from "@/services/program_service";
-import { OrderService } from "@/services/order_service";
 import { UserService } from "@/services/user_service";
-import { RelationshipService } from "@/services/relationship_service";
-import { ConceptService } from "@/services/concept_service"
 import { alertAction, alertConfirmation, toastDanger, toastSuccess } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
-import PatientAlerts from "@/services/patient_alerts"
 import HisDate from "@/utils/Date"
 import { PatientProgramService } from "@/services/patient_program_service"
 import { voidWithReason } from "@/utils/VoidHelper"
 import { isEmpty } from "lodash";
 import { matchToGuidelines } from "@/utils/GuidelineEngine"
-
 import {
   IonContent,
   IonHeader,
@@ -110,6 +99,7 @@ import {
   CONFIRMATION_PAGE_GUIDELINES
 } from "@/guidelines/confirmation_page_guidelines"
 import { PatientPrintoutService } from "@/services/patient_printout_service";
+import { AppInterface } from "@/apps/interfaces/AppInterface";
 export default defineComponent({
   name: "Patient Confirmation",
   components: {
@@ -127,11 +117,12 @@ export default defineComponent({
     IonCardHeader
   },
   data: () => ({
+    app: {} as AppInterface,
     program: {} as any,
     patient: {} as any,
     cards: [] as any[],
     facts: {
-      programName: 'Not available' as string,
+      programName: 'N/A' as string,
       currentOutcome: '' as string,
       viralLoadStatus: '' as 'High' | 'Low' | '',
       programs: [] as string[],
@@ -153,6 +144,11 @@ export default defineComponent({
       },
     }
   }),
+  created() {
+    const app = HisApp.getActiveApp()
+
+    if (app) this.app = app
+  },
   computed: {
     demographics(): any {
       return this.facts.demographics
@@ -185,7 +181,7 @@ export default defineComponent({
       await this.presentLoading()
       await this.setProgram()
       this.setPatientFacts()
-      this.setProgramFacts()
+      await this.setProgramFacts()
       await this.drawPatientCards()
       loadingController.dismiss()
       await this.onEvent(TargetEvent.ONLOAD)
@@ -224,6 +220,12 @@ export default defineComponent({
       loadingController.dismiss()
       this.patient = new Patientservice(data)
     },
+    /**
+     * Facts are used by the Guideline Engine to crosscheck 
+     * conditions to execute. The more the data the better
+     * the decision support. These facts are also presented 
+     * on the User interface
+     */
     setPatientFacts() {
       this.facts.demographics.patientName = this.patient.getFullName()
       this.facts.demographics.givenName = this.patient.getGivenName()
@@ -245,13 +247,20 @@ export default defineComponent({
       this.facts.currentOutcome = outcome
       this.facts.programName = program
     },
-    drawPatientCards() {
-      return this.getProgramInfoCard()
-        .then(this.getAlertCard)
-        .then(this.getLabOrdersCard)
-        .then(this.getIdentifiersCard)
-        .then(this.getOucomeCard)
-        .then(this.getGuardianCard)
+    /**
+     * The Application/Program determines which cards to
+     * render on the view
+     */
+    async drawPatientCards() {
+      if (!this.app.confirmationSummary) return
+
+      const summaryEntries: Record<string, Function> 
+        = await this.app.confirmationSummary(this.patient, this.program)
+
+      for (const title in summaryEntries) {
+        const data = await summaryEntries[title]()
+        this.cards.push({ title, data })
+      }
     },
     async presentLoading() {
       const loading = await loadingController
@@ -287,6 +296,10 @@ export default defineComponent({
       }
       return true
     },
+    /**
+     * Maps FlowStates defined in the Guideline to
+     * Functions definitions that are executed.
+     */
     async runFlowState(state: FlowState) {
       const states: Record<string, Function> = {
         'enroll': () => {
@@ -338,125 +351,6 @@ export default defineComponent({
       }else {
         this.$router.push(`/patient/dashboard/${this.patient.getID()}`)
       }
-    },
-    getGuardianCard() {
-      RelationshipService.getGuardianDetails(
-        this.patient.getID()
-      ).then((relationship: any) => {
-        const rel: DataInterface[] = relationship.map((r: any) => {
-          return {
-            label: r.name,
-            value: r.relationshipType,
-          };
-        });
-        const displayData = {
-          title: "GUARDIAN(s)",
-          data: { ...rel },
-        };
-        this.cards.push(displayData);
-      });
-    },
-    getOucomeCard() {
-      const displayData = {
-        title: "Outcome",
-        data: [
-          {
-            label: "Current Outcome",
-            value: this.facts.currentOutcome,
-          },
-        ] as DataInterface[],
-      };
-      this.cards.push(displayData);
-    },
-    async getLabOrdersCard() {
-      const displayData = {
-        title: "Labs",
-        data: [] as DataInterface[],
-      };
-      await OrderService.getOrders(this.patient.getID()).then((orders) => {
-        const VLOrders = OrderService.getViralLoadOrders(orders);
-        VLOrders.forEach((element) => {
-          displayData.data.push({
-            value: OrderService.formatOrders(element),
-            label: ``,
-          });
-        });
-      });
-      this.cards.push(displayData);
-    },
-    async getAlertCard() {
-      const sideEffects: Observation[] = await PatientAlerts.alertSideEffects(this.patient.getID())
-      const displayData = {
-        title: "ALERTS",
-        data: [
-          {
-            label: "Side effects",
-            value: sideEffects.length,
-          },
-        ],
-      };
-      this.cards.push(displayData);
-    },
-    getIdentifiersCard() {
-      this.cards.push({
-        title: "PATIENT IDENTIFIERS",
-        data: [
-          {
-            label: "ARV Number",
-            value: this.patient.getArvNumber(),
-          },
-          {
-            label: "NPID",
-            value: this.patient.getNationalID(),
-          },
-        ],
-      });
-    },
-    async getProgramInfoCard() {
-      const patientID = this.patient.getID()
-      const displayData = {
-        title: "PROGRAM INFORMATION",
-        data: [] as DataInterface[],
-      };
-      const params = await WorkflowService.getNextTaskParams(patientID)
-      let task = 'NONE'      
-      if(params.name) {
-        task = params.name
-      }
-      displayData.data.push({
-        label: "Next Task",
-        value: `${task}`,
-      });
-      await ProgramService.getProgramInformation(patientID)
-        .then(
-        (task) => {
-          displayData.data.push({
-            label: "ART Duration",
-            value: `${task.art_duration} month(s) `,
-          });
-        }
-      );
-      await ProgramService.getFastTrackStatus(patientID).then(
-        (task) => {
-          const data = task["Continue FT"] === true ? "Yes" : "No";
-          displayData.data.push({
-            label: "On Fast Track",
-            value: data,
-          });
-        }
-      );
-      const appointMentObs: Observation[] = await ObservationService.getObservations(
-        patientID,
-        ConceptService.getCachedConceptID('appointment date')
-      );
-      if (appointMentObs.length > 0) {
-        const nextAPPT = HisDate.toStandardHisDisplayFormat(appointMentObs[0].value_datetime);
-        displayData.data.push({
-          label: "Next Appointment",
-          value: nextAPPT,
-        });
-      }
-      this.cards.push(displayData);
     }
   }
 })

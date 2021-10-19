@@ -4,7 +4,7 @@
     :skipSummary="true"
     :activeField="fieldComponent" 
     :fields="fields" 
-    @onFinish="onFinish"
+    :onFinishAction="onFinish"
  />
 </template>
 <script lang="ts">
@@ -71,23 +71,19 @@ export default defineComponent({
         return fields
     },
     async onFinish(form: any, computedData: any) {
-        try {
-            let guardianID = -1
-            if (this.isRegistrationMode()) {
-                const guardian: any = new PatientRegistrationService()
-                await guardian.registerGuardian(PersonField.resolvePerson(computedData))
-                guardianID = guardian.getPersonID()
-            } else {
-                guardianID = this.guardianData.id
-            }
-            await RelationsService.createRelation(
-                this.patientData.id, guardianID, form.relations.other.relationship_type_id
-            )
-            const nextTask = await WorkflowService.getNextTaskParams(this.patientData.id)
-            this.$router.push(nextTask)
-        }catch(e) {
-            toastDanger(e)
+        let guardianID = -1
+        if (this.isRegistrationMode()) {
+            const guardian: any = new PatientRegistrationService()
+            await guardian.registerGuardian(PersonField.resolvePerson(computedData))
+            guardianID = guardian.getPersonID()
+        } else {
+            guardianID = this.guardianData.id
         }
+        await RelationsService.createRelation(
+            this.patientData.id, guardianID, form.relations.other.relationship_type_id
+        )
+        const nextTask = await WorkflowService.getNextTaskParams(this.patientData.id)
+        this.$router.push(nextTask)
     },
     isSearchMode() {
         return ['Search', 'Registration'].includes(this.fieldAction)

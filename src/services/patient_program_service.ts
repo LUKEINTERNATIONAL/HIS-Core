@@ -44,7 +44,7 @@ export class PatientProgramService extends ProgramService {
      * @returns 
      */
     async getProgram() {
-        const defaults = { program: 'Not available', outcome: 'Not available' }
+        const defaults = { program: 'N/A', outcome: 'N/A' }
         const req = await this.getPrograms()
         if (isEmpty(req)) {
             return defaults

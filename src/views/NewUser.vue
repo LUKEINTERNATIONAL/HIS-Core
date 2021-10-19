@@ -5,7 +5,7 @@
     :skipSummary="true"
     :activeField="fieldComponent"
     @onIndex="fieldComponent=''" 
-    @onFinish="onFinish"/>
+    :onFinishAction="onFinish"/>
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
@@ -51,22 +51,18 @@ export default defineComponent({
   methods: {
     async onFinish(form: Record<string, Option> | Record<string, null>, computeValues: any) {
         const data = {...this.resolveData(form, 'data_field'), ...computeValues}
-        try {
-            switch(this.activity) {
-                case 'add':
-                    this.activity = 'edit'
-                    await this.create(data)
-                    break;
-                case 'edit':
-                    await this.update(data)
-                    break;
-            }
-            this.formKey += 1
-            this.activeField = 'user_info'
-            this.$nextTick(() => this.fieldComponent = this.activeField)
-        } catch (e) {
-            toastWarning(e)
+        switch(this.activity) {
+            case 'add':
+                this.activity = 'edit'
+                await this.create(data)
+                break;
+            case 'edit':
+                await this.update(data)
+                break;
         }
+        this.formKey += 1
+        this.activeField = 'user_info'
+        this.$nextTick(() => this.fieldComponent = this.activeField)
     },
     async create(data: any) {
         const { user } = await UserService.createUser(data)

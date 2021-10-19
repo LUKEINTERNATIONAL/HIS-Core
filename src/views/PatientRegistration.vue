@@ -4,7 +4,7 @@
     :skipSummary="skipSummary"
     :activeField="fieldComponent" 
     :fields="fields" 
-    @onFinish="onFinish"
+    :onFinishAction="onFinish"
  />
 </template>
 
@@ -19,15 +19,17 @@ import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import { GlobalPropertyService } from "@/services/global_property_service" 
 import { ProgramService } from "@/services/program_service";
-import { toastWarning, toastDanger } from "@/utils/Alerts"
 import { WorkflowService } from "@/services/workflow_service"
-import { isPlainObject, isEmpty, findIndex } from "lodash"
+import { isPlainObject, isEmpty } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
 import { PatientRegistrationService } from "@/services/patient_registration_service"
+import App from "@/apps/app_lib"
+import { AppInterface } from "@/apps/interfaces/AppInterface"
 
 export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
+    app: App.getActiveApp() as AppInterface,
     skipSummary: false,
     addressAttributes: [
         'home_region',
@@ -129,40 +131,40 @@ export default defineComponent({
         this.skipSummary = true
     },
     async onFinish(form: Record<string, Option> | Record<string, null>, computedData: any) {
-        try {
-            if (!this.isEditMode()) {
-                return this.create(form, computedData)
-            } else {
-                return this.update(computedData)
-            }
-        } catch (e) {
-            toastWarning(e)
+        if (!this.isEditMode()) {
+            return this.create(form, computedData)
+        } else {
+            return this.update(computedData)
         }
     },
-    async create(form: any, computedData: any) {
-        try {
-            const person: any = PersonField.resolvePerson(computedData)
-            const attributes: Array<any> = this.resolvePersonAttributes(computedData) 
+    async create(_: any, computedData: any) {
+        const person: any = PersonField.resolvePerson(computedData)
+        const attributes: Array<any> = this.resolvePersonAttributes(computedData)
+        const registration: any = new PatientRegistrationService()
+        await registration.registerPatient(person, attributes)
 
-            const registration: any = new PatientRegistrationService()
-            await registration.registerPatient(person, attributes)
-            let nextTask: any = {}
-            if (form.relationship.value === 'Yes') {
-                nextTask = { 
-                    path: '/guardian/registration', 
-                    query: {
-                        patient: registration.getPersonID() 
-                    }
-                }
-            } else {
-                nextTask = await WorkflowService.getNextTaskParams(
-                    registration.getPersonID()
-                )
-            }
-            this.$router.push(nextTask)
-        }catch(e) {
-            toastDanger(e)
+        const patientID = registration.getPersonID()
+
+        if (this.app.onRegisterPatient) {
+            await this.app.onRegisterPatient(patientID, person, attributes)
         }
+
+        let nextTask: any = {}
+        
+        if (person.relationship === 'Yes') {
+            nextTask = { 
+                path: '/guardian/registration', 
+                query: {
+                    patient: patientID
+                }
+            }
+        } else {
+            nextTask = await WorkflowService.getNextTaskParams(patientID)
+            if (!nextTask.name) {
+                return this.$router.push(`/patient/dashboard/${patientID}`)
+            }
+        }
+        this.$router.push(nextTask)
     },
     async update(computedData: any) {
         const person: any = PersonField.resolvePerson(computedData)

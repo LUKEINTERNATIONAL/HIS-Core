@@ -1,36 +1,45 @@
 import Apps from "@/apps/his_apps";
 import ApplicationModal from "@/components/ApplicationModal.vue";
-import ActivitiesModal from "@/components/ART/ActivitiesModal.vue";
-import OrdersModal from "@/components/ART/OrdersModal.vue";
 import { modalController } from "@ionic/vue";
-import { ActivityInterface } from './interfaces/AppInterface';
 import { find, isEmpty } from 'lodash';
+import GlobalApp from "@/apps/GLOBAL_APP/global_app"
+import { AppInterface } from "./interfaces/AppInterface";
 
-function getActiveApp() {
+/**
+* Merge global configurations with app configurations
+*/
+function applyGlobalConfig(app: AppInterface) {
+    const _app = {...app}
+    _app.secondaryPatientActivites = [
+        ...GlobalApp.GlobalProgramActivities,
+        ..._app.secondaryPatientActivites
+    ]
+    if (_app.globalPropertySettings) {
+        _app.globalPropertySettings = [
+            ...GlobalApp.GlobalAppSettings,
+            ..._app.globalPropertySettings
+        ]
+    } else {
+        _app.globalPropertySettings = GlobalApp.GlobalAppSettings
+    }
+    return _app
+}
+
+function getActiveApp(): AppInterface | undefined {
     const appName = sessionStorage.getItem('applicationName')
 
     if (appName) {
-        return find(Apps, { applicationName: appName })
+        const app: AppInterface | undefined = find(Apps, { applicationName: appName })
+        if (app) return applyGlobalConfig(app)
     }
 }
 
-function openModal(component: any, props = {}, cssClass = "large-modal") {
-    return modalController.create({
-        component,
-        cssClass: cssClass,
-        backdropDismiss: false,
-        componentProps: { ...props }
-    });
-}
-
-async function selectTasks(activities: Array<ActivityInterface>) {
-    const modal = await openModal(ActivitiesModal, {activities})
-    modal.present();
-    return modal;
-}
-
 async function selectApplication() {
-    const modal = await openModal(ApplicationModal)
+    const modal = await modalController.create({
+        component: ApplicationModal,
+        cssClass: "large-modal",
+        backdropDismiss: false
+    });
 
     modal.present()
 
@@ -38,23 +47,15 @@ async function selectApplication() {
 
     if (!data || isEmpty(data)) return
 
-    const activities = await selectTasks(data.activities)
+    const app: AppInterface = applyGlobalConfig(data)
+    
+    if (app.init) await app.init()
+    
+    sessionStorage.setItem('applicationName', app.applicationName)
 
-    await activities.onDidDismiss()
-
-    sessionStorage.setItem('applicationName', data.applicationName)
-
-    return data
-}
-async function makeLabOrders() {
-    const modal = await openModal(OrdersModal, {}, "custom-modal")
-    modal.present()
-    return modal;
-    // const { data } = await modal.onDidDismiss()
-   
+    return app
 }
 export default {
     selectApplication,
-    getActiveApp,
-    makeLabOrders
+    getActiveApp
 }

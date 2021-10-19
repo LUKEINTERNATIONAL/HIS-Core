@@ -8,7 +8,7 @@
             <ion-item v-for="(item, index) in items" :key="index" :style="{fontSize: '0.8em'}">
                 <ion-label> {{ item.label }} </ion-label>
                 <ion-chip v-if="item.value" slot='end'>
-                  <ion-icon :icon="time"></ion-icon>
+                  <ion-icon :icon="icon"></ion-icon>
                     <ion-label>{{ item.value }}</ion-label>
                 </ion-chip>
             </ion-item>
@@ -31,6 +31,9 @@ export default defineComponent({
         counter: {
             type: Number,
             required: false
+        },
+        icon: {
+            type: Object   
         },
         title: {
             type: String,

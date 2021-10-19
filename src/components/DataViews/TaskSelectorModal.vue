@@ -5,13 +5,16 @@
     </ion-toolbar>
   </ion-header>
   <ion-grid class="selector">
-    <ion-row v-for="(row, rowIndex) in turpleTaskItems" :key="rowIndex">
-      <ion-col size="4" v-for="(taskItem, taskIndex) in row" :key="`task-${taskIndex}`">
+    <ion-row>
+      <ion-col 
+        size="4" 
+        v-for="(taskItem, index) in items" 
+        :key="index">
         <task-card
           @click="doTask(taskItem)"
           :title="taskItem.name.toUpperCase()"
           :description="taskItem.description"
-          :icon="taskItem.icon">
+          :icon="img(taskItem.icon)">
         </task-card>
       </ion-col>
     </ion-row>
@@ -23,13 +26,34 @@
   </ion-footer>
 </template>
 <script lang="ts">
+import Img from "@/utils/Img"
 import { defineComponent, PropType } from "vue";
 import TaskCard from "@/components/DataViews/TaskCard.vue";
-import { IonGrid, IonRow, IonCol, modalController } from "@ionic/vue"; 
 import { TaskInterface } from "@/apps/interfaces/TaskInterface";
-import Transformer from "@/utils/Transformers"
+import { 
+  IonGrid,
+  IonFooter,
+  IonToolbar,
+  IonButton,
+  IonHeader,
+  IonTitle,
+  IonRow, 
+  IonCol, 
+  modalController 
+} from "@ionic/vue"; 
+
 export default defineComponent({
-  components: { IonGrid, IonRow, IonCol, TaskCard },
+  components: { 
+    IonGrid, 
+    IonRow, 
+    IonCol, 
+    TaskCard,
+    IonFooter,
+    IonToolbar,
+    IonButton,
+    IonHeader,
+    IonTitle,
+  },
   props: {
     title: {
       type: String,
@@ -39,16 +63,15 @@ export default defineComponent({
       type: Object as PropType<TaskInterface[]>,
       required: true,
     },
-    itemsPerRow: {
-      type: Number,
-      default: 3
-    },
     taskParams: {
       type: Object,
       required: false
     }
   },
   methods: {
+    img(name: string) {
+      return Img(name)
+    },
     async closeModal() {
       await modalController.dismiss({})
     },
@@ -68,12 +91,7 @@ export default defineComponent({
       this.closeModal()
     }
   },
-  computed: {
-    turpleTaskItems(): any {
-      return Transformer.convertArrayToTurples(this.items, this.itemsPerRow)
-    }
-  }
-});
+})
 </script>
 <style scoped>
   .selector{

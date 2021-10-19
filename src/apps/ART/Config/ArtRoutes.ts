@@ -46,6 +46,26 @@ import BPPrescription from "@/apps/ART/views/encounters/BPDrug_management.vue"
 
 export default [
     {
+        name: "Set Clinic Days",
+        path: "/art/preferences/clinic_days",
+        component: () => import("@/apps/ART/views/preferences/SetClinicDays.vue")
+    },
+    {
+        name: "Set HTN Age",
+        path: "/art/preferences/htn_age",
+        component: () => import("@/apps/ART/views/preferences/SetHTNAge.vue")
+    },
+    {
+        name: "Set filing number limit",
+        path: "/art/preferences/fn/limit",
+        component: () => import("@/apps/ART/views/preferences/SetFilingNumbersLimit.vue")
+    },
+    {
+        name: "Set Appointment limit",
+        path: "/art/preferences/appointment/limit",
+        component: () => import("@/apps/ART/views/preferences/SetAppointmentLimit.vue")
+    },
+    {
         name: "treatment",
         path: "/art/encounters/prescriptions/:patient_id",
         component: Prescription
