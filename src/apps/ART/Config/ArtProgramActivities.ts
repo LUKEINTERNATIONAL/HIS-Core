@@ -5,6 +5,7 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
   {
     id: "art adherence",
     name: "ART adherence",
+    workflowID: "ART adherence",
     icon: "adherence.png"
   },
   {
@@ -15,31 +16,37 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
   {
     id: "hiv clinic registration",
     name: "Hiv clinic registration",
+    workflowID: "HIV first visits",
     icon: "registration.png"
   },
   {
     id: "hiv reception",
     name: "HIV reception",
+    workflowID: "HIV reception visits",
     icon: "reception.png"
   },
   {
     id: "hiv staging",
     name: "HIV staging",
+    workflowID: "HIV staging visits",
     icon: "hiv-staging.png"
   },
   {
     id: "appointment",
     name: "Manage Appointments",
+    workflowID: "Manage Appointments",
     icon: "appointment.png"
   },
   {
     id: "dispensing",
     name: "Drug Dispensations",
+    workflowID: "Drug Dispensations",
     icon: "dispensing.png"
   },
   {
     id: "treatment",
     name: "Treatment",
+    workflowID: "Prescriptions",
     icon: "prescription.png"
   },
   {
