@@ -53,10 +53,6 @@ export const PROPERTIES: FolderInterface[] = [
                 "use_filing_numbers"
             ),
             globalPropConfig(
-                "Activate extended labs", 
-                "extended_labs"
-            ),
-            globalPropConfig(
                 "Activate drug management", 
                 "activate_drug_management"
             ),
