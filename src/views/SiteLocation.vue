@@ -4,7 +4,6 @@
     @onSubmit="onSubmit"
     @onFinish="onFinish"
     :skipSummary="true"
-    v-if="fields.length > 0"
   />
 </template> 
 <script lang="ts">

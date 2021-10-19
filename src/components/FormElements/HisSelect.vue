@@ -39,6 +39,8 @@ export default defineComponent({
                     const found = find(this.listData, {label: defaults}) || find(this.listData, {value: defaults}) 
                     if (found) {
                         this.onselect(found)
+                    } else {
+                        this.filter = defaults
                     }
                 }
             }

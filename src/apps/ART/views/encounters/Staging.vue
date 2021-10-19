@@ -1,5 +1,5 @@
 <template>
-    <his-standard-form :skipSummary="true" :cancelDestinationPath="cancelDestination" :fields="fields" @onFinish="onSubmit"/>
+    <his-standard-form :skipSummary="true" :cancelDestinationPath="cancelDestination" :fields="fields" :onFinishAction="onSubmit"/>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
@@ -21,13 +21,9 @@ export default defineComponent({
     },
     methods: {
         async onSubmit(f: any, computedValues: any) {
-            try{ 
-                await this.submitStaging(computedValues)
-                toastSuccess('Staging information has been saved')
-                this.nextTask()
-            }catch(e) {
-                toastWarning(e)
-            }
+            await this.submitStaging(computedValues)
+            toastSuccess('Staging information has been saved')
+            this.nextTask()
         }
     }
 })

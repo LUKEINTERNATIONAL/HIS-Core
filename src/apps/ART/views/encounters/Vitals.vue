@@ -3,7 +3,7 @@
     :fields="fields"
     :activeField="activeField"
     @onskip="activeField = ''"
-    @onFinish="onFinish"
+    :onFinishAction="onFinish"
     :skipSummary="true"
     :cancelDestinationPath="cancelDestination"
   >

@@ -20,6 +20,12 @@ export class OrderService extends Service {
         return super.getJson('/lab/test_types');
     }
 
+    static getTestTypesBySpecimen(specimenType='') {
+        return super.getJson('/lab/test_types', {
+            'specimen_type': specimenType
+        });
+    }
+
     static getSpecimens(testName: string) {
         return super.getJson('/lab/specimen_types', { 'test_type': testName });
     }

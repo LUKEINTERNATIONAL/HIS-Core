@@ -160,7 +160,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             }
         },
         conditions: {
-            programName: (name: string) => name === 'Not available'
+            programName: (name: string) => name.match(/n\/a/i) ? true : false
         }
     },
     "(ART Filing numbers) Prompt dormant filing number reactivation if patient has a dormant filing number": {

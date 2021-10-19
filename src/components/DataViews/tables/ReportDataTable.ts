@@ -18,6 +18,7 @@ export interface ColumnInterface {
 }
 export interface EventInterface {
     obj: 'button' | 'link' | 'cell';
+    color?: string;
     click: Function;
 }
 export interface RowInterface {
@@ -61,7 +62,7 @@ function configCell(conf: any) {
             return conf.th ? conf.th : ''
         },
         td: () => {
-            return conf.th ? conf.th : ''
+            return conf.td ? conf.td : ''
         },
         value: () => {
             return conf.value ? conf.value : ''
@@ -129,9 +130,9 @@ function thNum(th: string | number | Date, params={} as any): ColumnInterface {
     return configCell(data)
 }
 
-function tdDate(td: string | number | Date, params={} as RowInterface): RowInterface {
+function tdDate(td: string, params={} as RowInterface): RowInterface {
     const data = params
-    data.td = HisDate.toStandardHisDisplayFormat(td.toString())
+    data.td = HisDate.toStandardHisDisplayFormat(td)
     return configCell(data)
 }
 
@@ -150,11 +151,12 @@ function tdLink(td: string | number | Date, click: Function, params={}): RowInte
     }
 }
 
-function tdBtn(td: string | number | Date, click: Function, params={}): RowInterface {
+function tdBtn(td: string | number | Date, click: Function, params={}, color=''): RowInterface {
     return {
         td,
         event: {
             click,
+            color: color,
             obj: 'button'
         },
         ...params

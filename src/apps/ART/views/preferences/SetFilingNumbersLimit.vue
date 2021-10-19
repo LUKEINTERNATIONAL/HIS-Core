@@ -1,9 +1,8 @@
 <template>
   <his-standard-form
     :fields="fields"
-    @onFinish="onFinish"
+    :onFinishAction="onFinish"
     :skipSummary="true"
-    v-if="fields.length > 0"
   />
 </template> 
 <script lang="ts">
@@ -27,13 +26,10 @@ export default defineComponent({
       return [
         {
           id: "property",
-          helpText: "Enter Appointment Limit",
-          preset: {
-            label: this.presetAppointmentLimit,
-            value: this.presetAppointmentLimit,
-          },
-          type: FieldType.TT_TEXT,
-          validation: (val: any) => Validation.required(val),
+          helpText: "Enter Filing Number Limit",
+          defaultValue: () => this.presetFilingNumberLimit,
+          type: FieldType.TT_NUMBER,
+          validation: (val: any) => Validation.required(val)
         },
       ];
     },
@@ -41,14 +37,14 @@ export default defineComponent({
   data() {
     return {
       fields: [] as any,
-      property: "clinic.appointment.limit",
-      presetAppointmentLimit: '',
+      presetFilingNumberLimit: '',
+      property: "filing.number.limit",
     };
   },
   watch: {
     $route: {
       async handler() {
-        this.presetAppointmentLimit = await GlobalPropertyService.get(this.property);
+        this.presetFilingNumberLimit = await GlobalPropertyService.get(this.property);
         this.fields = this.getFields() 
       },
       deep: true,
@@ -57,4 +53,3 @@ export default defineComponent({
   },
 });
 </script>
-
