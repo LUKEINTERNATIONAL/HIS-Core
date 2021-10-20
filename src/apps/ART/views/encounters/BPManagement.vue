@@ -99,7 +99,7 @@ import {
   IonItem,
   IonLabel,
 } from "@ionic/vue";
-import { toastWarning, toastSuccess, alertAction } from "@/utils/Alerts";
+import { toastWarning, alertAction } from "@/utils/Alerts";
 import EncounterMixinVue from "./EncounterMixin.vue";
 import RiskFactorModal from "@/components/DataViews/RiskFactorModal.vue";
 import { ObservationService } from "@/services/observation_service";
@@ -110,8 +110,6 @@ import { isEmpty } from "lodash";
 import { BPManagementService } from "../../services/htn_service";
 import { UserService } from "@/services/user_service";
 import { ProgramService } from "@/services/program_service";
-import { Patientservice } from "@/services/patient_service";
-import { Program } from "@/interfaces/program";
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
@@ -131,7 +129,6 @@ export default defineComponent({
     IonItem,
     IonLabel,
   },
-  // components: {  },
   data: () => ({
     htn: {} as any,
     hasARVNumber: true,
@@ -214,7 +211,6 @@ export default defineComponent({
       return this.$router.push({path: `/art/encounters/hypertension_diagnosis/${this.patientID}`}) 
     },
     nextAction(state: string) {
-      // TODO: replace commented out parts below with finalized routes
       switch (state) {
       
        case 'Start anti-hypertensives' :
@@ -308,7 +304,6 @@ export default defineComponent({
             value: val,
           };
         });
-        // this.rows = [...this.formatOrders(data), ...this.rows]
       }
     },
     async enrollInHTN() {
@@ -321,7 +316,6 @@ export default defineComponent({
     },
     async getItems() {
       if (this.patientOnBPDrugs && this.patientFirstVisit) {
-        //Add enroll modal here for patient
 
         if(!this.isEnrolledInHTN) {
 
