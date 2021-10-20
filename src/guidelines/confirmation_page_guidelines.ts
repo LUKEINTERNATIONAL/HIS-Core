@@ -224,9 +224,10 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         },
         conditions: {
             demographics: (data: Record<string, any>) => {
-                const checks = Object.values(data).map(
-                    (d: any) => isEmpty(d) || d.match(/n\/a/i)
-                )
+                const demo = {...data}
+                delete demo['landmark']
+                const checks = Object.values(demo)
+                    .map((d: any) => isEmpty(d) || d.match(/n\/a/i))
                 return checks.some(Boolean)
             }
         }
