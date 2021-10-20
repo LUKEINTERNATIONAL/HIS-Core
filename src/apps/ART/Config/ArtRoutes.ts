@@ -44,6 +44,7 @@ import DataCleaning from "@/apps/ART/views/reports/inconsistencies/DataCleaning.
 import HyperTensionDiagnosis from "@/apps/ART/views/encounters/hypertension_diagnosis.vue"
 import BPPrescription from "@/apps/ART/views/encounters/BPDrug_management.vue"
 import SocialHistory from "@/apps/ART/views/encounters/SocialHistory.vue"
+import BPAdherence from "@/apps/ART/views/encounters/BPAdherence.vue"
 
 export default [
     {
@@ -145,6 +146,11 @@ export default [
         name: "Social history",
         path: "/art/encounters/social_history/:patient_id",
         component: SocialHistory
+    },
+    {
+        name: "BP adherence",
+        path: "/art/encounters/bp_adherence/:patient_id",
+        component: BPAdherence
     },
     {
         name: "lab activities",

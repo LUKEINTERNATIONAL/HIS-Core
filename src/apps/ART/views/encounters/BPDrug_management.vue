@@ -336,8 +336,9 @@
         >
           cancel
         </ion-button>
+
         <ion-button size="large" color="success" slot="end" @click="onFinish">
-          Finish
+          Continue
         </ion-button>
       </ion-toolbar>
     </ion-footer>

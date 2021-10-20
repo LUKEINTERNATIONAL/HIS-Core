@@ -11,4 +11,13 @@ export class BPManagementService extends AppEncounterService {
     async getCurrentDrugs() {
         return await AppEncounterService.getJson(`/patients/${this.patientID}/current_bp_drugs`);
     }
+    async getLastDrugs() {
+        return await AppEncounterService.getJson(`/patients/${this.patientID}/last_bp_drugs_dispensation`);
+    }
+    async getAdherence(drugID: number, pills: number) {
+        return await AppEncounterService.postJson(`/patients/${this.patientID}/remaining_bp_drugs`, {
+            'drug_id': drugID,
+            pills: pills
+        });
+    }
 }

@@ -45,7 +45,7 @@ export default defineComponent({
     methods: {
         async keypress(key: any) {
             if (key.match(/done/i)) {
-                await modalController.dismiss()
+                await modalController.dismiss(this.value)
             } else {
                 if (key.includes('.') && this.value.includes('.')) return
                 
