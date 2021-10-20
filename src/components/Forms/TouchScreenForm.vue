@@ -415,7 +415,7 @@ export default defineComponent({
       if (this.onFinish) {
         try {
           this.state = 'onsubmit'
-          return await this.onFinish(this.formData, this.computedFormData)
+          await this.onFinish(this.formData, this.computedFormData)
         }catch(e) { 
           toastDanger(e) 
         }
