@@ -193,8 +193,9 @@
                         v-for="(drug, i) in drugs['HCZ'].drugs"
                         :key="i"
                       >
-                        <ion-checkbox :checked="drug.selected" 
-                        @ionChange="selectDrug('HCZ', i, $event)"
+                        <ion-checkbox
+                          :checked="drug.selected"
+                          @ionChange="selectDrug('HCZ', i, $event)"
                         ></ion-checkbox>
                       </td>
                     </tr>
@@ -208,7 +209,8 @@
                       v-for="(drug, i) in drugs['Enalapril'].drugs"
                       :key="i"
                     >
-                      <ion-checkbox :checked="drug.selected"
+                      <ion-checkbox
+                        :checked="drug.selected"
                         @ionChange="selectDrug('Enalapril', i, $event)"
                       ></ion-checkbox>
                     </td>
@@ -224,8 +226,9 @@
                         v-for="(drug, i) in drugs['Amlodipine'].drugs"
                         :key="i"
                       >
-                        <ion-checkbox :checked="drug.selected"
-                        @ionChange="selectDrug('Amlodipine', i, $event)"
+                        <ion-checkbox
+                          :checked="drug.selected"
+                          @ionChange="selectDrug('Amlodipine', i, $event)"
                         ></ion-checkbox>
                       </td>
                     </tr>
@@ -240,8 +243,9 @@
                         v-for="(drug, i) in drugs['Atenolol'].drugs"
                         :key="i"
                       >
-                        <ion-checkbox :checked="drug.selected"
-                        @ionChange="selectDrug('Atenolol', i, $event)"
+                        <ion-checkbox
+                          :checked="drug.selected"
+                          @ionChange="selectDrug('Atenolol', i, $event)"
                         ></ion-checkbox>
                       </td>
                     </tr>
@@ -347,8 +351,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import ViewPort from "@/components/DataViews/ViewPort.vue";
-import HisTable from "@/components/DataViews/HisBasicTable.vue";
-import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue";
 import { CHARACTERS_AND_NUMBERS_LO } from "@/components/Keyboard/KbLayouts";
 import KeyBoardModal from "@/components/Keyboard/HisModalKeyboard.vue";
 import handleVirtualInput from "@/components/Keyboard/KbHandler";
@@ -356,45 +358,30 @@ import {
   IonToolbar,
   IonHeader,
   IonContent,
-  IonGrid,
   IonRow,
   IonCol,
-  IonRadioGroup,
-  IonRadio,
   IonButton,
   modalController,
   IonFooter,
   IonPage,
-  IonItem,
-  IonLabel,
   IonCheckbox,
 } from "@ionic/vue";
-import { toastWarning, toastSuccess, alertAction } from "@/utils/Alerts";
 import EncounterMixinVue from "./EncounterMixin.vue";
 import { BPManagementService } from "../../services/htn_service";
-import { UserService } from "@/services/user_service";
 import { ProgramService } from "@/services/program_service";
-import { Patientservice } from "@/services/patient_service";
-import { Program } from "@/interfaces/program";
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
     ViewPort,
-    // HisTable,
-    // IonToolbar,
-    // IonHeader,
-    // IonContent,
-    // IonGrid,
-    // IonRow,
+    IonToolbar,
+    IonHeader,
+    IonContent,
+    IonRow,
     IonButton,
-    // IonRadioGroup,
-    // IonRadio,
-    // IonCol,
+    IonCol,
     IonFooter,
     IonPage,
-    // IonItem,
-    // IonLabel,
-    // IonCheckbox
+    IonCheckbox
   },
   watch: {
     patient: {
@@ -506,17 +493,6 @@ export default defineComponent({
       this.drugs[d].notes.splice(ind, 1);
     },
 
-    async keypress(text: string) {
-      // if (!this.inputFocus) {
-      //     return
-      // }
-      const input = handleVirtualInput(text, this.input);
-      if (text.match(/clear/i)) {
-        this.input = "";
-      } else {
-        this.input = input;
-      }
-    },
     async getCurrentDrugs() {
       const drugs = await this.HTN.getCurrentDrugs();
       drugs.drugs.forEach((drug: any) => {
@@ -532,15 +508,8 @@ export default defineComponent({
       });
     },
     selectDrug(key: any, index: any, event: any) {
-      console.log(event);
       this.drugs[key].drugs.forEach((d: any, i: any) => {
-          this.drugs[key].drugs[i].selected = false;
-        // if (i === index) {
-        //   this.drugs[key].drugs[index].selected = true;
-        //   this.drugs[key].selected = this.drugs[key].drugs[index].drugID;
-        // } else {
-        //   this.drugs[key].drugs[i].selected = false;
-        // }
+        this.drugs[key].drugs[i].selected = false;
       });
       this.drugs[key].drugs[index].selected = event.detail.checked;
     },
@@ -562,81 +531,21 @@ export default defineComponent({
   computed: {
     selectedDrugs(): any {
       let drugs: any[] = [];
-      const selectedDrugs = Object.keys(this.drugs).forEach((d: any) => {
+      Object.keys(this.drugs).forEach((d: any) => {
         const dr = this.drugs[d].drugs.filter((d: any) => d.selected === true);
         drugs = [...drugs, ...dr];
       });
       return drugs;
     },
   },
-
-  // components: {  },
 });
 </script>
 <style scoped>
-.items {
-  border: solid 1px black;
-}
-.mod {
-  z-index: 1000;
-  background-color: blue;
-}
+
 ion-checkbox {
   --size: 30px;
 }
 
-#nextButton {
-  min-width: 170px !important;
-}
-
-.holder {
-  width: 99%;
-  padding: 1.5%;
-}
-
-.blue {
-  background-color: #a7cfdf !important;
-  border: 1px solid #7eb9d0 !important;
-  border-radius: 3px !important;
-  color: #ffffff;
-  display: inline-block !important;
-  font-family: arial, helvetica, sans-serif !important;
-  font-size: 28px !important;
-  font-weight: bold !important;
-  text-decoration: none !important;
-  text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3) !important;
-  border-radius: 8px !important;
-}
-
-#done {
-  border: 1px solid #34740e !important;
-  -webkit-border-radius: 3px !important;
-  -moz-border-radius: 3px !important;
-  border-radius: 5px !important;
-  font-size: 28px !important;
-  font-family: arial, helvetica, sans-serif !important;
-  padding-left: 10px !important;
-  margin-left: 20px !important;
-  text-decoration: none !important;
-  display: inline-block !important;
-  text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3) !important;
-  font-weight: bold !important;
-  color: #ffffff !important;
-  background-color: #4ba614 !important;
-  background-image: -webkit-gradient(
-    linear,
-    left top,
-    left bottom,
-    from(#4ba614),
-    to(#008c00)
-  ) !important;
-  background-image: -webkit-linear-gradient(top, #4ba614, #008c00) !important;
-  background-image: -moz-linear-gradient(top, #4ba614, #008c00) !important;
-  background-image: -ms-linear-gradient(top, #4ba614, #008c00) !important;
-  background-image: -o-linear-gradient(top, #4ba614, #008c00) !important;
-  background-image: linear-gradient(to bottom, #4ba614, #008c00) !important;
-  filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr=#4ba614, endColorstr=#008c00) !important;
-}
 
 #main-table,
 #table-notes {
@@ -689,31 +598,7 @@ caption {
   color: rgba(0, 0, 0, 0.8);
 }
 
-.checked {
-  background: url("/public/touchscreentoolkit/lib/images/ticked");
-}
 
-.unchecked {
-  background: url("/public/touchscreentoolkit/lib/images/unticked");
-}
-
-.button-success,
-.button-secondary {
-  color: white;
-  border-radius: 4px;
-  padding: 3px;
-  max-width: 130px;
-  margin: auto;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-}
-
-.button-success {
-  background: rgb(223, 117, 20);
-}
-
-.gray {
-  background: lightgray !important;
-}
 
 #table-notes td {
   background: rgba(210, 220, 240, 0.5);
@@ -752,42 +637,7 @@ caption {
   overflow: auto;
 }
 
-#shield {
-  position: absolute;
-  top: 0%;
-  left: 0%;
-  width: 100%;
-  height: 100%;
-  z-index: 150;
-  background: rgba(200, 200, 200, 0.5);
-  display: none;
-}
 
-#keyboard-holder {
-  position: absolute;
-  top: 20%;
-  left: 15%;
-  width: 75% !important;
-  margin: auto;
-  display: none;
-  z-index: 900;
-}
-
-textarea {
-  width: 97% !important;
-  border: 1px dotted lightblue;
-  border-radius: 5px;
-  background: white;
-  resize: none;
-}
-
-#fixedKeyboard {
-  z-index: 999;
-}
-
-#done {
-  min-width: 100px !important;
-}
 
 .today-tr {
   font-style: italic;
