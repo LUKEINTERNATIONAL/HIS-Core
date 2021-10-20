@@ -218,20 +218,18 @@ export default defineComponent({
       switch (state) {
       
        case 'Start anti-hypertensives' :
-          // path = "/apps/ART/views/htn/change_drugs.html";
-          this.nextTask();
+          this.$router.push(`/art/encounters/bp_prescription/${this.patientID}`);
           break;
       case 'Review Drugs':
-          // path = "/apps/ART/views/htn/bp_drug_management.html?review=true";
+          this.$router.push(`/art/encounters/bp_adherence/${this.patientID}?review=true`);
           this.nextTask();
           break;
       case 'Continue Drugs':
-          // path = "/apps/ART/views/htn/bp_drug_management.html";
+          this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`);
           this.nextTask();
           break;
       case 'Did not take prescribed BP drugs today':
-          // path = "/apps/ART/views/htn/bp_drug_management.html";
-          this.nextTask();
+          this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`);
           break;
       default :
           this.nextTask();
