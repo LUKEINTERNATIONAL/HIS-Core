@@ -24,10 +24,12 @@
           <ion-col size="5">
             <div class="tool-bar-medium-card">
               <div class="tool-bar-medium-content"> 
-                <p><b>Facility name:</b> {{ facilityName }}</p>
-                <p><b>Location:</b> {{ userLocation }}</p>
-                <p><b>Date:</b> <ion-label :color="isBDE ? 'danger' : 'success'"> {{ sessionDate }} </ion-label></p>
-                <p><b>User:</b> {{ userName }}</p>
+                <p>Facility name: <b>{{ facilityName }}</b></p>
+                <p>Location: <b> {{ userLocation }}</b></p>
+                <p>Date: <ion-label :color="isBDE ? 'danger' : 'success'">
+                  <b> {{ sessionDate }} </b> 
+                  </ion-label></p>
+                <p>User:<b> {{ userName }}</b></p>
               </div>
             </div>
           </ion-col>
@@ -51,13 +53,11 @@
             <ion-label>Administration</ion-label>
           </ion-segment-button>
         </ion-segment>
-        <keep-alive>
-          <component 
-            v-if ="activeTab == 1" 
-            v-bind:is="appOverview"
-            > 
-          </component>
-        </keep-alive>
+        <component 
+          v-if ="activeTab == 1" 
+          v-bind:is="appOverview"
+          > 
+        </component>
         <home-folder
           v-if="activeTab == 2"
           :items="appReports"

@@ -49,6 +49,7 @@ export default defineComponent({
         }
     },
     data: () => ({
+        defaultIcon: 'sys-setting.png' as string,
         viewableItems: [] as any,
         showingChildNodes: false as boolean
     }),
@@ -67,6 +68,10 @@ export default defineComponent({
         onClick(item: any){
             if (item.files) {
                 this.showingChildNodes = true
+                this.defaultIcon = 'sys-setting.png'
+                if (item.defaultFilesIcon) {
+                    this.defaultIcon = item.defaultFilesIcon
+                }
                 return this.viewableItems = item.files
             } else if (item.pathName) {
                 this.$router.push({ name: item.pathName })
@@ -79,7 +84,7 @@ export default defineComponent({
             this.viewableItems = this.items
         },
         itemIcon(item: any) {
-            return img(item.icon ? item.icon : 'sys-setting.png')
+            return img(item.icon ? item.icon : this.defaultIcon)
         }
     }
 })
