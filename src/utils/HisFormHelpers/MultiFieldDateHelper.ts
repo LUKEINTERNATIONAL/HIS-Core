@@ -265,6 +265,9 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         if (StandardValidations.required(v)) {
             return ['Please select an estimate']
         }
+        if (isNaN(parseInt(v.value.toString()))) {
+            return ['Please enter a valid number']
+        }
         return validateMinMax(fullDate, field, f, c)
     }
 
