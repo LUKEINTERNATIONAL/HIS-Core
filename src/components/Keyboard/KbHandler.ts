@@ -6,9 +6,11 @@ export default function kbHandler(newInput: string, accumulator: string): string
         output = `${accumulator} `
     } else if (newInput.match(/unknown/i)) {
         output = 'Unknown'
+    } else if (newInput.match(/n\/a/i)) {
+        output = 'N/A'
     } else {
         // Override Unknown text with new input
-        if (output.match(/unknown/i)) {
+        if (output.match(/unknown/i) || output.match(/n\/a/i)) {
             output = newInput
         } else {
             output = `${accumulator}${newInput}`
