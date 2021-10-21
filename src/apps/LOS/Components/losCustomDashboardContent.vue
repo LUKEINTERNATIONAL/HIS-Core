@@ -97,15 +97,22 @@ import { isEmpty } from "lodash"
 import { voidWithReason } from "@/utils/VoidHelper"
 import {
     IonTitle,
+    IonCol,
+    IonRow,
+    IonRadio,
     IonButton,
     IonFooter,
     IonToolbar,
     IonHeader,
     IonModal,
+    IonList,
+    IonItem,
+    IonChip,
     IonPage,
     IonContent,
     IonSegment,
     IonLabel,
+    IonRadioGroup,
     IonSegmentButton,
 } from "@ionic/vue";
 import { toastDanger, toastWarning } from '@/utils/Alerts';
@@ -113,10 +120,17 @@ import { toastDanger, toastWarning } from '@/utils/Alerts';
 export default defineComponent({
     components: {
         IonTitle,
+        IonCol,
+        IonRow,
+        IonRadio,
         IonButton,
+        IonList,
+        IonRadioGroup,
         IonFooter,
         IonToolbar,
         IonHeader,
+        IonItem,
+        IonChip,
         IonModal,
         IonContent,
         IonPage,
