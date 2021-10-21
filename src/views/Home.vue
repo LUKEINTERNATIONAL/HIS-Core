@@ -73,22 +73,30 @@
       <ion-toolbar>
         <ion-row>
           <ion-col>
-            <ion-button color="danger left" size="large" @click="signOut"
-              >Logout</ion-button
-            >
+            <ion-button color="danger left" size="large" @click="signOut">
+              <ion-icon :icon="logoutIcon"></ion-icon>
+                Logout
+              </ion-button>
           </ion-col>
           <ion-col v-if="canFindByIdentifier">
-            <ion-button color="primary" size="large" router-link="/patients/search/id">Find By</ion-button>
+            <ion-button color="primary" size="large" router-link="/patients/search/id">
+              <ion-icon :icon="searchIcon"> </ion-icon>
+              Find By
+            </ion-button>
           </ion-col>
           <ion-col>
-            <ion-button color="primary" size="large" router-link="/patient/registration"
-              >Find or Register</ion-button
-            >
+            <ion-button color="primary" size="large" router-link="/patient/registration">
+              <ion-icon :icon="personIcon"></ion-icon>
+                Find or Register
+              </ion-button>
           </ion-col>
           <ion-col>
-            <ion-button color="primary" size="large" @click="openModal"
-              >Applications</ion-button
-            >
+            <ion-button color="primary" size="large" @click="openModal">
+              <ion-icon :icon="appsIcon"></ion-icon>
+              <ion-label>
+                Applications
+              </ion-label>
+            </ion-button>
           </ion-col>
         </ion-row>
       </ion-toolbar>
@@ -105,6 +113,7 @@ import {
   IonToolbar,
   IonRow,
   IonCol,
+  IonIcon,
   IonButton,
   IonSegment,
   IonSegmentButton,
@@ -121,10 +130,12 @@ import { Service } from "@/services/service"
 import ProgramIcon from "@/components/DataViews/DashboardAppIcon.vue"
 import HomeFolder from "@/components/HomeComponents/HomeFolders.vue"
 import Img from "@/utils/Img"
+import { appsOutline, personOutline, searchOutline, logOutOutline } from 'ionicons/icons';
 
 export default defineComponent({
   name: "Home",
   components: {
+    IonIcon,
     ProgramIcon,
     HomeFolder,
     IonContent,
@@ -141,6 +152,10 @@ export default defineComponent({
   },
   data() {
     return {
+      appsIcon: appsOutline,
+      personIcon: personOutline,
+      searchIcon: searchOutline,
+      logoutIcon: logOutOutline,
       app: {} as AppInterface,
       facilityName: "",
       userLocation: "",
@@ -290,6 +305,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
+ion-icon {
+  padding: 0.5em;
+}
 .tool-bar-medium-content {
   padding: 10px;
 }

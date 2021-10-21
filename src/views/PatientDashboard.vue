@@ -77,15 +77,19 @@
         <ion-footer> 
             <ion-toolbar color="dark">
                 <ion-button color="primary" size="large" slot="end" @click="showTasks"> 
+                    <ion-icon :icon="folderIcon"> </ion-icon>
                     Tasks
                 </ion-button>
-                <ion-button color="primary" size="large" slot="end" @click="showOptions"> 
+                <ion-button color="primary" size="large" slot="end" @click="showOptions">
+                    <ion-icon :icon="folderIcon"> </ion-icon>
                     Printouts/Other
                 </ion-button>
                 <ion-button color="primary" size="large" slot="end" @click="changeApp"> 
+                    <ion-icon :icon="appsIcon"> </ion-icon>
                     Applications
                 </ion-button>
-                <ion-button color="success" size="large" slot="end" @click="onCancel"> 
+                <ion-button color="success" size="large" slot="end" @click="onCancel">
+                    <ion-icon :icon="logOutIcon"> </ion-icon>
                     Finish
                 </ion-button>
             </ion-toolbar>
@@ -114,8 +118,13 @@ import { man, woman } from "ionicons/icons";
 import { WorkflowService } from "@/services/workflow_service"
 import { toastSuccess, toastDanger, alertConfirmation } from "@/utils/Alerts";
 import _, { isEmpty } from "lodash"
-import { time, warning } from "ionicons/icons";
-
+import { 
+    appsOutline, 
+    folderOutline, 
+    logOutOutline, 
+    time, 
+    warningOutline 
+} from "ionicons/icons";
 import {
   IonPage,
   IonContent,
@@ -143,8 +152,11 @@ export default defineComponent({
         IonCol,
     },
     data: () => ({
+        appsIcon: appsOutline,
         timeIcon: time,
-        warningIcon: warning,
+        folderIcon: folderOutline,
+        logOutIcon: logOutOutline,
+        warningIcon: warningOutline,
         app: {} as any,
         dashboardComponent: {} as any,
         isBDE: false as boolean,
@@ -403,6 +415,9 @@ export default defineComponent({
 })
 </script>
 <style scoped>
+    ion-icon {
+        padding: 0.5em;
+    }
     .next-task {
         margin-top: -8px;
         font-weight: 600;
