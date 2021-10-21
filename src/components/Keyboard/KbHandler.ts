@@ -7,7 +7,12 @@ export default function kbHandler(newInput: string, accumulator: string): string
     } else if (newInput.match(/unknown/i)) {
         output = 'Unknown'
     } else {
-        output = `${accumulator}${newInput}`
+        // Override Unknown text with new input
+        if (output.match(/unknown/i)) {
+            output = newInput
+        } else {
+            output = `${accumulator}${newInput}`
+        }
     }
     if (typeof output === 'string' && output) {
         output = output.charAt(0).toUpperCase() + output.slice(1)
