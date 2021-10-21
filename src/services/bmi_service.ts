@@ -23,7 +23,9 @@ export class BMIService {
       }
       const result = await this.getBMIData();
       const dataset = result[gender][age];
-      BMIResult = this.buildBounds(Object.keys(dataset), dataset, bmindex, result.colors);
+      if (dataset) {
+        BMIResult = this.buildBounds(Object.keys(dataset), dataset, bmindex, result.colors);
+      }
     }
     return BMIResult;
 
