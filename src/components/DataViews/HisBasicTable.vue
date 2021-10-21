@@ -36,7 +36,10 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { isEmpty } from "lodash";
+import { IonButton } from "@ionic/vue"
+
 export default defineComponent({
+  components: {IonButton},
   props: {
     styles: {
       type: Array,

@@ -127,6 +127,8 @@ import {
 } from "ionicons/icons";
 import {
   IonPage,
+  IonIcon,
+  IonChip,
   IonContent,
   IonButton,
   IonGrid,
@@ -142,7 +144,9 @@ export default defineComponent({
         PatientHeader,
         VisitDatesCard,
         PrimaryCard,
+        IonChip,
         IonPage,
+        IonIcon,
         IonFooter,
         IonContent,
         IonButton,

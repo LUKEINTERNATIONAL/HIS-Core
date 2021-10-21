@@ -18,12 +18,25 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { IonLabel, IonList, IonItem } from "@ionic/vue";
 import { Option } from "@/components/Forms/FieldInterface"
 import { time } from "ionicons/icons";
-
+import { 
+    IonLabel, 
+    IonList, 
+    IonItem,
+    IonChip,
+    IonIcon,
+    IonBadge
+} from "@ionic/vue";
 export default defineComponent({
-    components: {IonLabel, IonList, IonItem},
+    components: {
+        IonLabel, 
+        IonList, 
+        IonItem,
+        IonChip,
+        IonIcon,
+        IonBadge
+    },
     data: () => ({
         time
     }),

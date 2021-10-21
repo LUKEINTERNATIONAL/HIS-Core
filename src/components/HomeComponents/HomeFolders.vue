@@ -28,6 +28,7 @@ import TaskCard from "@/components/DataViews/TaskCard.vue";
 import { FolderInterface } from "@/apps/interfaces/AppInterface"
 import img from '@/utils/Img'
 import {
+    IonButton,
     IonGrid,
     IonRow,
     IonCol
@@ -36,6 +37,7 @@ import {
 export default defineComponent({
     components: { 
         TaskCard,
+        IonButton,
         IonGrid,
         IonRow,
         IonCol

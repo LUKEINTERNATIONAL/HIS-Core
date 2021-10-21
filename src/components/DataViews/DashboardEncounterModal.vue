@@ -33,15 +33,40 @@
     </ion-toolbar>
   </ion-footer>
 </template>
+
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import HisBasicTable from "@/components/DataViews/HisBasicTable.vue";
 import { actionSheetController, modalController } from "@ionic/vue"
 import { Option } from "@/components/Forms/FieldInterface"
 import { isEmpty } from "lodash"
-import { alertConfirmation } from "@/utils/Alerts.ts"
+import { alertConfirmation } from "@/utils/Alerts"
+import {
+  IonButton,
+  IonToolbar,
+  IonFooter,
+  IonContent,
+  IonRow,
+  IonCol,
+  IonTitle,
+  IonHeader,
+  IonItem,
+  IonList
+} from "@ionic/vue"
 export default defineComponent({
-  components: { HisBasicTable },
+  components: { 
+    HisBasicTable,
+    IonButton,
+    IonToolbar,
+    IonList,
+    IonFooter,
+    IonContent,
+    IonRow,
+    IonCol,
+    IonTitle,
+    IonHeader,
+    IonItem
+  },
   data: () => ({
     active: {
       id: -1,

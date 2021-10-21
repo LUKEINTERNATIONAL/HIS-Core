@@ -16,10 +16,11 @@ import { defineComponent, PropType } from "vue";
 import { Option } from "@/components/Forms/FieldInterface";
 import ToolBarMediumCard from "@/components/Cards/ToolbarMediumCard.vue"
 import Transformer from "@/utils/Transformers"
+import {IonGrid, IonCol, IonRow} from "@ionic/vue"
 
 export default defineComponent({
   name: "HisResultCard",
-  components: {ToolBarMediumCard},
+  components: { ToolBarMediumCard, IonGrid, IonCol, IonRow },
   props: {
     items: {
       type: Object as PropType<Option[]>,

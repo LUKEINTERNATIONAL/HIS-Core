@@ -25,7 +25,7 @@
   </view-port>
 </template>
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 import ViewPort from "@/components/DataViews/ViewPort.vue";
 import { modalController } from "@ionic/vue";
 import LabOrderModal from "@/components/DataViews/LabOrderModal.vue"
