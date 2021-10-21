@@ -23,14 +23,14 @@
                         <div class="his-card"> 
                         <ion-row> 
                            <ion-col size-md="4" size-sm="6"> 
-                               <b>Today's Date:</b> {{ currentDate }}
+                               Today's Date: <b>{{ currentDate }}</b>
                             </ion-col> 
                             <ion-col size-md="4" size-sm="6"> 
                                 <span v-if="nextTask.name"> 
                                     <ion-chip class="next-task" color="success" @click="$router.push(nextTask)">Next Task: {{ nextTask.name.toUpperCase() }}</ion-chip>
                                 </span>
                                 <span v-else> 
-                                    <b> Next Task</b>: NONE
+                                    Next Task: <b>NONE</b>
                                 </span>
                             </ion-col>
                             <ion-col size-md="4" size-sm="12">
@@ -38,7 +38,7 @@
                                     <ion-chip :style="{marginTop: '-8px'}" color="danger" @click="$router.push({name: 'Session Date'})"><b> BDE: {{ sessionDate.toUpperCase() }}</b> </ion-chip>
                                 </span>
                                 <span v-else> 
-                                    <b>Set Date:</b> {{ sessionDate }}
+                                    Set Date: <b>{{ sessionDate }}</b>
                                 </span>
                             </ion-col>
                         </ion-row>
@@ -77,7 +77,7 @@
         <ion-footer> 
             <ion-toolbar color="dark">
                 <ion-button color="primary" size="large" slot="end" @click="showTasks"> 
-                    <ion-icon :icon="folderIcon"> </ion-icon>
+                    <ion-icon :icon="clipboardIcon"> </ion-icon>
                     Tasks
                 </ion-button>
                 <ion-button color="primary" size="large" slot="end" @click="showOptions">
@@ -118,7 +118,8 @@ import { man, woman } from "ionicons/icons";
 import { WorkflowService } from "@/services/workflow_service"
 import { toastSuccess, toastDanger, alertConfirmation } from "@/utils/Alerts";
 import _, { isEmpty } from "lodash"
-import { 
+import {
+    clipboardOutline, 
     appsOutline, 
     folderOutline, 
     logOutOutline, 
@@ -161,6 +162,7 @@ export default defineComponent({
         folderIcon: folderOutline,
         logOutIcon: logOutOutline,
         warningIcon: warningOutline,
+        clipboardIcon: clipboardOutline,
         app: {} as any,
         dashboardComponent: {} as any,
         isBDE: false as boolean,
