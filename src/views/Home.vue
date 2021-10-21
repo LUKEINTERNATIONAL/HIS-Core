@@ -51,11 +51,13 @@
             <ion-label>Administration</ion-label>
           </ion-segment-button>
         </ion-segment>
-        <component 
-          v-if ="activeTab == 1" 
-          v-bind:is="appOverview"
-          > 
-        </component>
+        <keep-alive>
+          <component 
+            v-if ="activeTab == 1" 
+            v-bind:is="appOverview"
+            > 
+          </component>
+        </keep-alive>
         <home-folder
           v-if="activeTab == 2"
           :items="appReports"
