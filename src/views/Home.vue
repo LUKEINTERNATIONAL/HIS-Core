@@ -306,7 +306,7 @@ export default defineComponent({
 
 <style scoped>
 ion-icon {
-  padding: 0.5em;
+  padding: 0.3em;
 }
 .tool-bar-medium-content {
   padding: 10px;

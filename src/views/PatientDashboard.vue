@@ -122,7 +122,7 @@ import {
     appsOutline, 
     folderOutline, 
     logOutOutline, 
-    time, 
+    timeOutline, 
     warningOutline 
 } from "ionicons/icons";
 import {
@@ -153,7 +153,7 @@ export default defineComponent({
     },
     data: () => ({
         appsIcon: appsOutline,
-        timeIcon: time,
+        timeIcon: timeOutline,
         folderIcon: folderOutline,
         logOutIcon: logOutOutline,
         warningIcon: warningOutline,
@@ -416,7 +416,7 @@ export default defineComponent({
 </script>
 <style scoped>
     ion-icon {
-        padding: 0.5em;
+        padding: 0.2em;
     }
     .next-task {
         margin-top: -8px;
