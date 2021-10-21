@@ -341,7 +341,7 @@
           cancel
         </ion-button>
 
-        <ion-button size="large" color="success" slot="end" @click="onFinish">
+        <ion-button size="large" color="success" slot="end" @click="gotoPatientDashboard">
           Continue
         </ion-button>
       </ion-toolbar>

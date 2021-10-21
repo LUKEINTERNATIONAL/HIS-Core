@@ -15,7 +15,9 @@
           <ion-header>
             <ion-toolbar
               ><span>BP management screening on {{ date }}</span>
-              <span v-if="patientOnBPDrugs" style="color: green"> Patient already on BP drugs</span>
+              <span v-if="patientOnBPDrugs" style="color: green">
+                Patient already on BP drugs</span
+              >
               <span slot="end">
                 <ion-button
                   color="danger"
@@ -63,13 +65,29 @@
     </ion-content>
     <ion-footer>
       <ion-toolbar color="black">
-        <ion-button size="large" color="danger" slot="start" v-if="showClinicianButton">
-          Refer to clinician 
+        <ion-button
+          size="large"
+          color="danger"
+          slot="start"
+          v-if="showClinicianButton"
+          @click="referPatient"
+        >
+          Refer to clinician
         </ion-button>
-        <ion-button size="large" slot="start" @click="goToDiagnosis" v-if="!patientHasHyperTensionObs" >
-          Hypertension Diagnosis 
+        <ion-button
+          size="large"
+          slot="start"
+          @click="goToDiagnosis"
+          v-if="!patientHasHyperTensionObs"
+        >
+          Hypertension Diagnosis
         </ion-button>
-        <ion-button size="large" color="danger" slot="start" @click="gotoPatientDashboard">
+        <ion-button
+          size="large"
+          color="danger"
+          slot="start"
+          @click="gotoPatientDashboard"
+        >
           cancel
         </ion-button>
         <ion-button size="large" color="success" slot="end" @click="onFinish">
@@ -157,7 +175,8 @@ export default defineComponent({
     isEnrolledInHTN: false,
     isAliveOnHTN: false,
     HTNProgramID: 20,
-    aliveState: 160
+    aliveState: 160,
+    refer: false,
   }),
   watch: {
     patient: {
@@ -182,78 +201,113 @@ export default defineComponent({
       return this.riskFactors.filter((d: any) => d.value === "Yes").length;
     },
     showClinicianButton() {
-      return !UserService.isClinician() && !UserService.isDoctor()
+      return !UserService.isClinician() && !UserService.isDoctor();
     },
   },
   methods: {
     async onFinish() {
-      if (this.action) {
-        const encounter = await this.htn.createEncounter()
-      if (!encounter) return toastWarning('Unable to create encounter')
-      const obs = await this.htn.saveValueTextObs('Plan', this.action.label)
+      if (this.action || this.refer) {
+        const encounter = await this.htn.createEncounter();
+        if (!encounter) return toastWarning("Unable to create encounter");
+        if (this.refer) {
+          const obs = await this.htn.saveValueCodedObs(
+            "Refer patient to clinician",
+            "Yes"
+          );
+          if (!obs) return toastWarning("Unable to create Obs");
+          this.gotoPatientDashboard();
+        } else {
+          const obs = await this.htn.saveValueTextObs(
+            "Plan",
+            this.action.label
+          );
 
-      if (!obs) return toastWarning('Unable to create Obs')
-      const patientState = {
-        state: this.action.value
-      }
-        await this.htn.enrollPatient(patientState);
-        this.nextAction(this.action.value);
-        console.log(this.action);
+          if (!obs) return toastWarning("Unable to create Obs");
+          const patientState = {
+            state: this.action.value,
+          };
+          await this.htn.enrollPatient(patientState);
+          this.nextAction(this.action.value);
+        }
       } else {
         toastWarning("Please select an action");
-    
       }
     },
+    referPatient() {
+      this.refer = true;
+      this.onFinish();
+    },
     goToDiagnosis() {
-      return this.$router.push({path: `/art/encounters/hypertension_diagnosis/${this.patientID}`}) 
+      return this.$router.push({
+        path: `/art/encounters/hypertension_diagnosis/${this.patientID}`,
+      });
     },
     nextAction(state: string) {
       switch (state) {
-      
-       case 'Start anti-hypertensives' :
-          this.$router.push(`/art/encounters/bp_prescription/${this.patientID}`);
+        case "Start anti-hypertensives":
+          this.$router.push(
+            `/art/encounters/bp_prescription/${this.patientID}`
+          );
           break;
-      case 'Review Drugs':
-          this.$router.push(`/art/encounters/bp_adherence/${this.patientID}?review=true`);
+        case "Review Drugs":
+          this.$router.push(
+            `/art/encounters/bp_adherence/${this.patientID}?review=true`
+          );
           this.nextTask();
           break;
-      case 'Continue Drugs':
+        case "Continue Drugs":
           this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`);
           this.nextTask();
           break;
-      case 'Did not take prescribed BP drugs today':
+        case "Did not take prescribed BP drugs today":
           this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`);
           break;
-      default :
+        default:
           this.nextTask();
           break;
       }
     },
-    
-    async hasHyperTenstion() {
-      const ob = await ObservationService.getFirstValueCoded(this.patientID, 'Patient has hypertension');
-      this.patientHasHyperTensionObs = ob === "Yes";
 
+    async hasHyperTenstion() {
+      const ob = await ObservationService.getFirstValueCoded(
+        this.patientID,
+        "Patient has hypertension"
+      );
+      this.patientHasHyperTensionObs = ob === "Yes";
     },
     async isTransfered() {
-      const ob = await ObservationService.getFirstValueCoded(this.patientID, 'Transferred');
+      const ob = await ObservationService.getFirstValueCoded(
+        this.patientID,
+        "Transferred"
+      );
       this.patientFirstVisit = ob !== "Yes";
-
     },
     async getTreatmentStatus() {
-      const ob = await ObservationService.getFirstValueText(this.patientID, 'Treatment status');
+      const ob = await ObservationService.getFirstValueText(
+        this.patientID,
+        "Treatment status"
+      );
       this.patientOnBPDrugs = ob && ob.match(/BP Drugs started/i);
     },
     async getProgramStatus() {
-      const programs: any[] = await ProgramService.getPatientPrograms(this.patientID);
-      this.isEnrolledInHTN = programs.filter(program => program.program.name === "HYPERTENSION PROGRAM").length > 0;
-      if(this.isEnrolledInHTN) {
+      const programs: any[] = await ProgramService.getPatientPrograms(
+        this.patientID
+      );
+      this.isEnrolledInHTN =
+        programs.filter(
+          (program) => program.program.name === "HYPERTENSION PROGRAM"
+        ).length > 0;
+      if (this.isEnrolledInHTN) {
         await this.programState();
       }
     },
     async programState() {
-      const programs: any[] = await ProgramService.getPatientStates(this.patientID, this.HTNProgramID);
-      this.isAliveOnHTN = programs.filter(program => program.name === "Alive").length > 0;
+      const programs: any[] = await ProgramService.getPatientStates(
+        this.patientID,
+        this.HTNProgramID
+      );
+      this.isAliveOnHTN =
+        programs.filter((program) => program.name === "Alive").length > 0;
     },
     async getRiskFactors() {
       const concepts = ConceptService.getConceptsByCategory("risk factors");
@@ -304,37 +358,37 @@ export default defineComponent({
       }
     },
     async enrollInHTN() {
-
       const sessionDate = ProgramService.getSessionDate();
-      await ProgramService.enrollProgram(this.patientID, this.HTNProgramID, sessionDate);
+      await ProgramService.enrollProgram(
+        this.patientID,
+        this.HTNProgramID,
+        sessionDate
+      );
       await ProgramService.createState(this.patientID, this.HTNProgramID, {
-        "state": this.aliveState
-      })
+        state: this.aliveState,
+      });
     },
     async getItems() {
       if (this.patientOnBPDrugs && this.patientFirstVisit) {
-
-        if(!this.isEnrolledInHTN) {
-
-        alertAction('Do you want to enroll this client in the HTN program?', [
-        {
-          text: 'Yes',
-          handler: async () =>  {
-            await this.enrollInHTN()
-            this.patientFirstVisit = false;
-            await this.getItems();
-          }
-        },
-        {
-          text: 'No',
-          handler: () => this.nextTask()
-        }
-        ])
-        
-        }else {
+        if (!this.isEnrolledInHTN) {
+          alertAction("Do you want to enroll this client in the HTN program?", [
+            {
+              text: "Yes",
+              handler: async () => {
+                await this.enrollInHTN();
+                this.patientFirstVisit = false;
+                await this.getItems();
+              },
+            },
+            {
+              text: "No",
+              handler: () => this.nextTask(),
+            },
+          ]);
+        } else {
           this.patientFirstVisit = false;
-          await this.getItems(); 
-        }        
+          await this.getItems();
+        }
       } else {
         if (this.currentDrugs.length > 0) {
           this.items = [
