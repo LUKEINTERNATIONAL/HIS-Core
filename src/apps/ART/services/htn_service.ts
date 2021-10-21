@@ -23,4 +23,108 @@ export class BPManagementService extends AppEncounterService {
     async enrollPatient(state: any) {
       return await AppEncounterService.postJson(`/patients/${this.patientID}/update_or_create_htn_state`, state);
     }
+    getDrugs() {
+        return {
+        HCZ: {
+          drugs: [
+            {
+              drugName: "HCZ (25mg tablet)",
+              drugID: 275,
+              current: false,
+              selected: false,
+              isChecked: false,
+              dispensed: null,
+              expectedRemaining: null,
+              adherence: null,
+            },
+          ],
+          selected: null,
+          notes: [],
+        },
+        Enalapril: {
+          drugs: [
+            {
+              drugName: "Enalapril (5mg tablet)",
+              drugID: 942,
+              current: false,
+              selected: false,
+              isChecked: false,
+              dispensed: null,
+              expectedRemaining: null,
+              adherence: null,
+              remaining: null,
+            },
+            {
+              drugName: "Enalapril (10mg tablet)",
+              drugID: 943,
+              current: false,
+              selected: false,
+              isChecked: false,
+              dispensed: null,
+              expectedRemaining: null,
+              adherence: null,
+              remaining: null,
+            },
+          ],
+          selected: null,
+          notes: [],
+        },
+        Amlodipine: {
+          drugs: [
+            {
+              drugName: "Amlodipine (5mg tablet)",
+              drugID: 558,
+              current: false,
+              selected: false,
+              isChecked: false,
+              dispensed: null,
+              expectedRemaining: null,
+              adherence: null,
+              remaining: null,
+            },
+            {
+              drugName: "Amlodipine (10mg tablet)",
+              drugID: 559,
+              current: false,
+              selected: false,
+              isChecked: false,
+              dispensed: null,
+              expectedRemaining: null,
+              adherence: null,
+              remaining: null,
+            },
+          ],
+          selected: null,
+          notes: [],
+        },
+        Atenolol: {
+          drugs: [
+            {
+              drugName: "Atenolol (50mg tablet)",
+              drugID: 117,
+              current: false,
+              selected: false,
+              isChecked: false,
+              dispensed: null,
+              expectedRemaining: null,
+              adherence: null,
+              remaining: null,
+            },
+            {
+              drugName: "Atenolol(100mg tablet)",
+              drugID: 11,
+              current: false,
+              selected: false,
+              isChecked: false,
+              dispensed: null,
+              expectedRemaining: null,
+              adherence: null,
+              remaining: null,
+            },
+          ],
+          selected: null,
+          notes: [],
+        },
+      }
+    }
 }

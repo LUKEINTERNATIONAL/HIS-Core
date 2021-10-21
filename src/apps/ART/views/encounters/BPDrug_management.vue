@@ -11,7 +11,7 @@
     </ion-header>
     <ion-content>
       <view-port>
-        <div class="view-port-content">
+        <div class="view-port-content" v-if="drugs">
           <ion-content>
             <table id="main-table">
               <tr>
@@ -387,6 +387,7 @@ export default defineComponent({
     patient: {
       async handler(patient: any) {
         this.HTN = new BPManagementService(this.patientID, this.providerID);
+        this.drugs = this.HTN.getDrugs();
         await this.getCurrentDrugs();
       },
       deep: true,
@@ -404,88 +405,7 @@ export default defineComponent({
           ["", "Clear"],
         ],
       ] as any,
-      drugs: {
-        HCZ: {
-          drugs: [
-            {
-              drugName: "HCZ (25mg tablet)",
-              drugID: 275,
-              current: false,
-              selected: false,
-              isChecked: false,
-              notes: [],
-            },
-          ],
-          selected: null,
-          notes: [],
-        },
-        Enalapril: {
-          drugs: [
-            {
-              drugName: "Enalapril (5mg tablet)",
-              drugID: 942,
-              current: false,
-              selected: false,
-              isChecked: false,
-              notes: [],
-            },
-            {
-              drugName: "Enalapril (10mg tablet)",
-              drugID: 943,
-              current: false,
-              selected: false,
-              isChecked: false,
-              notes: [],
-            },
-          ],
-          selected: null,
-          notes: [],
-        },
-        Amlodipine: {
-          drugs: [
-            {
-              drugName: "Amlodipine (5mg tablet)",
-              drugID: 558,
-              current: false,
-              selected: false,
-              isChecked: false,
-              notes: [],
-            },
-            {
-              drugName: "Amlodipine (10mg tablet)",
-              drugID: 559,
-              current: false,
-              selected: false,
-              isChecked: false,
-              notes: [],
-            },
-          ],
-          selected: null,
-          notes: [],
-        },
-        Atenolol: {
-          drugs: [
-            {
-              drugName: "Atenolol (50mg tablet)",
-              drugID: 117,
-              current: false,
-              selected: false,
-              isChecked: false,
-              notes: [],
-            },
-            {
-              drugName: "Atenolol(100mg tablet)",
-              drugID: 11,
-              current: false,
-              selected: false,
-              isChecked: false,
-              notes: [],
-            },
-          ],
-          selected: null,
-          notes: [],
-        },
-      } as any,
+      drugs: null as any,
     };
   },
   methods: {
