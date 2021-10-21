@@ -10,6 +10,9 @@ import HisDate from "@/utils/Date"
 import { isEmpty } from "lodash"
 import { CD4_COUNT_PAD_LO } from "@/components/Keyboard/KbLayouts"
 import { matchToGuidelines } from "@/utils/GuidelineEngine"
+import {
+    getFacilities
+} from '@/utils/HisFormHelpers/LocationFieldOptions'
 
 export default defineComponent({
     mixins: [EncounterMixinVue],
@@ -90,11 +93,8 @@ export default defineComponent({
             }
             return true
         },
-        async getFacilities(filter=''){
-            const facilities = await this.staging.getFacilities(filter)
-            return facilities.map((facility: any) => ({
-                label: facility.name, value: facility.location_id
-            }))
+        getFacilities(filter='') {
+            return getFacilities(filter)
         },
         updateStagingFacts(stage: number, data: any) {
             const activeStage = this.stagingFacts.stage === null ? 0 : this.stagingFacts.stage
