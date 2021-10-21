@@ -196,16 +196,13 @@ export default defineComponent({
       const patientState = {
         state: this.action.value
       }
-        await this.enrollPatient(patientState);
+        await this.htn.enrollPatient(patientState);
         this.nextAction(this.action.value);
         console.log(this.action);
       } else {
         toastWarning("Please select an action");
     
       }
-    },
-    async enrollPatient(state: any) {
-      return await Service.postJson(`/patients/${this.patientID}/update_or_create_htn_state`, state);
     },
     goToDiagnosis() {
       return this.$router.push({path: `/art/encounters/hypertension_diagnosis/${this.patientID}`}) 

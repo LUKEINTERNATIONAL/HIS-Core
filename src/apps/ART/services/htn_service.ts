@@ -20,4 +20,7 @@ export class BPManagementService extends AppEncounterService {
             pills: pills
         });
     }
+    async enrollPatient(state: any) {
+      return await AppEncounterService.postJson(`/patients/${this.patientID}/update_or_create_htn_state`, state);
+    }
 }
