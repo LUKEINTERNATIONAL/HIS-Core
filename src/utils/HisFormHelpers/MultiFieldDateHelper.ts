@@ -132,7 +132,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
 
     const yearID = `year_${field.id}`
     const monthID = `month_${field.id}`
-    const dayID = field.id
+    const dayID = `day_${field.id}`
     const ageEstimateID = `age_estimate_${field.id}`
     const durationEstimateID = `duration_estimate_${field.id}`
 
