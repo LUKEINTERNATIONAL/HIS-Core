@@ -24,12 +24,12 @@
         <div class="view-port-content">
           <ion-header> </ion-header>
           <ion-content>
-            <div>
-              <ion-grid>
-                <ion-row>
+            <div style="height: 100%;">
+              <ion-grid style="height: 100%;">
+                <ion-row style="max-height: 80%; overflow: scroll; ">
                   <his-table :columns="columns" :rows="rows"></his-table>
                 </ion-row>
-                <ion-row style="margin-top: 40vh">
+                <ion-row style="height: 30%; margin-top: 40vh">
                   <ion-radio-group v-model="action">
                     <ion-grid>
                       <ion-row>
