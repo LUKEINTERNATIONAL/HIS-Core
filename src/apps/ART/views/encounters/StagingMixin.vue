@@ -171,16 +171,6 @@ export default defineComponent({
             }
             return true
         },
-        yearNotHundredAgo(year: string) {
-            const oldestYear = HisDate.getYearFromAge(100)
-            return parseInt(year) < oldestYear ? ['Year is too long ago'] : null
-        },
-        dateBeforeBirthDate(date: string) {
-            return date < this.patient.getBirthdate() ? ['Date is before Date of birth'] : null
-        },
-        dateInFuture(date: string) {
-            return date > this.staging.getDate() ? ['Date is out of range'] : null
-        },
         getStagingSummaryField(helpText="Summary" as string) {
             return {
                 id: 'summary',
