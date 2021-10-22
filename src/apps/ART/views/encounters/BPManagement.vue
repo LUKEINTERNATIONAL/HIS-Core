@@ -1,11 +1,12 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar
-        ><span>BP management screening on {{ date }}</span>
-        <span v-if="patientOnBPDrugs" style="color: green">
-          Patient already on BP drugs</span
-        >
+      <ion-toolbar>
+        <ion-title> 
+          <span>BP management screening on {{ date }}</span>
+          <span v-if="patientOnBPDrugs" style="color: green">
+            Patient already on BP drugs</span>
+        </ion-title>
         <span slot="end">
           <ion-button
             color="danger"
@@ -94,6 +95,7 @@ import ViewPort from "@/components/DataViews/ViewPort.vue";
 import HisTable from "@/components/DataViews/HisBasicTable.vue";
 import {
   IonToolbar,
+  IonTitle,
   IonHeader,
   IonContent,
   IonGrid,
@@ -124,6 +126,7 @@ export default defineComponent({
   components: {
     ViewPort,
     HisTable,
+    IonTitle,
     IonToolbar,
     IonHeader,
     IonContent,
