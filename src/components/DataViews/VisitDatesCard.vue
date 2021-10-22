@@ -36,8 +36,15 @@
 import { defineComponent, PropType } from "vue";
 import { Option } from "@/components/Forms/FieldInterface";
 import { chunk, isEmpty } from "lodash"
-
+import {
+  IonList,
+  IonItem
+} from "@ionic/vue"
 export default defineComponent({
+  components: {
+    IonList,
+    IonItem
+  },
   props: {
     title: {
       type: String,

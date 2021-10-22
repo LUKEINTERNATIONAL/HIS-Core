@@ -23,14 +23,14 @@
                         <div class="his-card"> 
                         <ion-row> 
                            <ion-col size-md="4" size-sm="6"> 
-                               <b>Today's Date:</b> {{ currentDate }}
+                               Today's Date: <b>{{ currentDate }}</b>
                             </ion-col> 
                             <ion-col size-md="4" size-sm="6"> 
                                 <span v-if="nextTask.name"> 
                                     <ion-chip class="next-task" color="success" @click="$router.push(nextTask)">Next Task: {{ nextTask.name.toUpperCase() }}</ion-chip>
                                 </span>
                                 <span v-else> 
-                                    <b> Next Task</b>: NONE
+                                    Next Task: <b>NONE</b>
                                 </span>
                             </ion-col>
                             <ion-col size-md="4" size-sm="12">
@@ -38,7 +38,7 @@
                                     <ion-chip :style="{marginTop: '-8px'}" color="danger" @click="$router.push({name: 'Session Date'})"><b> BDE: {{ sessionDate.toUpperCase() }}</b> </ion-chip>
                                 </span>
                                 <span v-else> 
-                                    <b>Set Date:</b> {{ sessionDate }}
+                                    Set Date: <b>{{ sessionDate }}</b>
                                 </span>
                             </ion-col>
                         </ion-row>
@@ -77,15 +77,19 @@
         <ion-footer> 
             <ion-toolbar color="dark">
                 <ion-button color="primary" size="large" slot="end" @click="showTasks"> 
+                    <ion-icon :icon="clipboardIcon"> </ion-icon>
                     Tasks
                 </ion-button>
-                <ion-button color="primary" size="large" slot="end" @click="showOptions"> 
+                <ion-button color="primary" size="large" slot="end" @click="showOptions">
+                    <ion-icon :icon="folderIcon"> </ion-icon>
                     Printouts/Other
                 </ion-button>
                 <ion-button color="primary" size="large" slot="end" @click="changeApp"> 
+                    <ion-icon :icon="appsIcon"> </ion-icon>
                     Applications
                 </ion-button>
-                <ion-button color="success" size="large" slot="end" @click="onCancel"> 
+                <ion-button color="success" size="large" slot="end" @click="onCancel">
+                    <ion-icon :icon="logOutIcon"> </ion-icon>
                     Finish
                 </ion-button>
             </ion-toolbar>
@@ -114,10 +118,18 @@ import { man, woman } from "ionicons/icons";
 import { WorkflowService } from "@/services/workflow_service"
 import { toastSuccess, toastDanger, alertConfirmation } from "@/utils/Alerts";
 import _, { isEmpty } from "lodash"
-import { time, warning } from "ionicons/icons";
-
+import {
+    clipboardOutline, 
+    appsOutline, 
+    folderOutline, 
+    logOutOutline, 
+    timeOutline, 
+    warningOutline 
+} from "ionicons/icons";
 import {
   IonPage,
+  IonIcon,
+  IonChip,
   IonContent,
   IonButton,
   IonGrid,
@@ -133,7 +145,9 @@ export default defineComponent({
         PatientHeader,
         VisitDatesCard,
         PrimaryCard,
+        IonChip,
         IonPage,
+        IonIcon,
         IonFooter,
         IonContent,
         IonButton,
@@ -143,8 +157,12 @@ export default defineComponent({
         IonCol,
     },
     data: () => ({
-        timeIcon: time,
-        warningIcon: warning,
+        appsIcon: appsOutline,
+        timeIcon: timeOutline,
+        folderIcon: folderOutline,
+        logOutIcon: logOutOutline,
+        warningIcon: warningOutline,
+        clipboardIcon: clipboardOutline,
         app: {} as any,
         dashboardComponent: {} as any,
         isBDE: false as boolean,
@@ -403,6 +421,9 @@ export default defineComponent({
 })
 </script>
 <style scoped>
+    ion-icon {
+        padding: 0.2em;
+    }
     .next-task {
         margin-top: -8px;
         font-weight: 600;

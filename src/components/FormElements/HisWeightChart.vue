@@ -59,9 +59,20 @@
 import { defineComponent } from 'vue'
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue'
-
+import {
+    IonCol,
+    IonRow,
+    IonItem,
+    IonChip
+} from "@ionic/vue"
 export default defineComponent({
-   components: { ViewPort },
+   components: { 
+        ViewPort,
+        IonCol,
+        IonRow,
+        IonItem,
+        IonChip 
+    },
    mixins: [FieldMixinVue],
    data: () => ({
       stats: {

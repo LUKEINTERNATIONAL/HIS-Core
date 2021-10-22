@@ -38,15 +38,17 @@
     </view-port>
 </template>
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
 import ViewPort from '../DataViews/ViewPort.vue'
 import { modalController } from '@ionic/vue'
 import { Option } from '@/components/Forms/FieldInterface'
 import KeyPad from '../Keyboard/HisKeypad.vue'
 import { find } from 'lodash'
 import FieldMixinVue from './FieldMixin.vue'
+import { IonImg, IonInput } from '@ionic/vue'
+
 export default defineComponent({
-  components: { ViewPort },
+  components: { ViewPort, IonImg, IonInput },
   mixins: [FieldMixinVue],
   data: () => ({
     listData: [] as any

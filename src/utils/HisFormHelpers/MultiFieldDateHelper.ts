@@ -132,7 +132,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
 
     const yearID = `year_${field.id}`
     const monthID = `month_${field.id}`
-    const dayID = field.id
+    const dayID = `day_${field.id}`
     const ageEstimateID = `age_estimate_${field.id}`
     const durationEstimateID = `duration_estimate_${field.id}`
 
@@ -205,6 +205,9 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             fullDate = `${val.value}-${month}-${day}`
             return field.computeValue(fullDate, false)
         }
+        if (val && val.value === 'Unknown') {
+            return field.computeValue('Unknown', false)
+        }
     }
 
     // MONTH CONFIG
@@ -264,6 +267,9 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     const validateValueEstimate = (v: Option, f: any, c: any) => {
         if (StandardValidations.required(v)) {
             return ['Please select an estimate']
+        }
+        if (isNaN(parseInt(v.value.toString()))) {
+            return ['Please enter a valid number']
         }
         return validateMinMax(fullDate, field, f, c)
     }

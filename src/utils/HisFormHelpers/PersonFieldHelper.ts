@@ -212,10 +212,11 @@ export default {
             type: FieldType.TT_NUMBER,
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => {
-                if (val && val.value.match(/Unknown/i)) return
+                if (val && (val.value.match(/Unknown/i) 
+                    || val.value.match(/n\/a/i))) return
 
                 return Validation.isMWPhoneNumber(val)
-            } 
+            }
         }
     },
     getLandmarkField(): Field {

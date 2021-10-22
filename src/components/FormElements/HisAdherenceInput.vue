@@ -25,8 +25,20 @@ import { modalController } from '@ionic/vue'
 import { Option } from '@/components/Forms/FieldInterface'
 import KeyPad from '../Keyboard/HisKeypad.vue'
 import FieldMixinVue from './FieldMixin.vue'
+import {
+    IonGrid,
+    IonCol,
+    IonRow,
+    IonInput
+} from "@ionic/vue"
 export default defineComponent({
-  components: { ViewPort },
+  components: { 
+    ViewPort,
+    IonGrid,
+    IonCol,
+    IonRow,
+    IonInput
+  },
   mixins: [FieldMixinVue],
   data: () => ({
     listData: [] as any

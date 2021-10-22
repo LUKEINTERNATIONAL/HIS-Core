@@ -1,7 +1,7 @@
 <template>
     <view-port :showFull="false">
         <ion-grid>
-            <ion-row >
+            <ion-row>
                 <ion-col v-if="prependValue" size-md="4">
                     <ion-input :value="prependValue" class="input_display" :disabled="true"/>
                 </ion-col>
@@ -23,15 +23,34 @@ import { defineComponent } from 'vue'
 import BaseInput from "@/components/FormElements/BaseTextInput.vue"
 import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
-import { IonInput, IonList, IonItem, IonLabel} from "@ionic/vue"
 import { Option } from '../Forms/FieldInterface'
 import { QWERTY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue'
 import { isPlainObject } from 'lodash'
+import { 
+    IonInput,
+    IonRow,
+    IonCol,
+    IonGrid,
+    IonList, 
+    IonItem, 
+    IonLabel
+} from "@ionic/vue"
 
 export default defineComponent({
-    components: { IonInput, BaseInput, HisKeyboard, ViewPort, IonList, IonItem, IonLabel },
+    components: { 
+        IonInput, 
+        IonRow,
+        IonCol,
+        IonGrid,
+        BaseInput, 
+        HisKeyboard, 
+        ViewPort, 
+        IonList, 
+        IonItem, 
+        IonLabel 
+    },
     mixins: [FieldMixinVue],
     data: ()=>({
         value: '' as string,

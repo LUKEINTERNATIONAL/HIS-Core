@@ -9,6 +9,7 @@ export interface ActivityInterface {
 export interface FolderInterface {
     name: string;
     icon?: string;
+    defaultFilesIcon?: string;
     files: Array<
         {
             name: string;
