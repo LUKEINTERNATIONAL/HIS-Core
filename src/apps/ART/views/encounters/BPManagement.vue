@@ -1,38 +1,28 @@
 <template>
   <ion-page>
     <ion-header>
-      <ion-toolbar>
-        <ion-row>
-          <ion-col>
-            <label class="his-title"> BP management </label>
-          </ion-col>
-        </ion-row>
+      <ion-toolbar
+        ><span>BP management screening on {{ date }}</span>
+        <span v-if="patientOnBPDrugs" style="color: green">
+          Patient already on BP drugs</span
+        >
+        <span slot="end">
+          <ion-button
+            color="danger"
+            @click="showRiskFactors"
+            v-if="totalRiskFactors > 0"
+            >View/Edit risk factors {{ totalRiskFactors }}</ion-button
+          >
+          <ion-button @click="showRiskFactors" v-if="totalRiskFactors === 0"
+            >add riskfactors</ion-button
+          >
+        </span>
       </ion-toolbar>
     </ion-header>
     <ion-content>
       <view-port>
         <div class="view-port-content">
-          <ion-header>
-            <ion-toolbar
-              ><span>BP management screening on {{ date }}</span>
-              <span v-if="patientOnBPDrugs" style="color: green">
-                Patient already on BP drugs</span
-              >
-              <span slot="end">
-                <ion-button
-                  color="danger"
-                  @click="showRiskFactors"
-                  v-if="totalRiskFactors > 0"
-                  >View/Edit risk factors {{ totalRiskFactors }}</ion-button
-                >
-                <ion-button
-                  @click="showRiskFactors"
-                  v-if="totalRiskFactors === 0"
-                  >add riskfactors</ion-button
-                >
-              </span>
-            </ion-toolbar>
-          </ion-header>
+          <ion-header> </ion-header>
           <ion-content>
             <div>
               <ion-grid>
@@ -90,7 +80,7 @@
         >
           Hypertension Diagnosis
         </ion-button>
-       
+
         <ion-button size="large" color="success" slot="end" @click="onFinish">
           Finish
         </ion-button>
