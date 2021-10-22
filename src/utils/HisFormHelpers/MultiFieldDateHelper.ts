@@ -205,6 +205,9 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             fullDate = `${val.value}-${month}-${day}`
             return field.computeValue(fullDate, false)
         }
+        if (val && val.value === 'Unknown') {
+            return field.computeValue('Unknown', false)
+        }
     }
 
     // MONTH CONFIG
