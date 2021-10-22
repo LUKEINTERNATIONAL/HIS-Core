@@ -69,6 +69,14 @@
           size="large"
           color="danger"
           slot="start"
+          @click="gotoPatientDashboard"
+        >
+          cancel
+        </ion-button>
+        <ion-button
+          size="large"
+          color="danger"
+          slot="start"
           v-if="showClinicianButton"
           @click="referPatient"
         >
@@ -82,14 +90,7 @@
         >
           Hypertension Diagnosis
         </ion-button>
-        <ion-button
-          size="large"
-          color="danger"
-          slot="start"
-          @click="gotoPatientDashboard"
-        >
-          cancel
-        </ion-button>
+       
         <ion-button size="large" color="success" slot="end" @click="onFinish">
           Finish
         </ion-button>
