@@ -61,8 +61,11 @@ export default defineComponent({
         },
         async selectProvider(providers: Array<string>) {
             const toDate = (date: any) => HisDate.toStandardHisDisplayFormat(date)
+            const encounterName = this.$route.name 
+                ? this.$route.name.toString().toUpperCase()
+                : 'Kaya'
             const modal = await optionsActionSheet(
-                'Please select a provider',
+                `Please select a provider for ${encounterName}`,
                 `BDE: ${toDate(ProgramService.getSessionDate())} 
                     | Current: ${toDate(ProgramService.getCachedApiDate())}`,
                 providers,
