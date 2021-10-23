@@ -13,7 +13,7 @@
                       height: '90px',
                       margin: '0'
                     }"
-                    src="/assets/images/barcode.svg"/>
+                    :src="barcodeLogo"/>
                 </ion-col>
                 <ion-col size-lg="7" size-sm="8"> 
                   <input v-model="patientBarcode" class="barcode-input" ref="scanBarcode"/>
@@ -24,15 +24,17 @@
           <ion-col size="5">
             <div class="tool-bar-medium-card">
               <div class="tool-bar-medium-content"> 
-                <p><b>Facility name:</b> {{ facilityName }}</p>
-                <p><b>Location:</b> {{ userLocation }}</p>
-                <p><b>Date:</b> <ion-label :color="isBDE ? 'danger' : 'success'"> {{ sessionDate }} </ion-label></p>
-                <p><b>User:</b> {{ userName }}</p>
+                <p>Facility name: <b>{{ facilityName }}</b></p>
+                <p>Location: <b> {{ userLocation }}</b></p>
+                <p>Date: <ion-label :color="isBDE ? 'danger' : 'success'">
+                  <b> {{ sessionDate }} </b> 
+                  </ion-label></p>
+                <p>User:<b> {{ userName }}</b></p>
               </div>
             </div>
           </ion-col>
           <ion-col size="3">
-            <program-icon :icon="app.applicationIcon"> </program-icon>
+            <program-icon :icon="appLogo"> </program-icon>
           </ion-col>
         </ion-row>
       </ion-toolbar>
@@ -40,22 +42,32 @@
 
     <ion-content :fullscreen="true">
       <div id="container" class="his-card overview" v-if="ready">
-        <ion-segment scrollable value="1" class="ion-justify-content-center">
-          <ion-segment-button value="1" @click="activeTab = 1">
+        <ion-segment mode="ios" scrollable :value="activeTab" class="ion-justify-content-center">
+          <ion-segment-button :value="1" @click="activeTab = 1">
             <ion-label>Overview</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="2" @click="activeTab = 2">
+          <ion-segment-button v-if="canReport" :value="2" @click="activeTab = 2">
             <ion-label>Reports</ion-label>
           </ion-segment-button>
-          <ion-segment-button value="3" @click="activeTab = 3">
+          <ion-segment-button :value="3" @click="activeTab = 3">
             <ion-label>Administration</ion-label>
           </ion-segment-button>
         </ion-segment>
-        <div>
-          <overview v-show="activeTab == 1"> </overview>
-          <reports v-show="activeTab == 2"></reports>
-          <administration v-show="activeTab == 3"></administration>
-        </div>
+        <component 
+          v-if ="activeTab == 1" 
+          v-bind:is="appOverview"
+          > 
+        </component>
+        <home-folder
+          v-if="activeTab == 2"
+          :items="appReports"
+          >
+        </home-folder>
+        <home-folder 
+          v-if="activeTab == 3"
+          :items="app.globalPropertySettings" 
+          >
+        </home-folder>
       </div>
     </ion-content>
 
@@ -63,22 +75,30 @@
       <ion-toolbar>
         <ion-row>
           <ion-col>
-            <ion-button color="danger left" size="large" @click="signOut"
-              >Logout</ion-button
-            >
+            <ion-button color="danger left" size="large" @click="signOut">
+              <ion-icon :icon="logoutIcon"></ion-icon>
+                Logout
+              </ion-button>
+          </ion-col>
+          <ion-col v-if="canFindByIdentifier">
+            <ion-button color="primary" size="large" router-link="/patients/search/id">
+              <ion-icon :icon="searchIcon"> </ion-icon>
+              Find By
+            </ion-button>
           </ion-col>
           <ion-col>
-            <ion-button color="primary" size="large" router-link="/patients/search/by_arv">Find By</ion-button>
+            <ion-button color="primary" size="large" router-link="/patient/registration">
+              <ion-icon :icon="personIcon"></ion-icon>
+                Find or Register
+              </ion-button>
           </ion-col>
           <ion-col>
-            <ion-button color="primary" size="large" router-link="/patient/registration"
-              >Find or Register</ion-button
-            >
-          </ion-col>
-          <ion-col>
-            <ion-button color="primary" size="large" @click="openModal"
-              >Applications</ion-button
-            >
+            <ion-button color="primary" size="large" @click="openModal">
+              <ion-icon :icon="appsIcon"></ion-icon>
+              <ion-label>
+                Applications
+              </ion-label>
+            </ion-button>
           </ion-col>
         </ion-row>
       </ion-toolbar>
@@ -95,6 +115,7 @@ import {
   IonToolbar,
   IonRow,
   IonCol,
+  IonIcon,
   IonButton,
   IonSegment,
   IonSegmentButton,
@@ -105,18 +126,20 @@ import { defineComponent } from "vue";
 import { barcode } from "ionicons/icons";
 import { GlobalPropertyService } from "@/services/global_property_service"
 import ApiClient from "@/services/api_client";
-import Administration from "@/components/ART/administration.vue";
-import Reports from "@/components/ART/reports.vue";
-import Overview from "@/components/ART/overview.vue";
 import HisDate from "@/utils/Date"
-import { AppInterface } from "@/apps/interfaces/AppInterface";
+import { AppInterface, FolderInterface } from "@/apps/interfaces/AppInterface";
 import { Service } from "@/services/service"
 import ProgramIcon from "@/components/DataViews/DashboardAppIcon.vue"
+import HomeFolder from "@/components/HomeComponents/HomeFolders.vue"
+import Img from "@/utils/Img"
+import { appsOutline, personOutline, searchOutline, logOutOutline } from 'ionicons/icons';
 
 export default defineComponent({
   name: "Home",
   components: {
+    IonIcon,
     ProgramIcon,
+    HomeFolder,
     IonContent,
     IonHeader,
     IonPage,
@@ -125,15 +148,16 @@ export default defineComponent({
     IonCol,
     IonButton,
     IonFooter,
-    Administration,
-    Reports,
     IonSegment,
     IonSegmentButton,
-    Overview,
     IonLabel
   },
   data() {
     return {
+      appsIcon: appsOutline,
+      personIcon: personOutline,
+      searchIcon: searchOutline,
+      logoutIcon: logOutOutline,
       app: {} as AppInterface,
       facilityName: "",
       userLocation: "",
@@ -143,8 +167,32 @@ export default defineComponent({
       activeTab: 1,
       ready: false,
       patientBarcode: "",
+      overviewComponent: {} as any,
       isBDE: false
     };
+  },
+  computed: {
+    barcodeLogo(): string {
+      return Img('barcode.svg')
+    },
+    appOverview(): any {
+      return this.app.homeOverviewComponent
+    },
+    appLogo(): string {
+      return Img(this.app.applicationIcon)
+    },
+    appReports(): FolderInterface[] {
+      return this.app.programReports ? this.app.programReports: []
+    },
+    appAdministration(): FolderInterface[] {
+      return this.app.globalPropertySettings ? this.app.globalPropertySettings: []
+    },
+    canFindByIdentifier(): boolean {
+      return this.app.programPatientIdentifiers ? true : false
+    },
+    canReport(): boolean {
+      return this.app.programReports ? true : false
+    }
   },
   methods: {
     fetchLocationID: async function () {
@@ -203,8 +251,11 @@ export default defineComponent({
     },
     async openModal() {
       const data = await HisApp.selectApplication() 
-      this.app = data
-      this.loadApplicationData();
+      if (data) {
+        this.app = data
+        this.activeTab = 1
+        this.loadApplicationData();
+      }
     },
     checkForbarcode(){
       if(this.patientBarcode.match(/.+\$$/i) != null){
@@ -256,6 +307,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
+ion-icon {
+  padding: 0.3em;
+}
 .tool-bar-medium-content {
   padding: 10px;
 }

@@ -4,7 +4,7 @@ export const HIS_APP_COMPONENTS = (() => {
   let components: any = {}
   HisApps.forEach(app => {
     if (app.appRoutes) {
-      components = {...components, ...app.preferenceComponents}
+      components = {...components}
     }
   })
   return components

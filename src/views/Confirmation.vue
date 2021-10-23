@@ -1,39 +1,32 @@
 <template>
   <ion-page>
-  <ion-loading
-    :is-open="isOpenRef"
-    cssClass="my-custom-class"
-    message="Please wait..."
-  >
-  </ion-loading>
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-row> 
           <ion-col> 
             <div class="tool-bar-medium-card"> 
-              <b> Patient Name:</b> {{patientName}} <p/>
-              <b> Birthdate: </b> {{birthdate}} <p/>
-              <b> Gender: </b> {{gender}}
+              Patient Name: <b> {{demographics.patientName}}</b> <p/>
+              Birthdate: <b> {{birthdate}} </b> <p/>
+              Gender:  <b>{{demographics.gender}} </b>
             </div>
           </ion-col>
           <ion-col> 
             <div class="tool-bar-medium-card"> 
-              <b>Ancestry district:</b> {{ ancestryDistrict }}<p/>
-              <b>Ancestry TA:</b> {{ ancestryTA }}<p/>
-              <b>Ancestry village:</b> {{ ancestryVillage }}<p/>
+              Ancestry district: <b>{{ demographics.ancestryDistrict }}</b> <p/>
+              Ancestry TA: <b>{{ demographics.ancestryTA }}</b> <p/>
+              Ancestry village: <b>{{ demographics.ancestryVillage }}</b> <p/>
             </div>
           </ion-col>
           <ion-col> 
             <div class="tool-bar-medium-card"> 
-              <b>Current District:</b> {{ currentDistrict }}<p/>
-              <b>Current TA:</b> {{ currentTA }}<p/>
-              <b>Current Village:</b> {{ currentVillage }}<p/>
+              Current District: <b> {{ demographics.currentDistrict }}</b><p/>
+              Current TA: <b> {{ demographics.currentTA }}</b><p/>
+              Current Village: <b> {{ demographics.currentVillage }}</b><p/>
             </div>
           </ion-col>
         </ion-row>
       </ion-toolbar>
     </ion-header>
-
     <ion-content>
       <ion-row>
         <ion-col size="4" v-for="(card, index) in cards" :key="index">
@@ -44,8 +37,8 @@
             <ion-card-content>
               <ul class="card-content"> 
                 <li class='li-item' v-for="(info, id) in card.data" :key="id"> 
-                  <strong v-if="info.label">{{ info.label }} &nbsp; </strong>
-                  {{ info.value }}
+                  <span v-if="info.label"> {{ info.label }} &nbsp;</span>
+                  <strong>{{ info.value }} </strong>
                 </li>
               </ul>
             </ion-card-content>
@@ -74,10 +67,17 @@
 </template>
 
 <script lang="ts">
-interface DataInterface {
-  label: string;
-  value: string;
-}
+import HisApp from "@/apps/app_lib"
+import { defineComponent } from "vue";
+import { Patientservice } from "@/services/patient_service";
+import { UserService } from "@/services/user_service";
+import { alertAction, alertConfirmation, toastDanger, toastSuccess } from "@/utils/Alerts"
+import { WorkflowService } from "@/services/workflow_service"
+import HisDate from "@/utils/Date"
+import { PatientProgramService } from "@/services/patient_program_service"
+import { voidWithReason } from "@/utils/VoidHelper"
+import { isEmpty } from "lodash";
+import { matchToGuidelines } from "@/utils/GuidelineEngine"
 import {
   IonContent,
   IonHeader,
@@ -91,363 +91,270 @@ import {
   IonCardContent,
   IonCardTitle,
   IonCardHeader,
-  IonLoading,
+  loadingController
 } from "@ionic/vue";
-import { defineComponent, ref } from "vue";
-import { barcode, man, woman } from "ionicons/icons";
-import ApiClient from "@/services/api_client";
-import { Patient } from "@/interfaces/patient";
-import { Observation } from "@/interfaces/observation";
-import { ObservationService } from "@/services/observation_service";
-import { Patientservice } from "@/services/patient_service";
-import { ProgramService } from "@/services/program_service";
-import { OrderService } from "@/services/order_service";
-import { UserService } from "@/services/user_service";
-import { RelationshipService } from "@/services/relationship_service";
-import { ConceptService } from "@/services/concept_service"
-import { alertAction } from "@/utils/Alerts"
-import { WorkflowService } from "@/services/workflow_service"
-import PatientAlerts from "@/services/patient_alerts"
-import HisDate from "@/utils/Date"
+import {
+  FlowState, 
+  TargetEvent,
+  CONFIRMATION_PAGE_GUIDELINES
+} from "@/guidelines/confirmation_page_guidelines"
 import { PatientPrintoutService } from "@/services/patient_printout_service";
-import { voidWithReason } from "@/utils/VoidHelper"
-
+import { AppInterface } from "@/apps/interfaces/AppInterface";
 export default defineComponent({
-  name: "Home",
+  name: "Patient Confirmation",
   components: {
     IonContent,
     IonHeader,
+    IonFooter,
     IonPage,
     IonToolbar,
     IonRow,
     IonCol,
     IonButton,
-    IonFooter,
     IonCard,
     IonCardContent,
     IonCardTitle,
-    IonCardHeader, 
-    IonLoading
+    IonCardHeader
   },
-  data() {
-    return {
-      patientBarcode: "" as any,
-      patientName: "",
-      landmark: "",
-      phoneNumber: "",
-      currentDistrict: "",
-      currentTA: "",
-      currentVillage: "",
-      ancestryDistrict: "",
-      ancestryTA: "",
-      ancestryVillage: "",
-      gender: "",
-      birthdate: "",
-      cards: [] as any,
-      ARVNumber: "",
-      NPID: "",
-      patientID: "" as any
-    };
+  data: () => ({
+    app: {} as AppInterface,
+    program: {} as any,
+    patient: {} as any,
+    cards: [] as any[],
+    facts: {
+      programName: 'N/A' as string,
+      currentOutcome: '' as string,
+      viralLoadStatus: '' as 'High' | 'Low' | '',
+      programs: [] as string[],
+      identifiers: [] as string[],
+      demographics: {
+        givenName: '' as string,
+        familyName: '' as string,
+        patientName: '' as string,
+        landmark: '' as string,
+        phoneNumber: '' as string,
+        currentDistrict: '' as string,
+        currentTA: '' as string,
+        currentVillage: '' as string,
+        ancestryDistrict: '' as string,
+        ancestryTA: '' as string,
+        ancestryVillage: '' as string,
+        gender: '' as string,
+        birthdate: '' as string,
+      },
+    }
+  }),
+  created() {
+    const app = HisApp.getActiveApp()
+
+    if (app) this.app = app
+  },
+  computed: {
+    demographics(): any {
+      return this.facts.demographics
+    },
+    birthdate(): string {
+      return HisDate.toStandardHisDisplayFormat(
+        this.facts.demographics.birthdate
+      )
+    },
+    isAdmin() {
+      return UserService.isAdmin()
+    }
+  },
+  watch: {
+    '$route': {
+      async handler({query}: any) {
+        if (!isEmpty(query) && (
+          query.person_id 
+          || query.patient_barcode)) 
+          {
+          await this.setPatient(
+            query.person_id, 
+            query.patient_barcode
+          )
+        }
+      },
+      immediate: true
+    },
+    async patient() {
+      await this.presentLoading()
+      await this.setProgram()
+      this.setPatientFacts()
+      await this.setProgramFacts()
+      await this.drawPatientCards()
+      loadingController.dismiss()
+      await this.onEvent(TargetEvent.ONLOAD)
+    }
   },
   methods: {
+    setProgram() {
+      this.program = new PatientProgramService(this.patient.getID())
+    },
+    /**
+     * Resolve patient by either patient ID or NpID 
+     * depending on search criteria
+     */
+    async setPatient(id: any, npid: any) {
+      let data: any = {}
+      await this.presentLoading()
+
+      if (id) {
+        data = await Patientservice.findByID(id)
+      } else if (npid) {
+        data = await Patientservice.findByNpid(npid)
+      }
+
+      if (isEmpty(data)) {
+        return alertAction('Patient not found', [
+          {
+            text: 'Home',
+            handler: () => this.$router.push('/')
+          },
+          {
+            text: 'Back',
+            handler: () => this.$router.back()
+          }
+        ])
+      }
+      loadingController.dismiss()
+      this.patient = new Patientservice(data)
+    },
+    /**
+     * Facts are used by the Guideline Engine to crosscheck 
+     * conditions to execute. The more the data the better
+     * the decision support. These facts are also presented 
+     * on the User interface
+     */
+    setPatientFacts() {
+      this.facts.demographics.patientName = this.patient.getFullName()
+      this.facts.demographics.givenName = this.patient.getGivenName()
+      this.facts.demographics.familyName = this.patient.getFamilyName()
+      this.facts.demographics.landmark = this.patient.getAttribute(19)
+      this.facts.demographics.phoneNumber = this.patient.getAttribute(12)
+      this.facts.demographics.gender = this.patient.getGender()
+      this.facts.demographics.birthdate = this.patient.getBirthdate()
+      this.facts.demographics.ancestryDistrict = this.patient.getHomeDistrict()
+      this.facts.demographics.ancestryTA = this.patient.getHomeTA()
+      this.facts.demographics.ancestryVillage = this.patient.getHomeVillage()
+      this.facts.demographics.currentDistrict = this.patient.getCurrentDistrict()
+      this.facts.demographics.currentTA = this.patient.getCurrentTA()
+      this.facts.demographics.currentVillage = this.patient.getHomeVillage()
+      this.facts.identifiers = this.getStrIdentifierTypes()
+    },
+    async setProgramFacts() {
+      const { program, outcome }: any =  await this.program.getProgram()
+      this.facts.currentOutcome = outcome
+      this.facts.programName = program
+    },
+    /**
+     * The Application/Program determines which cards to
+     * render on the view
+     */
+    async drawPatientCards() {
+      if (!this.app.confirmationSummary) return
+
+      const summaryEntries: Record<string, Function> 
+        = await this.app.confirmationSummary(this.patient, this.program)
+
+      for (const title in summaryEntries) {
+        const data = await summaryEntries[title]()
+        this.cards.push({ title, data })
+      }
+    },
+    async presentLoading() {
+      const loading = await loadingController
+        .create({
+          message: 'Please wait...',
+          backdropDismiss: false
+        })
+      await loading.present()
+    },
+    /**
+     * Checks Confirmation page guidelines for patient observations
+    */
+    async onEvent(targetEvent: TargetEvent) {
+      const findings = matchToGuidelines(
+        this.facts,
+        CONFIRMATION_PAGE_GUIDELINES, 
+        '', 
+        targetEvent
+      )
+      for(const index in findings) {
+          const finding = findings[index]
+          if (finding?.actions?.alert) {
+            const state = await finding?.actions?.alert(this.facts)
+            switch(state) {
+              case FlowState.EXIT:
+                continue
+              case FlowState.FORCE_EXIT:
+                return false
+              default:
+                await this.runFlowState(state)
+            }
+          }
+      }
+      return true
+    },
+    /**
+     * Maps FlowStates defined in the Guideline to
+     * Functions definitions that are executed.
+     */
+    async runFlowState(state: FlowState) {
+      const states: Record<string, Function> = {
+        'enroll': () => {
+          return this.program.enrollProgram()
+        },
+        'updateDemographics': () => {
+          return this.$router.push(`/patient/registration?edit_person=${this.patient.getID()}`)
+        },
+        'assignNpid': async () => {
+          const req = await this.patient.assignNpid()
+          loadingController.dismiss()
+          if (req) {
+            const ok = await alertConfirmation('Do you want to print National ID?')
+            if (ok) {
+              const print = new PatientPrintoutService(this.patient.getID())
+              await print.printNidLbl()
+            }
+          }
+        }
+      }
+      if (state in states) {
+        await this.presentLoading()
+        try {
+          await states[state]()  
+          toastSuccess('Operation successful')
+        }catch(e) {
+          toastDanger(e)
+        }
+        loadingController.dismiss()
+      }
+    },
     async onVoid() {
       voidWithReason(async (reason: string) => {
-        await Patientservice.voidPatient(this.patientID, reason)
-        this.$router.push('/')        
+        await Patientservice.voidPatient(this.patient.getID(), reason)
+        this.$router.push('/')
       })
     },
+    getStrIdentifierTypes() {
+      return this.patient.getIdentifiers().map((id: any) => id.type.name)
+    },
     async nextTask() {
-      const params = await WorkflowService.getNextTaskParams(this.patientID)
+      const ok: any = await this.onEvent(TargetEvent.ON_CONTINUE)
+      if (!ok) {
+        return
+      }      
+      const params = await WorkflowService.getNextTaskParams(this.patient.getID())
       if(params.name) {
         this.$router.push(params)
       }else {
-        this.$router.push(`/patient/dashboard/${this.patientID}`)
+        this.$router.push(`/patient/dashboard/${this.patient.getID()}`)
       }
-    },
-    alertPatientNotFound() {
-      alertAction('Patient not found', [
-        {
-          text: 'Home',
-          handler: () => this.$router.push('/')
-        },
-        {
-          text: 'Back',
-          handler: () => this.$router.back()
-        }
-      ])
-    },
-    fetchPatient: async function () {
-      const response = await ApiClient.get(`/patients/${this.patientID}`);
-
-      this.setOpen(true);
-      if (!response || response.status !== 200) {
-        this.setOpen(false);
-        this.alertPatientNotFound();
-
-      } // NOTE: Targeting Firefox 65, can't `response?.status`
-      else {
-        const data: Patient = await response.json();
-        this.parsePatient(data);
-      }
-    },
-    fetchPatientByID: async function() {
-      this.setOpen(true);
-      const response = await ApiClient.get(`/search/patients/by_npid?npid=${this.patientBarcode}`);
-
-      if (!response || response.status !== 200) {
-        this.setOpen(false);
-        this.alertPatientNotFound();
-      } 
-      else {
-        const data: Patient[] = await response.json();
-
-        switch (data.length) {
-          case 0:
-            this.alertPatientNotFound();
-            this.setOpen(false);
-            break;
-          case 1:
-            this.patientID = data[0].patient_id; 
-            this.parsePatient(data[0]);
-            break;
-          default:
-            console.log('duplicates');
-            break;
-        }
-      }
-    },
-    parsePatient: async function(data: Patient) {
-        this.cards = [];
-        const patient = new Patientservice(data);
-        this.patientName = patient.getFullName();
-        this.landmark = patient.getAttribute(19);
-        this.phoneNumber = patient.getAttribute(12);
-        const addresses = patient.getAddresses();
-        this.gender = data.person.gender;
-        this.birthdate = HisDate.toStandardHisDisplayFormat(data.person.birthdate);
-        this.ancestryDistrict = addresses.ancestryDistrict;
-        this.ancestryTA = addresses.ancestryTA;
-        this.ancestryVillage = addresses.ancestryVillage;
-        this.currentDistrict = addresses.currentDistrict;
-        this.currentTA = addresses.currentTA;
-        this.currentVillage = addresses.ancestryVillage;
-        this.ARVNumber = patient.getPatientIdentifier(4);
-        const ARVNumber = patient.getPatientIdentifier(4);
-        const NPID = await this.getNPID(patient);
-        this.cards.push({
-          title: "PATIENT IDENTIFIERS",
-          data: [
-            {
-              label: "ARV Number",
-              value: ARVNumber,
-            },
-            {
-              label: "NPID",
-              value: NPID,
-            },
-          ],
-        });
-        
-        await this.fetchAlerts()
-          .then(this.fetchLabOrders)
-          .then(this.fetchProgramInfo)
-          .then(this.fetchGuardians)
-
-          this.setOpen(false);
-    },
-    async getNPID(patient: any) {
-      this.setOpen(false)
-      const NPID = patient.getPatientIdentifier(3)
-      if(NPID ==="") {
-          const f = await this.assignNHID(patient.getID());
-          this.printNHID();
-          return f.new_identifier.identifier;
-        }
-      this.setOpen(true)
-      return NPID;
-    },
-    async assignNHID(patientID: number) {
-      await alertAction("Patient was found BUT has no National ID.<br />The system is going to assign the patient with a new ID", [
-        {
-          text: "OK",
-          handler: async () => {
-            null
-          },
-        },
-      ]);
-      return await Patientservice.assignNHID(patientID);
-    },
-    async printNHID() {
-     const p = new PatientPrintoutService(this.patientID);
-     await p.printNidLbl()
-  },
-    fetchAlerts: async function () {
-      const sideEffects: Observation[] = await PatientAlerts.alertSideEffects(this.patientID)
-      const displayData = {
-        title: "ALERTS",
-        data: [
-          {
-            label: "Side effects",
-            value: sideEffects.length,
-          },
-        ],
-      };
-
-      this.cards.push(displayData);
-    },
-    fetchLabOrders: async function () {
-      const displayData = {
-        title: "Labs",
-        data: [] as DataInterface[],
-      };
-      await OrderService.getOrders(this.patientID).then((orders) => {
-        const VLOrders = OrderService.getViralLoadOrders(orders);
-        VLOrders.forEach((element) => {
-          displayData.data.push({
-            value: OrderService.formatOrders(element),
-            label: ``,
-          });
-        });
-      });
-
-      this.cards.push(displayData);
-    },
-    fetchProgramInfo: async function () {
-      const displayData = {
-        title: "PROGRAM INFORMATION",
-        data: [] as DataInterface[],
-      };
-      let outcome = "";
-
-      const params = await WorkflowService.getNextTaskParams(this.patientID)
-      let task = 'NONE'      
-      if(params.name) {
-        task = params.name
-      }
-      displayData.data.push({
-            label: "Next Task",
-            value: `${task}`,
-      });
-      await ProgramService.getProgramInformation(this.patientID).then(
-        (task) => {
-          displayData.data.push({
-            label: "ART Duration",
-            value: `${task.art_duration} month(s) `,
-          });
-          outcome = task.current_outcome;
-        }
-      );
-      await ProgramService.getFastTrackStatus(this.patientID).then(
-        (task) => {
-          const data = task["Continue FT"] === true ? "Yes" : "No";
-          displayData.data.push({
-            label: "On Fast Track",
-            value: data,
-          });
-        }
-      );
-      const appointMentObs: Observation[] = await ObservationService.getObservations(
-        this.patientID,
-        ConceptService.getCachedConceptID('appointment date')
-      );
-      if (appointMentObs.length > 0) {
-        const nextAPPT = HisDate.toStandardHisDisplayFormat(appointMentObs[0].value_datetime);
-        displayData.data.push({
-          label: "Next Appointment",
-          value: nextAPPT,
-        });
-      }
-      this.cards.push(displayData);
-      this.fetchOutCome(outcome);
-    },
-    fetchOutCome: async function (outcome: string) {
-      const displayData = {
-        title: "Outcome",
-        data: [
-          {
-            label: "Current Outcome",
-            value: outcome,
-          },
-        ] as DataInterface[],
-      };
-      this.cards.push(displayData);
-    },
-    fetchGuardians: async function () {
-      RelationshipService.getGuardianDetails(
-        this.patientID
-      ).then((relationship: any) => {
-        const rel: DataInterface[] = relationship.map((r: any) => {
-          return {
-            label: r.name,
-            value: r.relationshipType,
-          };
-        });
-        const displayData = {
-          title: "GUARDIAN(s)",
-          data: { ...rel },
-        };
-        this.cards.push(displayData);
-      });
-    },
-    setupconfirmation(query: any) {
-      this.resetState();
-      if(query.person_id) {
-        const patientID = query.person_id as any;
-        this.patientID = parseInt(patientID);
-        this.fetchPatient();
-      }else if(query.patient_barcode) {
-        const patientBarcode = query.patient_barcode as any;
-        this.patientBarcode = patientBarcode.replace(/-/g, "");
-        this.fetchPatientByID();
-      }
-    },
-    resetState() {
-       this.patientBarcode = "";
-        this.patientName =  "";
-        this.landmark = "";
-        this.phoneNumber = "";
-        this.currentDistrict = "";
-        this.currentTA = "";
-        this.currentVillage = "";
-        this.ancestryDistrict = "";
-        this.ancestryTA = "";
-        this.ancestryVillage = "";
-        this.gender = "";
-        this.birthdate = "";
-        this.cards =  [];
-        this.ARVNumber = "";
-        this.NPID = "";
-        this.patientID =  "";
     }
-     
-  },
-  setup() {
-    const isOpenRef = ref(true);
-    const setOpen = (state: boolean) => isOpenRef.value = state;
-
-    return { isOpenRef, setOpen,
-      barcode,
-      man,
-      woman,
-    };
-  },
-   watch: {
-    $route: {
-      async handler({ query }: any) {
-       this.setupconfirmation(query);
-      },
-      deep: true,
-      immediate: true,
-    },
-  },
-  computed: {
-    isAdmin() {
-      return UserService.isAdmin;
-    },
-  },
-});
+  }
+})
 </script>
-
 <style scoped>
 .card-content {
   height: 200px;

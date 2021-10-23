@@ -21,6 +21,7 @@ export default defineComponent({
                 id: 'location',
                 helpText: 'Please select facility name',
                 type: FieldType.TT_SELECT,
+                defaultValue: () => LocationService.getUserLocation(),
                 validation: (val: any) => Validation.required(val),
                 options: async (_, filter='') => {
                     const facilities = await LocationService.getFacilities({name: filter})

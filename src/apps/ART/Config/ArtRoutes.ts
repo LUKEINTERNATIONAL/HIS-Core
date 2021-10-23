@@ -40,13 +40,32 @@ import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
 import StockCardReport from "@/apps/ART/views/reports/clinic/ClinicStockCardReport.vue"
 import ClinicAppointments from "@/apps/ART/views/reports/clinic/ClinicAppointments.vue"
 import DataCleaning from "@/apps/ART/views/reports/inconsistencies/DataCleaning.vue"
-import FilingNumberManagement from "@/apps/ART/views/FilingNumberManagement.vue"
 
 export default [
     {
         name: "filing management",
         path: '/art/filing_numbers/:patient_id',
-        component: FilingNumberManagement
+        component: () => import("@/apps/ART/views/FilingNumberManagement.vue")
+    },
+    {
+        name: "Set Clinic Days",
+        path: "/art/preferences/clinic_days",
+        component: () => import("@/apps/ART/views/preferences/SetClinicDays.vue")
+    },
+    {
+        name: "Set HTN Age",
+        path: "/art/preferences/htn_age",
+        component: () => import("@/apps/ART/views/preferences/SetHTNAge.vue")
+    },
+    {
+        name: "Set filing number limit",
+        path: "/art/preferences/fn/limit",
+        component: () => import("@/apps/ART/views/preferences/SetFilingNumbersLimit.vue")
+    },
+    {
+        name: "Set Appointment limit",
+        path: "/art/preferences/appointment/limit",
+        component: () => import("@/apps/ART/views/preferences/SetAppointmentLimit.vue")
     },
     {
         name: "treatment",

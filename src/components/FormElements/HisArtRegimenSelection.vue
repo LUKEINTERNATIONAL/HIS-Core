@@ -33,8 +33,15 @@ import ViewPort from "@/components/DataViews/ViewPort.vue"
 import SelectMixin from "@/components/FormElements/SelectMixin.vue"
 import RegimenCard from "@/components/DataViews/RegimenCard.vue"
 import { isEmpty } from 'lodash'
+import { IonRow, IonCol } from '@ionic/vue'
+
 export default defineComponent({
-    components: { ViewPort, RegimenCard },
+    components: { 
+        ViewPort, 
+        RegimenCard, 
+        IonRow, 
+        IonCol 
+    },
     mixins: [SelectMixin],
     watch: {
         clear(val: boolean){

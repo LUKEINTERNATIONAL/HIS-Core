@@ -26,7 +26,7 @@ export class GlobalPropertyService extends Service {
 
     static async isMilitarySite() { 
         try {
-            const enabled = await this.get('military.enabled') 
+            const enabled = await this.get('military_site') 
             return enabled === 'true'
         }catch(e) {
             return false

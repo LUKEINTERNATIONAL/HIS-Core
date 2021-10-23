@@ -1,6 +1,6 @@
 <template>
     <ion-card class="his-card task-card clickable">
-        <ion-item>
+        <ion-item lines="none">
             <ion-thumbnail slot="start">
                 <img :src="icon"/>
             </ion-thumbnail>
@@ -11,8 +11,19 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-
+import {
+    IonCard,
+    IonThumbnail,
+    IonItem,
+    IonLabel
+} from "@ionic/vue"
 export default defineComponent({
+    components: {
+        IonCard, 
+        IonThumbnail, 
+        IonItem, 
+        IonLabel
+    },
     props: {
         title: {
             type: String,

@@ -82,6 +82,7 @@ import {
 } from "@ionic/vue";
 import { alertConfirmation, toastWarning } from "@/utils/Alerts";
 import InfoCard from "@/components/DataViews/HisFormInfoCard.vue"
+import {toastDanger} from "@/utils/Alerts"
 
 export default defineComponent({
   name: "TouchscreenForm",
@@ -104,6 +105,9 @@ export default defineComponent({
     'onIndex'
   ],
   props: {
+    onFinish: {
+      type: Function
+    },
     skipSummary: {
       type: Boolean,
       default: false,
@@ -129,6 +133,7 @@ export default defineComponent({
     currentFields: [] as Array<Field>,
     state: "" as
       | "init"
+      | "onsubmit"
       | "onload"
       | "unload"
       | "next"
@@ -230,6 +235,10 @@ export default defineComponent({
         name: "Back",
         slot: "end",
         state: {
+          disabled: {
+            default: () => false,
+            onsubmit: () => true
+          },
           visible: {
             onload: () => visibleCondition(),
             default: () => visibleCondition()
@@ -255,7 +264,8 @@ export default defineComponent({
         slot: "end",
         state: {
           disabled: {
-            onload(field: Field) {
+            onsubmit: () => true,
+            default(field: Field) {
               if ('requireNext' in field) {
                 return !field.requireNext
               }
@@ -263,6 +273,7 @@ export default defineComponent({
             }
           },
           visible: {
+            onsubmit: () => false,
             onfinish: () => false,
             default: () => visibleCondition(),
             onload: () => visibleCondition()
@@ -283,15 +294,18 @@ export default defineComponent({
         color: "success",
         slot: "end",
         state: {
+          disabled: {
+            default: () => false,
+            onsubmit: () => true,
+          },
           visible: {
             onfinish: () => true,
+            onsubmit: () => true,
             default:() => visibilityCondition(),
             onload: () => visibilityCondition()
           },
         },
-        onClick: () => {
-          this.$emit("onFinish", this.formData, this.computedFormData);
-        },
+        onClick: () => this.goNext(),
       };
     },
     /**
@@ -395,6 +409,21 @@ export default defineComponent({
       };
     },
     /**
+     * Run default action when the form is submitted
+    */
+    async onFinishAction() {
+      if (this.onFinish) {
+        try {
+          this.state = 'onsubmit'
+          await this.onFinish(this.formData, this.computedFormData)
+        }catch(e) { 
+          toastDanger(e) 
+        }
+      }
+      this.state = 'onfinish'
+      this.$emit('onFinish', this.formData, this.computedFormData)
+    },
+    /**
      * Goes to next component if they're no errors on the page
      */
     async goNext() {
@@ -402,10 +431,8 @@ export default defineComponent({
       if (this.currentField.validation) {
         const value = this.formData[this.currentField.id];
         const errors = this.currentField.validation(
-          value,
-          this.formData,
-          this.computedFormData
-        );
+          value, this.formData, this.computedFormData
+        )
         if (errors) {
           return toastWarning(errors.join(", "), 3500);
         }
@@ -528,8 +555,7 @@ export default defineComponent({
         await this.setActiveField(i, "next");
         return;
       }
-      this.$emit("onFinish", this.formData, this.computedFormData);
-      this.state = "onfinish";
+      await this.onFinishAction()
     },
     /**
      * Push the current field to be displayed

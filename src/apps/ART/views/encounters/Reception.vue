@@ -2,7 +2,7 @@
   <his-standard-form
     :fields="fields"
     :activeField="activeField"
-    @onFinish="onFinish"
+    :onFinishAction="onFinish"
     :skipSummary="true"
     :cancelDestinationPath="cancelDestination"
   >
@@ -18,6 +18,7 @@ import { ReceptionService } from "@/apps/ART/services/reception_service"
 import { ProgramService } from "@/services/program_service";
 import { toastWarning, toastSuccess } from "@/utils/Alerts"
 import EncounterMixinVue from './EncounterMixin.vue'
+import HisApp from "@/apps/app_lib"
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -124,8 +125,14 @@ export default defineComponent({
           condition: (f: any) => !this.hasARVNumber && f.capture_arv.value === "Yes",
           defaultValue: () => this.suggestedNumber,
           config: {
-            prepend: true,
-            prependValue: `${this.reception.getSitePrefix()}-ARV-`,
+            prependValue: () => {
+              const artApp = HisApp.getActiveApp()
+              if (artApp && artApp.programPatientIdentifiers) {
+                const arvType = artApp.programPatientIdentifiers['ARV Number']
+                return arvType.prefix()
+              }
+              return ''
+            }
           }
         }
       ]

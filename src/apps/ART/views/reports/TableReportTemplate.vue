@@ -127,6 +127,7 @@ export default defineComponent({
         await this.onReportConfiguration(this.formData, this.computeFormData)
         loadingController.dismiss ()
       }catch(e) {
+        console.error(e)
         toastDanger(e)
         loadingController.dismiss()
       }

@@ -2,7 +2,8 @@
   <tool-bar-medium-card>
     <ul :style="{marginLeft: '-4%'}">
       <li v-for="(item, index) in items" :key="index"> 
-      <ion-icon v-if="hasIcon(item)" :icon="item.other.icon"/><b>{{ item.label }}:</b> {{ item.value }}
+      <ion-icon v-if="hasIcon(item)" :icon="item.other.icon"/>
+      {{ item.label }}: <b>{{ item.value }}</b>
       </li>
     </ul>
   </tool-bar-medium-card>

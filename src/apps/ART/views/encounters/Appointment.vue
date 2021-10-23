@@ -1,7 +1,7 @@
 <template>
   <his-standard-form
     :fields="fields"
-    @onFinish="onFinish"
+    :onFinishAction="onFinish"
     :skipSummary="true"
     :cancelDestinationPath="cancelDestination"
   >
@@ -17,6 +17,8 @@ import { toastWarning, toastSuccess } from "@/utils/Alerts"
 import EncounterMixinVue from './EncounterMixin.vue';
 import {AppointmentService} from '@/apps/ART/services/appointment_service'
 import { PatientPrintoutService } from "@/services/patient_printout_service";
+import { nextTask } from "@/utils/WorkflowTaskHelper"
+import { isEmpty } from "lodash"
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -57,6 +59,10 @@ export default defineComponent({
     },
     async init() {
     const appointments = await this.appointment.getNextAppointment();
+    if (isEmpty(appointments)) {
+      toastWarning('Can not do appointment right now!')
+      return nextTask(this.patientID, this.$router)
+    }
     this.appointmentDate = appointments.appointment_date;
     this.medicationRunOutDate = appointments.drugs_run_out_date;
 

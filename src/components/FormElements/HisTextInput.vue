@@ -1,9 +1,9 @@
 <template>
     <view-port :showFull="false">
         <ion-grid>
-            <ion-row >
-                <ion-col v-if="config && config.prepend" size-md="4">
-                    <ion-input :value="config.prependValue" class="input_display" :disabled="true"/>
+            <ion-row>
+                <ion-col v-if="prependValue" size-md="4">
+                    <ion-input :value="prependValue" class="input_display" :disabled="true"/>
                 </ion-col>
                 <ion-col size-md="">
                     <base-input :type="inputType" :value="value" @onValue="onKbValue"/>
@@ -23,18 +23,38 @@ import { defineComponent } from 'vue'
 import BaseInput from "@/components/FormElements/BaseTextInput.vue"
 import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
-import { IonInput, IonList, IonItem, IonLabel} from "@ionic/vue"
 import { Option } from '../Forms/FieldInterface'
 import { QWERTY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue'
 import { isPlainObject } from 'lodash'
+import { 
+    IonInput,
+    IonRow,
+    IonCol,
+    IonGrid,
+    IonList, 
+    IonItem, 
+    IonLabel
+} from "@ionic/vue"
 
 export default defineComponent({
-    components: { IonInput, BaseInput, HisKeyboard, ViewPort, IonList, IonItem, IonLabel },
+    components: { 
+        IonInput, 
+        IonRow,
+        IonCol,
+        IonGrid,
+        BaseInput, 
+        HisKeyboard, 
+        ViewPort, 
+        IonList, 
+        IonItem, 
+        IonLabel 
+    },
     mixins: [FieldMixinVue],
     data: ()=>({
-        value: '',
+        value: '' as string,
+        prependValue: '' as string,
         initalKeyboardName: '' as string,
         keyboard: {} as Array<any>,
         listData: [] as Array<Option>
@@ -47,7 +67,7 @@ export default defineComponent({
             return 'text'
         }
     },
-    created() {
+    async created() {
         this.keyboard = this.config?.customKeyboard || QWERTY
         if (this.config) {
             if (this.config.initialKb) {
@@ -57,6 +77,9 @@ export default defineComponent({
     },
     async activated(){
         this.$emit('onFieldActivated', this)
+        if (this.config && this.config.prependValue) {
+            this.prependValue = await this.config.prependValue(this.fdata)
+        }
         await this.setDefaultValue()
     },
     methods: {
@@ -81,6 +104,10 @@ export default defineComponent({
                     return
                 }
             }
+            //Automatically concat prepended value with input
+            v.value = this.prependValue 
+                ? `${this.prependValue}${v.value}`
+                : v.value
             this.value = v.label
             this.$emit('onValue', v)
         },

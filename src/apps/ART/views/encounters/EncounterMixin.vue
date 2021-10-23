@@ -3,11 +3,11 @@ import { defineComponent } from 'vue'
 import { Field, Option } from '@/components/Forms/FieldInterface'
 import { Patientservice } from "@/services/patient_service"
 import { ProgramService } from "@/services/program_service"
-import { WorkflowService } from "@/services/workflow_service"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { optionsActionSheet } from "@/utils/ActionSheets"
 import { UserService } from "@/services/user_service"
 import { find } from "lodash"
+import { nextTask } from "@/utils/WorkflowTaskHelper"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -76,12 +76,7 @@ export default defineComponent({
             return this.$router.push({path: this.patientDashboardUrl()}) 
         },
         async nextTask() {
-            const params = await WorkflowService.getNextTaskParams(this.patientID)
-            if (params.name) {
-                this.$router.push(params)
-            } else {
-                this.gotoPatientDashboard()
-            }
+            return nextTask(this.patientID, this.$router)
         },
         yesNoOptions() {
             return [

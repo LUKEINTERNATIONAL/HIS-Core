@@ -44,8 +44,19 @@ import IntervalCard from '@/components/DataViews/IntervalCard.vue'
 import ViewPort from '../DataViews/ViewPort.vue'
 import SelectMixin from "@/components/FormElements/SelectMixin.vue"
 import Transformer from '@/utils/Transformers'
+import {
+    IonGrid,
+    IonCard,
+    IonCardContent
+} from "@ionic/vue"
 export default defineComponent({
-    components: { IntervalCard, ViewPort },
+    components: { 
+        IntervalCard, 
+        ViewPort,
+        IonGrid,
+        IonCard,
+        IonCardContent
+    },
     mixins: [SelectMixin],
     data: ()=>({
         active: {} as Option | {}

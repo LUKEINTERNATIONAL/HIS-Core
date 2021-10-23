@@ -23,6 +23,7 @@ export const SYMBOLS_CONFIG = [
 export const NUMBERS_ONLY = [
     NUMBER_PAD_LO,
     [
+        ['N/A'],
         ['Unknown', 'Delete']
     ]
 ]

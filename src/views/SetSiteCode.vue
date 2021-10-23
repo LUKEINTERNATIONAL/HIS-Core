@@ -5,7 +5,6 @@
     @onSubmit="onSubmit"
     @onFinish="onFinish"
     :skipSummary="true"
-    v-if="fields.length > 0"
   />
 </template> 
 <script lang="ts">
@@ -14,28 +13,27 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { GlobalPropertyService } from "@/services/global_property_service";
 import { toastSuccess } from "@/utils/Alerts";
-import Validation from "@/components/Forms/validations/StandardValidations"
 
 export default defineComponent({
   components: { HisStandardForm },
   methods: {
     onFinish(formData: any) {
-      const sitePrefix = `${formData.htn_age.value}`.toUpperCase();
+      const sitePrefix = `${formData.site_code.value}`.toUpperCase();
       GlobalPropertyService.set(this.property, sitePrefix)
         .then(() => toastSuccess("Property set"))
         .then(() => this.$router.push("/"));
     },
-    async getFields() {
+    async setFields() {
+      const val = await GlobalPropertyService.get("site_prefix");
       this.fields = [
         {
-          id: "htn_age",
-          helpText: "Enter HTN age Threshold",
-          preset: {
-            label: this.htnThreshold,
-            value: this.htnThreshold,
-          },
+          id: "site_code",
+          helpText: "Enter Site Code",
+          defaultValue: () => val,
           type: FieldType.TT_TEXT,
-          validation: (val: any) => Validation.required(val),
+          validation(value: any): null | Array<string> {
+            return !value ? ["Value is required"] : null;
+          },
         },
       ];
     },
@@ -43,15 +41,13 @@ export default defineComponent({
   data() {
     return {
       fields: [] as any,
-      property: "htn.screening.age.threshold",
-      htnThreshold: ''
+      property: "site_prefix",
     };
   },
   watch: {
     $route: {
-      async handler() {
-        this.htnThreshold = await GlobalPropertyService.get(this.property);
-        this.getFields();
+      async handler({ query }: any) {
+        this.setFields();
       },
       deep: true,
       immediate: true,

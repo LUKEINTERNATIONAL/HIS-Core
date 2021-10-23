@@ -15,9 +15,19 @@ import { defineComponent } from 'vue'
 import { Option } from "@/components/Forms/FieldInterface"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue'
+import {
+    IonList,
+    IonLabel,
+    IonItem,
+} from "@ionic/vue"
 
 export default defineComponent({
-    components: { ViewPort },
+    components: { 
+        ViewPort,
+        IonList,
+        IonLabel,
+        IonItem,
+    },
     mixins: [FieldMixinVue],
     data: () => ({
         listData: [] as Array<Option[]>

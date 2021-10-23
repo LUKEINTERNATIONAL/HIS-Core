@@ -1,5 +1,5 @@
 <template>
-    <his-standard-form :cancelDestinationPath="cancelDestination" :fields="fields" @onFinish="onSubmit"/>
+    <his-standard-form :cancelDestinationPath="cancelDestination" :fields="fields" :onFinishAction="onSubmit"/>
 </template>
 
 <script lang="ts">
@@ -64,7 +64,9 @@ export default defineComponent({
         },
         buildDateObs(conceptName: string, date: string, isEstimate: boolean) {
             let obs = {}
-            if (isEstimate) {
+            if (date.match(/unknown/i)) {
+                obs = this.registration.buildValueText(conceptName, 'Unknown')
+            } else if (isEstimate) {
                 obs = this.registration.buildValueDateEstimated(conceptName, date)
             } else {
                 obs = this.registration.buildValueDate(conceptName, date)
