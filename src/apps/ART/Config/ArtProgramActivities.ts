@@ -1,5 +1,6 @@
 import { TaskInterface } from "../../interfaces/TaskInterface"
 import { PatientPrintoutService } from "@/services/patient_printout_service"
+import { Patientservice } from "@/services/patient_service"
 
 export const PRIMARY_ACTIVITIES: TaskInterface[] = [
   {
@@ -81,15 +82,35 @@ export const SECONDARY_ACTIVITIES: TaskInterface[] = [
     id: "archive_client",
     name: "Archive client",
     description: "Archive a client",
-    url: "/",
+    action: ({ patient }: any, router: any) => {
+      router.push(`/art/filing_numbers/${patient.patient_id}?archive=true`)
+    },
+    condition: async ({ patient }: any) => {
+      return new Patientservice(patient).hasActiveFilingNumber()
+    },
     icon: "archive.png"
   },
   {
     id: "assign_filing_number",
     name: "Assign filing number",
     description: "Assign a new filing number",
-    url: "/",
+    condition: async ({patient}: any) => {
+      const _p = new Patientservice(patient)
+      return _p.hasDormantFilingNumber() || !_p.hasActiveFilingNumber()
+    },
+    action: ({ patient }: any, router: any) => {
+      router.push(`/art/filing_numbers/${patient.patient_id}?assign=true`)
+    },
     icon: "archive.png"
+  },
+  {
+    id: "filing_number_trail",
+    name: "View filing number trail",
+    description: "view trail",
+    action: ({ patient }: any, router: any) => {
+      router.push(`/art/filing_numbers/${patient.patient_id}?trail=true`)
+    },
+    icon: "folder.png"
   },
   {
     id: "change_patient_type",
