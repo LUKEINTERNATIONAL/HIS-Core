@@ -94,7 +94,7 @@ export interface AppInterface {
     /**
      * Callback that runs after a patient has been successfully registered
      */
-    readonly onRegisterPatient?: (patientID: number, person: any, attributes: any) => void;
+    readonly onRegisterPatient?: (patientID: number, person: any, attributes: any, router: any) => Promise<any>;
     /**
      * Get program specific patient dashboard alerts
      */
