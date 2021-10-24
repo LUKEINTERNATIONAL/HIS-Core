@@ -25,9 +25,7 @@ import { defineComponent, onMounted, ref } from 'vue'
 import { IonGrid, IonRow, IonCol } from "@ionic/vue";
 import OpdStatCard from '@/apps/OPD/components/OpdStatCard.vue'
 import OpdStatChart from '@/apps/OPD/components/OpdStatChart.vue'
-import Strings from "@/apps/OPD/utils/Strings";
-import ApiClient from '@/services/api_client'
-import dayjs from 'dayjs';
+import PatientVisitsService from '@/apps/OPD/services/patient_visits_service'
 
 export default defineComponent({
   components: {
@@ -38,73 +36,18 @@ export default defineComponent({
     IonCol
   },
   setup() {
-    const patientSummaryStats = ref([
-      {label: '', value: 0, color: ''}
-    ])
-
+    const patientSummaryStats = ref()
     const categories = ref()
     const series = ref()
-
-    const updatePatientSummaryStats = function (stats: any) {
-      const statsKeys = Object.keys(stats)
-      let total = 0
-      patientSummaryStats.value = []
-      
-      statsKeys.forEach(key => {
-        patientSummaryStats.value.push({
-          label: Strings.capitalizeFirstLetter(key.toString().replace('_', ' ')),
-          value: stats[key],
-          color: 'lightyellow'
-        })
-        
-        total += stats[key]
-      })
-
-      patientSummaryStats.value.push({
-        label: 'Total',
-        value: total,
-        color: 'yellowgreen'
-      })
-    }
-
-    const updateChart = function(chartData: any) {
-      const seriesNames = Object.keys(chartData)
-      const keys = Object.keys(chartData[seriesNames[0]])
-      categories.value = []
-      series.value = []
-
-      for(const name in seriesNames) {
-        const counts: number[] = []
-
-        for (let i = 0; i < keys.length; i++){
-          const date = chartData[seriesNames[name]][keys[i]].start_date
-          const formattedDate = dayjs(date).format("MMM/YYYY")
-          if (formattedDate !== categories.value[i]) categories.value.push(formattedDate)
-
-          counts.push(chartData[seriesNames[name]][keys[i]].count)
-        }
-
-        series.value.push({
-          name: Strings.capitalizeFirstLetter(seriesNames[name]),
-          data: counts
-        })
-      }
-    }
-
-    const fetchDashboardStats = async function() {
-      const response = await ApiClient.get(
-        `dashboard_stats?date=${sessionStorage.sessionDate}&program_id=14`,
-      );
-
-      if (response && response.status == 200) {
-        const data = await response.json();
-        updatePatientSummaryStats(data.top)
-        updateChart(data.down);
-      }
-    }
     
     onMounted(async function() {
-      await fetchDashboardStats();
+      const data = await PatientVisitsService.fetchPatientStats()
+
+      if (data) {
+        patientSummaryStats.value = data.todaysVisits
+        categories.value = data.accumulativeVisits?.days
+        series.value = data.accumulativeVisits?.visits
+      }
     })
 
     return {
