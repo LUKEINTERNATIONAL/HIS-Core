@@ -47,30 +47,30 @@ export default class PatientVisitsService extends Service {
 
   static getAccumulativePatientVisits(data: any) {
     const visitTypes = Object.keys(data)
-    const keys = Object.keys(data)
+    const keys = Object.keys(data[visitTypes[0]])
     const days: Array<string> = []
     const visits: Array<any> = []
 
     for (const type in visitTypes) {
       const counts: Array<number> = []
 
-      for (let i = 0; i < keys.length; i++) {
-        const date = data[visitTypes[type]][keys[i]].start_date
+      for (const key in keys) {        
+        const date = data[visitTypes[type]][keys[key]].start_date
         const formattedDate = dayjs(date).format("MMM/YYYY")
-        if(formattedDate !== days[i]) days.push(formattedDate)
+        if(formattedDate !== days[key]) days.push(formattedDate)
 
-        counts.push(data[visitTypes[type]][keys[i]].count)
+        counts.push(data[visitTypes[type]][keys[key]].count)
       }
 
       visits.push({
         name: Strings.capitalizeFirstLetter(visitTypes[type]),
         data: counts
       })
+    }
 
-      return {
-        days,
-        visits
-      }
+    return {
+      days,
+      visits
     }
   }
 }
