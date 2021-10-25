@@ -9,6 +9,7 @@ import Staging from "@/apps/ART/views/encounters/Staging.vue"
 import Vitals from "@/apps/ART/views/encounters/Vitals.vue"
 import PatientType from "@/apps/ART/views/encounters/PatientType.vue"
 import FastTrack from "@/apps/ART/views/encounters/FastTrack.vue"
+import BPManagment from "@/apps/ART/views/encounters/BPManagement.vue"
 import LabActivities from "@/apps/ART/views/encounters/LabActivities.vue"
 import Mastercard from "@/apps/ART/views/Mastercard.vue"
 import PepFarDiaggregatedReport from "@/apps/ART/views/reports/pepfar/disaggregated.vue"
@@ -40,6 +41,10 @@ import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
 import StockCardReport from "@/apps/ART/views/reports/clinic/ClinicStockCardReport.vue"
 import ClinicAppointments from "@/apps/ART/views/reports/clinic/ClinicAppointments.vue"
 import DataCleaning from "@/apps/ART/views/reports/inconsistencies/DataCleaning.vue"
+import HyperTensionDiagnosis from "@/apps/ART/views/encounters/hypertension_diagnosis.vue"
+import BPPrescription from "@/apps/ART/views/encounters/BPDrug_management.vue"
+import SocialHistory from "@/apps/ART/views/encounters/SocialHistory.vue"
+import BPAdherence from "@/apps/ART/views/encounters/BPAdherence.vue"
 
 export default [
     {
@@ -126,6 +131,31 @@ export default [
         name: "fast track assesment",
         path: "/art/encounters/fast_track/:patient_id",
         component: FastTrack
+    },
+    {
+        name: "BP management",
+        path: "/art/encounters/bp_management/:patient_id",
+        component: BPManagment
+    },
+    {
+        name: "Hypertesnion diagnosis",
+        path: "/art/encounters/hypertension_diagnosis/:patient_id",
+        component: HyperTensionDiagnosis
+    },
+    {
+        name: "BP prescription",
+        path: "/art/encounters/bp_prescription/:patient_id",
+        component: BPPrescription
+    },
+    {
+        name: "Social history",
+        path: "/art/encounters/social_history/:patient_id",
+        component: SocialHistory
+    },
+    {
+        name: "BP adherence",
+        path: "/art/encounters/bp_adherence/:patient_id",
+        component: BPAdherence
     },
     {
         name: "lab activities",
