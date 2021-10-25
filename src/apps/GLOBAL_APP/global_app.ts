@@ -66,6 +66,15 @@ export default {
           pathUrl: "/patients/merge",
         }
       ]
+    },
+    {
+      name: 'DDE Settings', 
+      files: [
+        {
+          name: "DDE Activation",
+          pathUrl: "/preferences?label=Activate DDE&property=dde_enabled"
+        }
+      ]
     }
   ],
   GlobalProgramActivities: [
