@@ -35,9 +35,6 @@
 </template>
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import {
-  IonButton,
-} from "@ionic/vue";
 import { isEmpty } from "lodash";
 import { IonButton } from "@ionic/vue"
 
