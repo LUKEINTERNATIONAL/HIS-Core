@@ -65,6 +65,12 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
     name: "Fast Track assesment",
     globalProperty: 'enable_fast_track=true',
     icon: "fast-track.png"
+  },
+  {
+    id: "BP management",
+    name: "BP management",
+    icon: "dispensing.png",
+    globalProperty: 'activate.htn.enhancement=true'
   }
 ]
 
