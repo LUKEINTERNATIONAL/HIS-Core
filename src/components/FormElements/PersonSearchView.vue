@@ -2,7 +2,7 @@
     <ion-row>
         <ion-col size="5">
             <div class="large-card">
-                <h3> People ({{listData.length}}):  </h3>
+                <h3> Found people ({{listData.length}}):  </h3>
                 <ion-list>
                     <ion-item
                         button
@@ -13,7 +13,7 @@
                         @click="onSelect(result)"
                         >
                         <ion-avatar>
-                            <ion-img src="/assets/images/avatar.svg"/>
+                          <ion-img src="/assets/images/avatar.svg"/>
                         </ion-avatar>
                         <ion-label> {{ result.label }} </ion-label>
                     </ion-item>
@@ -46,7 +46,9 @@ import { defineComponent } from "vue";
 import {
   IonRow,
   IonLabel,
+  IonAvatar,
   IonCol,
+  IonImg,
   IonList,
   IonItem,
 } from "@ionic/vue";
@@ -57,7 +59,9 @@ export default defineComponent({
   mixins:[FieldMixinVue],
   components: {
     IonLabel,
+    IonAvatar,
     IonRow,
+    IonImg,
     IonCol,
     IonList,
     IonItem,

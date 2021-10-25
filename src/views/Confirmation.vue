@@ -305,6 +305,9 @@ export default defineComponent({
         'enroll': () => {
           return this.program.enrollProgram()
         },
+        'activateFn': () => {
+          return this.$router.push(`/art/filing_numbers/${this.patient.getID()}?assign=true`)
+        },
         'updateDemographics': () => {
           return this.$router.push(`/patient/registration?edit_person=${this.patient.getID()}`)
         },

@@ -46,9 +46,17 @@ import { Option } from '../Forms/FieldInterface'
 import FieldMixinVue from './FieldMixin.vue'
 import Transformer from "@/utils/Transformers"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
+import {
+    IonCol,
+    IonRow
+} from "@ionic/vue"
 export default defineComponent({
     mixins: [FieldMixinVue],
-    components: {ViewPort},
+    components: {
+        ViewPort,
+        IonCol,
+        IonRow
+    },
     data: () => ({
        patient: {} as any,
        guardian: {} as any,

@@ -4,6 +4,7 @@ export const REPORTS: FolderInterface[] = [
     {
         name: 'MoH',
         icon: 'login-logos/Malawi-Coat_of_arms_of_arms.png',
+        defaultFilesIcon: 'reports.png',
         files: [
             {
                 name: 'Cohort',
@@ -30,6 +31,7 @@ export const REPORTS: FolderInterface[] = [
     {
         name: 'Clinic',
         icon: 'reports.png',
+        defaultFilesIcon: 'reports.png',
         files: [
             {
                 name: 'Defaulter list',
@@ -92,6 +94,7 @@ export const REPORTS: FolderInterface[] = [
     {
         name: 'PEPFAR',
         icon: 'login-logos/PEPFAR.png',
+        defaultFilesIcon: 'reports.png',
         files: [
             {
                 name: 'Defaulter list',

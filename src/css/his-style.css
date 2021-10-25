@@ -153,10 +153,10 @@ body {
 
 #view-port {
     border: 1px solid #ccc;
-    background: #f1f1f1;
+    background: #f7f7f7;
     width: 96.8%;
     margin: auto;
-    border-radius: 9px;
+    border-radius: 3px;
     padding: 5px;
     overflow: hidden;
     margin-top: 1.3%;

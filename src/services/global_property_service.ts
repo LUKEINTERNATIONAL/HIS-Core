@@ -26,12 +26,21 @@ export class GlobalPropertyService extends Service {
 
     static async isMilitarySite() { 
         try {
-            const enabled = await this.get('military.enabled') 
+            const enabled = await this.get('military_site') 
             return enabled === 'true'
         }catch(e) {
             return false
         }
     }
+    static async filingNumbersEnabled() {
+        const prop = await this.get('use.filing.number')
+        if (prop) {
+            return prop === 'true'
+        }
+        return false
+    }
+
     static isHTNEnabled() { return this.get('activate.htn.enhancement') }
     static getAppointmentLimit() { return this.get('clinic.appointment.limit') }
+
 }

@@ -84,9 +84,19 @@ import NavButton from "@/components/Buttons/ActionSideButton.vue"
 import ResetButton from "@/components/Buttons/ResetButton.vue"
 import ArtDispensationModal from "@/components/DataViews/ArtDispensationModal.vue"
 import FieldMixinVue from './FieldMixin.vue'
-
+import {
+    IonRow,
+    IonCol
+} from "@ionic/vue"
 export default defineComponent({
-  components: { ViewPort, Barcode, NavButton, ResetButton },
+  components: { 
+    ViewPort, 
+    Barcode, 
+    NavButton, 
+    ResetButton,
+    IonRow,
+    IonCol
+  },
   mixins: [FieldMixinVue],
   data: () => ({
     tab: 'prescribe',

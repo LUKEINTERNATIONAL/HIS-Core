@@ -71,7 +71,7 @@
   </view-port>
 </template>
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { defineComponent } from "vue";
 import ViewPort from "../DataViews/ViewPort.vue";
 import {
   IonGrid,
@@ -80,7 +80,6 @@ import {
 } from "@ionic/vue";
 import { VITALS_KEYPAD } from "../Keyboard/KbLayouts";
 import { BMIService } from "@/services/bmi_service";
-import { Option } from "../Forms/FieldInterface";
 import OptionButton from "@/components/Buttons/ActionSideButton.vue"
 import FieldMixinVue from "./FieldMixin.vue";
 

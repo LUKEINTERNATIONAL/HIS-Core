@@ -6,9 +6,12 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import ToolBarMediumCard from "@/components/Cards/ToolbarMediumCard.vue"
+import {
+  IonImg
+} from "@ionic/vue"
 export default defineComponent({
   name: "AppIcon",
-  components: {ToolBarMediumCard},
+  components: { IonImg, ToolBarMediumCard },
   props: {
     icon: {
       type: String,

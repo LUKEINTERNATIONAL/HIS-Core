@@ -5,6 +5,7 @@
     :activeField="fieldComponent" 
     :fields="fields" 
     :onFinishAction="onFinish"
+    :cancelDestinationPath="`/patient/dashboard/${patientData.id}`"
  />
 </template>
 <script lang="ts">
@@ -16,12 +17,11 @@ import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
-import { toastDanger } from "@/utils/Alerts"
-import { WorkflowService } from "@/services/workflow_service"
 import { RelationsService } from "@/services/relations_service"
 import { isEmpty } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
 import { PatientRegistrationService } from "@/services/patient_registration_service"
+import { nextTask } from "@/utils/WorkflowTaskHelper"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -35,9 +35,9 @@ export default defineComponent({
   }),
   watch: {
     '$route': {
-        async handler({query}: any) {
-            if (query.patient) {
-                const patient = await Patientservice.findByID(query.patient)
+        async handler({params}: any) {
+            if (params.patient_id) {
+                const patient = await Patientservice.findByID(params.patient_id)
                 if (patient) {
                     this.patientData = this.toPersonData(patient.person)
                     this.fields = this.getFields()
@@ -82,8 +82,7 @@ export default defineComponent({
         await RelationsService.createRelation(
             this.patientData.id, guardianID, form.relations.other.relationship_type_id
         )
-        const nextTask = await WorkflowService.getNextTaskParams(this.patientData.id)
-        this.$router.push(nextTask)
+        await nextTask(this.patientData.id, this.$router)
     },
     isSearchMode() {
         return ['Search', 'Registration'].includes(this.fieldAction)

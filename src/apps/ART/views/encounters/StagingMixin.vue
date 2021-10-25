@@ -10,6 +10,9 @@ import HisDate from "@/utils/Date"
 import { isEmpty } from "lodash"
 import { CD4_COUNT_PAD_LO } from "@/components/Keyboard/KbLayouts"
 import { matchToGuidelines } from "@/utils/GuidelineEngine"
+import {
+    getFacilities
+} from '@/utils/HisFormHelpers/LocationFieldOptions'
 
 export default defineComponent({
     mixins: [EncounterMixinVue],
@@ -90,11 +93,8 @@ export default defineComponent({
             }
             return true
         },
-        async getFacilities(filter=''){
-            const facilities = await this.staging.getFacilities(filter)
-            return facilities.map((facility: any) => ({
-                label: facility.name, value: facility.location_id
-            }))
+        getFacilities(filter='') {
+            return getFacilities(filter)
         },
         updateStagingFacts(stage: number, data: any) {
             const activeStage = this.stagingFacts.stage === null ? 0 : this.stagingFacts.stage
@@ -170,16 +170,6 @@ export default defineComponent({
                 return f.has_transfer_letter && f.has_transfer_letter.value === 'Yes'
             }
             return true
-        },
-        yearNotHundredAgo(year: string) {
-            const oldestYear = HisDate.getYearFromAge(100)
-            return parseInt(year) < oldestYear ? ['Year is too long ago'] : null
-        },
-        dateBeforeBirthDate(date: string) {
-            return date < this.patient.getBirthdate() ? ['Date is before Date of birth'] : null
-        },
-        dateInFuture(date: string) {
-            return date > this.staging.getDate() ? ['Date is out of range'] : null
         },
         getStagingSummaryField(helpText="Summary" as string) {
             return {

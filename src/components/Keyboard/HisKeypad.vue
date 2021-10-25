@@ -28,6 +28,10 @@ export default defineComponent({
             type: Function,
             required: true,
         },
+        strictNumbers: {
+            type: Boolean,
+            default: false
+        }
     },
     data: () => ({
         value: '0',
@@ -47,15 +51,20 @@ export default defineComponent({
             if (key.match(/done/i)) {
                 await modalController.dismiss(this.value)
             } else {
-                if (key.includes('.') && this.value.includes('.')) return
-                
-                if (!key.includes('.') && this.value === '0') this.value = ''
+                if (this.strictNumbers) {
+                    if (key.includes('.') && this.value.includes('.')) return
+                    
+                    if (!key.includes('.') && this.value === '0') this.value = ''
+    
+                    this.value = handleVirtualInput(key, this.value)
+                    
+                    if (!this.value) this.value = '0'
 
-                this.value = handleVirtualInput(key, this.value)
-                
-                if (!this.value) this.value = '0'
-                
-                this.onKeyPress(parseInt(this.value))
+                    this.onKeyPress(parseInt(this.value))
+                } else {
+                    this.value = handleVirtualInput(key, this.value)
+                    this.onKeyPress(this.value)
+                }
             }
         }
     }

@@ -305,7 +305,7 @@ export default defineComponent({
             onload: () => visibilityCondition()
           },
         },
-        onClick: () => this.onFinishAction(),
+        onClick: () => this.goNext(),
       };
     },
     /**
@@ -415,7 +415,7 @@ export default defineComponent({
       if (this.onFinish) {
         try {
           this.state = 'onsubmit'
-          return await this.onFinish(this.formData, this.computedFormData)
+          await this.onFinish(this.formData, this.computedFormData)
         }catch(e) { 
           toastDanger(e) 
         }
@@ -431,10 +431,8 @@ export default defineComponent({
       if (this.currentField.validation) {
         const value = this.formData[this.currentField.id];
         const errors = this.currentField.validation(
-          value,
-          this.formData,
-          this.computedFormData
-        );
+          value, this.formData, this.computedFormData
+        )
         if (errors) {
           return toastWarning(errors.join(", "), 3500);
         }

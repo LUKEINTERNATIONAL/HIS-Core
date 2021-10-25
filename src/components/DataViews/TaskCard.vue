@@ -1,6 +1,6 @@
 <template>
     <ion-card class="his-card task-card clickable">
-        <ion-item>
+        <ion-item lines="none">
             <ion-thumbnail slot="start">
                 <img :src="icon"/>
             </ion-thumbnail>

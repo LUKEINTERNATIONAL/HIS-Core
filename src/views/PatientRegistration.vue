@@ -1,9 +1,9 @@
 <template>
   <his-standard-form
-    @onIndex="fieldComponent=''" 
+    @onIndex="fieldComponent=''"
     :skipSummary="skipSummary"
-    :activeField="fieldComponent" 
-    :fields="fields" 
+    :activeField="fieldComponent"
+    :fields="fields"
     :onFinishAction="onFinish"
  />
 </template>
@@ -17,7 +17,7 @@ import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
-import { GlobalPropertyService } from "@/services/global_property_service" 
+import { GlobalPropertyService } from "@/services/global_property_service"
 import { ProgramService } from "@/services/program_service";
 import { WorkflowService } from "@/services/workflow_service"
 import { isPlainObject, isEmpty } from "lodash"
@@ -25,6 +25,7 @@ import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
 import { PatientRegistrationService } from "@/services/patient_registration_service"
 import App from "@/apps/app_lib"
 import { AppInterface } from "@/apps/interfaces/AppInterface"
+import { nextTask } from "@/utils/WorkflowTaskHelper"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -40,7 +41,7 @@ export default defineComponent({
         'current_district',
         'current_village',
         'current_traditional_authority'
-    ] as Array<string>,  
+    ] as Array<string>,
     editPersonData: {} as any,
     editPerson: -1 as number,
     activeField: '' as string,
@@ -58,7 +59,7 @@ export default defineComponent({
   watch: {
     '$route': {
         async handler({query}: any) {
-            if (query.edit_person) {
+           if (query.edit_person) {
                 await this.initEditMode(query.edit_person)
             } else {
                 this.presets = query
@@ -108,9 +109,9 @@ export default defineComponent({
             return
         }
         const patient = new Patientservice(person)
-        const { 
-            ancestryDistrict, 
-            ancestryTA, 
+        const {
+            ancestryDistrict,
+            ancestryTA,
             ancestryVillage,
             currentDistrict,
             currentTA
@@ -146,25 +147,20 @@ export default defineComponent({
         const patientID = registration.getPersonID()
 
         if (this.app.onRegisterPatient) {
-            await this.app.onRegisterPatient(patientID, person, attributes)
+            const exit = await this.app.onRegisterPatient(
+                patientID, person, attributes, this.$router
+            )
+            if (exit) return
         }
-
-        let nextTask: any = {}
-        
         if (person.relationship === 'Yes') {
-            nextTask = { 
-                path: '/guardian/registration', 
+            return this.$router.push({
+                path: '/guardian/registration',
                 query: {
                     patient: patientID
                 }
-            }
-        } else {
-            nextTask = await WorkflowService.getNextTaskParams(patientID)
-            if (!nextTask.name) {
-                return this.$router.push(`/patient/dashboard/${patientID}`)
-            }
+            })
         }
-        this.$router.push(nextTask)
+        await nextTask(patientID, this.$router)
     },
     async update(computedData: any) {
         const person: any = PersonField.resolvePerson(computedData)
@@ -192,7 +188,7 @@ export default defineComponent({
                     .map(({personAttributes}: any) => personAttributes)
     },
     mapToOption(listOptions: Array<string>): Array<Option> {
-        return listOptions.map((item: any) => ({ label: item, value: item })) 
+        return listOptions.map((item: any) => ({ label: item, value: item }))
     },
     givenNameField(): Field {
         const name: Field = PersonField.getGivenNameField()
@@ -277,12 +273,12 @@ export default defineComponent({
         const cellPhone: Field = PersonField.getCellNumberField()
         cellPhone.condition = () => this.editConditionCheck(['cell_phone_number'])
         cellPhone.defaultValue = () => this.presets.cell_phone_number
-        return cellPhone 
+        return cellPhone
     },
     facilityLocationField(): Field {
        const facility: Field = PersonField.getFacilityLocationField()
        facility.condition = (form: any) => form.patient_type.value === 'External consultation'
-       return facility 
+       return facility
     },
     landmarkField(): Field {
         const landmark: Field = PersonField.getLandmarkField()
@@ -325,7 +321,7 @@ export default defineComponent({
             type: FieldType.TT_TEXT,
             computedValue: ({value}: Option) => ({
                 personAttributes: {
-                    'person_attribute_type_id': 35, 
+                    'person_attribute_type_id': 35,
                     'value': value
                 }
             }),
@@ -341,7 +337,7 @@ export default defineComponent({
             validation: (val: any) => Validation.required(val),
             computedValue: ({value}: Option) => ({
                 personAttributes: {
-                    'person_attribute_type_id': 36, 
+                    'person_attribute_type_id': 36,
                     'value': value
                 }
             }),
@@ -371,8 +367,8 @@ export default defineComponent({
             helpText: 'Joined Military',
             required: true,
             condition: (form: any) =>  this.editConditionCheck([
-                'year_person_date_joined_military', 
-                'month_person_date_joined_military', 
+                'year_person_date_joined_military',
+                'month_person_date_joined_military',
                 'day_person_date_joined_military'
             ]) && form.occupation && form.occupation.value.match(/MDF/i),
             minDate: () => HisDate.estimateDateFromAge(100),
@@ -380,10 +376,10 @@ export default defineComponent({
             estimation: {
                 allowUnknown: false
             },
-            computeValue: (date: string) => ({ 
-                date, 
+            computeValue: (date: string) => ({
+                date,
                 personAttributes : {
-                    'person_attribute_type_id': 37, 
+                    'person_attribute_type_id': 37,
                     'value': date
                 }
             })
@@ -406,7 +402,7 @@ export default defineComponent({
             helpText: 'Search results',
             type: FieldType.TT_PERSON_RESULT_VIEW,
             dynamicHelpText: (f: any) => {
-                return `Search results for 
+                return `Search results for
                 "${f.given_name.value} ${f.family_name.value} | ${f.gender.label}"
                 `
             },
@@ -415,9 +411,9 @@ export default defineComponent({
             validation: (val: Option) => Validation.required(val),
             options: async (form: any) => {
                 const patients = await Patientservice.search({
-                    'given_name': form.given_name.value, 
-                    'family_name': form.family_name.value, 
-                    'gender': form.gender.value, 
+                    'given_name': form.given_name.value,
+                    'family_name': form.family_name.value,
+                    'gender': form.gender.value,
                 });
                 return patients.map((item: any) => PersonField.getPersonAttributeOptions(item))
             },
@@ -471,8 +467,8 @@ export default defineComponent({
             condition: () => this.editPerson != -1,
             options: async () => {
                 const columns = ['Attributes', 'Values', 'Edit']
-                const editButton = (attribute: string) => ({ 
-                    name: 'Edit', 
+                const editButton = (attribute: string) => ({
+                    name: 'Edit',
                     type: 'button',
                     action: () => {
                         this.activeField = attribute

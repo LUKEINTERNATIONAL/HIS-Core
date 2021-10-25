@@ -39,6 +39,8 @@ import {
   IonButton,
 } from "@ionic/vue";
 import { isEmpty } from "lodash";
+import { IonButton } from "@ionic/vue"
+
 export default defineComponent({
   components: {IonButton},
   props: {

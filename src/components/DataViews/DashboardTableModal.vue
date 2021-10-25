@@ -20,8 +20,22 @@
 import { defineComponent, PropType } from 'vue'
 import HisBasicTable from './HisBasicTable.vue'
 import {modalController} from '@ionic/vue'
+import { 
+  IonHeader, 
+  IonToolbar, 
+  IonContent, 
+  IonFooter, 
+  IonButton 
+} from "@ionic/vue"
 export default defineComponent({
-  components: { HisBasicTable },
+  components: { 
+    HisBasicTable,
+    IonHeader, 
+    IonToolbar, 
+    IonContent, 
+    IonFooter, 
+    IonButton 
+  },
   props: {
     title: {
       type: String, 

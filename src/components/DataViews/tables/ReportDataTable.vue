@@ -58,8 +58,12 @@ import {
 from "@/components/DataViews/tables/ReportDataTable"
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { isEmpty } from "lodash";
-
+import {
+    IonButton,
+    IonIcon
+} from "@ionic/vue"
 export default defineComponent({
+  components: { IonButton, IonIcon},
   props: {
     config: {
         type: Object as PropType<TableInterface>,
