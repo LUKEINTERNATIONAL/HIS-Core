@@ -16,7 +16,7 @@
           :description="taskItem.description"
           :icon="img(taskItem.icon)">
         </task-card>
-      </ion-col>
+     </ion-col>
     </ion-row>
   </ion-grid>
   <ion-footer>
@@ -85,6 +85,11 @@ export default defineComponent({
               item.globalProperty)))
              continue
           }
+          if (item.condition) {
+            if (!(await item.condition(this.taskParams))) {
+              continue
+            }
+          }
           this.filteredItems.push(item)
         }
       },
@@ -122,7 +127,7 @@ export default defineComponent({
       }
       this.closeModal()
     }
-  },
+  }
 })
 </script>
 <style scoped>

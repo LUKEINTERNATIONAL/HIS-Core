@@ -43,6 +43,11 @@ import DataCleaning from "@/apps/ART/views/reports/inconsistencies/DataCleaning.
 
 export default [
     {
+        name: "filing management",
+        path: '/art/filing_numbers/:patient_id',
+        component: () => import("@/apps/ART/views/FilingNumberManagement.vue")
+    },
+    {
         name: "Set Clinic Days",
         path: "/art/preferences/clinic_days",
         component: () => import("@/apps/ART/views/preferences/SetClinicDays.vue")

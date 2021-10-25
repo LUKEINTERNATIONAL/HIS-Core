@@ -14,6 +14,23 @@ import { ConceptService } from "@/services/concept_service"
 import HisDate from "@/utils/Date"
 import { GeneralDataInterface } from "@/apps/interfaces/AppInterface";
 import { AppEncounterService } from "@/services/app_encounter_service"
+import { GlobalPropertyService } from "@/services/global_property_service"
+
+async function enrollInArtProgram(patientID: number, patientType: string) {
+    const program = new PatientProgramService(patientID)
+    const enroll = await program.enrollProgram()
+    if (enroll) {
+        //Create pre-art state
+        program.setStateId(1) 
+        await program.updateState()
+    }
+    // Create registration encounter
+    const encounter = new AppEncounterService(patientID, 5)
+    await encounter.createEncounter()
+    await encounter.saveValueCodedObs(
+        'Type of patient', patientType
+    )
+}
 
 export async function init() {
     const activities = PRIMARY_ACTIVITIES
@@ -35,20 +52,18 @@ export async function init() {
     return modal;
 }
 
-export async function onRegisterPatient(patientID: number, person: any) {
-    const program = new PatientProgramService(patientID)
-    const enroll = await program.enrollProgram()
-    if (enroll) {
-        //Create pre-art state
-        program.setStateId(1) 
-        await program.updateState()
+export async function onRegisterPatient(patientID: number, person: any, attr: any, router: any) {
+    await enrollInArtProgram(patientID, person.patient_type)
+    // Assign filing number if property use_filing_numbers is enabled
+    const canFilingNumber = await GlobalPropertyService.get('use_filing_numbers')
+    if (canFilingNumber) {
+        let nextRoute = `/art/filing_numbers/${patientID}?assign=true`
+        if (person.relationship === 'Yes') {
+            nextRoute += '&next_workflow_task=Guardian Registration'
+        }
+        router.push(nextRoute)
+        return true
     }
-    // Create registration encounter
-    const encounter = new AppEncounterService(patientID, 5)
-    await encounter.createEncounter()
-    await encounter.saveValueCodedObs(
-        'Type of patient', person.patient_type
-    )
 }
 
 export async function getPatientDashboardAlerts(patient: any): Promise<GeneralDataInterface[]>{

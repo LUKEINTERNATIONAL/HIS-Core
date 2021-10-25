@@ -7,4 +7,5 @@ export interface TaskInterface {
     workflowID?: string;
     action?: Function;
     icon: string;
+    condition?: (params: any) => boolean | Promise<boolean>;
 }

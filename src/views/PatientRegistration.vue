@@ -59,7 +59,7 @@ export default defineComponent({
   watch: {
     '$route': {
         async handler({query}: any) {
-            if (query.edit_person) {
+           if (query.edit_person) {
                 await this.initEditMode(query.edit_person)
             } else {
                 this.presets = query
@@ -147,7 +147,10 @@ export default defineComponent({
         const patientID = registration.getPersonID()
 
         if (this.app.onRegisterPatient) {
-            await this.app.onRegisterPatient(patientID, person, attributes)
+            const exit = await this.app.onRegisterPatient(
+                patientID, person, attributes, this.$router
+            )
+            if (exit) return
         }
         if (person.relationship === 'Yes') {
             return this.$router.push({
