@@ -30,29 +30,29 @@
                 <ion-row style="max-height: 80%; overflow: scroll; ">
                   <his-table :columns="columns" :rows="rows"></his-table>
                 </ion-row>
-                <ion-row style="height: 30%; margin-top: 40vh">
-                  <ion-radio-group v-model="action">
-                    <ion-grid>
-                      <ion-row>
-                        <ion-col
-                          size="4"
-                          v-for="(item, index) in items"
-                          :key="index"
-                        >
-                          <ion-item>
-                            <ion-label>{{ item.label }}</ion-label>
-                            <ion-radio :value="item"></ion-radio>
-                          </ion-item>
-                        </ion-col>
-                      </ion-row>
-                    </ion-grid>
-                  </ion-radio-group>
-                </ion-row>
               </ion-grid>
             </div>
           </ion-content>
         </div>
       </view-port>
+      <div class="his-floating-keyboard"> 
+        <ion-radio-group v-model="action">
+          <ion-grid>
+            <ion-row>
+              <ion-col
+                size="4"
+                v-for="(item, index) in items"
+                :key="index"
+              >
+                <ion-item>
+                  <ion-label>{{ item.label }}</ion-label>
+                  <ion-radio :value="item"></ion-radio>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
+        </ion-radio-group>
+      </div>
     </ion-content>
     <ion-footer>
       <ion-toolbar color="black">
