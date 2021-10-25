@@ -2,6 +2,7 @@ import { Service } from "./service";
 import { modalController } from "@ionic/vue";
 import ZebraPrinterComponent from "@/components/ZebraPrinterImage.vue"
 import { toastWarning } from "@/utils/Alerts";
+import { delayPromise } from "@/utils/Timers";
 
 export class PrintoutService extends Service {
     constructor() {
@@ -35,8 +36,8 @@ export class PrintoutService extends Service {
 
         link.click()
         document.body.removeChild(link);
-        setTimeout(async () => await modalController.dismiss({}), 3000)
-        return true
+        await delayPromise(3000)
+        await modalController.dismiss({})
     }
 
     async printLocation(locationId: number) {
