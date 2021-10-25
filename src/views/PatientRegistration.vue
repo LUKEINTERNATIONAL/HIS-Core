@@ -147,10 +147,10 @@ export default defineComponent({
         const patientID = registration.getPersonID()
 
         if (this.app.onRegisterPatient) {
-            const exit = await this.app.onRegisterPatient(patientID, person, attributes, this.$router)
-            if (exit) {
-                return
-            } 
+            const exit = await this.app.onRegisterPatient(
+                patientID, person, attributes, this.$router
+            )
+            if (exit) return
         }
         if (person.relationship === 'Yes') {
             return this.$router.push({

@@ -8,6 +8,7 @@ import { optionsActionSheet } from "@/utils/ActionSheets"
 import { UserService } from "@/services/user_service"
 import { find } from "lodash"
 import { nextTask } from "@/utils/WorkflowTaskHelper"
+import HisDate from "@/utils/Date"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -59,9 +60,14 @@ export default defineComponent({
             }
         },
         async selectProvider(providers: Array<string>) {
+            const toDate = (date: any) => HisDate.toStandardHisDisplayFormat(date)
+            const encounterName = this.$route.name 
+                ? this.$route.name.toString().toUpperCase()
+                : 'Kaya'
             const modal = await optionsActionSheet(
-                'Please select a provider',
-                `BDE: ${ProgramService.getSessionDate()} | Current: ${ProgramService.getCachedApiDate()}`,
+                `Please select a provider for ${encounterName}`,
+                `BDE: ${toDate(ProgramService.getSessionDate())} 
+                    | Current: ${toDate(ProgramService.getCachedApiDate())}`,
                 providers,
                 [
                     { name: 'Confirm', slot: 'end', role: 'action' }

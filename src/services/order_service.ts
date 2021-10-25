@@ -85,18 +85,20 @@ export class OrderService extends Service {
     static buildLabOrders(encounter: any, orders: any) {
         return orders.map((data: any) => {
             const testReason = ConceptService.getCachedConceptID(data.reason, true);
-            return {
+            const payload: any = {
                 'encounter_id': encounter.encounter_id,
                 'tests': [{ 'concept_id': data.concept_id }],
                 'reason_for_test_id': testReason,
                 'target_lab': super.getLocationName(),
                 'date': HisDate.toStandardHisFormat(super.getSessionDate()),
                 'requesting_clinician': super.getUserName(),
-                'specimen': {
+            }
+            if (data.specimenConcept) {
+                payload['specimen'] = {
                     'concept_id': data.specimenConcept
                 }
-                
             }
+            return payload
         })
     }
     static saveOrdersArray(encounterId: number, orders: Array<Order>) {

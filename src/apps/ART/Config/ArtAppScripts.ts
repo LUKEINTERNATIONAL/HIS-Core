@@ -57,7 +57,11 @@ export async function onRegisterPatient(patientID: number, person: any, attr: an
     // Assign filing number if property use_filing_numbers is enabled
     const canFilingNumber = await GlobalPropertyService.get('use_filing_numbers')
     if (canFilingNumber) {
-        router.push(`/art/filing_numbers/${patientID}?assign=true&next_workflow_task=Guardian Registration`)
+        let nextRoute = `/art/filing_numbers/${patientID}?assign=true`
+        if (person.relationship === 'Yes') {
+            nextRoute += '&next_workflow_task=Guardian Registration'
+        }
+        router.push(nextRoute)
         return true
     }
 }

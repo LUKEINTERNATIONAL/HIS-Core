@@ -1,10 +1,11 @@
 export interface TaskInterface {
     id: string;
     name: string;
+    globalProperty?: string;
     description?: string;
     url?: string;
     workflowID?: string;
     action?: Function;
     icon: string;
-    condition?: (globalPropertyService: any, otherParams: any) => boolean | Promise<boolean>;
+    condition?: (params: any) => boolean | Promise<boolean>;
 }
