@@ -39,7 +39,12 @@ function getYearFromAge(age: number) {
 function getYear(date: string) {
     return dayjs(date).year()
 }
-
+function getMonth(date: string) {
+    return dayjs(date).month()
+}
+function getDay(date: string) {
+    return dayjs(date).day()
+}
 function dateIsAfter(date: string) { return dayjs().isAfter(date) }
 
 function getCurrentYear() { return dayjs().year() }
@@ -84,5 +89,7 @@ export default {
     estimateDateFromAge,
     getYearFromAge,
     getCurrentYear,
-    getDateBeforeByDays
+    getDateBeforeByDays,
+    getMonth,
+    getDay
 }

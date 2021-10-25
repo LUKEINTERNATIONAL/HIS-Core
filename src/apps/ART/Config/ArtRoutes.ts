@@ -73,6 +73,11 @@ export default [
         component: () => import("@/apps/ART/views/preferences/SetAppointmentLimit.vue")
     },
     {
+        name: "Enter stock",
+        path: "/art/stock/enter",
+        component: () => import("@/apps/ART/views/ARTStock/enter_receipts.vue")
+    },
+    {
         name: "treatment",
         path: "/art/encounters/prescriptions/:patient_id",
         component: Prescription
