@@ -8,7 +8,7 @@
     <ion-row>
       <ion-col 
         size="4" 
-        v-for="(taskItem, index) in items" 
+        v-for="(taskItem, index) in filteredItems" 
         :key="index">
         <task-card
           @click="doTask(taskItem)"
@@ -30,7 +30,8 @@ import Img from "@/utils/Img"
 import { defineComponent, PropType } from "vue";
 import TaskCard from "@/components/DataViews/TaskCard.vue";
 import { TaskInterface } from "@/apps/interfaces/TaskInterface";
-import { 
+import { GlobalPropertyService } from "@/services/global_property_service"
+import {
   IonGrid,
   IonFooter,
   IonToolbar,
@@ -41,6 +42,7 @@ import {
   IonCol, 
   modalController 
 } from "@ionic/vue"; 
+import { isEmpty } from "lodash";
 
 export default defineComponent({
   components: { 
@@ -68,12 +70,42 @@ export default defineComponent({
       required: false
     }
   },
+  data: () => ({
+    filteredItems: [] as TaskInterface[]
+  }),
+  watch: {
+    items: {
+      async handler(items: TaskInterface[]) {
+        if (!items || isEmpty(items)) 
+          return 
+        for(const i in items){
+          const item = items[i]
+          if (item.globalProperty) {
+            if (!(await this.checkGlobalProperty(
+              item.globalProperty)))
+             continue
+          }
+          this.filteredItems.push(item)
+        }
+      },
+      deep: true,
+      immediate: true
+    }
+  },
   methods: {
     img(name: string) {
       return Img(name)
     },
     async closeModal() {
       await modalController.dismiss({})
+    },
+    async checkGlobalProperty(property: string) {
+      const [prop, val] = property.split('=')
+      const curVal = await GlobalPropertyService.get(prop)
+      if (curVal) {
+        return val === curVal 
+      }
+      return false
     },
     doTask(taskItem: TaskInterface) {
       if (taskItem.action) {
