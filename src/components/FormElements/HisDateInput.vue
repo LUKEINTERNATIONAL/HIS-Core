@@ -5,40 +5,40 @@
     <ion-grid>
         <ion-row>
             <ion-col>
-                <ion-button>+</ion-button>
+                <ion-button @click="add('day')">+</ion-button>
             </ion-col>
             <ion-col>
-                <ion-button>+</ion-button>
+                <ion-button @click="add('month')">+</ion-button>
             </ion-col>
             <ion-col>
-                <ion-button>+</ion-button>
+                <ion-button @click="add('year')">+</ion-button>
             </ion-col>
         </ion-row>
         <ion-row>
             <ion-col>
-                {{getYear()}}
+                {{getDay}}
             </ion-col>
             <ion-col>
-                <ion-input>{{ getMonth() }}></ion-input>
+                <ion-input>{{ getMonth }}</ion-input>
             </ion-col>
             <ion-col>
-                <ion-input>{{getDay()}}</ion-input>
+                <ion-input>{{getYear}}</ion-input>
             </ion-col>
             <ion-col>
-                <ion-button>
+                <ion-button @click="today()">
                     Today
                 </ion-button>
             </ion-col>
         </ion-row>
         <ion-row>
             <ion-col>
-                <ion-button>-</ion-button>
+                <ion-button @click="subtract('day')">-</ion-button>
             </ion-col>
             <ion-col>
-                <ion-button>-</ion-button>
+                <ion-button @click="subtract('month')">-</ion-button>
             </ion-col>
             <ion-col>
-                <ion-button>-</ion-button>
+                <ion-button @click="subtract('year')">-</ion-button>
             </ion-col>
         </ion-row>
     </ion-grid>
@@ -53,6 +53,7 @@ import { NUMBERS_ONLY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue'
 import HisDate from "@/utils/Date"
+import { Service } from '@/services/service'
 
 export default defineComponent({
     components: { BaseInput, ViewPort },
@@ -60,7 +61,7 @@ export default defineComponent({
     data: ()=>({ 
         value: '',
         keyboard: NUMBERS_ONLY,
-        date: new Date()
+        date: '' as any
     }),
     async activated(){
         this.$emit('onFieldActivated', this)
@@ -81,6 +82,15 @@ export default defineComponent({
         },
         async keypress(text: any){
             this.value = handleVirtualInput(text, this.value)
+        },
+        add(unit: string) {
+            this.date = HisDate.add(`${this.date}`, unit, 1)
+        },
+        subtract(unit: string) {
+           this.date = HisDate.subtract(`${this.date}`, unit, 1)
+        },
+        today() {
+            this.date = Service.getSessionDate();
         }
     },
     computed: {

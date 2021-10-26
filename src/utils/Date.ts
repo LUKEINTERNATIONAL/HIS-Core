@@ -40,10 +40,16 @@ function getYear(date: string) {
     return dayjs(date).year()
 }
 function getMonth(date: string) {
-    return dayjs(date).month()
+    return dayjs(date).format('MMM')
 }
 function getDay(date: string) {
-    return dayjs(date).day()
+    return dayjs(date).date()
+}
+function add(date: string, unit: any, value: number) {
+    return dayjs(date).add(value, unit);
+}
+function subtract(date: string, unit: any, value: number) {
+    return dayjs(date).subtract(value, unit);
 }
 function dateIsAfter(date: string) { return dayjs().isAfter(date) }
 
@@ -91,5 +97,7 @@ export default {
     getCurrentYear,
     getDateBeforeByDays,
     getMonth,
-    getDay
+    getDay,
+    add,
+    subtract
 }
