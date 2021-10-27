@@ -277,15 +277,25 @@ export default defineComponent({
       this.facts.currentOutcome = outcome
       this.facts.programName = program
     },
+    /**
+     * Set dde facts if service is enabled. 
+     * Please Note that DDE has to be configured per Program in the backend.
+     * If a program isnt configured for DDE, it crashes by default hence 
+     * exception handling is required
+     */
     async setDDEFacts() {
-      this.ddeInstance = new PatientDemographicsExchangeService(this.patient.getID())
-      const localAndRemoteDiffs = (await this.ddeInstance.getLocalAndRemoteDiffs()).diff
-      this.facts.dde.localDiffs = this.ddeInstance.formatDiffValuesByType(
-        localAndRemoteDiffs, 'local'
-      )
-      this.facts.dde.shouldUpdateNpid = this.ddeInstance.shouldCreateNpid(localAndRemoteDiffs)
-      this.facts.dde.hasDemographicConflict = !isEmpty(localAndRemoteDiffs)
-      this.facts.dde.diffColumnsAndRows = this.ddeInstance.diffsToTurple(localAndRemoteDiffs)
+      try {
+        this.ddeInstance = new PatientDemographicsExchangeService(this.patient.getID())
+        const localAndRemoteDiffs = (await this.ddeInstance.getLocalAndRemoteDiffs()).diff
+        this.facts.dde.localDiffs = this.ddeInstance.formatDiffValuesByType(
+          localAndRemoteDiffs, 'local'
+        )
+        this.facts.dde.shouldUpdateNpid = this.ddeInstance.shouldCreateNpid(localAndRemoteDiffs)
+        this.facts.dde.hasDemographicConflict = !isEmpty(localAndRemoteDiffs)
+        this.facts.dde.diffColumnsAndRows = this.ddeInstance.diffsToTurple(localAndRemoteDiffs)
+      } catch (e) {
+        console.warn(e)
+      }
     },
     /**
      * The Application/Program determines which cards to
