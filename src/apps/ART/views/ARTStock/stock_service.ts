@@ -1,8 +1,18 @@
+import { Service } from "@/services/service"
+
 interface Drug {
 	drugID: number;
 	shortName: string;
 	fullName: string;
 	packSizes: number[];
+}
+export class StockService extends Service {
+    constructor() {
+        super()
+    }
+    static postItems(items: any) {
+	return Service.postJson('/pharmacy/batches', items);
+    }
 }
 export const finalList: Drug[] = [
 	{
