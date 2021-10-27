@@ -451,7 +451,14 @@ export default defineComponent({
                             }
                         },
                         onClick: (form: any) => {
-                            return this.$router.push(`/patients/confirm?person_id=${form.results.value}`)
+                            let searchParam = ''
+                            const npid = form?.results?.other?.npid 
+                            if (npid && !npid.match(/unknown/i)) {
+                                searchParam = `patient_barcode=${npid}`
+                            } else {
+                                searchParam = `person_id=${form.results.value}`
+                            }
+                            return this.$router.push(`/patients/confirm?${searchParam}`)
                         }
                     }
                 ]

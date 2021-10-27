@@ -80,7 +80,8 @@ export default defineComponent({
           idType, identifier
         )
       if (!isEmpty(res)) {
-        this.$router.push(`/patients/confirm?person_id=${res[0].patient_id}`);
+        const patient = new Patientservice(res[0])
+        this.$router.push(`/patients/confirm?patient_barcode=${patient.getNationalID()}`);
       } else {
         toastWarning('Client not found')
       }
