@@ -126,11 +126,13 @@ export default defineComponent({
     cards: [] as any[],
     ddeInstance: {} as any,
     facts: {
+      scannedNpid: '' as string,
       programName: 'N/A' as string,
       currentOutcome: '' as string,
       viralLoadStatus: '' as 'High' | 'Low' | '',
       programs: [] as string[],
       identifiers: [] as string[],
+      currentNpid: '' as string,
       dde: {
         shouldUpdateNpid: false,
         remoteAndLocalHaveDiffs: false,
@@ -176,12 +178,11 @@ export default defineComponent({
     }
   },
   watch: {
-    '$route': {
+    $route: {
       async handler({query}: any) {
         if (!isEmpty(query) && (
-          query.person_id 
-          || query.patient_barcode)) 
-          {
+          query.person_id || query.patient_barcode
+        )) {
           await this.findAndSetPatient(
             query.person_id, 
             query.patient_barcode
@@ -209,16 +210,16 @@ export default defineComponent({
     /**
      * Resolve patient by either patient ID or NpID 
      * depending on search criteria
-     */
+    */
     async findAndSetPatient(id: any, npid: any) {
       await this.presentLoading()
       let data: any = {}
       if (npid) {
+        this.facts.scannedNpid = npid
         const ddeEnabled = await PatientDemographicsExchangeService.isEnabled()
         if (ddeEnabled) {
           const res = await PatientDemographicsExchangeService.findNpid(npid)
-          if (!isEmpty(res))
-            data = res.locals[0]
+          if (!isEmpty(res)) data = res.locals[0]
         } else {
           data = (await Patientservice.findByNpid(npid))[0] || {}
         }
@@ -245,7 +246,7 @@ export default defineComponent({
      * conditions to execute. The more the data the better
      * the decision support. These facts are also presented 
      * on the User interface
-     */
+    */
     setPatientFacts() {
       this.facts.demographics.patientName = this.patient.getFullName()
       this.facts.demographics.givenName = this.patient.getGivenName()
@@ -261,6 +262,7 @@ export default defineComponent({
       this.facts.demographics.currentTA = this.patient.getCurrentTA()
       this.facts.demographics.currentVillage = this.patient.getHomeVillage()
       this.facts.identifiers = this.getStrIdentifierTypes()
+      this.facts.currentNpid = this.patient.getNationalID()
     },
     async resolveGlobalPropertyFacts() {
       for(const i in this.facts.globalProperties) {
@@ -276,7 +278,7 @@ export default defineComponent({
     },
     async setDDEFacts() {
       this.ddeInstance = new PatientDemographicsExchangeService(this.patient.getID())
-      const localAndRemoteDiffs = await this.ddeInstance.getLocalAndRemoteDiffs()
+      const localAndRemoteDiffs = (await this.ddeInstance.getLocalAndRemoteDiffs()).diff
       this.facts.dde.shouldUpdateNpid = this.ddeInstance.shouldCreateNpid(localAndRemoteDiffs)
       this.facts.dde.remoteAndLocalHaveDiffs = !isEmpty(localAndRemoteDiffs)
       this.facts.dde.localAndRemoteDiffs = localAndRemoteDiffs
@@ -345,6 +347,9 @@ export default defineComponent({
         'updateDemographics': () => {
           return this.$router.push(`/patient/registration?edit_person=${this.patient.getID()}`)
         },
+        'printNPID': async () => {
+          await this.ddeInstance.printNpid()
+        },
         'assignNpid': async () => {
           const req = await this.patient.assignNpid()
           loadingController.dismiss()
@@ -354,14 +359,6 @@ export default defineComponent({
               const print = new PatientPrintoutService(this.patient.getID())
               await print.printNidLbl()
             }
-          }
-        },
-        'createNpidInDDE': async () => {
-          const req = await this.ddeInstance.createNPID(
-            this.facts.dde.localAndRemoteDiffs.npid.remote
-          )
-          if (req) {
-            await this.ddeInstance.printNpid()
           }
         },
         'refreshDemographicsDDE': async () => {

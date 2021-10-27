@@ -19,7 +19,10 @@ export enum FlowState {
     EXIT = 'exit',
     ACTIVATE_FN = 'activateFn',
     ASSIGN_NPID = 'assignNpid',
-    UPDATE_DMG = 'updateDemographics'
+    UPDATE_DMG = 'updateDemographics',
+    PRINT_NPID = 'printNPID',
+    REFRESH_DDE_DEMOGRAPHICS = 'refreshDemographicsDDE',
+    UPDATE_LOCAL_DDE_DIFFS = 'updateLocalDiffs'
 }
 
 export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = {
@@ -202,7 +205,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         }
     },
     "Prompt the user to update patient demographics when data is incomplete": {
-        priority: 2,
+        priority: 3,
         targetEvent: TargetEvent.ONLOAD,
         actions: {
             alert: async () => {
@@ -258,6 +261,40 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         conditions: {
             programName: (programName: string) => programName === 'HIV PROGRAM',
             viralLoadStatus: (viralLoadStatus: string) => viralLoadStatus === 'High'
+        }
+    },
+    "[DDE] Alert to print newer NPID when the scanned NPID doesnt match active NPID": {
+        priority: 2,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async ({ currentNpid }: any) => {
+                const action = await infoActionSheet(
+                    '[DDE] NATIONAL ID',
+                    `Patient has a newer National Identifier ${currentNpid}`,
+                    'Would you like to print it?',
+                    [
+                        { 
+                            name: 'Yes', 
+                            slot: 'start', 
+                            color: 'success'
+                        },
+                        { 
+                            name: 'No',  
+                            slot: 'end', 
+                            color: 'danger'
+                        }
+                    ])
+                return action === 'Yes' ? FlowState.PRINT_NPID : FlowState.EXIT
+            }
+        },
+        conditions: {
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled
+
+            },
+            scannedNpid(scannedNpid: string, {currentNpid}: any) {
+                return !scannedNpid.match(new RegExp(currentNpid, 'i'))
+            }
         }
     }
 }
