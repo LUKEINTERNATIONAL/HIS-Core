@@ -10,6 +10,12 @@ export class PatientDemographicsExchangeService extends Service {
         super()
         this.patientID = patientID
     }
+    
+    static findNpid(npid: string) {
+        return Service.getJson('dde/patients/find_by_npid', {
+            'npid': npid, 'program_id': Service.getProgramID()  
+        })
+    }
 
     shouldCreateNpid(diffs: any) {
         return !isEmpty(diffs) && diffs.npid
@@ -29,12 +35,6 @@ export class PatientDemographicsExchangeService extends Service {
 
     printNpid() {
         return new PatientPrintoutService(this.patientID).printNidLbl()
-    }
-
-    findNpid() {
-        return Service.getJson('dde/patients/find_by_npid', {
-            'npid': this.patientID, 'program_id': Service.getProgramID()  
-        })
     }
 
     getLocalAndRemoteDiffs() {

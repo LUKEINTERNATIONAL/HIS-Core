@@ -182,7 +182,7 @@ export default defineComponent({
           query.person_id 
           || query.patient_barcode)) 
           {
-          await this.setPatient(
+          await this.findAndSetPatient(
             query.person_id, 
             query.patient_barcode
           )
@@ -206,21 +206,25 @@ export default defineComponent({
     setProgram() {
       this.program = new PatientProgramService(this.patient.getID())
     },
-    /** /
+    /**
      * Resolve patient by either patient ID or NpID 
      * depending on search criteria
      */
-    async setPatient(id: any, npid: any) {
+    async findAndSetPatient(id: any, npid: any) {
       await this.presentLoading()
       let data: any = {}
-      
-      if (id) {
+      if (npid) {
+        const ddeEnabled = await PatientDemographicsExchangeService.isEnabled()
+        if (ddeEnabled) {
+          const res = await PatientDemographicsExchangeService.findNpid(npid)
+          if (!isEmpty(res))
+            data = res.locals[0]
+        } else {
+          data = (await Patientservice.findByNpid(npid))[0] || {}
+        }
+      }else if (id) {
         data = await Patientservice.findByID(id)
-      } else if (npid) {
-        const res = await Patientservice.findByNpid(npid)
-        data = res[0]
       }
-
       if (isEmpty(data)) {
         return alertAction('Patient not found', [
           {
