@@ -250,11 +250,9 @@ export default defineComponent({
     },
     async resolveGlobalPropertyFacts() {
       for(const i in this.facts.globalProperties) {
-        const [prop, val] = this.facts.globalProperties[i].split('=')
-        const configuredVal = await GlobalPropertyService.get(prop)
-        if (configuredVal != undefined) {
-          this.facts.globalProperties[i] = val === configuredVal
-        }
+        this.facts.globalProperties[i] = await GlobalPropertyService.isProp(
+          this.facts.globalProperties[i]
+        )
       }
     },
     async setProgramFacts() {

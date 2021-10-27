@@ -81,8 +81,9 @@ export default defineComponent({
         for(const i in items){
           const item = items[i]
           if (item.globalProperty) {
-            if (!(await this.checkGlobalProperty(
-              item.globalProperty)))
+            if (!(await GlobalPropertyService.isProp(
+              item.globalProperty
+              )))
              continue
           }
           if (item.condition) {
@@ -103,14 +104,6 @@ export default defineComponent({
     },
     async closeModal() {
       await modalController.dismiss({})
-    },
-    async checkGlobalProperty(property: string) {
-      const [prop, val] = property.split('=')
-      const curVal = await GlobalPropertyService.get(prop)
-      if (curVal) {
-        return val === curVal 
-      }
-      return false
     },
     doTask(taskItem: TaskInterface) {
       if (taskItem.action) {

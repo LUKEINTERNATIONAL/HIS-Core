@@ -11,10 +11,18 @@ export class GlobalPropertyService extends Service {
         if (res && prop in res) return res[prop]
     }
 
+    static async isProp(property: string) {
+        const [prop, val] = property.split('=')
+        const curVal = await this.get(prop)
+
+        if (curVal) return val === curVal
+
+        return false
+    }
+
     static set(prop: string, val: string | number) {
         return super.postJson('global_properties', {
-            'property': prop, 
-            'property_value': val 
+            'property': prop, 'property_value': val 
         })   
     }
 
