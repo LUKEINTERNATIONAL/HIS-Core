@@ -125,6 +125,7 @@ export default defineComponent({
     patient: {} as any,
     cards: [] as any[],
     ddeInstance: {} as any,
+    useDDE: false as boolean,
     facts: {
       scannedNpid: '' as string,
       programName: 'N/A' as string,
@@ -198,7 +199,7 @@ export default defineComponent({
       await this.setProgram()
       this.setPatientFacts()
       await this.setProgramFacts()
-      await this.setDDEFacts()
+      if (this.useDDE) await this.setDDEFacts()
       await this.drawPatientCards()
       loadingController.dismiss()
       await this.onEvent(TargetEvent.ONLOAD)
@@ -217,8 +218,8 @@ export default defineComponent({
       let data: any = {}
       if (npid) {
         this.facts.scannedNpid = npid
-        const ddeEnabled = await PatientDemographicsExchangeService.isEnabled()
-        if (ddeEnabled) {
+        this.useDDE = await PatientDemographicsExchangeService.isEnabled()
+        if (this.useDDE) {
           const res = await PatientDemographicsExchangeService.findNpid(npid)
           if (!isEmpty(res)) data = res.locals[0]
         } else {
@@ -227,6 +228,7 @@ export default defineComponent({
       }else if (id) {
         data = await Patientservice.findByID(id)
       }
+      await loadingController.dismiss()
       if (isEmpty(data)) {
         return alertAction('Patient not found', [
           {
