@@ -21,6 +21,31 @@ export class PatientDemographicsExchangeService extends Service {
         return !isEmpty(diffs) && diffs.npid
     }
 
+    formatDiffValuesByType(
+        diffs: Record<string, {remote?: any; local?: any}>, 
+        by: 'local' | 'remote') 
+        {
+            const formatted: any = {}
+            for(const i in diffs) {
+                formatted[i] = diffs[by]
+            }
+            return formatted
+        }
+
+    diffsToTurple(diffs: any) {
+        const turple: any = []
+        for(const index in diffs) {
+            const diff = diffs[index]
+            const label = index
+                .split('_')
+                .map((word: string) => word.charAt(0)
+                    .toUpperCase()+ word.slice(1))
+                    .join(' ')
+            turple.push([label, diff.local, diff.remote])
+        }
+        return turple
+    }
+
     shouldUpdateDiffs(diffs: any) {
         return !isEmpty(diffs)
     }
@@ -46,13 +71,12 @@ export class PatientDemographicsExchangeService extends Service {
 
     updateLocalDifferences(diff: any) {
         return Service.putJson(`people/${this.patientID}`, {
-            'program_id': Service.getProgramID(),
-            ...diff
+            'program_id': Service.getProgramID(), ...diff
         })
     }
 
     refreshDemographics() {
-        return Service.getJson('dde/patienbts/refresh', {
+        return Service.getJson('dde/patients/refresh', {
             'patient_id': this.patientID, 
             'program_id': Service.getProgramID()
         })

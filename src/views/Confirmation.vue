@@ -134,9 +134,10 @@ export default defineComponent({
       identifiers: [] as string[],
       currentNpid: '' as string,
       dde: {
+        hasDemographicConflict: false,
+        localDiffs: {},
+        diffColumnsAndRows: [],
         shouldUpdateNpid: false,
-        remoteAndLocalHaveDiffs: false,
-        localAndRemoteDiffs: {}
       } as any,
       demographics: {
         givenName: '' as string,
@@ -279,9 +280,12 @@ export default defineComponent({
     async setDDEFacts() {
       this.ddeInstance = new PatientDemographicsExchangeService(this.patient.getID())
       const localAndRemoteDiffs = (await this.ddeInstance.getLocalAndRemoteDiffs()).diff
+      this.facts.dde.localDiffs = this.ddeInstance.formatDiffValuesByType(
+        localAndRemoteDiffs, 'local'
+      )
       this.facts.dde.shouldUpdateNpid = this.ddeInstance.shouldCreateNpid(localAndRemoteDiffs)
-      this.facts.dde.remoteAndLocalHaveDiffs = !isEmpty(localAndRemoteDiffs)
-      this.facts.dde.localAndRemoteDiffs = localAndRemoteDiffs
+      this.facts.dde.hasDemographicConflict = !isEmpty(localAndRemoteDiffs)
+      this.facts.dde.diffColumnsAndRows = this.ddeInstance.diffsToTurple(localAndRemoteDiffs)
     },
     /**
      * The Application/Program determines which cards to
@@ -348,25 +352,23 @@ export default defineComponent({
           return this.$router.push(`/patient/registration?edit_person=${this.patient.getID()}`)
         },
         'printNPID': async () => {
+          loadingController.dismiss()
           await this.ddeInstance.printNpid()
         },
         'assignNpid': async () => {
           const req = await this.patient.assignNpid()
           loadingController.dismiss()
-          if (req) {
-            const ok = await alertConfirmation('Do you want to print National ID?')
-            if (ok) {
-              const print = new PatientPrintoutService(this.patient.getID())
-              await print.printNidLbl()
-            }
+          if (req && (await alertConfirmation('Do you want to print National ID?'))) {
+            const print = new PatientPrintoutService(this.patient.getID())
+            await print.printNidLbl()
           }
         },
         'refreshDemographicsDDE': async () => {
           await this.ddeInstance.refreshDemographics()
         },
         'updateLocalDiffs': async () => {
-          await this.ddeInstance.updateLocalDiffs(
-            this.facts.dde.localAndRemoteDiffs
+          await this.ddeInstance.updateLocalDifferences(
+            this.facts.dde.localDiffs
           )
         }
       }

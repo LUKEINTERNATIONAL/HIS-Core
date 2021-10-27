@@ -4,7 +4,7 @@
  * a Patient's state.
 */
 import { GuideLineInterface } from "@/utils/GuidelineEngine"
-import { infoActionSheet } from "@/utils/ActionSheets"
+import { infoActionSheet, tableActionSheet } from "@/utils/ActionSheets"
 import { isEmpty } from "lodash"
 
 export enum TargetEvent {
@@ -263,6 +263,40 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         conditions: {
             programName: (programName: string) => programName === 'HIV PROGRAM',
             viralLoadStatus: (viralLoadStatus: string) => viralLoadStatus === 'High'
+        }
+    },
+    "[DDE] Alert When remote Patient demographics dont match Local Demographics ": {
+        priority: 3,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async ({dde}: any) => {
+                const action = await tableActionSheet(
+                    'Demographics Mismatch',
+                    'Local Demographics do not match Remote Demographics',
+                    ['Attributes', 'Local', 'Remote'],
+                    dde.diffColumnsAndRows,
+                    [
+                        { 
+                            name: 'Use Local', 
+                            slot: 'start', 
+                            color: 'primary'
+                        },
+                        { 
+                            name: 'Use Remote', 
+                            slot: 'start', 
+                            color: 'primary'
+                        }
+                    ]
+                )
+                return action === 'Use Local' 
+                    ? FlowState.UPDATE_LOCAL_DDE_DIFFS
+                    : FlowState.REFRESH_DDE_DEMOGRAPHICS
+            }
+        },
+        conditions: {
+            dde({hasDemographicConflict}: any) {
+                return hasDemographicConflict
+            }
         }
     },
     "[DDE] Alert to print newer NPID when the scanned NPID doesnt match active NPID": {
