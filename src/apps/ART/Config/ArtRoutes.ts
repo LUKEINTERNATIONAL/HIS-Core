@@ -78,6 +78,11 @@ export default [
         component: () => import("@/apps/ART/views/ARTStock/enter_receipts.vue")
     },
     {
+        name: "Audit trail",
+        path: "/art/stock/trail",
+        component: () => import("@/apps/ART/views/ARTStock/AuditTrail.vue")
+    },
+    {
         name: "treatment",
         path: "/art/encounters/prescriptions/:patient_id",
         component: Prescription
