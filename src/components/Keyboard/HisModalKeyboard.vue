@@ -5,18 +5,19 @@
             <center>
                 <ion-chip> {{ title || 'keypad'}} </ion-chip>
             </center>
-            <base-keyboard btnSize="96px" :layout="keypad" :onKeyPress="keypress"/> 
+              <his-keyboard  :kbConfig="keyboard" :onKeyPress="keypress"> </his-keyboard>
         </div>
     </ion-content>
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
 import BaseKeyboard from '@/components/Keyboard/BaseKeyboard.vue'
-import { DEFAULT_KEYPAD } from '@/components/Keyboard/KbLayouts'
+import { CHARACTERS_AND_NUMBERS_LO, DEFAULT_KEYPAD } from '@/components/Keyboard/KbLayouts'
 import handleVirtualInput from '@/components/Keyboard/KbHandler'
+import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
 import { modalController } from '@ionic/core'
 export default defineComponent({
-    components: { BaseKeyboard },
+    components: { HisKeyboard },
     props: {
         title: {
             type: String
@@ -28,14 +29,18 @@ export default defineComponent({
             type: Function,
             required: true,
         },
-        strictNumbers: {
-            type: Boolean,
-            default: false
-        }
     },
     data: () => ({
-        value: '0',
-        keypad: DEFAULT_KEYPAD
+        value: '',
+        keypad: DEFAULT_KEYPAD,
+        keyboard: [
+            CHARACTERS_AND_NUMBERS_LO, 
+            [
+                ['Done','Hide'],
+                ['Space', 'Delete'],
+                ['', 'Clear']
+            ]
+        ] as any,
     }),
     watch: {
         preset: { 
@@ -51,20 +56,15 @@ export default defineComponent({
             if (key.match(/done/i)) {
                 await modalController.dismiss(this.value)
             } else {
-                if (this.strictNumbers) {
-                    if (key.includes('.') && this.value.includes('.')) return
-                    
-                    if (!key.includes('.') && this.value === '0') this.value = ''
-    
-                    this.value = handleVirtualInput(key, this.value)
-                    
-                    if (!this.value) this.value = '0'
+                if (key.includes('.') && this.value.includes('.')) return
+                
+                if (!key.includes('.') && this.value === '0') this.value = ''
 
-                    this.onKeyPress(parseInt(this.value))
-                } else {
-                    this.value = handleVirtualInput(key, this.value)
-                    this.onKeyPress(this.value)
-                }
+                this.value = handleVirtualInput(key, this.value)
+                
+                if (!this.value) this.value = '0'
+                
+                this.onKeyPress(parseInt(this.value))
             }
         }
     }
@@ -83,6 +83,7 @@ export default defineComponent({
 
 .his-keyboard-btn {
     width: 110px!important;
+    font-size: 1rem;
 }
 .keypad-input {
     border: solid 1px #ccc;

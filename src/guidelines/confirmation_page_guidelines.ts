@@ -195,7 +195,10 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                 'Treatment stopped', 
                 'Patient transferred out', 
                 'Patient died'
-            ].includes(outcome)  
+            ].includes(outcome),
+            globalProperties({useFilingNumbers}: Record<string, boolean>) {
+                return useFilingNumbers
+            }
         }
     },
     "Prompt the user to update patient demographics when data is incomplete": {

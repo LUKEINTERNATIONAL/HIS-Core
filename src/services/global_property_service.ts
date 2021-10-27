@@ -32,6 +32,15 @@ export class GlobalPropertyService extends Service {
             return false
         }
     }
+    static async filingNumbersEnabled() {
+        const prop = await this.get('use.filing.number')
+        if (prop) {
+            return prop === 'true'
+        }
+        return false
+    }
+
     static isHTNEnabled() { return this.get('activate.htn.enhancement') }
     static getAppointmentLimit() { return this.get('clinic.appointment.limit') }
+
 }

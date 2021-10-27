@@ -4,4 +4,9 @@ export default [
     path: "/opd/encounters/registration/:patient_id",
     component: () => import('@/apps/OPD/views/encounters/Registration.vue')
   },
+  {
+    name: "vitals",
+    path: "/opd/encounters/vitals/:patient_id",
+    component: () => import('@/apps/OPD/views/encounters/Vitals.vue')
+  },
 ]

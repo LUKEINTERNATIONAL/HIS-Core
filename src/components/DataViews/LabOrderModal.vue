@@ -23,18 +23,17 @@
       :style="{overflowY: 'auto', height:'78vh'}"
       v-if="activeIndex != null && selectedOrders.length > 0">
     <div style="">
-      <ion-list> 
-      
-    <ion-radio-group v-model="testTypes[activeIndex]['specimen']">
-      <div class="side-title">
-        Select specimen
-      </div>
-        <!-- :color="isActive(item) ? 'primary' : ''" -->
-        <ion-item v-for="data in specimens" :key="data" > 
-      <ion-label>{{data.name}}</ion-label>
-        <ion-radio slot="start" :value="data.name" @click="addSpecimen(data)"></ion-radio>
-      </ion-item>
-    </ion-radio-group>
+    <ion-list v-if="!extendedLabsEnabled">   
+      <ion-radio-group v-model="testTypes[activeIndex]['specimen']">
+        <div class="side-title">
+          Select specimen
+        </div>
+          <!-- :color="isActive(item) ? 'primary' : ''" -->
+          <ion-item v-for="data in specimens" :key="data" > 
+        <ion-label>{{data.name}}</ion-label>
+          <ion-radio slot="start" :value="data.name" @click="addSpecimen(data)"></ion-radio>
+        </ion-item>
+      </ion-radio-group>
     </ion-list>
     <ion-radio-group v-model="testTypes[activeIndex]['reason']">
       <div class="side-title">
@@ -61,7 +60,7 @@
            <tbody>
              <tr v-for="(data, index) in finalOrders" :key="index">
                <td>{{data.name}}</td>
-               <td>{{data.specimen}}</td>
+               <td>{{data.specimen || 'N/A'}}</td>
                <td>{{data.reason}}</td>
                <td><ion-button @click="removeOrder(data.currentIndex)" slot="end" color="danger">X</ion-button></td>
              </tr>
@@ -101,6 +100,8 @@ import { OrderService } from "@/services/order_service";
 import { LabOrderService } from "@/apps/ART/services/lab_order_service";
 import { alertAction } from "@/utils/Alerts"
 import { PrintoutService } from "@/services/printout_service";
+import { GlobalPropertyService } from "@/services/global_property_service"
+
 export default defineComponent({
   name: "Modal",
   props: {
@@ -123,6 +124,10 @@ export default defineComponent({
       },
       immediate: true
     }
+  },
+  async created() {
+    const extendedLabsEnabled = await GlobalPropertyService.get('extended_labs')
+    this.extendedLabsEnabled = extendedLabsEnabled === 'true'
   },
   methods: {
     async getActivities() {
@@ -179,7 +184,10 @@ export default defineComponent({
       return this.testTypes.filter((data: any) => data.isChecked === true);
     },
     finalOrders(): any {
-      return this.selectedOrders.filter((data: any) => data.reason && data.specimen)
+      return this.selectedOrders.filter((data: any) => {
+        return data.reason && (data.specimen && !this.extendedLabsEnabled 
+          || this.extendedLabsEnabled)
+      } )
     }
   },
   mounted() {
@@ -188,6 +196,7 @@ export default defineComponent({
   data() {
     return {
       content: "Content",
+      extendedLabsEnabled: false as boolean,
       appActivities: [] as Array<ActivityInterface>,
       testTypes: [] as any,
       specimens: [],

@@ -77,6 +77,7 @@ export default defineComponent({
             componentProps: {
                 title: item.label,
                 preset: item.value,
+                strictNumbers: true,
                 onKeyPress(val: string){
                     item.value = val
                 }

@@ -5,6 +5,7 @@
     :activeField="fieldComponent" 
     :fields="fields" 
     :onFinishAction="onFinish"
+    :cancelDestinationPath="`/patient/dashboard/${patientData.id}`"
  />
 </template>
 <script lang="ts">
@@ -16,7 +17,6 @@ import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
-import { WorkflowService } from "@/services/workflow_service"
 import { RelationsService } from "@/services/relations_service"
 import { isEmpty } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
@@ -35,9 +35,9 @@ export default defineComponent({
   }),
   watch: {
     '$route': {
-        async handler({query}: any) {
-            if (query.patient) {
-                const patient = await Patientservice.findByID(query.patient)
+        async handler({params}: any) {
+            if (params.patient_id) {
+                const patient = await Patientservice.findByID(params.patient_id)
                 if (patient) {
                     this.patientData = this.toPersonData(patient.person)
                     this.fields = this.getFields()

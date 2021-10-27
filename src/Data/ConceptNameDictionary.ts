@@ -1,5 +1,26 @@
 export default [
    {
+      "categories": ['risk factors'],
+      "concept_id": 3720,
+      "name": "Diabetes"
+   },{
+      "categories": ['risk factors'],
+      "concept_id": 7623,
+      "name": "CKD"
+   },{
+      "categories": ['risk factors'],
+      "concept_id": 9499,
+      "name": "history of CVD"
+   },{
+      "categories": ['risk factors'],
+      "concept_id": 9501,
+      "name": "relative with CVD"
+   },{
+      "categories": ['risk factors'],
+      "concept_id": 3339,
+      "name": "patient smokes"
+   },
+   {
       "categories": [],
       "concept_id": 9675,
       "name": "Referral"
