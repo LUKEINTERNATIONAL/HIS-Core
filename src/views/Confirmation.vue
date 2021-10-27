@@ -101,6 +101,7 @@ import {
 import { PatientPrintoutService } from "@/services/patient_printout_service";
 import { AppInterface } from "@/apps/interfaces/AppInterface";
 import { GlobalPropertyService } from "@/services/global_property_service"
+import { PatientDemographicsExchangeService } from "@/services/patient_demographics_exchange_service"
 
 export default defineComponent({
   name: "Patient Confirmation",
@@ -123,12 +124,18 @@ export default defineComponent({
     program: {} as any,
     patient: {} as any,
     cards: [] as any[],
+    ddeInstance: {} as any,
     facts: {
       programName: 'N/A' as string,
       currentOutcome: '' as string,
       viralLoadStatus: '' as 'High' | 'Low' | '',
       programs: [] as string[],
       identifiers: [] as string[],
+      dde: {
+        shouldUpdateNpid: false,
+        remoteAndLocalHaveDiffs: false,
+        localAndRemoteDiffs: {}
+      } as any,
       demographics: {
         givenName: '' as string,
         familyName: '' as string,
@@ -145,7 +152,8 @@ export default defineComponent({
         birthdate: '' as string,
       },
       globalProperties: {
-        useFilingNumbers: 'use_filing_numbers=true'
+        useFilingNumbers: 'use_filing_numbers=true',
+        ddeEnabled: 'dde_enabled=true'
       } as any
     }
   }),
@@ -184,10 +192,11 @@ export default defineComponent({
     },
     async patient() {
       await this.presentLoading()
+      await this.resolveGlobalPropertyFacts()
       await this.setProgram()
       this.setPatientFacts()
       await this.setProgramFacts()
-      await this.resolveGlobalPropertyFacts()
+      await this.setDDEFacts()
       await this.drawPatientCards()
       loadingController.dismiss()
       await this.onEvent(TargetEvent.ONLOAD)
@@ -259,6 +268,13 @@ export default defineComponent({
       const { program, outcome }: any =  await this.program.getProgram()
       this.facts.currentOutcome = outcome
       this.facts.programName = program
+    },
+    async setDDEFacts() {
+      this.ddeInstance = new PatientDemographicsExchangeService(this.patient.getID())
+      const localAndRemoteDiffs = await this.ddeInstance.getLocalAndRemoteDiffs()
+      this.facts.dde.shouldUpdateNpid = this.ddeInstance.shouldCreateNpid(localAndRemoteDiffs)
+      this.facts.dde.remoteAndLocalHaveDiffs = !isEmpty(localAndRemoteDiffs)
+      this.facts.dde.localAndRemoteDiffs = localAndRemoteDiffs
     },
     /**
      * The Application/Program determines which cards to
@@ -334,6 +350,22 @@ export default defineComponent({
               await print.printNidLbl()
             }
           }
+        },
+        'createNpidInDDE': async () => {
+          const req = await this.ddeInstance.createNPID(
+            this.facts.dde.localAndRemoteDiffs.npid.remote
+          )
+          if (req) {
+            await this.ddeInstance.printNpid()
+          }
+        },
+        'refreshDemographicsDDE': async () => {
+          await this.ddeInstance.refreshDemographics()
+        },
+        'updateLocalDiffs': async () => {
+          await this.ddeInstance.updateLocalDiffs(
+            this.facts.dde.localAndRemoteDiffs
+          )
         }
       }
       if (state in states) {
