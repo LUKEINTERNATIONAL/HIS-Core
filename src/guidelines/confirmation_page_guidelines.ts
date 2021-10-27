@@ -233,7 +233,9 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                 const demo = {...data}
                 delete demo['landmark']
                 const checks = Object.values(demo)
-                    .map((d: any) => isEmpty(d) || d.match(/n\/a/i))
+                    .map((d: any) => isEmpty(d) 
+                        || d.match(/n\/a/i) 
+                        || d.match(/unknown/i))
                 return checks.some(Boolean)
             }
         }
