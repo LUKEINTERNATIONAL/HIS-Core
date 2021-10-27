@@ -206,18 +206,19 @@ export default defineComponent({
     setProgram() {
       this.program = new PatientProgramService(this.patient.getID())
     },
-    /**
+    /** /
      * Resolve patient by either patient ID or NpID 
      * depending on search criteria
      */
     async setPatient(id: any, npid: any) {
-      let data: any = {}
       await this.presentLoading()
-
+      let data: any = {}
+      
       if (id) {
         data = await Patientservice.findByID(id)
       } else if (npid) {
-        data = await Patientservice.findByNpid(npid)
+        const res = await Patientservice.findByNpid(npid)
+        data = res[0]
       }
 
       if (isEmpty(data)) {
