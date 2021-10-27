@@ -56,7 +56,7 @@ export async function onRegisterPatient(patientID: number, person: any, attr: an
     await enrollInArtProgram(patientID, person.patient_type)
     // Assign filing number if property use_filing_numbers is enabled
     const canFilingNumber = await GlobalPropertyService.get('use_filing_numbers')
-    if (canFilingNumber) {
+    if (canFilingNumber==='true') {
         let nextRoute = `/art/filing_numbers/${patientID}?assign=true`
         if (person.relationship === 'Yes') {
             nextRoute += '&next_workflow_task=Guardian Registration'
