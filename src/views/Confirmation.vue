@@ -72,12 +72,13 @@ import { defineComponent } from "vue";
 import { Patientservice } from "@/services/patient_service";
 import { UserService } from "@/services/user_service";
 import { alertAction, alertConfirmation, toastDanger, toastSuccess } from "@/utils/Alerts"
-import { WorkflowService } from "@/services/workflow_service"
 import HisDate from "@/utils/Date"
 import { PatientProgramService } from "@/services/patient_program_service"
 import { voidWithReason } from "@/utils/VoidHelper"
 import { isEmpty } from "lodash";
 import { matchToGuidelines } from "@/utils/GuidelineEngine"
+import { nextTask } from "@/utils/WorkflowTaskHelper"
+
 import {
   IonContent,
   IonHeader,
@@ -138,7 +139,6 @@ export default defineComponent({
         hasDemographicConflict: false,
         localDiffs: {},
         diffColumnsAndRows: [],
-        shouldUpdateNpid: false,
       } as any,
       demographics: {
         givenName: '' as string,
@@ -163,7 +163,6 @@ export default defineComponent({
   }),
   created() {
     const app = HisApp.getActiveApp()
-
     if (app) this.app = app
   },
   computed: {
@@ -327,10 +326,8 @@ export default defineComponent({
     */
     async onEvent(targetEvent: TargetEvent) {
       const findings = matchToGuidelines(
-        this.facts,
-        CONFIRMATION_PAGE_GUIDELINES, 
-        '', 
-        targetEvent
+        this.facts, CONFIRMATION_PAGE_GUIDELINES, 
+        '', targetEvent
       )
       for(const index in findings) {
           const finding = findings[index]
@@ -405,15 +402,8 @@ export default defineComponent({
       return this.patient.getIdentifiers().map((id: any) => id.type.name)
     },
     async nextTask() {
-      const ok: any = await this.onEvent(TargetEvent.ON_CONTINUE)
-      if (!ok) {
-        return
-      }      
-      const params = await WorkflowService.getNextTaskParams(this.patient.getID())
-      if(params.name) {
-        this.$router.push(params)
-      }else {
-        this.$router.push(`/patient/dashboard/${this.patient.getID()}`)
+      if ((await this.onEvent(TargetEvent.ON_CONTINUE))) {
+        return nextTask(this.patient.getID(), this.$router)
       }
     }
   }
