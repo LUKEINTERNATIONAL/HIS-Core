@@ -37,7 +37,22 @@ export class UserService extends Service {
       );
       return roles.length > 0;
 	}
-
+ static isDoctor() {
+    const roles = super.getUserRoles().filter(
+        (role: Role) => {
+          return role.role.match(/Doctor/i);
+        }
+      );
+      return roles.length > 0;
+	} 
+  static isClinician() {
+    const roles = super.getUserRoles().filter(
+        (role: Role) => {
+          return role.role.match(/Clinician/i);
+        }
+      );
+      return roles.length > 0;
+	}
   static getAllUsers() {
     return this.getJson('users', { 'page_size': 100})
   }

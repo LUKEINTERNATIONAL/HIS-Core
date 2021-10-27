@@ -100,6 +100,8 @@ import {
 } from "@/guidelines/confirmation_page_guidelines"
 import { PatientPrintoutService } from "@/services/patient_printout_service";
 import { AppInterface } from "@/apps/interfaces/AppInterface";
+import { GlobalPropertyService } from "@/services/global_property_service"
+
 export default defineComponent({
   name: "Patient Confirmation",
   components: {
@@ -142,6 +144,9 @@ export default defineComponent({
         gender: '' as string,
         birthdate: '' as string,
       },
+      globalProperties: {
+        useFilingNumbers: 'use_filing_numbers=true'
+      } as any
     }
   }),
   created() {
@@ -182,6 +187,7 @@ export default defineComponent({
       await this.setProgram()
       this.setPatientFacts()
       await this.setProgramFacts()
+      await this.resolveGlobalPropertyFacts()
       await this.drawPatientCards()
       loadingController.dismiss()
       await this.onEvent(TargetEvent.ONLOAD)
@@ -241,6 +247,15 @@ export default defineComponent({
       this.facts.demographics.currentTA = this.patient.getCurrentTA()
       this.facts.demographics.currentVillage = this.patient.getHomeVillage()
       this.facts.identifiers = this.getStrIdentifierTypes()
+    },
+    async resolveGlobalPropertyFacts() {
+      for(const i in this.facts.globalProperties) {
+        const [prop, val] = this.facts.globalProperties[i].split('=')
+        const configuredVal = await GlobalPropertyService.get(prop)
+        if (configuredVal != undefined) {
+          this.facts.globalProperties[i] = val === configuredVal
+        }
+      }
     },
     async setProgramFacts() {
       const { program, outcome }: any =  await this.program.getProgram()
@@ -304,6 +319,9 @@ export default defineComponent({
       const states: Record<string, Function> = {
         'enroll': () => {
           return this.program.enrollProgram()
+        },
+        'activateFn': () => {
+          return this.$router.push(`/art/filing_numbers/${this.patient.getID()}?assign=true`)
         },
         'updateDemographics': () => {
           return this.$router.push(`/patient/registration?edit_person=${this.patient.getID()}`)
