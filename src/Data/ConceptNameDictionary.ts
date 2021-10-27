@@ -1,8 +1,43 @@
 export default [
    {
       "categories": [],
+      "concept_id": 9675,
+      "name": "Referral"
+   },
+   {
+      "categories": [],
+      "concept_id": 9675,
+      "name": "Re-visiting"
+   },
+   {
+      "categories": [],
+      "concept_id": 3753,
+      "name": "HIV status"
+   },
+   {
+      "categories": [],
+      "concept_id": 7878,
+      "name": "HIV test location"
+   },
+   {
+      "categories": [],
+      "concept_id": 1837,
+      "name": "HIV test date"
+   },
+   {
+      "categories": [],
+      "concept_id": 6189,
+      "name": "Type of visit"
+   },
+   {
+      "categories": [],
       "concept_id": 3003,
       "name": "Transfer to"
+   },
+   {
+      "categories": [],
+      "concept_id": 7414,
+      "name": "Transfer from"
    },
    {
       "categories": [],
