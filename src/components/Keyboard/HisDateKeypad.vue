@@ -1,8 +1,11 @@
 <template>
-    <view-port>
-        <base-input :value="fullDate" @onValue="onKbValue"/>
-    </view-port>
-    <ion-grid>
+    <ion-content> 
+        <div class="keypad">
+            <ion-input :value="fullDate" :disabled="true" class='keypad-input'/> 
+            <center>
+                <ion-chip> {{ title || 'keypad'}} </ion-chip>
+            </center>
+            <ion-grid>
         <ion-row>
             <ion-col size="2">
                 <ion-button @click="add('day')" size="large">+</ion-button>
@@ -42,42 +45,47 @@
             </ion-col>
         </ion-row>
     </ion-grid>
+    <ion-button size="large" @click="closeModal">
+        Done
+    </ion-button>
+        </div>
+    </ion-content>
 </template>
-
 <script lang="ts">
 import { defineComponent } from 'vue'
-import BaseInput from "@/components/FormElements/BaseTextInput.vue"
-import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
-import handleVirtualInput from "@/components/Keyboard/KbHandler"
-import { NUMBERS_ONLY } from "@/components/Keyboard/HisKbConfigurations"
-import ViewPort from "@/components/DataViews/ViewPort.vue"
-import FieldMixinVue from './FieldMixin.vue'
-import HisDate from "@/utils/Date"
+import BaseKeyboard from '@/components/Keyboard/BaseKeyboard.vue'
+import { DEFAULT_KEYPAD } from '@/components/Keyboard/KbLayouts'
+import handleVirtualInput from '@/components/Keyboard/KbHandler'
+import { modalController } from '@ionic/core'
 import { Service } from '@/services/service'
+import HisDate from "@/utils/Date"
 import {IonInput, IonGrid, IonCol, IonRow, IonButton} from '@ionic/vue'
-
 export default defineComponent({
-    components: { BaseInput, ViewPort, IonInput, IonGrid, IonCol, IonRow, IonButton},
-    mixins: [FieldMixinVue],
-    data: ()=>({ 
-        value: '',
-        keyboard: NUMBERS_ONLY,
-        date: '' as any
-    }),
-    async activated(){
-        this.$emit('onFieldActivated', this)
-        this.date = new Date();
-        await this.setDefaultValue()
-    },
-    methods: {
-        async setDefaultValue() {
-            if (this.defaultValue && !this.value) {
-                const defaults = await this.defaultValue(this.fdata, this.cdata)
-                if (defaults) {
-                    this.value = defaults.toString()
-                }
-            }
+    components: { IonInput, IonGrid, IonCol, IonRow, IonButton },
+    props: {
+        title: {
+            type: String
         },
+        preset: {
+            type: String
+        },
+        onKeyPress: {
+            type: Function,
+            required: true,
+        },
+        strictNumbers: {
+            type: Boolean,
+            default: false
+        }
+    },
+    data: () => ({
+        date: Service.getSessionDate() as any,
+        keypad: DEFAULT_KEYPAD,
+        value: '' as any
+    }),
+    
+    methods: {
+      
         onKbValue(text: any) { 
             this.value = text
         },
@@ -92,6 +100,9 @@ export default defineComponent({
         },
         today() {
             this.date = Service.getSessionDate();
+        },
+        async closeModal() {
+            await modalController.dismiss(this.fullDate)
         }
     },
     computed: {
@@ -108,31 +119,35 @@ export default defineComponent({
             return HisDate.toStandardHisFormat(this.date);
         }
     },
-    watch: {
-        value(value){
-            this.$emit('onValue', { label: value, value: this.fullDate })
-        },
-        clear(val: boolean){
-            if (val) {
-                this.value = ''
-                this.$emit('onClear')
-            }
-        }
-    }
+       
+   
 })
 </script>
-<style scoped> 
-#view-port {
-    height: 53vh;
+<style scoped>
+.keypad {
+    background: #F4F4F4;
+    padding: 0.7em;
+    margin: auto;
+}
+
+.his-keyboard-margin {
+ padding: 0px!important;
+}
+
+.his-keyboard-btn {
+    width: 110px!important;
+}
+.keypad-input {
+    border: solid 1px #ccc;
+    background: white;
+    border-radius: 10px;
+    width: 100%;
+    height: 70px;
+    text-align: center;
+    font-size: 3em;
 }
 .date-inputs {
     border: solid 1px black;
     font-size: 1.7em;
 }
-ion-col {
-    text-align: center;
-}
-/* ion-button {
-    font-size: 20px;
-} */
 </style>

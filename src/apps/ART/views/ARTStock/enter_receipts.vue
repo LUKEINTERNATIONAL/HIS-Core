@@ -23,6 +23,7 @@ export default defineComponent({
     activeField: "",
     fields: [] as any,
     drugs: [] as any,
+    selectedDrugs: [] as any
   }),
 
   methods: {
@@ -43,11 +44,18 @@ export default defineComponent({
           requireNext: true,
           validation: (val: any) => Validation.required(val),
           options: () => this.drugs,
+          unload: (val: any) => this.selectedDrugs = val
         },
         {
           id: "date",
           helpText: "Set date",
           type: FieldType.TT_FULL_DATE,
+        },
+        {
+          id: "enter_batches",
+          helpText: "Batch entry",
+          type: FieldType.TT_BATCH_ENTRY,
+          options: () => this.selectedDrugs,
         },
       ];
     },
