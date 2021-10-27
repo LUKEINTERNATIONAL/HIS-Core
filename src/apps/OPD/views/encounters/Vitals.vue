@@ -17,7 +17,7 @@ import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import { VitalsService } from "@/apps/OPD/services/vitals_service";
 import { toastSuccess, toastWarning } from "@/utils/Alerts";
-import EncounterMixinVue from "./EncounterMixin.vue";
+import EncounterMixinVue from "@/apps/ART/views/encounters/EncounterMixin.vue";
 import { BMIService } from "@/services/bmi_service";
 import { GlobalPropertyService } from "@/services/global_property_service";
 import { ProgramService } from "@/services/program_service";
