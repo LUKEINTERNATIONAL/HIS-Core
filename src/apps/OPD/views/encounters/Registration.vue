@@ -21,10 +21,12 @@ export default defineComponent({
         registrationService: {} as any
     }),
     watch: {
-        patient: {
-            async handler(patient: any) {
-                this.registrationService = new PatientVisitRegistrationService(patient.getID(), this.providerID)
-                this.fields = this.getFields()
+        ready: {
+            async handler(isReady: boolean) {
+                if(isReady){
+                    this.registrationService = new PatientVisitRegistrationService(this.patient.getID(), this.providerID)
+                    this.fields = this.getFields()
+                }
             },
             immediate: true,
             deep: true
@@ -32,9 +34,6 @@ export default defineComponent({
     },
     methods: {
         async onSubmit(formData: any, computedData: any){
-            
-            console.log(formData);
-            
             const fObs = {...computedData}
             const encounter = await this.registrationService.createEncounter()
             if (!encounter) return toastWarning('Unable to create registration encounter')
