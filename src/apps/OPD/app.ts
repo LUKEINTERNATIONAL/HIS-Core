@@ -19,6 +19,18 @@ async function onRegisterPatient(patientId: number){
   )
 }
 
+async function formatPatientProgramSummary(data: any) {
+  // TODO: refactor core ProgramService to allow programs specify end-points for 
+  // getting program information summary
+  const nationalID = (data && data.national_id) ? data.national_id : ''
+  const hivStatus = (data && data.hiv_status) ? data.hiv_status : ''
+  
+  return [
+    { label: 'Malawi National ID', value: nationalID},
+    { label: 'HIV Status', value: hivStatus }
+  ]
+}
+
 const OPD: AppInterface = {
   programID: 14,
   applicationName: 'OPD',
@@ -30,6 +42,7 @@ const OPD: AppInterface = {
   secondaryPatientActivites: [],
   homeOverviewComponent: HomeOverview,
   onRegisterPatient,
+  formatPatientProgramSummary,
 }
 
 export default OPD
