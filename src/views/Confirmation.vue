@@ -129,12 +129,12 @@ export default defineComponent({
     useDDE: false as boolean,
     facts: {
       scannedNpid: '' as string,
+      currentNpid: '' as string,
       programName: 'N/A' as string,
       currentOutcome: '' as string,
       viralLoadStatus: '' as 'High' | 'Low' | '',
       programs: [] as string[],
       identifiers: [] as string[],
-      currentNpid: '' as string,
       dde: {
         hasDemographicConflict: false,
         localDiffs: {},
@@ -212,6 +212,7 @@ export default defineComponent({
       let data: any = {}
       await this.presentLoading()
       if (npid) {
+        this.facts.scannedNpid = npid
         this.ddeInstance = new PatientDemographicsExchangeService()
         await this.ddeInstance.loadDDEStatus()
         this.useDDE = this.ddeInstance.isEnabled()
@@ -375,8 +376,7 @@ export default defineComponent({
       if (state in states) {
         await this.presentLoading()
         try {
-          await states[state]()  
-          toastSuccess('Operation successful')
+          await states[state]()
         }catch(e) {
           toastDanger(e)
         }

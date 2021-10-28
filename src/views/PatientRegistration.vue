@@ -454,7 +454,7 @@ export default defineComponent({
                         onClick: (form: any) => {
                             let searchParam = ''
                             const npid = form?.results?.other?.npid 
-                            if (npid && !npid.match(/unknown/i)) {
+                            if (npid && !isValueEmpty(npid)) {
                                 searchParam = `patient_barcode=${npid}`
                             } else {
                                 searchParam = `person_id=${form.results.value}`
@@ -471,7 +471,6 @@ export default defineComponent({
             id: 'edit_user',
             helpText: 'Edit Demographics',
             type: FieldType.TT_TABLE_VIEWER,
-            requireNext: false,
             condition: () => this.editPerson != -1,
             options: async () => {
                 const editButton = (attribute: string) => ({
@@ -511,7 +510,8 @@ export default defineComponent({
             },
             config: {
                 hiddenFooterBtns: [
-                    'Clear'
+                    'Clear',
+                    'Next'
                 ]
             }
         }
