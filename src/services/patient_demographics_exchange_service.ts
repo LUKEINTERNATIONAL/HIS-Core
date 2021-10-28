@@ -3,6 +3,7 @@ import { isEmpty } from 'lodash';
 import { GlobalPropertyService } from './global_property_service'
 import { PatientPrintoutService } from './patient_printout_service';
 import { Patientservice } from './patient_service';
+import HisDate from "@/utils/Date"
 
 export class PatientDemographicsExchangeService extends Service {
     patientID: number;
@@ -68,6 +69,12 @@ export class PatientDemographicsExchangeService extends Service {
 
     diffsToTurple(diffs: any) {
         const turple: any = []
+        const formatValue: Function = (label: string, value: string) => {
+            // Detect date labels and format them
+            return typeof value === 'string' && label.match(/date/i) 
+                ? HisDate.toStandardHisDisplayFormat(value)
+                : value
+        }
         for(const index in diffs) {
             const diff = diffs[index]
             const label = index
@@ -75,7 +82,11 @@ export class PatientDemographicsExchangeService extends Service {
                 .map((word: string) => word.charAt(0)
                     .toUpperCase()+ word.slice(1))
                     .join(' ')
-            turple.push([label, diff.local, diff.remote])
+            turple.push([
+                label, 
+                formatValue(index, diff.local), 
+                formatValue(index, diff.remote)
+            ])
         }
         return turple
     }
