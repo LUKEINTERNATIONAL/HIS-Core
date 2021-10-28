@@ -27,6 +27,7 @@ import RelationSelection from "@/components/FormElements/RelationsSelection.vue"
 import FilingNumberView from "@/components/FormElements/FilingNumberView.vue"
 import DateInput from "@/components/FormElements/HisDateInput.vue"
 import BatchEntry from "@/components/FormElements/HisBatchEntry.vue"
+import BatchVerification from "@/components/FormElements/HisBatchVerification.vue"
 
 // Reference names for BaseFormComponents
 export enum FieldType {
@@ -58,7 +59,8 @@ export enum FieldType {
     TT_FILING_NUMBER_VIEW = 'FilingNumberView',
     TT_CARD_SELECTOR = 'SingleSelectCards',
     TT_FULL_DATE = 'date-input',
-    TT_BATCH_ENTRY = 'batch-entry'
+    TT_BATCH_ENTRY = 'batch-entry',
+    TT_BATCH_VERIFICATION = 'batch-verification'
 
 }
 // Components to be rendered
@@ -90,5 +92,6 @@ export const BaseFormComponents = {
     FilingNumberView,
     SingleSelectCards,
     DateInput,
-    BatchEntry
+    BatchEntry,
+    BatchVerification
 }

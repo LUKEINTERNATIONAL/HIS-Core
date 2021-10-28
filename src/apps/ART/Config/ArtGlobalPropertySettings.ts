@@ -17,11 +17,11 @@ export const PROPERTIES: FolderInterface[] = [
             },
             {
                 name: "Enter Product relocation/Disposal",
-                pathUrl: "/",
+                pathUrl: "/art/stock/move",
             },
             {
                 name: "Enter verified physical stock count",
-                pathUrl: "/",
+                pathUrl: "/art/stock/verify",
             },
             {
                 name: "Print Barcode",

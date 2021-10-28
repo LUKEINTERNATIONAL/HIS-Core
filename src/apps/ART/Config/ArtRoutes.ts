@@ -83,6 +83,16 @@ export default [
         component: () => import("@/apps/ART/views/ARTStock/AuditTrail.vue")
     },
     {
+        name: "Verify stock",
+        path: "/art/stock/verify",
+        component: () => import("@/apps/ART/views/ARTStock/verification.vue")
+    },
+    {
+        name: "Move stock",
+        path: "/art/stock/move",
+        component: () => import("@/apps/ART/views/ARTStock/movement.vue")
+    },
+    {
         name: "treatment",
         path: "/art/encounters/prescriptions/:patient_id",
         component: Prescription
