@@ -58,7 +58,9 @@
    transform: translateY(4px);
    background-color: rgb(235, 235, 235);
 }
-
+.his-empty-set-color {
+    background-color: rgb(255, 228, 228);
+}
 .his-danger-color {
     color: brown !important;
 }
