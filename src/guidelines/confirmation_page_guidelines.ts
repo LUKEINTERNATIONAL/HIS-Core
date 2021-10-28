@@ -302,29 +302,23 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         targetEvent: TargetEvent.ONLOAD,
         actions: {
             alert: async ({ currentNpid }: any) => {
-                const action = await infoActionSheet(
+                await infoActionSheet(
                     '[DDE] NATIONAL ID',
                     `Patient has a newer National Identifier ${currentNpid}`,
-                    'Would you like to print it?',
+                    'Print and proceed',
                     [
                         { 
-                            name: 'Yes', 
+                            name: 'Print', 
                             slot: 'start', 
-                            color: 'success'
-                        },
-                        { 
-                            name: 'No',  
-                            slot: 'end', 
-                            color: 'danger'
+                            color: 'primary'
                         }
                     ])
-                return action === 'Yes' ? FlowState.PRINT_NPID : FlowState.EXIT
+                return FlowState.PRINT_NPID
             }
         },
         conditions: {
             globalProperties({ddeEnabled}: any) {
                 return ddeEnabled
-
             },
             scannedNpid(scannedNpid: string, {currentNpid}: any) {
                 return !scannedNpid.match(new RegExp(currentNpid, 'i'))
