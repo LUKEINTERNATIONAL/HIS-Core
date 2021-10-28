@@ -103,7 +103,6 @@ import { PatientPrintoutService } from "@/services/patient_printout_service";
 import { AppInterface } from "@/apps/interfaces/AppInterface";
 import { GlobalPropertyService } from "@/services/global_property_service"
 import { PatientDemographicsExchangeService } from "@/services/patient_demographics_exchange_service"
-import { Target } from "@/apps/ART/guidelines/prescription_guidelines";
 
 export default defineComponent({
   name: "Patient Confirmation",
@@ -134,7 +133,6 @@ export default defineComponent({
       currentNpid: '' as string,
       programName: 'N/A' as string,
       currentOutcome: '' as string,
-      viralLoadStatus: '' as 'High' | 'Low' | '',
       programs: [] as string[],
       identifiers: [] as string[],
       dde: {
@@ -317,7 +315,7 @@ export default defineComponent({
       await loading.present()
     },
     /**
-     * Checks Confirmation page guidelines for patient observations
+     * Executes CONFIRMATION_PAGE GUIDELINES with given TargetEvent
     */
     async onEvent(targetEvent: TargetEvent, callback={}) {
       const findings = matchToGuidelines(
@@ -374,7 +372,7 @@ export default defineComponent({
       }
       if (state in states) {
         try {
-          return (await states[state]()) || FlowState.CONTINUE
+          return await states[state]()
         }catch(e) {
           toastDanger(e)
         }
