@@ -5,7 +5,7 @@
 */
 import { GuideLineInterface } from "@/utils/GuidelineEngine"
 import { infoActionSheet, tableActionSheet } from "@/utils/ActionSheets"
-import { isValueEmpty } from "@/utils/Strs"
+import { isEmpty } from "lodash"
 
 export enum TargetEvent {
     ON_CONTINUE = 'oncontinue',
@@ -229,11 +229,14 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             }
         },
         conditions: {
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled === false
+            },
             demographics: (data: Record<string, any>) => {
                 const demo = {...data}
                 delete demo['landmark']
                 const checks = Object.values(demo)
-                    .map((d: any) => isValueEmpty(d))
+                    .map((d: any) => isEmpty(d) || d.match(/^\s*$/i))
                 return checks.some(Boolean)
             }
         }
@@ -322,6 +325,81 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             },
             scannedNpid(scannedNpid: string, {currentNpid}: any) {
                 return !scannedNpid.match(new RegExp(currentNpid, 'i'))
+            }
+        }
+    },
+    "[DDE] Warn Program Managers to update patient demographics when data is incomplete": {
+        priority: 3,
+        targetEvent: TargetEvent.ON_CONTINUE,
+        actions: {
+            alert: async () => {
+                const action = await infoActionSheet(
+                    'Demographics',
+                    'Patient data is incomplete data',
+                    'Do you want to review and update now?',
+                    [
+                        { 
+                            name: 'Yes', 
+                            slot: 'start', 
+                            color: 'success'
+                        },
+                        { 
+                            name: 'No',  
+                            slot: 'end', 
+                            color: 'danger'
+                        }
+                    ])
+                return action === 'Yes' ? FlowState.UPDATE_DMG : FlowState.CONTINUE
+            }
+        },
+        conditions: {
+            userRoles(roles: string[]) {
+                return roles.includes('Program Manager')
+            },
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled === true
+            },
+            demographics: (data: Record<string, any>) => {
+                const demo = {...data}
+                delete demo['landmark']
+                const checks = Object.values(demo)
+                    .map((d: any) => isEmpty(d) || d.match(/^\s*$/i))
+                return checks.some(Boolean)
+            }
+        }
+    },
+    "[DDE] Force Non Program Management Users to update Incomplete Patient demographics": {
+        priority: 1,
+        targetEvent: TargetEvent.ON_CONTINUE,
+        actions: {
+            alert: async () => {
+                await infoActionSheet(
+                    'Patient Demographics',
+                    'Demographic data is incomplete',
+                    'Continue to update',
+                    [
+                        { 
+                            name: 'UPDATE DEMOGRAPHICS NOW!', 
+                            slot: 'start', 
+                            color: 'danger'
+                        }
+                    ])
+                return FlowState.UPDATE_DMG
+            }
+        },
+        conditions: {
+            userRoles(roles: string[]) {
+                return !roles.includes('Program Manager')
+            },
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled === true
+            },
+            demographics: (data: Record<string, any>) => {
+                const demo = {...data}
+                delete demo['landmark']
+                const checks = Object.values(demo)
+                    .map((d: any) => isEmpty(d) || d.match(/^\s*$/i))
+                return checks.some(Boolean)
             }
         }
     }
