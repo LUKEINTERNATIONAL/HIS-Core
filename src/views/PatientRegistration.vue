@@ -26,6 +26,7 @@ import { PatientRegistrationService } from "@/services/patient_registration_serv
 import App from "@/apps/app_lib"
 import { AppInterface } from "@/apps/interfaces/AppInterface"
 import { nextTask } from "@/utils/WorkflowTaskHelper"
+import { isValueEmpty } from "@/utils/Strs"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -473,7 +474,6 @@ export default defineComponent({
             requireNext: false,
             condition: () => this.editPerson != -1,
             options: async () => {
-                const columns = ['Attributes', 'Values', 'Edit']
                 const editButton = (attribute: string) => ({
                     name: 'Edit',
                     type: 'button',
@@ -482,6 +482,7 @@ export default defineComponent({
                         this.fieldComponent = this.activeField
                     }
                 })
+                const columns = ['Attributes', 'Values', 'Edit']
                 const rows = [
                     ['Given Name', this.editPersonData.given_name, editButton('given_name')],
                     ['Family Name', this.editPersonData.family_name, editButton('family_name')],
@@ -490,15 +491,21 @@ export default defineComponent({
                     ['Cell Phone Number', this.editPersonData.cell_phone_number, editButton('cell_phone_number')],
                     ['Current district',this.editPersonData.current_district, editButton('home_region')],
                     ['Current T/A', this.editPersonData.current_traditional_authority, editButton('home_region')],
-                    ['Home district', this.editPersonData.home_district, editButton('home_region')],
+                    ['Home District', this.editPersonData.home_district, editButton('home_region')],
                     ['Home TA', this.editPersonData.home_traditional_authority,  editButton('home_region')],
                     ['Home Village', this.editPersonData.home_village,  editButton('home_region')],
                 ]
+                // Tag rows with empty values
+                const emptySets: any = {indexes: [], class: 'his-empty-set-color'}
+                rows.forEach((r: any, i: number) => {
+                    if (isValueEmpty(r[1])) emptySets.indexes.push(i)
+                })
                 return [{
-                    label: '',
-                    value: '',
+                    label: '', value: '',
                     other: {
-                        columns, rows
+                        columns, 
+                        rows,
+                        rowColors: [emptySets]
                     }
                 }]
             },
