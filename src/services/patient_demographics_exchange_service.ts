@@ -2,16 +2,50 @@ import { Service } from '@/services/service'
 import { isEmpty } from 'lodash';
 import { GlobalPropertyService } from './global_property_service'
 import { PatientPrintoutService } from './patient_printout_service';
+import { Patientservice } from './patient_service';
 
 export class PatientDemographicsExchangeService extends Service {
     patientID: number;
-
-    constructor(patientID: number) {
+    enabled: boolean;
+    constructor() {
         super()
+        this.patientID = -1
+        this.enabled = false
+    }
+
+    setPatientID(patientID: number) {
         this.patientID = patientID
     }
-    
-    static findNpid(npid: string) {
+
+    async loadDDEStatus() {
+        this.enabled = await GlobalPropertyService.isProp('dde_enabled=true')
+    }
+
+    isEnabled() {
+        return this.enabled
+    }
+
+    /**
+     * Searches DDE for possible match and fallsback to PatientService
+     * npid finder
+     * @param npid 
+     */
+    async searchNpid(npid: string) {
+        if (this.enabled) {
+            const ddeSearch = await this.findNpid(npid)
+            if (!isEmpty(ddeSearch)) {
+                if (ddeSearch.locals > 1) {
+                    throw `NPID has ${ddeSearch.locals.length} duplicates`
+                }
+                this.patientID = ddeSearch.locals[0].person_id
+                return ddeSearch.locals[0]
+            }
+        }
+        const defaultSearch = await Patientservice.findByNpid(npid)
+        return !isEmpty(defaultSearch) ? defaultSearch[0] : {}
+    }
+
+    findNpid(npid: string) {
         return Service.getJson('dde/patients/find_by_npid', {
             'npid': npid, 'program_id': Service.getProgramID()  
         })
@@ -80,9 +114,5 @@ export class PatientDemographicsExchangeService extends Service {
             'patient_id': this.patientID, 
             'program_id': Service.getProgramID()
         })
-    }
-
-    static isEnabled() {
-        return GlobalPropertyService.isProp('dde_enabled=true')
     }
 }

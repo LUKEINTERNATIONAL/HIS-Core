@@ -185,18 +185,17 @@ export default defineComponent({
           query.person_id || query.patient_barcode
         )) {
           await this.findAndSetPatient(
-            query.person_id, 
-            query.patient_barcode
+            query.person_id, query.patient_barcode
           )
         }
       },
       immediate: true
     },
     async patient() {
+      this.program = new PatientProgramService(this.patient.getID())
       await this.presentLoading()
-      await this.resolveGlobalPropertyFacts()
-      await this.setProgram()
       this.setPatientFacts()
+      await this.resolveGlobalPropertyFacts()
       await this.setProgramFacts()
       if (this.useDDE) await this.setDDEFacts()
       await this.drawPatientCards()
@@ -205,26 +204,19 @@ export default defineComponent({
     }
   },
   methods: {
-    setProgram() {
-      this.program = new PatientProgramService(this.patient.getID())
-    },
     /**
-     * Resolve patient by either patient ID or NpID 
-     * depending on search criteria
+     * Resolve patient by either patient ID or NpID.
+     * Note: DDE Service only supports NPID search.
     */
     async findAndSetPatient(id: any, npid: any) {
-      await this.presentLoading()
       let data: any = {}
+      await this.presentLoading()
       if (npid) {
-        this.facts.scannedNpid = npid
-        this.useDDE = await PatientDemographicsExchangeService.isEnabled()
-        if (this.useDDE) {
-          const res = await PatientDemographicsExchangeService.findNpid(npid)
-          if (!isEmpty(res)) data = res.locals[0]
-        } else {
-          data = (await Patientservice.findByNpid(npid))[0] || {}
-        }
-      }else if (id) {
+        this.ddeInstance = new PatientDemographicsExchangeService()
+        await this.ddeInstance.loadDDEStatus()
+        this.useDDE = this.ddeInstance.isEnabled()
+        data = await this.ddeInstance.searchNpid(npid)
+      } else if (id) {
         data = await Patientservice.findByID(id)
       }
       await loadingController.dismiss()
@@ -263,7 +255,8 @@ export default defineComponent({
       this.facts.demographics.currentDistrict = this.patient.getCurrentDistrict()
       this.facts.demographics.currentTA = this.patient.getCurrentTA()
       this.facts.demographics.currentVillage = this.patient.getHomeVillage()
-      this.facts.identifiers = this.getStrIdentifierTypes()
+      this.facts.identifiers = this.patient.getIdentifiers()
+        .map((id: any) => id.type.name)
       this.facts.currentNpid = this.patient.getNationalID()
     },
     async resolveGlobalPropertyFacts() {
@@ -279,18 +272,16 @@ export default defineComponent({
       this.facts.programName = program
     },
     /**
-     * Set dde facts if service is enabled. 
+     * Set dde facts if service is enabled.
      * Please Note that DDE has to be configured per Program in the backend.
      * If a program isnt configured for DDE, it crashes by default hence 
      * exception handling is required
      */
     async setDDEFacts() {
       try {
-        this.ddeInstance = new PatientDemographicsExchangeService(this.patient.getID())
         const localAndRemoteDiffs = (await this.ddeInstance.getLocalAndRemoteDiffs()).diff
-        this.facts.dde.localDiffs = this.ddeInstance.formatDiffValuesByType(
-          localAndRemoteDiffs, 'local'
-        )
+        this.facts.dde.localDiffs = this.ddeInstance
+          .formatDiffValuesByType(localAndRemoteDiffs, 'local')
         this.facts.dde.shouldUpdateNpid = this.ddeInstance.shouldCreateNpid(localAndRemoteDiffs)
         this.facts.dde.hasDemographicConflict = !isEmpty(localAndRemoteDiffs)
         this.facts.dde.diffColumnsAndRows = this.ddeInstance.diffsToTurple(localAndRemoteDiffs)
@@ -398,12 +389,9 @@ export default defineComponent({
         this.$router.push('/')
       })
     },
-    getStrIdentifierTypes() {
-      return this.patient.getIdentifiers().map((id: any) => id.type.name)
-    },
     async nextTask() {
       if ((await this.onEvent(TargetEvent.ON_CONTINUE))) {
-        return nextTask(this.patient.getID(), this.$router)
+        nextTask(this.patient.getID(), this.$router)
       }
     }
   }
