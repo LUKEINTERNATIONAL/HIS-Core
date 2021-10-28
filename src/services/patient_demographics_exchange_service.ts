@@ -33,11 +33,11 @@ export class PatientDemographicsExchangeService extends Service {
     async searchNpid(npid: string) {
         if (this.enabled) {
             const ddeSearch = await this.findNpid(npid)
-            if (!isEmpty(ddeSearch)) {
+            if (!isEmpty(ddeSearch) && !isEmpty(ddeSearch.locals)) {
                 if (ddeSearch.locals > 1) {
                     throw `NPID has ${ddeSearch.locals.length} duplicates`
                 }
-                this.patientID = ddeSearch.locals[0].person_id
+                this.patientID = ddeSearch.locals[0].patient_id
                 return ddeSearch.locals[0]
             }
         }
