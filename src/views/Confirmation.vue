@@ -67,17 +67,17 @@
 </template>
 
 <script lang="ts">
+import { isEmpty } from "lodash";
+import HisDate from "@/utils/Date"
 import HisApp from "@/apps/app_lib"
 import { defineComponent } from "vue";
-import { Patientservice } from "@/services/patient_service";
-import { UserService } from "@/services/user_service";
-import { alertAction, alertConfirmation, toastDanger, toastSuccess } from "@/utils/Alerts"
-import HisDate from "@/utils/Date"
-import { PatientProgramService } from "@/services/patient_program_service"
 import { voidWithReason } from "@/utils/VoidHelper"
-import { isEmpty } from "lodash";
-import { matchToGuidelines } from "@/utils/GuidelineEngine"
 import { nextTask } from "@/utils/WorkflowTaskHelper"
+import { UserService } from "@/services/user_service";
+import { matchToGuidelines } from "@/utils/GuidelineEngine"
+import { Patientservice } from "@/services/patient_service";
+import { PatientProgramService } from "@/services/patient_program_service"
+import { alertAction, alertConfirmation, toastDanger } from "@/utils/Alerts"
 
 import {
   IonContent,
@@ -103,6 +103,7 @@ import { PatientPrintoutService } from "@/services/patient_printout_service";
 import { AppInterface } from "@/apps/interfaces/AppInterface";
 import { GlobalPropertyService } from "@/services/global_property_service"
 import { PatientDemographicsExchangeService } from "@/services/patient_demographics_exchange_service"
+import { Target } from "@/apps/ART/guidelines/prescription_guidelines";
 
 export default defineComponent({
   name: "Patient Confirmation",
@@ -128,6 +129,7 @@ export default defineComponent({
     ddeInstance: {} as any,
     useDDE: false as boolean,
     facts: {
+      userRoles: [] as string[],
       scannedNpid: '' as string,
       currentNpid: '' as string,
       programName: 'N/A' as string,
@@ -271,6 +273,7 @@ export default defineComponent({
       const { program, outcome }: any =  await this.program.getProgram()
       this.facts.currentOutcome = outcome
       this.facts.programName = program
+      this.facts.userRoles = UserService.getUserRoles().map((r: any) => r.role)
     },
     /**
      * Set dde facts if service is enabled.
@@ -316,26 +319,21 @@ export default defineComponent({
     /**
      * Checks Confirmation page guidelines for patient observations
     */
-    async onEvent(targetEvent: TargetEvent) {
+    async onEvent(targetEvent: TargetEvent, callback={}) {
       const findings = matchToGuidelines(
-        this.facts, CONFIRMATION_PAGE_GUIDELINES, 
-        '', targetEvent
+        this.facts, CONFIRMATION_PAGE_GUIDELINES, '', targetEvent
       )
       for(const index in findings) {
-          const finding = findings[index]
-          if (finding?.actions?.alert) {
-            const state = await finding?.actions?.alert(this.facts)
-            switch(state) {
-              case FlowState.EXIT:
-                continue
-              case FlowState.FORCE_EXIT:
-                return false
-              default:
-                await this.runFlowState(state)
+        const finding = findings[index]
+        if (finding?.actions?.alert) {
+          const state = await finding?.actions?.alert(this.facts)
+          if ((await this.runFlowState(state))
+              === FlowState.FORCE_EXIT) {
+              return false 
             }
-          }
+        }
       }
-      return true
+      if (typeof callback === 'function') callback()
     },
     /**
      * Maps FlowStates defined in the Guideline to
@@ -347,10 +345,12 @@ export default defineComponent({
           return this.program.enrollProgram()
         },
         'activateFn': () => {
-          return this.$router.push(`/art/filing_numbers/${this.patient.getID()}?assign=true`)
+          this.$router.push(`/art/filing_numbers/${this.patient.getID()}?assign=true`)
+          return FlowState.FORCE_EXIT
         },
         'updateDemographics': () => {
-          return this.$router.push(`/patient/registration?edit_person=${this.patient.getID()}`)
+          this.$router.push(`/patient/registration?edit_person=${this.patient.getID()}`)
+          return FlowState.FORCE_EXIT
         },
         'printNPID': async () => {
           loadingController.dismiss()
@@ -358,7 +358,6 @@ export default defineComponent({
         },
         'assignNpid': async () => {
           const req = await this.patient.assignNpid()
-          loadingController.dismiss()
           if (req && (await alertConfirmation('Do you want to print National ID?'))) {
             const print = new PatientPrintoutService(this.patient.getID())
             await print.printNidLbl()
@@ -374,14 +373,13 @@ export default defineComponent({
         }
       }
       if (state in states) {
-        await this.presentLoading()
         try {
-          await states[state]()
+          return (await states[state]()) || FlowState.CONTINUE
         }catch(e) {
           toastDanger(e)
         }
-        loadingController.dismiss()
       }
+      return state
     },
     async onVoid() {
       voidWithReason(async (reason: string) => {
@@ -390,9 +388,9 @@ export default defineComponent({
       })
     },
     async nextTask() {
-      if ((await this.onEvent(TargetEvent.ON_CONTINUE))) {
+      await this.onEvent(TargetEvent.ON_CONTINUE, () => {
         nextTask(this.patient.getID(), this.$router)
-      }
+      })
     }
   }
 })
