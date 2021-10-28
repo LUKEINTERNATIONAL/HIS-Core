@@ -84,6 +84,17 @@ export class PatientDemographicsExchangeService extends Service {
         return !isEmpty(diffs)
     }
 
+    mergePatients(params: Record<string, any>) {
+        return Service.postJson('dde/patients/merge', params)
+    }
+
+    reassignNpid(docID: string, patientID: number) {
+        return Service.getJson('dde/patients/reassign_npid', {
+            'doc_id': docID, 'patient_id': patientID, 
+            'program_id': Service.getProgramID()
+        })
+    }
+
     createNPID(npid: string) {
         return Service.postJson('patient_identifiers', {
             'identifier': npid,
