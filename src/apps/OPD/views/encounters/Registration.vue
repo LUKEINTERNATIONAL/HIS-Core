@@ -7,6 +7,7 @@ import { defineComponent} from 'vue'
 import HisStandardForm from "@/components/Forms/TouchScreenForm.vue";
 import EncounterMixinVue from '@/apps/ART/views/encounters/EncounterMixin.vue';
 import { PatientVisitRegistrationService } from "@/apps/OPD/services/patient_registration_service"
+import { PatientIdentifierService } from "@/services/patient_identifier_service";
 import Validation from '@/components/Forms/validations/StandardValidations';
 import { Field, Option } from '@/components/Forms/FieldInterface';
 import { FieldType } from '@/components/Forms/BaseFormElements';
@@ -34,17 +35,24 @@ export default defineComponent({
     },
     methods: {
         async onSubmit(formData: any, computedData: any){
-            const fObs = {...computedData}
+            await this.asignNID(formData)
             const encounter = await this.registrationService.createEncounter()
             if (!encounter) return toastWarning('Unable to create registration encounter')
             
-            const registrationData = await this.resolveObs(fObs)
-            
+            const registrationData = await this.resolveObs({...computedData})
             const registrationObs = await this.registrationService.saveObservationList(registrationData)
-
             if (!registrationObs) return toastWarning('Unable to save observations')
 
             this.nextTask()        
+        },
+        async asignNID(formData: any) {
+            const nidAvailable = formData['national_id_available']
+            const nid = formData['national_id']
+
+            if(nidAvailable && nidAvailable['value'] === 'Yes') {
+                // 28 = Malawi National Identifier Type Id
+                await PatientIdentifierService.create(this.patient.getID(), 28, nid['value'])
+            }
         },
         buildDateObs(conceptName: string, date: string, isEstimate: boolean) {
             let obs = {}
@@ -57,9 +65,6 @@ export default defineComponent({
             }
             return obs
         },
-        showNationalIdQuestions(){
-            return true
-        },
         getFields(): Array<Field>{
             return [
                 {
@@ -67,10 +72,10 @@ export default defineComponent({
                     helpText: 'Type of visit',
                     type: FieldType.TT_SELECT,
                     validation: (value: any) => Validation.required(value),
-                    computedValue: ({label, value}: Option) => ({ obs: this.registrationService.buildValueCoded(label, value)}),
+                    computedValue: ({value}: Option) => ({ obs: this.registrationService.buildValueCoded('Type of visit', value)}),
                     options: () => {
                         return [
-                            { label: 'New Patient', value: 'New patient' },
+                            { label: 'New', value: 'New patient' },
                             { label: 'Referral', value: 'Referral' },
                             { label: 'Re-visiting', value: 'Re-visiting' },
                         ]
@@ -104,7 +109,6 @@ export default defineComponent({
                     type: FieldType.TT_TEXT,
                     validation: (value: any) => Validation.required(value),
                     condition: (fields: any) => fields.national_id_available.value === 'Yes',
-                    // computedValue: ({value}: Option) => ({obs: this.registrationService.buildValueCoded('Malawi National ID', value)}),
                     summaryMapValue: ({ value }: Option) => ({
                         value,
                         label: 'National ID'
@@ -115,9 +119,9 @@ export default defineComponent({
                     helpText: 'HIV status',
                     type: FieldType.TT_SELECT,
                     validation: (value: any) => Validation.required(value),
-                    computedValue: ({ label, value }: Option) => ({obs: this.registrationService.buildValueText(label, value)}),
+                    computedValue: ({ value }: Option) => ({obs: this.registrationService.buildValueText('HIV status', value)}),
                     options: () => ([
-                        { label: 'Positive not on ART', value: 'Positive not ART' },
+                        { label: 'Positive not ART', value: 'Positive not ART' },
                         { label: 'Posititve on ART', value: 'Positive on ART' },
                         { label: 'Previous negative', value: 'Previous negative' },
                         { label: 'New positive', value: 'New positive' },
