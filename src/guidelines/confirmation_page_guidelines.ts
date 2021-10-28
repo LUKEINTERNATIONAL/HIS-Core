@@ -5,7 +5,7 @@
 */
 import { GuideLineInterface } from "@/utils/GuidelineEngine"
 import { infoActionSheet, tableActionSheet } from "@/utils/ActionSheets"
-import { isEmpty } from "lodash"
+import { isValueEmpty } from "@/utils/Strs"
 
 export enum TargetEvent {
     ON_CONTINUE = 'oncontinue',
@@ -233,9 +233,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                 const demo = {...data}
                 delete demo['landmark']
                 const checks = Object.values(demo)
-                    .map((d: any) => isEmpty(d) 
-                        || d.match(/n\/a/i) 
-                        || d.match(/unknown/i))
+                    .map((d: any) => isValueEmpty(d))
                 return checks.some(Boolean)
             }
         }
