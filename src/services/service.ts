@@ -19,7 +19,7 @@ export class Service {
         const req = await ApiClient.get(transformedUrl)
         if (req && req.ok && [200, 201].includes(req.status)) {
             return req?.json()
-        } 
+        }
     }
 
     static async postJson(url: string, data: any, genericError='Unable to save record') {
@@ -28,7 +28,10 @@ export class Service {
             if ([200, 201].includes(req.status)) {
                 return req?.json()
             }
-            return {}
+        }
+        if (req && req.status === 422) {
+            const response = await req.json()
+            return { errorCode: 422, response }
         }
         throw genericError
     }
