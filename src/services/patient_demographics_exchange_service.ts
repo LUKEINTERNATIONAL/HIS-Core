@@ -26,6 +26,19 @@ export class PatientDemographicsExchangeService extends Service {
         return this.enabled
     }
 
+    postMerge(persons: Array<any>) {
+        const [primary, ...secondary] = persons.map((p) => {
+            return {
+                'patient_id': p.patientID,
+                'doc_id': p.docID || ''
+            }
+        })
+        return this.mergePatients({
+            primary,  secondary,
+            'program_id': Service.getProgramID()
+        })
+    }
+
     /**
      * Searches DDE for possible match and fallsback to PatientService
      * npid finder

@@ -31,15 +31,24 @@
                     color="warning" 
                     slot="end" 
                     size="large">
-                    Clear Selections
+                    Clear
                 </ion-button>
                 <ion-button 
                     v-if="itemsChecked.length > 1"
+                    @click="mergeSelected"
                     color="primary"
                     size="large"
                     slot="end"
                     >
-                    Merge Selected
+                    Merge ({{itemsChecked.length}})
+                </ion-button>
+                <ion-button 
+                    v-if="items.length <= 0"
+                    color="success"
+                    size="large"
+                    slot="end"
+                    >
+                    Next
                 </ion-button>
             </ion-toolbar>
         </ion-footer>
@@ -98,13 +107,23 @@ export default defineComponent({
         check(e: any, i: any) {
             i.isChecked = e.detail.checked
         },
+        async mergeSelected() {
+            const req = await this.dde.postMerge(this.itemsChecked)
+            if (req) {
+                this.items = this.items.filter((i: any) => !i.isChecked)
+            } 
+            if (this.items.length <= 0) {
+                //TODO go to next task
+            }
+        },
         buildItems(items: any) {
             return items.map((i: any) => {
                 const p = new Patientservice(i)
                 return {
-                    // other: i,
-                    isChecked: false,
-                    name: p.getFullName()
+                    name: p.getFullName(),
+                    patientID: p.getID(),
+                    docID: p.getPatientIdentifier(27),
+                    isChecked: false
                 }
             })
         },
@@ -117,7 +136,10 @@ export default defineComponent({
         async init(npid: string) {
             this.dde = new PatientDemographicsExchangeService()
             const {locals, remotes} = await this.dde.findNpid(npid)
-            this.items = [...this.buildItems(locals), ...this.buildItems(remotes)]
+            this.items = [
+                ...this.buildItems(locals), 
+                ...this.buildItems(remotes)
+            ]
         }
     }
 })
