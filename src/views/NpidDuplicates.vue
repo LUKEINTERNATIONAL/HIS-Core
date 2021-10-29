@@ -11,18 +11,25 @@
             <ion-list> 
                 <ion-item v-for="(item, index) in items" :key="index">
                     <ion-checkbox 
+                        slot="start" 
                         :checked="item.isChecked"
                         @ionChange="(e) => check(e, item)"
-                        slot="start" 
                         >
                     </ion-checkbox>
                     <ion-label> {{item.name}} </ion-label>
+                    <ion-button
+                       @click="onAction(() => reassignIdentifier(item), 'reassign')"> 
+                        Re-Assign 
+                    </ion-button>
                 </ion-item>
             </ion-list>
         </ion-content>
         <ion-footer> 
             <ion-toolbar color="dark"> 
-                <ion-button color="danger" slot="start" size="large">
+                <ion-button 
+                    color="danger" 
+                    slot="start" 
+                    size="large">
                     Cancel
                 </ion-button>
                 <ion-button 
@@ -35,7 +42,7 @@
                 </ion-button>
                 <ion-button 
                     v-if="itemsChecked.length > 1"
-                    @click="mergeSelected"
+                    @click="onAction(mergeSelected, 'merge')"
                     color="primary"
                     size="large"
                     slot="end"
@@ -43,7 +50,7 @@
                     Merge ({{itemsChecked.length}})
                 </ion-button>
                 <ion-button 
-                    v-if="items.length <= 0"
+                    v-if="items.length <= 1"
                     color="success"
                     size="large"
                     slot="end"
@@ -69,6 +76,9 @@ import {
 } from "@ionic/vue"
 import { PatientDemographicsExchangeService } from "@/services/patient_demographics_exchange_service"
 import { Patientservice } from '@/services/patient_service'
+import { alertConfirmation, toastWarning } from '@/utils/Alerts'
+import { nextTask } from "@/utils/WorkflowTaskHelper"
+
 export default defineComponent({
     components: {
         IonPage,
@@ -107,23 +117,47 @@ export default defineComponent({
         check(e: any, i: any) {
             i.isChecked = e.detail.checked
         },
+        async onAction(action: Function, context='proceed') {
+            const ok = await alertConfirmation(`
+                Are you sure you want to ${context}?
+            `)
+            if (ok) {
+                try { await action() } catch(e) { toastWarning(e) }
+            }
+        },
         async mergeSelected() {
             const req = await this.dde.postMerge(this.itemsChecked)
             if (req) {
-                this.items = this.items.filter((i: any) => !i.isChecked)
-            } 
-            if (this.items.length <= 0) {
-                //TODO go to next task
+                await this.dde.printNpid(this.dde.patientID)
+                nextTask(this.dde.patientID, this.$router)
+            }
+        },
+        async reassignIdentifier(item: any) {
+            const reassign = await this.dde.reassignNpid(item.docID, item.patientID)
+
+            if (!reassign)  return  
+
+            if (reassign.errorCode === 422) {
+                const ok = await alertConfirmation(
+                    'Do you want to update missing information?', 
+                    'Incomplete Demographics'
+                )
+                if (ok) {
+                    this.$router.push(`/patient/registration?edit_person=${item.patientID}`)
+                }
+            } else {
+                await this.dde.printNpid(item.patientID)
+                await nextTask(item.patientID, this.$router)
             }
         },
         buildItems(items: any) {
             return items.map((i: any) => {
                 const p = new Patientservice(i)
                 return {
-                    name: p.getFullName(),
+                    isChecked: false,
                     patientID: p.getID(),
-                    docID: p.getPatientIdentifier(27),
-                    isChecked: false
+                    name: p.getFullName(),
+                    docID: p.getPatientIdentifier(27)
                 }
             })
         },

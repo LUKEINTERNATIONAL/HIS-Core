@@ -509,14 +509,6 @@ export default defineComponent({
                 }]
             },
             config: {
-                footerBtns: [
-                    {
-                        name: 'Next Task',
-                        slot: 'end',
-                        color: 'success',
-                        onClick: () => nextTask(this.editPerson, this.$router)
-                    }
-                ],
                 hiddenFooterBtns: [
                     'Clear',
                     'Next'
