@@ -267,31 +267,6 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             }
         }
     },
-    "(ART) Warn if Viral load is High": {
-        priority: 3,
-        targetEvent: TargetEvent.ONLOAD,
-        actions: {
-            alert: async () => {
-                await infoActionSheet(
-                    'Viral Load',
-                    'Patient has High viral load, please take action',
-                    '',
-                    [
-                        { 
-                            name: 'Ok', 
-                            slot: 'start', 
-                            color: 'danger'
-                        }
-                    ]
-                )
-                return FlowState.CONTINUE
-            }
-        },
-        conditions: {
-            programName: (programName: string) => programName === 'HIV PROGRAM',
-            viralLoadStatus: (viralLoadStatus: string) => viralLoadStatus === 'High'
-        }
-    },
     "[DDE] Alert When remote Patient demographics dont match Local Demographics ": {
         priority: 3,
         targetEvent: TargetEvent.ONLOAD,
