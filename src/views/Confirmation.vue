@@ -128,6 +128,7 @@ export default defineComponent({
     ddeInstance: {} as any,
     useDDE: false as boolean,
     facts: {
+      npidHasDuplicates: false as boolean,
       userRoles: [] as string[],
       scannedNpid: '' as string,
       currentNpid: '' as string,
@@ -211,16 +212,21 @@ export default defineComponent({
     async findAndSetPatient(id: any, npid: any) {
       let data: any = {}
       await this.presentLoading()
+
       if (npid) {
-        this.facts.scannedNpid = npid
         this.ddeInstance = new PatientDemographicsExchangeService()
-        await this.ddeInstance.loadDDEStatus()
+        await this.ddeInstance.loadDDEStatus()        
         this.useDDE = this.ddeInstance.isEnabled()
-        data = await this.ddeInstance.searchNpid(npid)
+        const results = await this.ddeInstance.searchNpid(npid)
+        this.facts.scannedNpid = npid
+        this.facts.npidHasDuplicates = results.length > 1
+        data = results[0]
       } else if (id) {
         data = await Patientservice.findByID(id)
       }
+
       await loadingController.dismiss()
+
       if (isEmpty(data)) {
         return alertAction('Patient not found', [
           {
@@ -360,6 +366,10 @@ export default defineComponent({
             const print = new PatientPrintoutService(this.patient.getID())
             await print.printNidLbl()
           }
+        },
+        'resolveDuplicateNpids': () => {
+          this.$router.push(`/npid/duplicates/${this.facts.scannedNpid}`)
+          return FlowState.FORCE_EXIT
         },
         'refreshDemographicsDDE': async () => {
           await this.ddeInstance.refreshDemographics()

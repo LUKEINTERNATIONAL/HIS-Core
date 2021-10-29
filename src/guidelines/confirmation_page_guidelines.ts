@@ -22,7 +22,8 @@ export enum FlowState {
     UPDATE_DMG = 'updateDemographics',
     PRINT_NPID = 'printNPID',
     REFRESH_DDE_DEMOGRAPHICS = 'refreshDemographicsDDE',
-    UPDATE_LOCAL_DDE_DIFFS = 'updateLocalDiffs'
+    UPDATE_LOCAL_DDE_DIFFS = 'updateLocalDiffs',
+    RESOLVE_DUPLICATE_NPIDS = 'resolveDuplicateNpids'
 }
 
 export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = {
@@ -48,6 +49,31 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         },
         conditions: {
             identifiers: (ids: string[]) => !ids.includes('National id')
+        }
+    },
+    "Detect NPID duplicates and prompt the user to resolve them" : {
+        priority: 1,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async ({ scannedNpid }: any) => {
+                await infoActionSheet(
+                    'DUPLICATE NPID',
+                    `NPID ${scannedNpid} is currently assigned to multiple patients`,
+                    'Proceed to resolve the issue',
+                    [
+                        { 
+                            name: 'Resolve Duplicate NPIDs', 
+                            slot: 'start', 
+                            color: 'danger'
+                        }
+                    ])
+                return FlowState.RESOLVE_DUPLICATE_NPIDS
+            }
+        },
+        conditions: {
+            npidHasDuplicates(isTrue: boolean) {
+                return isTrue
+            }
         }
     },
     "Warn before proceeding if patient is deceased based on current Patient state": {

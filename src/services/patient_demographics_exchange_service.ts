@@ -45,19 +45,22 @@ export class PatientDemographicsExchangeService extends Service {
      * npid finder
      * @param npid 
      */
-    async searchNpid(npid: string) {
+    async searchNpid(npid: string): Promise<Array<any>> {
         if (this.enabled) {
             const ddeSearch = await this.findNpid(npid)
-            if (!isEmpty(ddeSearch) && !isEmpty(ddeSearch.locals)) {
-                if (ddeSearch.locals > 1) {
-                    throw `NPID has ${ddeSearch.locals.length} duplicates`
-                }
-                this.patientID = ddeSearch.locals[0].patient_id
-                return ddeSearch.locals[0]
+            const results: any = [
+                ...ddeSearch.locals, ...ddeSearch.remotes
+            ]
+            if (!isEmpty(results)) {
+                this.patientID = results[0].patient_id
             }
+            // If local and remote are less than equal two, treat it as one 
+            // record and use one result
+            return results.length <= 2 
+                ? [results[0]]
+                : results
         }
-        const defaultSearch = await Patientservice.findByNpid(npid)
-        return !isEmpty(defaultSearch) ? defaultSearch[0] : {}
+        return Patientservice.findByNpid(npid)
     }
 
     findNpid(npid: string) {
