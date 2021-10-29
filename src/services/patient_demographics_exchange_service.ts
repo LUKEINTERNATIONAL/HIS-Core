@@ -33,6 +33,7 @@ export class PatientDemographicsExchangeService extends Service {
                 'doc_id': p.docID || ''
             }
         })
+        this.patientID = primary.patient_id
         return this.mergePatients({
             primary,  secondary,
             'program_id': Service.getProgramID()
@@ -113,9 +114,10 @@ export class PatientDemographicsExchangeService extends Service {
     }
 
     reassignNpid(docID: string, patientID: number) {
-        return Service.getJson('dde/patients/reassign_npid', {
-            'doc_id': docID, 'patient_id': patientID, 
-            'program_id': Service.getProgramID()
+        return Service.postJson('dde/patients/reassign_npid', {
+            'program_id': Service.getProgramID(),
+            'patient_id': patientID,
+            'doc_id': docID
         })
     }
 
@@ -127,8 +129,8 @@ export class PatientDemographicsExchangeService extends Service {
         })
     }
 
-    printNpid() {
-        return new PatientPrintoutService(this.patientID).printNidLbl()
+    printNpid(id=this.patientID) {
+        return new PatientPrintoutService(id).printNidLbl()
     }
 
     getLocalAndRemoteDiffs() {
