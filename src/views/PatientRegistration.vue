@@ -27,12 +27,17 @@ import App from "@/apps/app_lib"
 import { AppInterface } from "@/apps/interfaces/AppInterface"
 import { nextTask } from "@/utils/WorkflowTaskHelper"
 import { isValueEmpty } from "@/utils/Strs"
+import { PatientDemographicsExchangeService } from "@/services/patient_demographics_exchange_service"
+import { toastWarning } from "@/utils/Alerts"
 
 export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     app: App.getActiveApp() as AppInterface,
-    skipSummary: false,
+    ddeInstance: {} as any,
+    ddeDocID: '' as string,
+    ddeIsReassign: false as boolean,
+    skipSummary: false as boolean,
     addressAttributes: [
         'home_region',
         'home_district',
@@ -43,6 +48,7 @@ export default defineComponent({
         'current_village',
         'current_traditional_authority'
     ] as Array<string>,
+    hasIncompleteData: false as boolean,
     editPersonData: {} as any,
     editPerson: -1 as number,
     activeField: '' as string,
@@ -61,6 +67,11 @@ export default defineComponent({
     '$route': {
         async handler({query}: any) {
            if (query.edit_person) {
+                this.ddeIsReassign = query.dde_reassign
+                this.ddeDocID = query.doc_id
+                this.ddeInstance = new PatientDemographicsExchangeService()
+                this.ddeInstance.setPatientID(query.edit_person)
+                await this.ddeInstance.loadDDEStatus()
                 await this.initEditMode(query.edit_person)
             } else {
                 this.presets = query
@@ -380,8 +391,7 @@ export default defineComponent({
             computeValue: (date: string) => ({
                 date,
                 personAttributes : {
-                    'person_attribute_type_id': 37,
-                    'value': date
+                    'person_attribute_type_id': 37, 'value': date
                 }
             })
         })
@@ -497,22 +507,52 @@ export default defineComponent({
                 // Tag rows with empty values
                 const emptySets: any = {indexes: [], class: 'his-empty-set-color'}
                 rows.forEach((r: any, i: number) => {
-                    if (isValueEmpty(r[1])) emptySets.indexes.push(i)
+                    if (isValueEmpty(r[1])) 
+                        emptySets.indexes.push(i)
                 })
+                this.hasIncompleteData = emptySets.indexes.length >= 1
                 return [{
-                    label: '', value: '',
+                    label: '', 
+                    value: '',
                     other: {
-                        columns, 
                         rows,
+                        columns,
                         rowColors: [emptySets]
                     }
                 }]
             },
             config: {
-                hiddenFooterBtns: [
-                    'Clear',
-                    'Next'
-                ]
+                footerBtns: [
+                    /**
+                     * Custom button that Appears when DDE wants to
+                     * Reassign a patient with incomplete data
+                    */
+                    {
+                        name: 'Reassign',
+                        slot: 'end',
+                        color: 'success',
+                        state: {
+                            visible: {
+                                default: () => false,
+                                onload: () => (
+                                    this.ddeInstance.isEnabled()
+                                    && this.ddeIsReassign
+                                    && !this.hasIncompleteData
+                                )
+                            }
+                        },
+                        onClick: async () => {
+                            try {
+                                await this.ddeInstance.reassignNpid(this.ddeDocID, this.editPerson)
+                                await this.ddeInstance.printNpid()
+                                this.$router.push(`/patients/confirm?person_id=${this.editPerson}`)
+                            } catch(e) {
+                                toastWarning(e)
+                            }
+                        }
+                    }
+                ],
+                hiddenFooterBtns: ['Clear', 'Next']
             }
         }
     },

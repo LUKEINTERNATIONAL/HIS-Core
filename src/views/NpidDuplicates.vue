@@ -27,6 +27,7 @@
         <ion-footer> 
             <ion-toolbar color="dark"> 
                 <ion-button 
+                    router-link="/"
                     color="danger" 
                     slot="start" 
                     size="large">
@@ -143,7 +144,10 @@ export default defineComponent({
                     'Incomplete Demographics'
                 )
                 if (ok) {
-                    this.$router.push(`/patient/registration?edit_person=${item.patientID}`)
+                    let params = `edit_person=${item.patientID}`
+                    params += '&dde_reassign=true'
+                    params += `&doc_id=${item.docID}`
+                    this.$router.push(`/patient/registration?${params}`)
                 }
             } else {
                 await this.dde.printNpid(item.patientID)
