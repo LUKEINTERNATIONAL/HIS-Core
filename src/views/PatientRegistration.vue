@@ -49,6 +49,7 @@ export default defineComponent({
         'current_traditional_authority'
     ] as Array<string>,
     hasIncompleteData: false as boolean,
+    patient: {} as any,
     editPersonData: {} as any,
     editPerson: -1 as number,
     activeField: '' as string,
@@ -120,25 +121,25 @@ export default defineComponent({
         if (!person) {
             return
         }
-        const patient = new Patientservice(person)
+        this.patient = new Patientservice(person)
         const {
             ancestryDistrict,
             ancestryTA,
             ancestryVillage,
             currentDistrict,
             currentTA
-        } = patient.getAddresses()
+        } = this.patient.getAddresses()
         this.editPersonData = {
-            'given_name': patient.getGivenName(),
-            'family_name': patient.getFamilyName(),
-            'gender': patient.getGender(),
-            'birthdate': patient.getBirthdate(),
+            'given_name': this.patient.getGivenName(),
+            'family_name': this.patient.getFamilyName(),
+            'gender': this.patient.getGender(),
+            'birthdate': this.patient.getBirthdate(),
             'home_district': ancestryDistrict,
             'home_traditional_authority': ancestryTA,
             'home_village': ancestryVillage,
             'current_district': currentDistrict,
             'current_traditional_authority': currentTA,
-            'cell_phone_number': patient.getPhoneNumber(),
+            'cell_phone_number': this.patient.getPhoneNumber(),
         }
         this.presets = this.editPersonData
         this.skipSummary = true
@@ -549,6 +550,22 @@ export default defineComponent({
                             } catch(e) {
                                 toastWarning(e)
                             }
+                        }
+                    },
+                    /**
+                     * Custom button that redirects to patient confirmation page
+                     */
+                    {
+                        name: 'Confirm',
+                        slot: 'end',
+                        color: 'warning',
+                        state: {
+                            visible: {
+                                onload: () => !this.ddeIsReassign && !this.hasIncompleteData
+                            }
+                        },
+                        onClick: () => {
+                            this.$router.push(`/patients/confirm?patient_barcode=${this.patient.getNationalID()}`)
                         }
                     }
                 ],

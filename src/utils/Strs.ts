@@ -1,6 +1,6 @@
 export function isValueEmpty(value: string) {
     try {
-        return value.match(/(Unknown|^\s*$|None)/i)
+        return value.match(/(^\s*$|None)/i)
     }catch(e) {
         return true
     }
