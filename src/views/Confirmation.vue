@@ -52,13 +52,18 @@
         <ion-button color="danger" size="large" router-link="/"
           >Cancel</ion-button>
         <ion-button
+          v-if="facts.patientFound && isAdmin"
           color="danger left"
           size="large"
           @click="onVoid"
-          v-if="isAdmin"
           >Void</ion-button
         >
-        <ion-button slot="end" color="success" size="large" @click="nextTask">
+        <ion-button 
+          v-if="facts.patientFound"
+          slot="end" 
+          color="success" 
+          size="large" 
+          @click="nextTask">
           Continue
         </ion-button>
       </ion-toolbar>
@@ -77,7 +82,7 @@ import { UserService } from "@/services/user_service";
 import { matchToGuidelines } from "@/utils/GuidelineEngine"
 import { Patientservice } from "@/services/patient_service";
 import { PatientProgramService } from "@/services/patient_program_service"
-import { alertAction, alertConfirmation, toastDanger } from "@/utils/Alerts"
+import { alertConfirmation, toastDanger } from "@/utils/Alerts"
 
 import {
   IonContent,
@@ -128,6 +133,7 @@ export default defineComponent({
     ddeInstance: {} as any,
     useDDE: false as boolean,
     facts: {
+      patientFound: false as boolean,
       npidHasDuplicates: false as boolean,
       userRoles: [] as string[],
       scannedNpid: '' as string,
@@ -192,14 +198,16 @@ export default defineComponent({
       },
       immediate: true
     },
-    async patient() {
-      this.program = new PatientProgramService(this.patient.getID())
+    async patient(patient: any) {
       await this.presentLoading()
-      this.setPatientFacts()
       await this.resolveGlobalPropertyFacts()
-      await this.setProgramFacts()
+      if (patient) {
+        await this.drawPatientCards()
+        this.setPatientFacts()
+        this.program = new PatientProgramService(this.patient.getID())
+        await this.setProgramFacts()
+      }
       if (this.useDDE) await this.setDDEFacts()
-      await this.drawPatientCards()
       loadingController.dismiss()
       await this.onEvent(TargetEvent.ONLOAD)
     }
@@ -224,23 +232,14 @@ export default defineComponent({
       } else if (id) {
         data = await Patientservice.findByID(id)
       }
-
+      this.facts.patientFound = !isEmpty(data)
+      if (this.facts.patientFound) {       
+        this.patient = new Patientservice(data)
+      }else {
+        this.patient = null
+      }
       await loadingController.dismiss()
 
-      if (isEmpty(data)) {
-        return alertAction('Patient not found', [
-          {
-            text: 'Home',
-            handler: () => this.$router.push('/')
-          },
-          {
-            text: 'Back',
-            handler: () => this.$router.back()
-          }
-        ])
-      }
-      loadingController.dismiss()
-      this.patient = new Patientservice(data)
     },
     /**
      * Facts are used by the Guideline Engine to crosscheck 
@@ -345,6 +344,17 @@ export default defineComponent({
      */
     async runFlowState(state: FlowState) {
       const states: Record<string, Function> = {
+        'gotoHome': () => {
+          this.$router.push('/')
+          return FlowState.FORCE_EXIT
+        },
+        'goBack': () => {
+          this.$router.back()
+          return FlowState.FORCE_EXIT
+        },
+        'checkVoidedIDs': () => {
+          //TODO check them
+        },
         'enroll': () => {
           return this.program.enrollProgram()
         },

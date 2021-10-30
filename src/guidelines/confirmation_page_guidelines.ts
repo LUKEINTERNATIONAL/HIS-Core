@@ -11,9 +11,10 @@ export enum TargetEvent {
     ON_CONTINUE = 'oncontinue',
     ONLOAD = 'onload'
 }
-
 export enum FlowState {
     FORCE_EXIT = 'forceExit',
+    GO_HOME = 'gotoHome',
+    GO_BACK = 'goBack',
     CONTINUE = 'continue',
     ENROLL = 'enroll',
     EXIT = 'exit',
@@ -25,8 +26,38 @@ export enum FlowState {
     UPDATE_LOCAL_DDE_DIFFS = 'updateLocalDiffs',
     RESOLVE_DUPLICATE_NPIDS = 'resolveDuplicateNpids'
 }
-
 export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = {
+    "Do not proceed if patient is not found in the system" : {
+        priority: 1,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async () => {
+                const action = await infoActionSheet(
+                    '0 Search results',
+                    'Patient has not been found',
+                    'Choose how to proceed',
+                    [
+                        { 
+                            name: 'Go Home', 
+                            slot: 'start', 
+                            color: 'primary',
+                        },
+                        { 
+                            name: 'Go Back', 
+                            slot: 'start', 
+                            color: 'primary',
+                        }
+                    ]
+                )
+                return action === 'Go Home' ? FlowState.GO_HOME : FlowState.GO_BACK
+            }
+        },
+        conditions: {
+            patientFound(yes: boolean) {
+                return yes === false
+            }
+        }
+    },
     "Warn if patient is missing National ID and assign them one": {
         priority: 1,
         targetEvent: TargetEvent.ONLOAD,
