@@ -227,11 +227,11 @@ export default defineComponent({
       await this.presentLoading()
 
       if (npid) {
+        if (!this.facts.scannedNpid) this.facts.scannedNpid = npid
         this.ddeInstance = new PatientDemographicsExchangeService()
         await this.ddeInstance.loadDDEStatus()        
         this.useDDE = this.ddeInstance.isEnabled()
         const results = await this.ddeInstance.searchNpid(npid)
-        this.facts.scannedNpid = npid
         this.facts.npidHasDuplicates = results.length > 1
         data = results[0]
       } else if (id) {
