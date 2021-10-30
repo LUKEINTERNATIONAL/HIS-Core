@@ -47,18 +47,22 @@ export class PatientDemographicsExchangeService extends Service {
      */
     async searchNpid(npid: string): Promise<Array<any>> {
         if (this.enabled) {
-            const ddeSearch = await this.findNpid(npid)
-            const results: any = [
-                ...ddeSearch.locals, ...ddeSearch.remotes
-            ]
-            if (!isEmpty(results)) {
-                this.patientID = results[0].patient_id
+            try {
+                const ddeSearch = await this.findNpid(npid)
+                const results: any = [
+                    ...ddeSearch.locals, ...ddeSearch.remotes
+                ]
+                if (!isEmpty(results)) {
+                    this.patientID = results[0].patient_id
+                }
+                // If local and remote are less than equal two, treat it as one 
+                // record and use one result
+                return results.length <= 2 
+                    ? [results[0]]
+                    : results
+            } catch(e) {
+                console.warn(e)
             }
-            // If local and remote are less than equal two, treat it as one 
-            // record and use one result
-            return results.length <= 2 
-                ? [results[0]]
-                : results
         }
         return Patientservice.findByNpid(npid)
     }
