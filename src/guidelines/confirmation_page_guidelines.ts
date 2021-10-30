@@ -33,7 +33,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         actions: {
             alert: async () => {
                 const action = await infoActionSheet(
-                    '0 Search results',
+                    ' 0 Search results',
                     'Patient has not been found',
                     'Choose how to proceed',
                     [
@@ -53,6 +53,48 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             }
         },
         conditions: {
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled === false
+            },
+            patientFound(yes: boolean) {
+                return yes === false
+            }
+        }
+    },
+    "[DDE] Do not proceed if NPID is not found and Provide history of voided NPIDS" : {
+        priority: 1,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async (facts: any) => {
+                const action = await tableActionSheet(
+                    `Voided patients with ID ${facts.scannedNpid}`,
+                    'NPID was not found. Please review available patient with similar ID',
+                    facts.dde.voidedNpids.cols,
+                    facts.dde.voidedNpids.rows,
+                    [
+                        { 
+                            name: 'Go Home', 
+                            slot: 'start', 
+                            color: 'primary',
+                        },
+                        { 
+                            name: 'Go Back', 
+                            slot: 'start', 
+                            color: 'primary',
+                        }
+                    ]
+                )
+                return action === 'Go Home' 
+                    ? FlowState.GO_HOME 
+                    : action ===  FlowState.GO_BACK
+                    ? FlowState.GO_BACK
+                    : FlowState.FORCE_EXIT
+            }
+        },
+        conditions: {
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled === true
+            },
             patientFound(yes: boolean) {
                 return yes === false
             }

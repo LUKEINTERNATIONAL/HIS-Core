@@ -73,6 +73,14 @@ export class PatientDemographicsExchangeService extends Service {
         })
     }
 
+    findVoidedIdentifier(npid: string) {
+        return Service.getJson(`search/patients/by_identifier`,{
+            'type_id': 3, 
+            'voided': true,
+            'identifier':npid 
+        })
+    }
+
     shouldCreateNpid(diffs: any) {
         return !isEmpty(diffs) && diffs.npid
     }

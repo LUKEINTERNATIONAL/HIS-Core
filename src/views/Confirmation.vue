@@ -97,7 +97,8 @@ import {
   IonCardContent,
   IonCardTitle,
   IonCardHeader,
-  loadingController
+  loadingController,
+  modalController
 } from "@ionic/vue";
 import {
   FlowState, 
@@ -143,6 +144,10 @@ export default defineComponent({
       programs: [] as string[],
       identifiers: [] as string[],
       dde: {
+        voidedNpids: {
+         cols: [] as string[],
+         rows: [] as any
+        },
         hasDemographicConflict: false,
         localDiffs: {},
         diffColumnsAndRows: [],
@@ -236,6 +241,7 @@ export default defineComponent({
       if (this.facts.patientFound) {       
         this.patient = new Patientservice(data)
       }else {
+        if (npid) await this.setVoidedNpidFacts(npid)
         this.patient = null
       }
       await loadingController.dismiss()
@@ -267,9 +273,11 @@ export default defineComponent({
     },
     async resolveGlobalPropertyFacts() {
       for(const i in this.facts.globalProperties) {
-        this.facts.globalProperties[i] = await GlobalPropertyService.isProp(
-          this.facts.globalProperties[i]
-        )
+        if (typeof this.facts.globalProperties[i] === 'string') {
+          this.facts.globalProperties[i] = await GlobalPropertyService.isProp(
+            this.facts.globalProperties[i]
+          )
+        }
       }
     },
     async setProgramFacts() {
@@ -309,6 +317,35 @@ export default defineComponent({
       for (const title in summaryEntries) {
         const data = await summaryEntries[title]()
         this.cards.push({ title, data })
+      }
+    },
+    async setVoidedNpidFacts(npid: string) {
+      const cols = [
+        'Name', 'Birthdate', 'Gender', 'Ancestry Home', 'CurrentID', 'Action'
+      ]
+      let rows = []
+      const req = await this.ddeInstance.findVoidedIdentifier(npid)
+      if (req) {
+        rows = req.map((d: any) => {
+          const p = new Patientservice(d)
+          return [
+            p.getFullName(),
+            p.getBirthdate(),
+            p.getGender(),
+            p.getHomeTA(),
+            p.getNationalID(),
+            {
+              type: 'button',
+              name: 'Select',
+              action: async () => {
+                await this.findAndSetPatient('', p.getNationalID())
+                await modalController.dismiss({ action: FlowState.FORCE_EXIT})
+              }
+            }
+          ]
+        })
+        this.facts.dde.voidedNpids.cols = cols
+        this.facts.dde.voidedNpids.rows = rows
       }
     },
     async presentLoading() {
