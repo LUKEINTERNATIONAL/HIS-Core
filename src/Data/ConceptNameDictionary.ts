@@ -27,6 +27,21 @@ export default [
    },
    {
       "categories": [],
+      "concept_id": 6541,
+      "name": "Referred"
+   },
+   {
+      "categories": [],
+      "concept_id": 8717,
+      "name": "Specialist clinic"
+   },
+   {
+      "categories": [],
+      "concept_id": 6734,
+      "name": "Admit to ward"
+   },
+   {
+      "categories": [],
       "concept_id": 9674,
       "name": "Re-visiting"
    },
