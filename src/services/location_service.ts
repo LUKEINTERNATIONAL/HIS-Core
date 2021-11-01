@@ -1,4 +1,5 @@
 import { Service } from '@/services/service'
+import { ConceptService } from '@/services/concept_service';
 
 export class LocationService extends Service {
     constructor() {
@@ -7,6 +8,11 @@ export class LocationService extends Service {
 
     static getFacilities(params={} as Record<string, string | number>) {
         return super.getJson('/locations', params)
+    }
+
+    static getSpecialistClinics() {
+       const conceptId = ConceptService.getConceptID('Specialist clinic')       
+       return super.getJson('/concept_set', {id:conceptId})
     }
 
     static getRegions() {
