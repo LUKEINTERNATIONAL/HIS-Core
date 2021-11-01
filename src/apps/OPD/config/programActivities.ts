@@ -17,11 +17,6 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
     icon: 'outcomes.png'
   },
   {
-    id: 'clinical notes',
-    name: 'Clinical notes',
-    icon: 'clinical-notes.png'
-  },
-  {
     id: 'lab orders',
     name: 'Lab orders',
     icon: 'clinical-notes.png'
