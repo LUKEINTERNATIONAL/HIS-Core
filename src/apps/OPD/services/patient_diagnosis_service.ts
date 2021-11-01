@@ -14,13 +14,12 @@ export class PatientDiagnosisService extends AppEncounterService {
     }
 
     static async getMalariaTestResult(patientId: number) {
-        const malariaTestObs = await AppEncounterService.getObs({
-            'person_id': patientId,
-            'concept_id': ConceptService.getConceptID('Malaria Test Result'),
-            'obs_datetime': AppEncounterService.getSessionDate()
-        })   
-        // TODO -
-        // complete the algorithm to check if the current patient
-        // has malaria test results
+        let malariaTestResult = await AppEncounterService.getFirstValueCoded(patientId, 'Malaria Test Result')   
+        if(malariaTestResult) return malariaTestResult
+
+        malariaTestResult = await AppEncounterService.getFirstValueText(patientId, 'Malaria Test Result')
+        if(malariaTestResult) return malariaTestResult
+
+        return null
     }
 }

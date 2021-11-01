@@ -52,6 +52,16 @@ export default [
    },
    {
       "categories": [],
+      "concept_id": 703,
+      "name": "Positive"
+   },
+   {
+      "categories": [],
+      "concept_id": 64,
+      "name": "Negative"
+   },
+   {
+      "categories": [],
       "concept_id": 6542,
       "name": "Primary diagnosis"
    },
