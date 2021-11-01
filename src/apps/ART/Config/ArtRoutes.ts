@@ -93,6 +93,11 @@ export default [
         component: () => import("@/apps/ART/views/ARTStock/movement.vue")
     },
     {
+        name: "Print drug barcode",
+        path: "/drug/print",
+        component: () => import("@/views/PrintDrug.vue")
+    },
+    {
         name: "treatment",
         path: "/art/encounters/prescriptions/:patient_id",
         component: Prescription

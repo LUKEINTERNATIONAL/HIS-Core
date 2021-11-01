@@ -15,8 +15,7 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import HisDate from "@/utils/Date";
-import { finalList } from "./stock_service";
-import { StockService } from "../../services/stock_service";
+import  { StockService } from "./stock_service";
 import { Service } from "@/services/service";
 import { toastDanger, toastSuccess } from "@/utils/Alerts";
 
@@ -28,6 +27,7 @@ export default defineComponent({
     drugs: [] as any,
     selectedDrugs: [] as any,
     barcode: "",
+    stockService: {} as any
   }),
 
   methods: {
@@ -136,7 +136,7 @@ export default defineComponent({
       });
     },
     formatDrugs() {
-      return finalList.map((drug) => {
+      return this.stockService.drugList().map((drug: any) => {
         return {
           label: drug.shortName,
           value: drug,
@@ -145,6 +145,7 @@ export default defineComponent({
     },
   },
   created() {
+    this.stockService = new StockService();
     this.fields = this.getFields();
     this.drugs = this.formatDrugs();
   },

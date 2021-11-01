@@ -15,9 +15,7 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import HisDate from "@/utils/Date";
-import { finalList } from "./stock_service";
-import { StockService } from "../../services/stock_service";
-import { Service } from "@/services/service";
+import  { StockService }  from "./stock_service";
 import { toastDanger, toastSuccess } from "@/utils/Alerts";
 
 export default defineComponent({
@@ -27,13 +25,14 @@ export default defineComponent({
     fields: [] as any,
     drugs: [] as any,
     selectedDrugs: [] as any,
-    barcode: ''
+    barcode: '',
+    stockService: {} as any
   }),
 
   methods: {
     async onFinish(formData: any) {
       const items = this.prepDrugs(formData);
-      const f = await Service.postJson('/pharmacy/batches', items);
+      const f = await this.stockService.postItems(items);
       if(f) {
         toastSuccess('Stock succesfully added');
         this.$router.push('/')
@@ -47,9 +46,18 @@ export default defineComponent({
           id: "barcode",
           helpText: "Scan barcode",
           type: FieldType.TT_BARCODE,
+
+config: {
+ hiddenFooterBtns: [
+                    'Clear',
+                    'Next'
+            ],
+},
           onValue: async (id: string) => {
             this.barcode = id;
+            this.activeField = "select drugs"
             },
+           
         },
         {
           id: "select drugs",
@@ -117,7 +125,7 @@ export default defineComponent({
       });
     },
     formatDrugs() {
-      return finalList.map((drug) => {
+      return this.stockService.drugList().map((drug: any) => {
         return {
           label: drug.shortName,
           value: drug,
@@ -126,6 +134,7 @@ export default defineComponent({
     },
   },
   created() {
+    this.stockService = new StockService();
     this.fields = this.getFields();
     this.drugs = this.formatDrugs();
   },

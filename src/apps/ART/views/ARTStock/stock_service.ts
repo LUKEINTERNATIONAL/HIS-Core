@@ -6,15 +6,7 @@ interface Drug {
 	fullName: string;
 	packSizes: number[];
 }
-export class StockService extends Service {
-    constructor() {
-        super()
-    }
-    static postItems(items: any) {
-	return Service.postJson('/pharmacy/batches', items);
-    }
-}
-export const finalList: Drug[] = [
+const finalList: Drug[] = [
 	{
 		drugID: 105,
 		shortName: "Acyclovir 200mg",
@@ -214,6 +206,33 @@ export const finalList: Drug[] = [
 		, packSizes: [90]
 	}
 ] as any
+export class StockService extends Service {
+	constructor() {
+		super()
+	}
+	postItems(items: any) {
+		return Service.postJson('/pharmacy/batches', items);
+	}
+	getItems() {
+		return Service.getJson('pharmacy/items', {paginate: false})
+	}
+	relocateItems(batchID: number, items: any) {
+		return Service.postJson(`pharmacy/items/${batchID}/reallocate`, items)
+	}
+	disposeItems(batchID: number, items: any) {
+		return Service.postJson(`pharmacy/items/${batchID}/dispose`, items)
+	}
+	drugList() {
+		return finalList;
+	}
+	static getShortName(drugID: number){
+		return finalList.filter(d => d.drugID === drugID)[0].shortName
+	}
+	static getPackSize(drugID: number){
+		return finalList.filter(d => d.drugID === drugID)[0].packSizes[0]
+	}
+}
+
 // var drugs: any = {};
 // finalList.forEach(element => {
 // 	drugs[element.drugID] = {

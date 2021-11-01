@@ -8,7 +8,7 @@
               :color="index === selectedDrug ? 'primary' : ''"
               @click="selectDrug(index)"
             >
-              {{ `${drug.drug_name} ` }}</ion-item
+              {{ `${drug.drug_name ?? drug.drug_legacy_name} `   }}</ion-item
             >
           </ion-list>
         </ion-col>
@@ -161,8 +161,7 @@ export default defineComponent({
     validateEntry(drug: any) {
       return (
         !isEmpty(drug.tins) &&
-        !isEmpty(drug.expiry) &&
-        !isEmpty(drug.batchNumber)
+        !isEmpty(drug.authorization) 
       );
     },
   },
@@ -183,7 +182,7 @@ export default defineComponent({
       const f: any = [];
       this.drugs.forEach((element: any) => {
         if(element.entries) {
-          const j = element.entries.filter((el: any) => el.updated === true);
+          const j = element.entries.filter((el: any) => this.validateEntry(el));
           j.forEach((e: any) => {
             f.push({ ...e, ...element });
           });

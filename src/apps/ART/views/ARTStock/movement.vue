@@ -15,9 +15,7 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import HisDate from "@/utils/Date";
-import { finalList } from "./stock_service";
-import { StockService } from "../../services/stock_service";
-import { Service } from "@/services/service";
+import  { StockService } from "./stock_service";
 import { toastDanger, toastSuccess } from "@/utils/Alerts";
 import {getFacilities} from "@/utils/HisFormHelpers/LocationFieldOptions"
 
@@ -28,19 +26,36 @@ export default defineComponent({
     fields: [] as any,
     drugs: [] as any,
     selectedDrugs: [] as any,
-    barcode: ''
+    barcode: '',
+    stockService: {} as any
   }),
 
   methods: {
     async onFinish(formData: any) {
-      const items = this.prepDrugs(formData);
-      const f = await Service.postJson('/pharmacy/batches', items);
-      if(f) {
-        toastSuccess('Stock succesfully added');
-        this.$router.push('/')
-      }else {
-        toastDanger('Could not save stock');
+      const data = formData.enter_batches.value;
+      for (let index = 0; index < data.length; index++) {
+        const d = data[index];
+        const packSize = StockService.getPackSize(d.drug_id);
+        const total = packSize * d.tins;
+        const extras = {} as any;
+        const res = {
+                                "reallocation_code": d.authorization,
+                                "quantity": total,
+                                "reason": formData.reasons.value,
+        }
+        if(formData.task.value === "Relocations") {
+          extras['location_id'] =  formData.relocation_location.value;
+          await this.stockService.relocateItems(d.pharmacy_batch_id, {...res, ...extras});
+        }else {
+
+          await this.stockService.disposeItems(d.pharmacy_batch_id, {...res, ...extras});
+        } 
+        
+
       }
+      
+      
+    
     },
     getFields(): Array<Field> {
       return [
@@ -63,7 +78,6 @@ export default defineComponent({
                 id: 'relocation_location',
                 helpText: 'Destination',
                 type: FieldType.TT_SELECT,
-                defaultValue: () => Service.getLocationName(),
                 validation: (val: Option) => Validation.required(val),
                 condition: (val: any) => val.task.value === 'Relocations',
                 options: (_: any, filter='') => getFacilities(filter),
@@ -111,9 +125,9 @@ export default defineComponent({
       ];
     },
     buildResults(d: any) {
-      const columns = ["Drug", "Amount per unit", "Total units", "Expiry date", 'Batch number'];
+      const columns = ["Drug", "Total units", "Expiry date", 'Authorization code'];
       const rows = d.map((d: any) => {
-        return [d.shortName, d.tabs, d.tins, HisDate.toStandardHisDisplayFormat(d.expiry), d.batchNumber]
+        return [ StockService.getShortName(d.drug_id), d.tins, HisDate.toStandardHisDisplayFormat(d.expiry), d.authorization]
       });
       return [{
         label: "Confirm entry",
@@ -145,7 +159,7 @@ export default defineComponent({
       });
     },
     async getItems() {
-      const f = await Service.getJson('pharmacy/items', {paginate: false});
+      const f = await this.stockService.getItems();
       return this.formatDrugs(f); 
     },
     mapVal(vals: string[]) {
@@ -161,15 +175,15 @@ export default defineComponent({
     formatDrugs(f: any) {
       return f.map((drug: any) => {
         return {
-          label: drug.drug_name,
+          label: `${StockService.getShortName(drug.drug_id)} (${StockService.getPackSize(drug.drug_id)}) Expiry date: ${HisDate.toStandardHisDisplayFormat(drug.expiry_date)}`,
           value: drug,
         };
       });
     },
   },
   created() {
+    this.stockService = new StockService();
     this.fields = this.getFields();
-    // this.drugs = this.formatDrugs();
   },
 });
 </script>

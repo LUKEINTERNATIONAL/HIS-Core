@@ -25,7 +25,7 @@ export const PROPERTIES: FolderInterface[] = [
             },
             {
                 name: "Print Barcode",
-                pathUrl: "/",
+                pathUrl: "/drug/print",
             },
             {
                 name: "Audit Trail",
