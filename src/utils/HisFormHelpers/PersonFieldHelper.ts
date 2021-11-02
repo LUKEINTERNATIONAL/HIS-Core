@@ -141,6 +141,8 @@ export default {
             config: {
                 showKeyboard: true
             },
+            defaultOutput: () => ({label: 'N/A', value: 'N/A'}),
+            defaultComputedOutput: () => ({ person: 'N/A'}),
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
             options: (form: any) => getTraditionalAuthorities(form.home_district.value)
@@ -155,6 +157,8 @@ export default {
                 showKeyboard: true
             },
             requireNext: false,
+            defaultOutput: () => ({ label: 'N/A', value: 'N/A' }),
+            defaultComputedOutput: () =>  ({ person: 'N/A'}),
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
             options: (form: any) => getVillages(form.home_traditional_authority.value)
@@ -188,6 +192,8 @@ export default {
             helpText: 'Current TA',
             requireNext: false,
             type: FieldType.TT_SELECT,
+            defaultOutput: () => ({label: 'N/A', value: 'N/A'}),
+            defaultComputedOutput: () => ({ person: 'N/A'}),
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
             options: (form: any) => getTraditionalAuthorities(form.current_district.value)
@@ -199,6 +205,8 @@ export default {
             helpText: 'Current Village',
             requireNext: false,
             type: FieldType.TT_SELECT,
+            defaultOutput: () => ({label: 'N/A', value: 'N/A'}),
+            defaultComputedOutput: () =>  ({ person: 'N/A'}),
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
             options: (form: any) => getVillages(form.current_traditional_authority.value)
