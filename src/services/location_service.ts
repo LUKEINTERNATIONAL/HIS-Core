@@ -10,8 +10,8 @@ export class LocationService extends Service {
         return super.getJson('/locations', params)
     }
 
-    static getSpecialistClinics() {
-       const conceptId = ConceptService.getConceptID('Specialist clinic')       
+    static async getSpecialistClinics() {
+       const conceptId = await ConceptService.getConceptID('Specialist clinic')       
        return super.getJson('/concept_set', {id:conceptId})
     }
 
