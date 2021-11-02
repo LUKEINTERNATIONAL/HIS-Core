@@ -173,8 +173,12 @@ export default defineComponent({
      * Switch the view to a target field
     */
     activeField: {
-      handler(field: string) {
+      async handler(field: string) {
         if (field) {
+          if (field === '_NEXT_FIELD_') {
+            await this.goNext()
+            return this.$emit('onIndex', this.currentIndex)
+          }
           const i = findIndex(this.currentFields, { id: field });
           if (i >= 0 && i <= this.currentFields.length) {
             this.setActiveField(i)
