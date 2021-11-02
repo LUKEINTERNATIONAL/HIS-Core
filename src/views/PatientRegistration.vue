@@ -496,7 +496,7 @@ export default defineComponent({
                     const name = `${person.given_name} ${person.family_name}`
                     return {
                         label: name,
-                        value: person.id,
+                        value: person.patient_id,
                         other: {
                             options:  [
                                 {
@@ -540,7 +540,7 @@ export default defineComponent({
                         name: 'Not Duplicate',
                         slot: 'start',
                         onClick: () => {
-                            // goto summary page
+                            this.fieldComponent = '_NEXT_FIELD_'
                         }
                     },
                     {
@@ -553,8 +553,8 @@ export default defineComponent({
                                 onValue: (_: any, f: any) => !isEmpty(f.possible_duplicates)
                             }
                         },
-                        onClick: () => {
-                            // Go to confirmation page
+                        onClick: (form: any) => {
+                            this.$router.push(`/patients/confirm?person_id=${form.possible_duplicates.value}`)
                         }
                     }
                 ]
