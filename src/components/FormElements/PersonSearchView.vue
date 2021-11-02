@@ -2,7 +2,7 @@
     <ion-row>
         <ion-col size="5">
             <div class="large-card">
-                <h3> Found people ({{listData.length}}):  </h3>
+                <h3> {{ foundRecordsTitle }} ({{listData.length}}):  </h3>
                 <ion-list>
                     <ion-item
                         button
@@ -10,8 +10,7 @@
                         :key="index"
                         :detail="true"
                         :color="result.value === selectedResult.value ? 'light' : ''"
-                        @click="onSelect(result)"
-                        >
+                        @click="onSelect(result)" >
                         <ion-avatar>
                           <ion-img src="/assets/images/avatar.svg"/>
                         </ion-avatar>
@@ -22,7 +21,7 @@
         </ion-col>
         <ion-col size="7">
             <div class="large-card">
-                <h3> Details: </h3>
+                <h3> {{ detailsTitle }} </h3>
                 <ion-list>
                     <ion-item
                       v-for="(opt, index) in selectedResult?.other?.options || []"
@@ -70,6 +69,14 @@ export default defineComponent({
     listData: [] as Array<Option>,
     selectedResult: {} as any
   }),
+  computed: {
+    foundRecordsTitle(): string {
+      return this.config?.foundRecordsTitle || 'Found People'
+    },
+    detailsTitle(): string {
+      return this.config?.detailsTitle || 'Details:'
+    }
+  },
   methods: {
     async onSelect(item: any) {
       if (!item) {
