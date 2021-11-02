@@ -78,10 +78,11 @@ import {
 } from "@ionic/vue";
 import HisDateKeyPad from "@/components/Keyboard/HisDateKeypad.vue";
 import KeyBoardModal from "@/components/Keyboard/HisModalKeyboard.vue";
-import { toastWarning } from "@/utils/Alerts";
+import { toastDanger, toastWarning } from "@/utils/Alerts";
 import { isEmpty } from "lodash";
 import { StockService } from "@/apps/ART/services/stock_service";
 import HisKeyboardVue from "../Keyboard/HisKeyboard.vue";
+import { DHAVerificationService } from "@/services/DHA_code_service"
 import HisModalKeyboardVue from "@/components/Keyboard/HisModalKeyboard.vue";
 
 export default defineComponent({
@@ -129,7 +130,22 @@ export default defineComponent({
       });
       modal.present();
       const { data } = await modal.onDidDismiss();
-      this.drugs[this.selectedDrug].entries[index][d] = data;
+      if(d === 'authorization') {
+
+        const j = new DHAVerificationService();
+        if(j.isValidDHACode(data.toUpperCase() )) {
+
+          this.drugs[this.selectedDrug].entries[index][d] = data.toUpperCase();
+        }else {
+          toastDanger('Invalid authorization code');
+        }
+      }else {
+        if (isNaN(data)) {
+          toastDanger("Invalid entry for number of tins");
+          return;
+        }
+        this.drugs[this.selectedDrug].entries[index][d] = data;
+      }
       return data;
     },
     onKbValue(text: any) {
