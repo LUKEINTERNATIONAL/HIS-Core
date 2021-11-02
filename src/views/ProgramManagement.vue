@@ -222,6 +222,7 @@ export default defineComponent({
                 id: "transfer_out_state",
                 helpText: 'Please Select facility name',
                 type: FieldType.TT_SELECT,
+                validation: (val: Option) => Validation.required(val),
                 condition: (f: any) => f.program_state.label === 'Patient transferred out',
                 options: (_: any, filter='') => getFacilities(filter),
                 config: {
@@ -235,6 +236,7 @@ export default defineComponent({
                 id: "program_state",
                 helpText: "State",
                 type: FieldType.TT_SELECT,
+                validation: (val: Option) => Validation.required(val),
                 options: () => this.programWorkflows(),
                 condition: () => this.activeField === 'program_state',
                 unload: (val: Option) => this.patientProgram.setStateId(val.value)
