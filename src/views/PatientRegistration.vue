@@ -532,14 +532,29 @@ export default defineComponent({
                 foundRecordsTitle: 'Similar people found:',
                 detailsTitle: 'Match Comparison:',
                 hiddenFooterBtns: [
-                    'Clear'
+                    'Clear',
+                    'Next'
                 ],
                 footerBtns: [
                     {
                         name: 'Not Duplicate',
                         slot: 'start',
                         onClick: () => {
-                            // goto confirmation page
+                            // goto summary page
+                        }
+                    },
+                    {
+                        name: 'Confirm',
+                        slot: 'end',
+                        color: 'warning',
+                        state: {
+                            visible: {
+                                default: () => false,
+                                onValue: (_: any, f: any) => !isEmpty(f.possible_duplicates)
+                            }
+                        },
+                        onClick: () => {
+                            // Go to confirmation page
                         }
                     }
                 ]
