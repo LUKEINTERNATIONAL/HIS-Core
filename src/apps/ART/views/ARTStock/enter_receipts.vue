@@ -67,6 +67,17 @@ config: {
           validation: (val: any) => Validation.required(val),
           options: () => this.drugs,
           unload: (val: any) => (this.selectedDrugs = val),
+          config: {
+            footerBtns: [
+                {
+                    name: 'Select all',
+                    slot: 'end',
+                    onClick: () => {
+                        this.selectAll(this.drugs);
+                    }
+                }
+              ]
+            }
         },
         {
           id: "date",
