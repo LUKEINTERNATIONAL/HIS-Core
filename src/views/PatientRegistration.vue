@@ -67,12 +67,12 @@ export default defineComponent({
   watch: {
     '$route': {
         async handler({query}: any) {
+           this.ddeInstance = new PatientDemographicsExchangeService()
+           await this.ddeInstance.loadDDEStatus()
            if (query.edit_person) {
                 this.ddeIsReassign = query.dde_reassign
                 this.ddeDocID = query.doc_id
-                this.ddeInstance = new PatientDemographicsExchangeService()
                 this.ddeInstance.setPatientID(query.edit_person)
-                await this.ddeInstance.loadDDEStatus()
                 await this.initEditMode(query.edit_person)
             } else {
                 this.presets = query
@@ -110,6 +110,7 @@ export default defineComponent({
         fields = fields.concat(this.dateJoinedMilitaryFields())
         fields.push(this.rankField())
         fields.push(this.relationshipField())
+        fields.push(this.possibleDuplicatesField())
         return fields
     },
     isEditMode() {
@@ -475,6 +476,75 @@ export default defineComponent({
                     }
                 ]
             }
+        }
+    },
+    possibleDuplicatesField(): Field {
+        let createdPerson: any = {}
+        let duplicatePatients: any = {}
+        return {
+            id: 'possible_duplicates',
+            helpText: 'Possible Duplicate(s)',
+            type: FieldType.TT_PERSON_RESULT_VIEW,
+            condition: async (f: any, c: any) => {
+                createdPerson = PersonField.resolvePerson(c)
+                duplicatePatients = await this.ddeInstance
+                    .checkPotentialDuplicates(createdPerson)
+                return this.ddeInstance.isEnabled() && duplicatePatients.length >= 1
+            },
+            options: async () => {
+                return duplicatePatients.map(({ person }: any) => {
+                    const name = `${person.given_name} ${person.family_name}`
+                    return {
+                        label: name,
+                        value: person.id,
+                        other: {
+                            options:  [
+                                {
+                                    label: `${createdPerson.given_name} ${createdPerson.family_name}`,
+                                    value: `${person.given_name} ${person.family_name}`
+                                },
+                                {
+                                    label: createdPerson.gender,
+                                    value: person.gender
+                                },
+                                {
+                                    label: createdPerson.birthdate,
+                                    value: person.birthdate
+                                },
+                                {
+                                    label: createdPerson.home_district,
+                                    value: person.home_district
+                                },
+                                {
+                                    label: createdPerson.home_traditional_authority,
+                                    value: person.home_traditional_authority
+                                },
+                                {
+                                    label: createdPerson.home_district,
+                                    value: person.home_district
+                                }
+                            ]
+                        }
+                    }
+                })
+            },
+            config: {
+                foundRecordsTitle: 'Similar people found:',
+                detailsTitle: 'Match Comparison:',
+                hiddenFooterBtns: [
+                    'Clear'
+                ],
+                footerBtns: [
+                    {
+                        name: 'Not Duplicate',
+                        slot: 'start',
+                        onClick: () => {
+                            // goto confirmation page
+                        }
+                    }
+                ]
+            }
+
         }
     },
     personIndexField(): Field {
