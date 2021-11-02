@@ -40,6 +40,12 @@ export class PatientDemographicsExchangeService extends Service {
         })
     }
 
+    checkPotentialDuplicates(params: Record<string, any>) {
+        return Service.getJson(`dde/patients/match_by_demographics`, {
+            ...params, 'program_id': Service.getProgramID()
+        }) 
+    }
+
     /**
      * Searches DDE for possible match and fallsback to PatientService
      * npid finder
