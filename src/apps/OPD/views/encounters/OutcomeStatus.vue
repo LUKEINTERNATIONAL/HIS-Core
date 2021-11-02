@@ -72,8 +72,11 @@ export default defineComponent({
             obs: this.referralService.buildValueText('Referred', value)
           }),
           condition: (fields: any) => fields.opd_outcome.value === 'External referral',
-          options: () => getFacilities(''),
-          config: { showKeyboard: true }
+          options: (_: any, filter='') => getFacilities(filter),
+          config: {
+              showKeyboard: true,
+              isFilterDataViaApi: true
+          }
         },
         {
           id: 'specialist_clinic',
@@ -98,7 +101,11 @@ export default defineComponent({
             tag: 'admission',
             obs: this.admissionService.buildValueText('Admit to ward', value)
           }),
-          options: () => getFacilityWards('')
+          options: (_: any, filter='') => getFacilityWards(filter),
+          config: {
+              showKeyboard: true,
+              isFilterDataViaApi: true
+          }
         },  
       ]
     }
