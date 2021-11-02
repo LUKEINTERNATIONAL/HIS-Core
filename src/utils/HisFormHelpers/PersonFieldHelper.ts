@@ -25,7 +25,7 @@ export default {
         let data: any = {}
         for(const attr in computedForm) {
             const values = computedForm[attr]
-            if ('person' in values) {
+            if (isPlainObject(values) && 'person' in values) {
                 if (isPlainObject(values.person)) {
                     data = {...data, ...values.person}
                 } else {
