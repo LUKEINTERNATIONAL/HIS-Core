@@ -454,9 +454,8 @@ export default defineComponent({
       }
       // Run callback before proceeding to next field
       if (this.currentField.beforeNext) {
-        const ok = await this.currentField.beforeNext();
-        if (!ok) {
-          return;
+        if (!(await this.currentField.beforeNext())) {
+          return
         }
       }
       await this.onNext();
@@ -467,30 +466,44 @@ export default defineComponent({
     async goBack() {
       for (let i = this.currentIndex; i >= 0; --i) {
         const field = this.currentFields[i];
-        if (!isEmpty(this.currentField) && this.currentField.id === field.id)
+        if (!isEmpty(this.currentField) 
+          && this.currentField.id === field.id) {
           continue;
-
+        }
         try {
-          if (field.condition && !field.condition(this.formData)) {
-            this.setDefaultOutputValue(field)
-            continue;
+          if (!(await this.checkFieldCondition(field))) {
+            continue
           }
         } catch (e) {
-          continue;
+          continue
         }
         await this.setActiveField(i, "prev");
         return
       }
     },
-    setDefaultOutputValue(field: Field) {
-      this.formData[field.id] = field.defaultOutput 
-        ? field.defaultOutput(this.formData, this.computedFormData) 
-        : null;
-      if (field.computedValue) {
-        this.computedFormData[field.id] = field.defaultComputedOutput
-          ? field.defaultComputedOutput(this.formData, this.computedFormData)
-          : null
+    /**
+     * Run a field's condition if configured. 
+     * Note: Fields whose evaluation === False will have their
+     *      values null by Default. If a defaultOuput/defaultComputedOutput 
+     *      was set, those values will be used instead of null
+     */
+    async checkFieldCondition(field: Field) {
+       if (field.condition && !(await field.condition(
+          this.formData, this.computedFormData
+        ))) {
+        // Normal form value to be used when condition is false
+        this.formData[field.id] = field.defaultOutput 
+          ? field.defaultOutput(this.formData, this.computedFormData) 
+          : null;
+        // Computed form value to be used when condition is false
+        if (field.computedValue) {
+          this.computedFormData[field.id] = field.defaultComputedOutput
+            ? field.defaultComputedOutput(this.formData, this.computedFormData)
+            : null
+        }
+        return false
       }
+      return true
     },
     /**
      * Callback when the field component has been activated.
@@ -564,18 +577,17 @@ export default defineComponent({
       const totalFields = this.currentFields.length;
       for (let i = this.currentIndex; i < totalFields; ++i) {
         const field = this.currentFields[i];
-
         if (!isEmpty(this.currentField) 
-          && this.currentField.id === field.id)
-          continue;
-
-        try {
-          if (field.condition && !field.condition(this.formData)) {
-            this.setDefaultOutputValue(field)
+          && this.currentField.id === field.id) {
             continue;
           }
-        } catch (e) { continue }
-
+        try {
+          if (!(await this.checkFieldCondition(field))) {
+            continue
+          }
+        } catch (e) { 
+          continue 
+        }
         await this.setActiveField(i, "next");
         return;
       }
