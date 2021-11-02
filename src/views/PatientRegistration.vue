@@ -539,6 +539,12 @@ export default defineComponent({
                     {
                         name: 'Not Duplicate',
                         slot: 'start',
+                        state: {
+                            visible: {
+                                default: () => false,
+                                onValue: (_: any, f: any) => !isEmpty(f.possible_duplicates)
+                            }
+                        },
                         onClick: () => {
                             this.fieldComponent = '_NEXT_FIELD_'
                         }
