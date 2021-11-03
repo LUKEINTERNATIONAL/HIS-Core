@@ -469,7 +469,12 @@ export default defineComponent({
           await this.ddeInstance.printNpid()
         },
         'assignNpid': async () => {
-          const req = await this.patient.assignNpid()
+          let req = {}
+          if (this.useDDE) {
+            req = await this.ddeInstance.reassignNpid('')
+          } else {
+            req = await this.patient.assignNpid()
+          }
           if (req && (await alertConfirmation('Do you want to print National ID?'))) {
             const print = new PatientPrintoutService(this.patient.getID())
             await print.printNidLbl()

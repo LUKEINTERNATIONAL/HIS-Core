@@ -131,7 +131,7 @@ export class PatientDemographicsExchangeService extends Service {
         return Service.postJson('dde/patients/merge', params)
     }
 
-    reassignNpid(docID: string, patientID: number) {
+    reassignNpid(docID: string, patientID=this.patientID) {
         return Service.postJson('dde/patients/reassign_npid', {
             'program_id': Service.getProgramID(),
             'patient_id': patientID,
