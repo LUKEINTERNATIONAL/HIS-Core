@@ -200,7 +200,7 @@ export default defineComponent({
         if(element.entries) {
           const j = element.entries.filter((el: any) => this.validateEntry(el));
           j.forEach((e: any) => {
-            f.push({ ...e, ...element });
+            f.push({ label: element.shortname, value: { ...e, ...element } });
           });
         }
         
@@ -211,7 +211,7 @@ export default defineComponent({
   watch: {
     drugs: {
         async handler() {
-          this.$emit("onValue", { label: 'drugs', value: this.enteredDrugs });
+          this.$emit("onValue", this.enteredDrugs );
         },
         immediate: true,
         deep: true

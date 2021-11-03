@@ -32,10 +32,10 @@ export default defineComponent({
 
   methods: {
     async onFinish(formData: any) {
-      const data = formData.enter_batches.value;
+      const data = formData.enter_batches;
       const errors = [];
       for (let index = 0; index < data.length; index++) {
-        const d = data[index];
+        const d = data[index].value;
         const packSize = StockService.getPackSize(d.drug_id);
         const total = packSize * d.tins;
         const extras = {} as any;
@@ -80,6 +80,7 @@ export default defineComponent({
           id: "task",
           helpText: "Select task",
           type: FieldType.TT_SELECT,
+          validation: (val: any) => Validation.required(val),
           options: () => [
             {
               label: "Relocations",
@@ -108,6 +109,7 @@ export default defineComponent({
           id: "date",
           helpText: "Set date",
           type: FieldType.TT_FULL_DATE,
+          validation: (val: any) => Validation.required(val),
         },
         {
           id: "select drugs",
@@ -123,32 +125,35 @@ export default defineComponent({
           helpText: "Batch entry",
           type: FieldType.TT_BATCH_MOVEMENT,
           options: () => this.selectedDrugs,
+          validation: (val: any) => Validation.required(val),
         },
         {
           id: "reasons",
           helpText: "Select reason",
           type: FieldType.TT_SELECT,
+          validation: (val: any) => Validation.required(val),
           options: (formdata: any) => this.getReasons(formdata),
         },
         {
-          id: "adherence_report",
-          helpText: "ART adherence",
+          id: "summary",
+          helpText: "Summary",
           type: FieldType.TT_TABLE_VIEWER,
-          options: (d: any) => this.buildResults(d.enter_batches.value),
+          options: (d: any) => this.buildResults(d.enter_batches),
           config: {
             hiddenFooterBtns: ["Clear"],
           },
         },
       ];
     },
-    buildResults(d: any) {
+    buildResults(drugs: any) {
       const columns = [
         "Drug",
         "Total units",
         "Expiry date",
         "Authorization code",
       ];
-      const rows = d.map((d: any) => {
+      const rows = drugs.map((j: any) => {
+        const d = j.value;
         return [
           StockService.getShortName(d.drug_id),
           d.tins,

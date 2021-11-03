@@ -16,7 +16,6 @@ import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import HisDate from "@/utils/Date";
 import  { StockService } from "./stock_service";
-import { Service } from "@/services/service";
 import { toastDanger, toastSuccess } from "@/utils/Alerts";
 
 export default defineComponent({

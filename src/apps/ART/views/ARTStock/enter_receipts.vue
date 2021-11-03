@@ -15,7 +15,7 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import HisDate from "@/utils/Date";
-import  { StockService }  from "./stock_service";
+import { StockService } from "./stock_service";
 import { toastDanger, toastSuccess } from "@/utils/Alerts";
 
 export default defineComponent({
@@ -25,19 +25,19 @@ export default defineComponent({
     fields: [] as any,
     drugs: [] as any,
     selectedDrugs: [] as any,
-    barcode: '',
-    stockService: {} as any
+    barcode: "",
+    stockService: {} as any,
   }),
 
   methods: {
     async onFinish(formData: any) {
       const items = this.prepDrugs(formData);
       const f = await this.stockService.postItems(items);
-      if(f) {
-        toastSuccess('Stock succesfully added');
-        this.$router.push('/')
-      }else {
-        toastDanger('Could not save stock');
+      if (f) {
+        toastSuccess("Stock succesfully added");
+        this.$router.push("/");
+      } else {
+        toastDanger("Could not save stock");
       }
     },
     getFields(): Array<Field> {
@@ -47,17 +47,13 @@ export default defineComponent({
           helpText: "Scan barcode",
           type: FieldType.TT_BARCODE,
 
-config: {
- hiddenFooterBtns: [
-                    'Clear',
-                    'Next'
-            ],
-},
+          config: {
+            hiddenFooterBtns: ["Clear", "Next"],
+          },
           onValue: async (id: string) => {
             this.barcode = id;
-            this.activeField = "select drugs"
-            },
-           
+            this.activeField = "select drugs";
+          },
         },
         {
           id: "select drugs",
@@ -69,32 +65,34 @@ config: {
           unload: (val: any) => (this.selectedDrugs = val),
           config: {
             footerBtns: [
-                {
-                    name: 'Select all',
-                    slot: 'end',
-                    onClick: () => {
-                        this.selectAll(this.drugs);
-                    }
-                }
-              ]
-            }
+              {
+                name: "Select all",
+                slot: "end",
+                onClick: () => {
+                  this.selectAll(this.drugs);
+                },
+              },
+            ],
+          },
         },
         {
           id: "date",
           helpText: "Set date",
           type: FieldType.TT_FULL_DATE,
+          validation: (val: Option) => Validation.required(val),
         },
         {
           id: "enter_batches",
           helpText: "Batch entry",
           type: FieldType.TT_BATCH_ENTRY,
           options: () => this.selectedDrugs,
+          validation: (val: Option) => Validation.required(val),
         },
         {
           id: "adherence_report",
-          helpText: "ART adherence",
+          helpText: "Summary",
           type: FieldType.TT_TABLE_VIEWER,
-          options: (d: any) => this.buildResults(d.enter_batches.value),
+          options: (d: any) => this.buildResults(d.enter_batches),
           config: {
             hiddenFooterBtns: ["Clear"],
           },
@@ -102,30 +100,48 @@ config: {
       ];
     },
     buildResults(d: any) {
-      const columns = ["Drug", "Amount per unit", "Total units", "Expiry date", 'Batch number'];
-      const rows = d.map((d: any) => {
-        return [d.shortName, d.tabs, d.tins, HisDate.toStandardHisDisplayFormat(d.expiry), d.batchNumber]
+      const columns = [
+        "Drug",
+        "Amount per unit",
+        "Total units",
+        "Expiry date",
+        "Batch number",
+      ];
+      const rows = d.map((j: any) => {
+        const d = j.value;
+        return [
+          d.shortName,
+          d.tabs,
+          d.tins,
+          HisDate.toStandardHisDisplayFormat(d.expiry),
+          d.batchNumber,
+        ];
       });
-      return [{
-        label: "Confirm entry",
-        value: "Table",
-        other: { columns, rows },
-      }];
+      return [
+        {
+          label: "Confirm entry",
+          value: "Table",
+          other: { columns, rows },
+        },
+      ];
     },
     prepDrugs(formdata: any) {
       const items: any[] = [];
       const barcode = this.barcode;
-      formdata.enter_batches.value.forEach((element: any) => {
-         items.push({
-                            'batch_number': element.batchNumber,
-                            'items' : [{
-                            'barcode': barcode,
-                            'drug_id': element.drugID,
-                            'expiry_date': element.expiry,
-                            'quantity': parseInt(element.tabs) * parseInt(element.tins),
-                            'delivery_date': formdata.date.value,
-                            }]
-                        }); 
+      formdata.enter_batches.forEach((el: any) => {
+        const element = el.value;
+        items.push({
+          'batch_number': element.batchNumber,
+          items: [
+            {
+              'barcode': barcode,
+              'drug_id': element.drugID,
+              'expiry_date': element.expiry,
+              'quantity': parseInt(element.tabs) * parseInt(element.tins),
+              'delivery_date': formdata.date.value,
+            },
+          ],
+        });
       });
       return items;
     },
