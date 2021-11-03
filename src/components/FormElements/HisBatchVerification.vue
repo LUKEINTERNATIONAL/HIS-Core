@@ -8,7 +8,7 @@
               :color="index === selectedDrug ? 'primary' : ''"
               @click="selectDrug(index)"
             >
-              {{ `${drug.drug_name ?? drug.drug_legacy_name} `   }}</ion-item
+              {{ `${drug.shortName} (${drug.packSizes[0]}) ` }}</ion-item
             >
           </ion-list>
         </ion-col>
@@ -28,28 +28,26 @@
               "
             >
               <tr>
-                <th style="width: 5%">Total tins</th>
-                <th style="width: 5%">Authorization code</th>
+                <th>Expiry date</th>
+                <th>Available tins</th>
+                <th></th>
               </tr>
               <tbody>
                 <tr
                   v-for="(entry, ind) in drugs[selectedDrug].entries"
                   :key="ind"
+                  :style="entry.updated ? 'color: green' : ''"
                 >
-                  <td style="width: 50px; text-align: center" >
-                   <input
-                      class="input-field"
-                      v-model="entry.tins"
-                      @click="launchKeyPad('tins', ind)"
-                    />
+                  <td style="text-align: center">
+                    <p>{{ entry.expiry_date }}</p>
                   </td>
-                  <td style="width: 50px; text-align: center">
-                    <input
-                      class="input-field"
-                      v-model="entry.authorization"
-                      @click="launchKeyPad('authorization', ind)"
-                    />
-                    
+                  <td style="text-align: center">
+                    <p>{{ entry.current_quantity }}</p>
+                  </td>
+                  <td>
+                    <ion-button @click="launchKeyPad(ind)"
+                      >update stock</ion-button
+                    >
                   </td>
                 </tr>
               </tbody>
@@ -76,17 +74,13 @@ import {
   IonButton,
   modalController,
 } from "@ionic/vue";
-import HisDateKeyPad from "@/components/Keyboard/HisDateKeypad.vue";
-import KeyBoardModal from "@/components/Keyboard/HisModalKeyboard.vue";
-import { toastDanger, toastWarning } from "@/utils/Alerts";
+import { toastDanger} from "@/utils/Alerts";
 import { isEmpty } from "lodash";
-import { StockService } from "@/apps/ART/services/stock_service";
-import HisKeyboardVue from "../Keyboard/HisKeyboard.vue";
-import { DHAVerificationService } from "@/services/DHA_code_service"
+import { StockService } from "@/apps/ART/views/ARTStock/stock_service";
 import HisModalKeyboardVue from "@/components/Keyboard/HisModalKeyboard.vue";
 
 export default defineComponent({
-  components: { ViewPort, IonGrid, IonCol, IonRow },
+  components: { ViewPort, IonGrid, IonCol, IonRow, IonButton },
   mixins: [FieldMixinVue],
   data: () => ({
     value: "",
@@ -94,9 +88,11 @@ export default defineComponent({
     date: "" as any,
     drugs: [] as any,
     selectedDrug: null as any,
+    stockService: {} as any,
   }),
   async activated() {
     this.$emit("onFieldActivated", this);
+    this.stockService = new StockService();
     this.date = new Date();
     await this.setDefaultValue();
   },
@@ -105,13 +101,8 @@ export default defineComponent({
       const drugs = await this.options();
       this.drugs = [];
       drugs.forEach((element: any) => {
-        const val = {
-          tins: null,
-          authorization: null
-        }
         const d = {
           ...element.value,
-          entries: [{...val}]
         };
         this.drugs.push(d);
       });
@@ -122,30 +113,26 @@ export default defineComponent({
         }
       }
     },
-    async launchKeyPad(d: any, index: any) {
+    async launchKeyPad(index: any) {
       const modal = await modalController.create({
-        component:  HisModalKeyboardVue,
+        component: HisModalKeyboardVue,
         backdropDismiss: false,
         cssClass: "large-modal",
       });
       modal.present();
       const { data } = await modal.onDidDismiss();
-      if(d === 'authorization') {
-
-        const j = new DHAVerificationService();
-        if(j.isValidDHACode(data.toUpperCase() )) {
-
-          this.drugs[this.selectedDrug].entries[index][d] = data.toUpperCase();
-        }else {
-          toastDanger('Invalid authorization code');
-        }
-      }else {
-        if (isNaN(data)) {
-          toastDanger("Invalid entry for number of tins");
-          return;
-        }
-        this.drugs[this.selectedDrug].entries[index][d] = data;
+      if (isNaN(data)) {
+        toastDanger("Invalid entry for number of tins");
+        return;
       }
+      if (
+        parseInt(data) !==
+        this.drugs[this.selectedDrug].entries[index]["current_quantity"]
+      ) {
+        this.drugs[this.selectedDrug].entries[index]["current_quantity"] = data;
+        this.drugs[this.selectedDrug].entries[index].updated = true;
+      }
+
       return data;
     },
     onKbValue(text: any) {
@@ -173,12 +160,13 @@ export default defineComponent({
     },
     async selectDrug(index: any) {
       this.selectedDrug = index;
+      const vals = await this.stockService.getItem(
+        this.drugs[this.selectedDrug].drugID
+      );
+      this.drugs[index]["entries"] = vals;
     },
     validateEntry(drug: any) {
-      return (
-        !isEmpty(drug.tins) &&
-        !isEmpty(drug.authorization) 
-      );
+      return !isEmpty(drug.tins) && !isEmpty(drug.authorization);
     },
   },
   computed: {
@@ -197,25 +185,24 @@ export default defineComponent({
     enteredDrugs(): any {
       const f: any = [];
       this.drugs.forEach((element: any) => {
-        if(element.entries) {
-          const j = element.entries.filter((el: any) => this.validateEntry(el));
+        if (element.entries) {
+          const j = element.entries.filter((el: any) => el.updated);
           j.forEach((e: any) => {
-            f.push({ ...e, ...element });
+            f.push({ label: element.shortname, value: { ...e, ...element } });
           });
         }
-        
       });
       return f;
     },
   },
   watch: {
     drugs: {
-        async handler() {
-          this.$emit("onValue", { label: 'drugs', value: this.enteredDrugs });
-        },
-        immediate: true,
-        deep: true
-    }
+      async handler() {
+        this.$emit("onValue", this.enteredDrugs);
+      },
+      immediate: true,
+      deep: true,
+    },
   },
 });
 </script>
@@ -243,7 +230,9 @@ input {
 th {
   font-size: 1.3em;
 }
-ion-col > .left {
+.left {
   border-right: solid;
+  height: 70vh;
+  overflow: scroll;
 }
 </style>

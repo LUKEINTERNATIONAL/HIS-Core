@@ -8,7 +8,7 @@
               :color="index === selectedDrug ? 'primary' : ''"
               @click="selectDrug(index)"
             >
-              {{ `${drug.shortName} (${drug.packSizes[0]})` }}</ion-item
+              {{ `${drug.drug_name ?? drug.drug_legacy_name} `   }}</ion-item
             >
           </ion-list>
         </ion-col>
@@ -28,50 +28,32 @@
               "
             >
               <tr>
-                <th style="width: 5%; display: none">Tabs Per Tin</th>
                 <th style="width: 5%">Total tins</th>
-                <th style="width: 5%">Date Of Expiry</th>
-                <th style="width: 5%">Batch Number</th>
+                <th style="width: 5%">Authorization code</th>
               </tr>
               <tbody>
                 <tr
                   v-for="(entry, ind) in drugs[selectedDrug].entries"
                   :key="ind"
                 >
-                  <td style="width: 50px; text-align: center; display: none">
-                    <input
-                      class="input-field"
-                      v-model="entry.tabs"
-                      @click="launchKeyPad('tabs', ind)"
-                    />
-                  </td>
-                  <td style="width: 50px; text-align: center">
-                    <input
+                  <td style="width: 50px; text-align: center" >
+                   <input
                       class="input-field"
                       v-model="entry.tins"
                       @click="launchKeyPad('tins', ind)"
-                      field_type="total_tins"
                     />
                   </td>
                   <td style="width: 50px; text-align: center">
                     <input
                       class="input-field"
-                      @click="launchKeyPad('expiry', ind)"
-                      v-model="entry.expiry"
+                      v-model="entry.authorization"
+                      @click="launchKeyPad('authorization', ind)"
                     />
-                  </td>
-                  <td style="width: 50px; text-align: center">
-                    <input
-                      class="input-field"
-                      @click="launchKeyPad('batchNumber', ind)"
-                      v-model="entry.batchNumber"
-                    />
+                    
                   </td>
                 </tr>
               </tbody>
             </table>
-            <br />
-            <ion-button @click="addRow" siz="large">Add row</ion-button>
           </div>
         </ion-col>
       </ion-row>
@@ -96,11 +78,15 @@ import {
 } from "@ionic/vue";
 import HisDateKeyPad from "@/components/Keyboard/HisDateKeypad.vue";
 import KeyBoardModal from "@/components/Keyboard/HisModalKeyboard.vue";
-import { toastWarning } from "@/utils/Alerts";
+import { toastDanger, toastWarning } from "@/utils/Alerts";
 import { isEmpty } from "lodash";
+import { StockService } from "@/apps/ART/services/stock_service";
+import HisKeyboardVue from "../Keyboard/HisKeyboard.vue";
+import { DHAVerificationService } from "@/services/DHA_code_service"
+import HisModalKeyboardVue from "@/components/Keyboard/HisModalKeyboard.vue";
 
 export default defineComponent({
-  components: { ViewPort, IonGrid, IonCol, IonRow, IonButton },
+  components: { ViewPort, IonGrid, IonCol, IonRow },
   mixins: [FieldMixinVue],
   data: () => ({
     value: "",
@@ -120,14 +106,12 @@ export default defineComponent({
       this.drugs = [];
       drugs.forEach((element: any) => {
         const val = {
-          tabs: element.value.packSizes[0],
           tins: null,
-          expiry: null,
-          batchNumber: null,
-        };
+          authorization: null
+        }
         const d = {
           ...element.value,
-          entries: [{ ...val }, { ...val }, { ...val }],
+          entries: [{...val}]
         };
         this.drugs.push(d);
       });
@@ -140,19 +124,28 @@ export default defineComponent({
     },
     async launchKeyPad(d: any, index: any) {
       const modal = await modalController.create({
-        component: d === "expiry" ? HisDateKeyPad : KeyBoardModal,
+        component:  HisModalKeyboardVue,
         backdropDismiss: false,
         cssClass: "large-modal",
       });
       modal.present();
       const { data } = await modal.onDidDismiss();
-      if (d === "tins") {
+      if(d === 'authorization') {
+
+        const j = new DHAVerificationService();
+        if(j.isValidDHACode(data.toUpperCase() )) {
+
+          this.drugs[this.selectedDrug].entries[index][d] = data.toUpperCase();
+        }else {
+          toastDanger('Invalid authorization code');
+        }
+      }else {
         if (isNaN(data)) {
-          toastWarning("Invalid entry for number of tins");
+          toastDanger("Invalid entry for number of tins");
           return;
         }
+        this.drugs[this.selectedDrug].entries[index][d] = data;
       }
-      this.drugs[this.selectedDrug].entries[index][d] = data;
       return data;
     },
     onKbValue(text: any) {
@@ -178,14 +171,13 @@ export default defineComponent({
     today() {
       this.date = Service.getSessionDate();
     },
-    selectDrug(index: any) {
+    async selectDrug(index: any) {
       this.selectedDrug = index;
     },
     validateEntry(drug: any) {
       return (
         !isEmpty(drug.tins) &&
-        !isEmpty(drug.expiry) &&
-        !isEmpty(drug.batchNumber)
+        !isEmpty(drug.authorization) 
       );
     },
   },
@@ -205,10 +197,13 @@ export default defineComponent({
     enteredDrugs(): any {
       const f: any = [];
       this.drugs.forEach((element: any) => {
-        const j = element.entries.filter((el: any) => this.validateEntry(el));
-        j.forEach((e: any) => {
-          f.push({ ...e, ...element });
-        });
+        if(element.entries) {
+          const j = element.entries.filter((el: any) => this.validateEntry(el));
+          j.forEach((e: any) => {
+            f.push({ ...e, ...element });
+          });
+        }
+        
       });
       return f;
     },
@@ -247,8 +242,9 @@ input {
 }
 th {
   font-size: 1.3em;
-}
-ion-col > .left {
+}.left {
   border-right: solid;
+  height: 70vh;
+  overflow: scroll;
 }
 </style>

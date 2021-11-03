@@ -121,7 +121,7 @@ export default defineComponent({
         {
           id: "enter_batches",
           helpText: "Batch entry",
-          type: FieldType.TT_BATCH_VERIFICATION,
+          type: FieldType.TT_BATCH_MOVEMENT,
           options: () => this.selectedDrugs,
         },
         {

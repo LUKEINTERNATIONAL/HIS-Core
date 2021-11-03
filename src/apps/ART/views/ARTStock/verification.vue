@@ -32,10 +32,21 @@ export default defineComponent({
 
   methods: {
     async onFinish(formData: any) {
-      const items = this.prepDrugs(formData);
-      const f = await Service.postJson("/pharmacy/batches", items);
-      if (f) {
-        toastSuccess("Stock succesfully added");
+      const items = formData.enter_batches;
+      const errors = [];
+      for (let index = 0; index < items.length; index++) {
+        const element = items[index].value;
+        const vals = {
+                "current_quantity": element['current_quantity'],
+                "reason": formData.reason.value
+            };
+            const f = await this.stockService.updateItem(element['pharmacy_batch_id'], vals)
+            if(!f) {
+              errors.push('could not stock for ' + items[index].shortName);
+            }
+      }
+      if (errors.length === 0) {
+        toastSuccess("Stock succesfully updated");
         this.$router.push("/");
       } else {
         toastDanger("Could not save stock");
@@ -47,17 +58,20 @@ export default defineComponent({
           id: "date",
           helpText: "Verfication Date",
           type: FieldType.TT_FULL_DATE,
+          validation: (val: Option) => Validation.required(val),
         },
         {
           id: "enter_batches",
           helpText: "Batch entry",
           type: FieldType.TT_BATCH_VERIFICATION,
           options: () => this.drugs,
+          validation: (val: Option) => Validation.required(val),
         },
         {
           id: "reason",
           helpText: "Select reason",
           type: FieldType.TT_SELECT,
+          validation: (val: Option) => Validation.required(val),
           options: () => [
             {
               label: "Monthly stock take",
@@ -81,24 +95,25 @@ export default defineComponent({
           id: "adherence_report",
           helpText: "ART adherence",
           type: FieldType.TT_TABLE_VIEWER,
-          options: (d: any) => this.buildResults(d.enter_batches.value),
+          options: (d: any) => this.buildResults(d.enter_batches),
           config: {
             hiddenFooterBtns: ["Clear"],
           },
         },
       ];
     },
-    buildResults(d: any) {
+    buildResults(drugs: any) {
       const columns = [
         "Drug",
         "Total units",
         "Expiry date",
       ];
-      const rows = d.map((d: any) => {
+      const rows = drugs.map((j: any) => {
+        const d = j.value;
         return [
           d.shortName,
           d['current_quantity'],
-          HisDate.toStandardHisDisplayFormat(d.expiry),
+          HisDate.toStandardHisDisplayFormat(d.expiry_date),
         ];
       });
       return [

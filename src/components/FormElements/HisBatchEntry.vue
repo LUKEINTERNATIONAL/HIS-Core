@@ -248,7 +248,9 @@ input {
 th {
   font-size: 1.3em;
 }
-ion-col > .left {
+.left {
   border-right: solid;
+  height: 70vh;
+  overflow: scroll;
 }
 </style>

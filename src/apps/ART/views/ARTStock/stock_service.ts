@@ -216,6 +216,12 @@ export class StockService extends Service {
 	getItems() {
 		return Service.getJson('pharmacy/items', { paginate: false })
 	}
+	getItem(drugID: number) {
+		return Service.getJson('pharmacy/items', { 'drug_id': drugID })
+	}
+	updateItem(batchID: number, vals: any) {
+		return Service.putJson(`pharmacy/items/${batchID}`, vals)
+	}
 	relocateItems(batchID: number, items: any) {
 		return Service.postJson(`pharmacy/items/${batchID}/reallocate`, items)
 	}
