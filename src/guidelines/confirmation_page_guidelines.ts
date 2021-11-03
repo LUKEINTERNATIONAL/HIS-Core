@@ -124,7 +124,8 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             }
         },
         conditions: {
-            identifiers: (ids: string[]) => !ids.includes('National id')
+            identifiers: (ids: string[]) => !ids.includes('National id'),
+            currentNpid: (npid: string) => !npid
         }
     },
     "Detect NPID duplicates and prompt the user to resolve them" : {
