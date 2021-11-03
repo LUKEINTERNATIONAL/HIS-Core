@@ -207,7 +207,7 @@ export default defineComponent({
     async patient(patient: any) {
       await this.presentLoading()
       await this.resolveGlobalPropertyFacts()
-      if (patient) {
+      if (!isEmpty(patient)) {
         await this.drawPatientCards()
         this.setPatientFacts()
         this.program = new PatientProgramService(this.patient.getID())
@@ -221,32 +221,58 @@ export default defineComponent({
   methods: {
     /**
      * Resolve patient by either patient ID or NpID.
-     * Note: DDE Service only supports NPID search.
+     * Note: 
+     *  - DDE Service only supports NPID search.
     */
-    async findAndSetPatient(id: any, npid: any) {
-      let data: any = {}
+    async findAndSetPatient(id: number | undefined, npid: string | undefined) {
+      let patient = {}
+      let nationalID = npid || ''
       await this.presentLoading()
+      this.ddeInstance = new PatientDemographicsExchangeService()
+      await this.ddeInstance.loadDDEStatus()        
+      this.useDDE = this.ddeInstance.isEnabled()
 
-      if (npid) {
-        if (!this.facts.scannedNpid) this.facts.scannedNpid = npid
-        this.ddeInstance = new PatientDemographicsExchangeService()
-        await this.ddeInstance.loadDDEStatus()        
-        this.useDDE = this.ddeInstance.isEnabled()
-        const results = await this.ddeInstance.searchNpid(npid)
-        this.facts.npidHasDuplicates = results.length > 1
-        data = results[0]
-      } else if (id) {
-        data = await Patientservice.findByID(id)
+      let searchResults: any = {}
+
+      if (id) {
+        searchResults = await Patientservice.findByID(id)
+      } else if(!this.useDDE) {
+        const res = await Patientservice.findByNpid(nationalID)
+        if (!isEmpty(res)) {
+          this.facts.npidHasDuplicates = res.length > 1
+          searchResults = res[0]
+        } 
       }
-      this.facts.patientFound = !isEmpty(data)
-      if (this.facts.patientFound) {       
-        this.patient = new Patientservice(data)
-      }else {
-        if (npid) await this.setVoidedNpidFacts(npid)
-        this.patient = null
+
+      if (!isEmpty(searchResults)) {
+        patient = new Patientservice(searchResults)
+        nationalID = this.patient.getNationalID()
       }
+
+      if (this.useDDE) {
+        const res = await this.ddeInstance.searchNpid(nationalID)
+        if (!isEmpty(res) && res[0]) {
+          patient = new Patientservice(res[0])
+          this.facts.npidHasDuplicates = res.length > 1
+        } else {
+          await this.setVoidedNpidFacts(nationalID)
+        }
+      }
+
+      this.facts.patientFound = !isEmpty(patient)
+
+      if (!this.facts.scannedNpid) 
+        this.facts.scannedNpid = nationalID
+
+      this.patient = patient
       await loadingController.dismiss()
-
+    },
+    /**
+     * Reloads patient facts and information.
+     * Note: Use this when you know the patient is loaded
+     */
+    reloadPatient() {
+      return this.findAndSetPatient(this.patient.getID(), undefined)
     },
     /**
      * Facts are used by the Guideline Engine to crosscheck 
@@ -376,7 +402,7 @@ export default defineComponent({
               type: 'button',
               name: 'Select',
               action: async () => {
-                await this.findAndSetPatient('', p.getNationalID())
+                await this.findAndSetPatient(undefined, p.getNationalID())
                 await modalController.dismiss({ action: FlowState.FORCE_EXIT})
               }
             }
@@ -427,9 +453,6 @@ export default defineComponent({
           this.$router.back()
           return FlowState.FORCE_EXIT
         },
-        'checkVoidedIDs': () => {
-          //TODO check them
-        },
         'enroll': () => {
           return this.program.enrollProgram()
         },
@@ -450,6 +473,8 @@ export default defineComponent({
           if (req && (await alertConfirmation('Do you want to print National ID?'))) {
             const print = new PatientPrintoutService(this.patient.getID())
             await print.printNidLbl()
+            await this.reloadPatient()
+            return FlowState.FORCE_EXIT
           }
         },
         'resolveDuplicateNpids': () => {
@@ -458,11 +483,15 @@ export default defineComponent({
         },
         'refreshDemographicsDDE': async () => {
           await this.ddeInstance.refreshDemographics()
+          await this.reloadPatient()
+          return FlowState.FORCE_EXIT
         },
         'updateLocalDiffs': async () => {
           await this.ddeInstance.updateLocalDifferences(
             this.facts.dde.localDiffs
           )
+          await this.reloadPatient()
+          return FlowState.FORCE_EXIT
         }
       }
       if (state in states) {
