@@ -313,16 +313,21 @@ export default defineComponent({
         currentTA: { label: 'Current TA', ref: 'current_traditional_authority'},
         currentVillage: { label: 'Current Village', ref: 'current_village'}
       }
-      const diffIndexes: any = { indexes: [], class: 'his-empty-set-color'}
-      
       let index = 0
+      const diffIndexes: any = { indexes: [], class: 'his-empty-set-color'}
       for(const k in refs) {
-        const local = this.facts.demographics[k]
+        let local = this.facts.demographics[k]
         let remote = local
+
+        if (diffs[refs[k].ref]?.local) {
+          diffIndexes.indexes.push(index)
+          local = diffs[refs[k].ref]?.local
+        }
         if (diffs[refs[k].ref]?.remote) {
           diffIndexes.indexes.push(index)
           remote = diffs[refs[k].ref]?.remote
         }
+
         comparisons.push([
           refs[k].label,
           local,
