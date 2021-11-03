@@ -226,13 +226,12 @@ export default defineComponent({
      *  - DDE Service only supports NPID search.
     */
     async findAndSetPatient(id: number | undefined, npid: string | undefined) {
-      let patient = {}
-      let nationalID = npid || ''
       await this.presentLoading()
+      let patient: any = {}
+      let nationalID = npid || ''
       this.ddeInstance = new PatientDemographicsExchangeService()
       await this.ddeInstance.loadDDEStatus()        
       this.useDDE = this.ddeInstance.isEnabled()
-
       let searchResults: any = {}
 
       if (id) {
@@ -247,7 +246,7 @@ export default defineComponent({
 
       if (!isEmpty(searchResults)) {
         patient = new Patientservice(searchResults)
-        nationalID = this.patient.getNationalID()
+        nationalID = patient.getNationalID()
       }
 
       if (this.useDDE) {
