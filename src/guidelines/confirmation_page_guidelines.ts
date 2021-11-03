@@ -22,6 +22,7 @@ export enum FlowState {
     ASSIGN_NPID = 'assignNpid',
     UPDATE_DMG = 'updateDemographics',
     PRINT_NPID = 'printNPID',
+    CREATE_NPID_WITH_REMOTE_DIFF = 'createNpiDWithRemote',
     REFRESH_DDE_DEMOGRAPHICS = 'refreshDemographicsDDE',
     UPDATE_LOCAL_DDE_DIFFS = 'updateLocalDiffs',
     RESOLVE_DUPLICATE_NPIDS = 'resolveDuplicateNpids'
@@ -99,6 +100,36 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             },
             patientFound(yes: boolean) {
                 return yes === false
+            }
+        }
+    },
+    "[DDE] Notify the user to proceed with Remote NPID if local NPID does not match remote": {
+        priority: 1,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async ({dde}: any) => {
+                await infoActionSheet(
+                    'Missing Local NPID',
+                    `Patient has a missing local NPID "${dde.remoteNpidDiff}"`,
+                    `Proceed to Fix issue`,
+                    [
+                        { 
+                            name: 'Resolve issue', 
+                            slot: 'start', 
+                            color: 'danger'
+                        }
+                    ],
+                    'his-danger-color'
+                )
+                return FlowState.CREATE_NPID_WITH_REMOTE_DIFF
+            }
+        },
+        conditions: {
+            dde({localNpidDiff, remoteNpidDiff}: any) {
+                return localNpidDiff != remoteNpidDiff
+            },
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled === true
             }
         }
     },

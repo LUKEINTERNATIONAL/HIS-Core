@@ -83,7 +83,6 @@ import { matchToGuidelines } from "@/utils/GuidelineEngine"
 import { Patientservice } from "@/services/patient_service";
 import { PatientProgramService } from "@/services/patient_program_service"
 import { alertConfirmation, toastDanger } from "@/utils/Alerts"
-
 import {
   IonContent,
   IonHeader,
@@ -144,6 +143,8 @@ export default defineComponent({
       programs: [] as string[],
       identifiers: [] as string[],
       dde: {
+        localNpidDiff: '',
+        remoteNpidDiff: '',
         voidedNpids: {
          cols: [] as string[],
          rows: [] as any
@@ -369,6 +370,11 @@ export default defineComponent({
         const { comparisons, rowColors } = this.buildDDEDiffs(localAndRemoteDiffs)
         this.facts.dde.diffRows = comparisons
         this.facts.dde.diffRowColors = rowColors
+        if (localAndRemoteDiffs.npid) {
+          const {local, remote} = localAndRemoteDiffs.npid
+          this.facts.dde.localNpidDiff = local
+          this.facts.dde.remoteNpidDiff = remote
+        }
       } catch (e) {
         console.warn(e)
       }
@@ -473,13 +479,19 @@ export default defineComponent({
           loadingController.dismiss()
           await this.ddeInstance.printNpid()
         },
-        'assignNpid': async () => {
-          let req = {}
-          if (this.useDDE) {
-            req = await this.ddeInstance.reassignNpid('')
-          } else {
-            req = await this.patient.assignNpid()
+        'createNpiDWithRemote': async () => {
+          const npid = this.facts.dde.remoteNpidDiff
+          if (npid && (await this.ddeInstance.createNPID(npid))) {
+            this.facts.scannedNpid = npid
+            this.facts.currentNpid = npid
+            this.facts.dde.localNpidDiff = npid
+            await this.findAndSetPatient(undefined, npid)
+            return FlowState.FORCE_EXIT
           }
+        },
+        'assignNpid': async () => {
+          const req =  await this.patient.assignNpid()
+
           if (req && (await alertConfirmation('Do you want to print National ID?'))) {
             const print = new PatientPrintoutService(this.patient.getID())
             await print.printNidLbl()
