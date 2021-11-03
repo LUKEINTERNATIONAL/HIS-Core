@@ -47,7 +47,8 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'start', 
                             color: 'primary',
                         }
-                    ]
+                    ],
+                    'his-danger-color'
                 )
                 return action === 'Go Home' ? FlowState.GO_HOME : FlowState.GO_BACK
             }
@@ -82,7 +83,8 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'start', 
                             color: 'primary',
                         }
-                    ]
+                    ],
+                    'his-danger-color'
                 )
                 return action === 'Go Home' 
                     ? FlowState.GO_HOME 
@@ -115,7 +117,8 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'start', 
                             color: 'primary'
                         }
-                    ]
+                    ],
+                    'his-danger-color'
                 )
                 return FlowState.ASSIGN_NPID
             }
@@ -139,7 +142,9 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'start', 
                             color: 'danger'
                         }
-                    ])
+                    ],
+                    'his-danger-color'
+                )
                 return FlowState.RESOLVE_DUPLICATE_NPIDS
             }
         },
@@ -169,7 +174,8 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'end', 
                             color: 'success'
                         }
-                    ]
+                    ],
+                    'his-warning-color'
                 )
                 return action === 'Yes' ? FlowState.CONTINUE : FlowState.FORCE_EXIT
             }
@@ -198,7 +204,8 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'end', 
                             color: 'success'
                         }
-                    ]
+                    ],
+                    'his-warning-color'
                 )
                 return action === 'Yes' ? FlowState.CONTINUE : FlowState.FORCE_EXIT
             }
@@ -227,7 +234,8 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'end', 
                             color: 'success'
                         }
-                    ]
+                    ],
+                    'his-warning-color'
                 )
                 return action === 'Yes' ? FlowState.CONTINUE : FlowState.FORCE_EXIT
             }
@@ -323,7 +331,9 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'end', 
                             color: 'danger'
                         }
-                    ])
+                    ],
+                    'his-danger-color'
+                )
                 return action === 'Yes' ? FlowState.UPDATE_DMG : FlowState.EXIT
             }
         },
@@ -424,7 +434,9 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'end', 
                             color: 'danger'
                         }
-                    ])
+                    ],
+                    'his-warning-color'
+                )
                 return action === 'Yes' ? FlowState.UPDATE_DMG : FlowState.CONTINUE
             }
         },
@@ -459,7 +471,9 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'start', 
                             color: 'danger'
                         }
-                    ])
+                    ],
+                    'his-warning-color'
+                )
                 return FlowState.UPDATE_DMG
             }
         },
