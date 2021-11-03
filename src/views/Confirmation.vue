@@ -402,8 +402,8 @@ export default defineComponent({
               type: 'button',
               name: 'Select',
               action: async () => {
-                await this.findAndSetPatient(undefined, p.getNationalID())
                 await modalController.dismiss({ action: FlowState.FORCE_EXIT})
+                await this.findAndSetPatient(undefined, p.getNationalID())
               }
             }
           ]
