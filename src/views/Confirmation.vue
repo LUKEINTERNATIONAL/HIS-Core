@@ -151,6 +151,7 @@ export default defineComponent({
         hasDemographicConflict: false,
         localDiffs: {},
         diffRows: [],
+        diffRowColors: [] as Array<{indexes: number[]; class: string}>
       } as any,
       demographics: {
         givenName: '' as string,
@@ -272,7 +273,6 @@ export default defineComponent({
       this.facts.currentNpid = this.patient.getNationalID()
     },
     buildDDEDiffs(diffs: any) {
-      const excluded = ['landmark', 'patientName']
       const comparisons: Array<string[]> = []
       const refs: any = {
         givenName : { label: 'First Name', ref: 'given_name' },
@@ -287,17 +287,24 @@ export default defineComponent({
         currentTA: { label: 'Current TA', ref: 'current_traditional_authority'},
         currentVillage: { label: 'Current Village', ref: 'current_village'}
       }
-      for (const i in this.facts.demographics) {
-        if (!excluded.includes(i)) {
-          const data = this.facts.demographics[i]
-          comparisons.push([
-            refs[i].label, 
-            data,
-            diffs[refs[i]?.ref]?.remote || data
-          ])
+      const diffIndexes: any = { indexes: [], class: 'his-empty-set-color'}
+      
+      let index = 0
+      for(const k in refs) {
+        const local = this.facts.demographics[k]
+        let remote = local
+        if (diffs[refs[k].ref]?.remote) {
+          diffIndexes.indexes.push(index)
+          remote = diffs[refs[k].ref]?.remote
         }
+        comparisons.push([
+          refs[k].label,
+          local,
+          remote
+        ])
+        ++index
       }
-      return comparisons
+      return {comparisons, rowColors: [diffIndexes]}
     },
     async resolveGlobalPropertyFacts() {
       for(const i in this.facts.globalProperties) {
@@ -328,7 +335,9 @@ export default defineComponent({
         )
         this.facts.dde.shouldUpdateNpid = this.ddeInstance.shouldCreateNpid(localAndRemoteDiffs)
         this.facts.dde.hasDemographicConflict = !isEmpty(localAndRemoteDiffs)
-        this.facts.dde.diffRows = this.buildDDEDiffs(localAndRemoteDiffs)
+        const { comparisons, rowColors } = this.buildDDEDiffs(localAndRemoteDiffs)
+        this.facts.dde.diffRows = comparisons
+        this.facts.dde.diffRowColors = rowColors
       } catch (e) {
         console.warn(e)
       }

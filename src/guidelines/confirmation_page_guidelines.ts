@@ -361,7 +361,9 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'start', 
                             color: 'primary'
                         }
-                    ]
+                    ], 
+                    'his-danger-color',
+                    dde.diffRowColors
                 )
                 return action === 'Use Local' 
                     ? FlowState.UPDATE_LOCAL_DDE_DIFFS
