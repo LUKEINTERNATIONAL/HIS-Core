@@ -249,9 +249,9 @@ export default defineComponent({
         nationalID = patient.getNationalID()
       }
 
-      if (this.useDDE) {
+      if (this.useDDE && nationalID) {
         const res = await this.ddeInstance.searchNpid(nationalID)
-        if (!isEmpty(res) && res[0]) {
+        if (!isEmpty(res)) {
           patient = new Patientservice(res[0])
           this.facts.npidHasDuplicates = res.length > 1
         } else {
@@ -261,8 +261,7 @@ export default defineComponent({
 
       this.facts.patientFound = !isEmpty(patient)
 
-      if (!this.facts.scannedNpid) 
-        this.facts.scannedNpid = nationalID
+      if (!this.facts.scannedNpid) this.facts.scannedNpid = nationalID
 
       this.patient = patient
       await loadingController.dismiss()
@@ -315,6 +314,7 @@ export default defineComponent({
       }
       let index = 0
       const diffIndexes: any = { indexes: [], class: 'his-empty-set-color'}
+
       for(const k in refs) {
         let local = this.facts.demographics[k]
         let remote = local
@@ -323,6 +323,7 @@ export default defineComponent({
           diffIndexes.indexes.push(index)
           local = diffs[refs[k].ref]?.local
         }
+
         if (diffs[refs[k].ref]?.remote) {
           diffIndexes.indexes.push(index)
           remote = diffs[refs[k].ref]?.remote

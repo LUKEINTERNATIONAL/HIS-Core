@@ -45,28 +45,33 @@ export class PatientDemographicsExchangeService extends Service {
         }) 
     }
 
+    /** Detects duplicates in patients */
+    hasPatientDoubles(patients: Array<any>) {
+        return patients.map(
+            (i: any) => patients.map(p => p.patient_id)
+                .includes(i.patient_id
+        )).some(Boolean)
+    }
+
     /**
      * Searches and returns result object combining local and remote details
      * @param npid 
      */
     async searchNpid(npid: string): Promise<Array<any>> {
-        try {
-            const ddeSearch = await this.findNpid(npid)
-            const results: any = [
-                ...ddeSearch.locals, 
-                ...ddeSearch.remotes
-            ]
-            if (!isEmpty(results)) {
-                this.patientID = results[0].patient_id
-            }
-            // If local and remote are less than equal two, treat it as one 
-            // record and use one result
-            return results.length <= 2 
-                ? [results[0]]
+        const ddeSearch = await this.findNpid(npid)
+        if (ddeSearch) {
+            const results = ddeSearch.locals.concat(ddeSearch.remotes)
+            const hasLocalDoubles = this.hasPatientDoubles(
+                ddeSearch.locals
+            )
+            const hasRemoteDoubles = this.hasPatientDoubles(
+                ddeSearch.remotes
+            )
+            this.patientID = results[0].patient_id
+            return !(hasLocalDoubles || hasRemoteDoubles)
+                ? results[0]
                 : results
-        } catch(e) {
-            console.warn(e)
-        }
+        } 
         return []
     }
 
