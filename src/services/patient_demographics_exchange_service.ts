@@ -2,7 +2,6 @@ import { Service } from '@/services/service'
 import { isEmpty } from 'lodash';
 import { GlobalPropertyService } from './global_property_service'
 import { PatientPrintoutService } from './patient_printout_service';
-import { Patientservice } from './patient_service';
 import HisDate from "@/utils/Date"
 
 export class PatientDemographicsExchangeService extends Service {
@@ -47,30 +46,28 @@ export class PatientDemographicsExchangeService extends Service {
     }
 
     /**
-     * Searches DDE for possible match and fallsback to PatientService
-     * npid finder
+     * Searches and returns result object combining local and remote details
      * @param npid 
      */
     async searchNpid(npid: string): Promise<Array<any>> {
-        if (this.enabled) {
-            try {
-                const ddeSearch = await this.findNpid(npid)
-                const results: any = [
-                    ...ddeSearch.locals, ...ddeSearch.remotes
-                ]
-                if (!isEmpty(results)) {
-                    this.patientID = results[0].patient_id
-                }
-                // If local and remote are less than equal two, treat it as one 
-                // record and use one result
-                return results.length <= 2 
-                    ? [results[0]]
-                    : results
-            } catch(e) {
-                console.warn(e)
+        try {
+            const ddeSearch = await this.findNpid(npid)
+            const results: any = [
+                ...ddeSearch.locals, 
+                ...ddeSearch.remotes
+            ]
+            if (!isEmpty(results)) {
+                this.patientID = results[0].patient_id
             }
+            // If local and remote are less than equal two, treat it as one 
+            // record and use one result
+            return results.length <= 2 
+                ? [results[0]]
+                : results
+        } catch(e) {
+            console.warn(e)
         }
-        return Patientservice.findByNpid(npid)
+        return []
     }
 
     findNpid(npid: string) {
