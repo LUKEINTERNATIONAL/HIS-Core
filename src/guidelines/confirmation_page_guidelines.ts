@@ -349,10 +349,10 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                     'Demographics Mismatch',
                     'Local Demographics do not match Remote Demographics',
                     ['Attributes', 'Local', 'Remote'],
-                    dde.diffColumnsAndRows,
+                    dde.diffRows,
                     [
                         { 
-                            name: 'Use Local', 
+                            name: 'Use Local',
                             slot: 'start', 
                             color: 'primary'
                         },

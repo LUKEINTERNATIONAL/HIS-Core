@@ -150,7 +150,7 @@ export default defineComponent({
         },
         hasDemographicConflict: false,
         localDiffs: {},
-        diffColumnsAndRows: [],
+        diffRows: [],
       } as any,
       demographics: {
         givenName: '' as string,
@@ -166,7 +166,7 @@ export default defineComponent({
         ancestryVillage: '' as string,
         gender: '' as string,
         birthdate: '' as string,
-      },
+      } as any,
       globalProperties: {
         useFilingNumbers: 'use_filing_numbers=true',
         ddeEnabled: 'dde_enabled=true'
@@ -271,6 +271,34 @@ export default defineComponent({
         .map((id: any) => id.type.name)
       this.facts.currentNpid = this.patient.getNationalID()
     },
+    buildDDEDiffs(diffs: any) {
+      const excluded = ['landmark', 'patientName']
+      const comparisons: Array<string[]> = []
+      const refs: any = {
+        givenName : { label: 'First Name', ref: 'given_name' },
+        familyName: { label: 'Last Name', ref: 'family_name'},
+        birthdate: { label: 'Birthdate', ref: 'birthdate'},
+        gender: { label: 'Gender', ref: 'gender' },
+        phoneNumber: {label: 'Phone number', ref: 'phone_number'},
+        ancestryDistrict: { label: 'Home District', ref: 'home_district'},
+        ancestryTA: { label: 'Home TA', ref: 'home_traditional_authority'},
+        ancestryVillage: { label: 'Home Village', ref: 'home_village'},
+        currentDistrict: { label: 'Current District', ref: 'current_district'},
+        currentTA: { label: 'Current TA', ref: 'current_traditional_authority'},
+        currentVillage: { label: 'Current Village', ref: 'current_village'}
+      }
+      for (const i in this.facts.demographics) {
+        if (!excluded.includes(i)) {
+          const data = this.facts.demographics[i]
+          comparisons.push([
+            refs[i].label, 
+            data,
+            diffs[refs[i]?.ref]?.remote || data
+          ])
+        }
+      }
+      return comparisons
+    },
     async resolveGlobalPropertyFacts() {
       for(const i in this.facts.globalProperties) {
         if (typeof this.facts.globalProperties[i] === 'string') {
@@ -295,11 +323,12 @@ export default defineComponent({
     async setDDEFacts() {
       try {
         const localAndRemoteDiffs = (await this.ddeInstance.getLocalAndRemoteDiffs()).diff
-        this.facts.dde.localDiffs = this.ddeInstance
-          .formatDiffValuesByType(localAndRemoteDiffs, 'local')
+        this.facts.dde.localDiffs = this.ddeInstance.formatDiffValuesByType(
+          localAndRemoteDiffs, 'local'
+        )
         this.facts.dde.shouldUpdateNpid = this.ddeInstance.shouldCreateNpid(localAndRemoteDiffs)
         this.facts.dde.hasDemographicConflict = !isEmpty(localAndRemoteDiffs)
-        this.facts.dde.diffColumnsAndRows = this.ddeInstance.diffsToTurple(localAndRemoteDiffs)
+        this.facts.dde.diffRows = this.buildDDEDiffs(localAndRemoteDiffs)
       } catch (e) {
         console.warn(e)
       }
