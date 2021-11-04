@@ -85,12 +85,14 @@ export default defineComponent({
                                     type: 'button',
                                     name: 'View',
                                     action: () => {
-                                        this.$router.push(`/patient/dashboard/${patient.getID()}`)
+                                        modalController.dismiss().then(() => {
+                                            this.$router.push(`/patient/dashboard/${patient.getID()}`)
+                                        })
                                     }
                                 }
                             ]
                         })
-                    } 
+                    }
                 }
             })
             modal.present()
