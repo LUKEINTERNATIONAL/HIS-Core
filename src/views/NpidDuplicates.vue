@@ -17,7 +17,7 @@
                     <ion-label :color="!item.isComplete ? 'danger' : ''">
                         {{item.name}} ({{item.gender}}) {{item.birthdate}} <br/> 
                         Current District: <b>{{item.curDistrict || 'Unknown'}}</b> 
-                        Current Village: <b>{{item.curVillage || 'Unknown'}}</b> 
+                        Home Village: <b>{{item.homeVillage || 'Unknown'}}</b> 
                     </ion-label>
                     <ion-button
                        @click="reassignIdentifier(item)"> 
