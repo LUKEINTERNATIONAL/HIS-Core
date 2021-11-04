@@ -43,4 +43,7 @@ export class PrintoutService extends Service {
     async printLocation(locationId: number) {
         await this.printLbl(`labels/location?location_id=${locationId}`)
     }
+    async printDrug(drugId: number, quantity: number) {
+        await this.printLbl(`drugs/${drugId}/barcode?quantity=${quantity}`)
+    }
 }

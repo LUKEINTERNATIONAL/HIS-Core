@@ -13,23 +13,23 @@ export const PROPERTIES: FolderInterface[] = [
         files: [
             {
                 name: "Enter Receipts",
-                pathUrl: "/",
+                pathUrl: "/art/stock/enter",
             },
             {
                 name: "Enter Product relocation/Disposal",
-                pathUrl: "/",
+                pathUrl: "/art/stock/move",
             },
             {
                 name: "Enter verified physical stock count",
-                pathUrl: "/",
+                pathUrl: "/art/stock/verify",
             },
             {
                 name: "Print Barcode",
-                pathUrl: "/",
+                pathUrl: "/drug/print",
             },
             {
                 name: "Audit Trail",
-                pathUrl: "/",
+                pathUrl: "/art/stock/trail",
             }
         ]
     },
