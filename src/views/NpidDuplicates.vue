@@ -2,9 +2,7 @@
     <ion-page>
         <ion-header>
             <ion-toolbar>
-                <ion-title>
-                    {{ title }}
-                </ion-title>
+                <ion-title> {{ title }} </ion-title>
             </ion-toolbar>
         </ion-header>
         <ion-content> 
@@ -16,14 +14,20 @@
                         @ionChange="(e) => check(e, item)"
                         >
                     </ion-checkbox>
-                    <ion-label> 
+                    <ion-label :color="!item.isComplete ? 'danger' : ''">
                         {{item.name}} ({{item.gender}}) {{item.birthdate}} <br/> 
                         Current District: <b>{{item.curDistrict || 'Unknown'}}</b> 
                         Current Village: <b>{{item.curVillage || 'Unknown'}}</b> 
                     </ion-label>
                     <ion-button
-                       @click="onAction(() => reassignIdentifier(item), 'reassign')"> 
+                       @click="reassignIdentifier(item)"> 
                         Re-Assign 
+                    </ion-button>
+                    <ion-button
+                        color="warning"
+                        v-if="!item.isComplete"
+                       :router-link="`/patients/confirm?edit_person=${item.patientID}`"> 
+                        Update Missing Data
                     </ion-button>
                 </ion-item>
             </ion-list>
@@ -130,9 +134,7 @@ export default defineComponent({
             const ok = await alertConfirmation(`
                 Are you sure you want to ${context}?
             `)
-            if (ok) {
-                try { await action() } catch(e) { toastWarning(e) }
-            }
+            if (ok) try { await action() } catch(e) { toastWarning(e) }
         },
         async mergeSelected() {
             const req = await this.dde.postMerge(this.itemsChecked)
@@ -142,11 +144,7 @@ export default defineComponent({
             }
         },
         async reassignIdentifier(item: any) {
-            const reassign = await this.dde.reassignNpid(item.docID, item.patientID)
-
-            if (!reassign)  return  
-
-            if (reassign.errorCode === 422) {
+            if (!item.isComplete) {
                 const ok = await alertConfirmation(
                     'Do you want to update missing information?', 
                     'Incomplete Demographics'
@@ -158,8 +156,13 @@ export default defineComponent({
                     this.$router.push(`/patient/registration?${params}`)
                 }
             } else {
-                await this.dde.printNpid(item.patientID)
-                await nextTask(item.patientID, this.$router)
+                this.onAction(async () => {
+                    const reassign = await this.dde.reassignNpid(item.docID, item.patientID)
+                    if (reassign) {
+                        await this.dde.printNpid(item.patientID)
+                        await nextTask(item.patientID, this.$router)
+                    }
+                }, 'Reassign')
             }
         },
         buildItems(items: any) {
@@ -173,7 +176,8 @@ export default defineComponent({
                     birthdate: this.toDate(p.getBirthdate()),
                     curDistrict: p.getCurrentDistrict(),
                     homeVillage: p.getHomeVillage(),
-                    docID: p.getPatientIdentifier(27)
+                    docID: p.getPatientIdentifier(27),
+                    isComplete: p.patientIsComplete()
                 }
             })
         },
