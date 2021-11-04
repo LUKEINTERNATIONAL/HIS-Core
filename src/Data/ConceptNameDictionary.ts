@@ -42,6 +42,41 @@ export default [
    },
    {
       "categories": [],
+      "concept_id": 7409,
+      "name": "Qech outpatient diagnosis list"
+   },
+   {
+      "categories": [],
+      "concept_id": 9227,
+      "name": "Malaria Test Result"
+   },
+   {
+      "categories": [],
+      "concept_id": 703,
+      "name": "Positive"
+   },
+   {
+      "categories": [],
+      "concept_id": 64,
+      "name": "Negative"
+   },
+   {
+      "categories": [],
+      "concept_id": 6542,
+      "name": "Primary diagnosis"
+   },
+   {
+      "categories": [],
+      "concept_id": 6543,
+      "name": "Secondary diagnosis"
+   },
+   {
+      "categories": [],
+      "concept_id": 2688,
+      "name": "Clinical notes construct"
+   },
+   {
+      "categories": [],
       "concept_id": 1837,
       "name": "HIV test date"
    },

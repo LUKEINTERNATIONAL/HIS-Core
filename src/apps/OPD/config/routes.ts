@@ -9,4 +9,9 @@ export default [
     path: "/opd/encounters/vitals/:patient_id",
     component: () => import('@/apps/OPD/views/encounters/Vitals.vue')
   },
+  {
+    name: "outpatient diagnosis",
+    path: "/opd/encounters/diagnosis/:patient_id",
+    component: () => import('@/apps/OPD/views/encounters/Diagnosis.vue')
+  },
 ]
