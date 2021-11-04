@@ -34,10 +34,11 @@
                       inset="none"
                       >
                       <ion-label
+                        color="danger"
                         :key="rIndex"
                         v-for="(item, rIndex) in comparison"
                         > 
-                        {{ item }} 
+                        <b>{{ item }}</b> 
                       </ion-label>
                     </ion-item>
                 </ion-list>
