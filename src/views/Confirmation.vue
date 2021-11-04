@@ -108,7 +108,7 @@ import { PatientPrintoutService } from "@/services/patient_printout_service";
 import { AppInterface } from "@/apps/interfaces/AppInterface";
 import { GlobalPropertyService } from "@/services/global_property_service"
 import { PatientDemographicsExchangeService } from "@/services/patient_demographics_exchange_service"
-
+import { IncompleteEntityError } from "@/services/service"
 export default defineComponent({
   name: "Patient Confirmation",
   components: {
@@ -155,6 +155,7 @@ export default defineComponent({
         diffRowColors: [] as Array<{indexes: number[]; class: string}>
       } as any,
       demographics: {
+        patientIsComplete: false as boolean,
         givenName: '' as string,
         familyName: '' as string,
         patientName: '' as string,
@@ -230,40 +231,52 @@ export default defineComponent({
       let patient: any = {}
       let nationalID = npid || ''
       this.ddeInstance = new PatientDemographicsExchangeService()
-      await this.ddeInstance.loadDDEStatus()        
+      await this.ddeInstance.loadDDEStatus()
       this.useDDE = this.ddeInstance.isEnabled()
       let searchResults: any = {}
 
-      if (id) {
-        searchResults = await Patientservice.findByID(id)
-      } else if(!this.useDDE) {
+      if (!this.useDDE) {
         const res = await Patientservice.findByNpid(nationalID)
         if (!isEmpty(res)) {
           this.facts.npidHasDuplicates = res.length > 1
           searchResults = res[0]
         } 
+      } else if (id) {
+        searchResults = await Patientservice.findByID(id)
       }
 
       if (!isEmpty(searchResults)) {
         patient = new Patientservice(searchResults)
         nationalID = patient.getNationalID()
+        this.facts.patientFound = true
+        this.facts.demographics.patientIsComplete = patient.patientIsComplete()
       }
 
       if (this.useDDE && nationalID) {
-        const res = await this.ddeInstance.searchNpid(nationalID)
-        if (!isEmpty(res)) {
-          patient = new Patientservice(res[0])
-          this.facts.npidHasDuplicates = res.length > 1
-        } else {
-          await this.setVoidedNpidFacts(nationalID)
+        try {
+          const res = await this.ddeInstance.searchNpid(nationalID)
+          if (!isEmpty(res)) {
+            patient = new Patientservice(res[0])
+            this.facts.npidHasDuplicates = res.length > 1
+            this.facts.patientFound = true
+            this.facts.demographics.patientIsComplete = patient.patientIsComplete()
+          } else {
+            this.facts.patientFound = false
+            await this.setVoidedNpidFacts(nationalID)
+          }
+        }catch(e) {
+          if (e instanceof IncompleteEntityError) {
+            patient = new Patientservice(e.entity)
+            this.facts.patientFound = true
+            this.facts.demographics.patientIsComplete = false
+          }
         }
       }
 
-      this.facts.patientFound = !isEmpty(patient)
-
-      if (!this.facts.scannedNpid) this.facts.scannedNpid = nationalID
-
+      if (!this.facts.scannedNpid) 
+        this.facts.scannedNpid = nationalID
       this.patient = patient
+     
       await loadingController.dismiss()
     },
     /**
@@ -361,11 +374,10 @@ export default defineComponent({
      */
     async setDDEFacts() {
       try {
-        const localAndRemoteDiffs = (await this.ddeInstance.getLocalAndRemoteDiffs()).diff
+        const localAndRemoteDiffs = (await this.ddeInstance.getLocalAndRemoteDiffs())?.diff
         this.facts.dde.localDiffs = this.ddeInstance.formatDiffValuesByType(
           localAndRemoteDiffs, 'local'
         )
-        this.facts.dde.shouldUpdateNpid = this.ddeInstance.shouldCreateNpid(localAndRemoteDiffs)
         this.facts.dde.hasDemographicConflict = !isEmpty(localAndRemoteDiffs)
         const { comparisons, rowColors } = this.buildDDEDiffs(localAndRemoteDiffs)
         this.facts.dde.diffRows = comparisons
