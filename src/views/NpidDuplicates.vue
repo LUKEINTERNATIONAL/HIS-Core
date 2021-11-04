@@ -26,7 +26,7 @@
                     <ion-button
                         color="warning"
                         v-if="!item.isComplete"
-                       :router-link="`/patients/confirm?edit_person=${item.patientID}`"> 
+                       :router-link="`/patient/registration?edit_person=${item.patientID}`"> 
                         Update Missing Data
                     </ion-button>
                 </ion-item>
