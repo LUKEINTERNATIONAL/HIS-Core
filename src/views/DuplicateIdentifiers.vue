@@ -33,7 +33,7 @@ export default defineComponent({
         rows: [] as Array<RowInterface[]>,
         columns: [
             [
-                table.thTxt('identifier'), 
+                table.thTxt('Identifier'), 
                 table.thTxt('Count'), 
                 table.thTxt('Action')
             ]
@@ -44,7 +44,7 @@ export default defineComponent({
     },
     methods: {
         async onPeriod({identifier}: any) {
-            this.title = identifier.label + 'Duplicates'
+            this.title = identifier.label + ' Duplicates'
             this.rows = await this.getRows(parseInt(identifier.value.toString()))
         },
         getFormFields(): Array<Field> {
