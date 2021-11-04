@@ -6,17 +6,34 @@ export interface DuplicateIdentifiersInterface {
 }
 
 export class IdentifierService extends Service {
+    identifierType: number
     constructor() {
         super()
+        this.identifierType = -1
     }
-
+ 
     static getIdentifierTypes() {
         return super.getJson('types/patient_identifiers')
     }
 
-    static getDuplicateIndentifiers(idType: number): Promise<DuplicateIdentifiersInterface[]> {
-        return super.getJson(`search/identifiers/duplicates`, {
-            'type_id': idType
+    getIdentifierType() {
+        return this.identifierType
+    }
+
+    setIdentifierType(type: number) {
+        this.identifierType = type
+    }
+
+    getDuplicateIndentifiers(): Promise<DuplicateIdentifiersInterface[]> {
+        return Service.getJson(`search/identifiers/duplicates`, {
+            'type_id': this.identifierType
+        })
+    }
+
+    getPatientsByIdentifier(identifier: string) {
+        return Service.getJson(`search/patients/by_identifier`,{
+            'type_id': this.identifierType,
+            'identifier': identifier
         })
     }
 }
