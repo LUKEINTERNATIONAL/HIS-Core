@@ -24,6 +24,7 @@ import Validation from "@/components/Forms/validations/StandardValidations"
 import DrillTable from "@/components/DataViews/DrillTableModal.vue"
 import { modalController } from "@ionic/vue";
 import { Patientservice } from "@/services/patient_service"
+import HisDate from "@/utils/Date"
 
 export default defineComponent({
     components: { ReportTemplate },
@@ -67,6 +68,9 @@ export default defineComponent({
                 }
             ]
         },
+        toDate(date: string | Date) {
+            return HisDate.toStandardHisDisplayFormat(date)
+        },
         async drillDuplicates(identifier: string){
             const modal = await modalController.create({
                 component: DrillTable,
@@ -80,12 +84,13 @@ export default defineComponent({
                         const patients = await this.service
                             .getPatientsByIdentifier(identifier)
                         return patients.map((p: any) => {
+                            console.log(p)
                             const patient = new Patientservice(p)
                             return [
                                 patient.getGivenName(),
                                 patient.getFamilyName(),
                                 patient.getGender(),
-                                patient.getBirthdate(),
+                                this.toDate(patient.getBirthdate()),
                                 {
                                     type: 'button',
                                     name: 'View',
