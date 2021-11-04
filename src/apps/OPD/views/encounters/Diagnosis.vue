@@ -41,14 +41,13 @@ export default defineComponent({
   },
   methods: {
     async onSubmit(formData: any, computedData: any){   
-      const obs = this.buildObs({...formData});
       await this.diagnosisService.createEncounter()
       await this.notesService.createEncounter()
       
-      const diagnosisData = await this.resolveObs({...obs}, 'diagnosis')      
+      const diagnosisData = await this.resolveObs({...computedData}, 'diagnosis')      
       await this.diagnosisService.saveObservationList(diagnosisData)
 
-      const notesData = await this.resolveObs({...obs}, 'notes')
+      const notesData = await this.resolveObs({...computedData}, 'notes')
       await this.notesService.saveObservationList(notesData)
 
       this.nextTask()        
@@ -59,28 +58,6 @@ export default defineComponent({
       return list.map(item => ({
         label: item.name, value: item.name, other: item.concept_id
       })).sort((a, b) => a.label < b.label ? -1 : a.label > b.label ? 1 : 0)
-    },
-    buildObs(formData: any){
-      const obs: Array<any> = []
-      for (const key in formData) {
-        if(key === 'primary_diagnosis'){
-          Object.values(formData[key]).forEach(({ other }: any) =>  obs.push({
-            tag: 'diagnosis',
-            obs: this.diagnosisService.buildValueCodedFromConceptId('Primary diagnosis', other)
-          }))
-        } else if (key === 'secondary_diagnosis'){
-          Object.values(formData[key]).forEach(({ other }: any) =>  obs.push({
-            tag: 'diagnosis',
-            obs: this.diagnosisService.buildValueCodedFromConceptId('Secondary diagnosis', other)
-          }))
-        } else {
-          obs.push({
-            tag: 'notes',
-            obs: this.notesService.buildValueText('Clinical notes construct', formData[key].value)
-          })
-        }
-      }
-      return obs;
     },
     checkMalariaResult(data: Array<any>){
       const malaria = data.find(o => o.label === 'Malaria')      
@@ -101,6 +78,11 @@ export default defineComponent({
             () => this.checkMalariaResult(data)
           ]),
           options: () => this.mapListToOptions(this.diagnosisList),
+          computedValue: (options: Array<Option>) => ({
+            tag: 'diagnosis',
+            obs: options.map(({other}) => 
+              this.diagnosisService.buildValueCodedFromConceptId('Primary diagnosis', other))
+          }),
           summaryMapValue: ({ value }: Option) => ({
             value,
             label: "Primary diagnosis"
@@ -115,6 +97,11 @@ export default defineComponent({
           type: FieldType.TT_MULTIPLE_SELECT,
           options: () => this.mapListToOptions(this.diagnosisList),
           validation: (data: any) => this.checkMalariaResult(data),
+          computedValue: (options: Array<Option>) => ({
+            tag: 'diagnosis',
+            obs: options.map(({other}) => 
+              this.diagnosisService.buildValueCodedFromConceptId('Secondary diagnosis', other))
+          }),
           summaryMapValue: ({ value }: Option) => ({
             value,
             label: "Secondary diagnosis"
@@ -127,6 +114,10 @@ export default defineComponent({
           id: 'clinical_notes',
           helpText: 'Clinical notes',
           type: FieldType.TT_TEXT,
+          computedValue: ({value}: Option) => ({
+            tag: 'notes',
+            obs: this.notesService.buildValueText('Clinical notes construct', value)
+          })
         },
       ]
     }
