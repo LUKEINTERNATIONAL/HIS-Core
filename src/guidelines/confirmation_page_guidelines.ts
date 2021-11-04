@@ -446,20 +446,25 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         targetEvent: TargetEvent.ONLOAD,
         actions: {
             alert: async () => {
-                await infoActionSheet(
+                const action = await infoActionSheet(
                     'Patient Demographics',
                     'Demographic data is incomplete',
                     'Continue to update',
                     [
                         { 
-                            name: 'UPDATE DEMOGRAPHICS NOW!', 
+                            name: 'Update', 
+                            slot: 'start', 
+                            color: 'success'
+                        },
+                        { 
+                            name: 'Cancel', 
                             slot: 'start', 
                             color: 'danger'
                         }
                     ],
                     'his-warning-color'
                 )
-                return FlowState.UPDATE_DMG
+                return action === 'Cancel' ? FlowState.GO_HOME : FlowState.UPDATE_DMG
             }
         },
         conditions: {
