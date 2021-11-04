@@ -25,11 +25,13 @@ import DrillTable from "@/components/DataViews/DrillTableModal.vue"
 import { modalController } from "@ionic/vue";
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
+import {PatientDemographicsExchangeService} from "@/services/patient_demographics_exchange_service"
 
 export default defineComponent({
     components: { ReportTemplate },
     data: () => ({
         service: {} as any,
+        dde: {} as any,
         title: 'Duplicate Identifiers',
         fields: [] as Field[],
         rows: [] as Array<RowInterface[]>,
@@ -37,12 +39,15 @@ export default defineComponent({
             [
                 table.thTxt('Identifier'), 
                 table.thTxt('Count'), 
-                table.thTxt('Action')
+                table.thTxt('View'),
+                table.thTxt('Resolve')
             ]
         ]
     }),
-    created() {
+    async created() {
         this.fields = this.getFormFields()
+        this.dde = new PatientDemographicsExchangeService()
+        await this.dde.loadDDEStatus()
     },
     methods: {
         async onPeriod({identifier}: any) {
@@ -84,7 +89,6 @@ export default defineComponent({
                         const patients = await this.service
                             .getPatientsByIdentifier(identifier)
                         return patients.map((p: any) => {
-                            console.log(p)
                             const patient = new Patientservice(p)
                             return [
                                 patient.getGivenName(),
@@ -114,7 +118,15 @@ export default defineComponent({
                 .map((i: DuplicateIdentifiersInterface) => ([
                     table.td(i.identifier),
                     table.td(i.count),
-                    table.tdBtn('Select', () => this.drillDuplicates(i.identifier))
+                    table.tdBtn('Select', () => this.drillDuplicates(i.identifier)),
+                    table.tdBtn('Resolve', () => {
+                        this.$router.push(`/npid/duplicates/${i.identifier}`)
+                    }, {
+                        event: {
+                            disabled: !(this.dde.isEnabled() 
+                                && this.service.getIdentifierType() === 3)
+                        }
+                    }, 'danger')
                 ]))
         }
     }
