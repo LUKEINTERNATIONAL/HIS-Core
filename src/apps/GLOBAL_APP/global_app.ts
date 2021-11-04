@@ -58,6 +58,10 @@ export default {
       name: 'Data Management', 
       files: [
         {
+          name: "View Duplicates",
+          pathUrl: '/view_duplicates'
+        },
+        {
           name: "Data Cleaning",
           pathUrl: "/data_cleaning",
         },
