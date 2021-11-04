@@ -28,6 +28,7 @@ import { Patientservice } from "@/services/patient_service"
 export default defineComponent({
     components: { ReportTemplate },
     data: () => ({
+        service: {} as any,
         title: 'Duplicate Identifiers',
         fields: [] as Field[],
         rows: [] as Array<RowInterface[]>,
@@ -44,8 +45,11 @@ export default defineComponent({
     },
     methods: {
         async onPeriod({identifier}: any) {
+            const idType = parseInt(identifier.value.toString())
             this.title = identifier.label + ' Duplicates'
-            this.rows = await this.getRows(parseInt(identifier.value.toString()))
+            this.service = new IdentifierService()
+            this.service.setIdentifierType(idType)
+            this.rows = await this.getRows()
         },
         getFormFields(): Array<Field> {
             return [
@@ -73,7 +77,8 @@ export default defineComponent({
                         'Given name', 'Family name', 'Gender', 'Birth date', 'Action'
                     ],
                     onRows: async () => {
-                        const patients = await Patientservice.findByNpid(identifier)
+                        const patients = await this.service
+                            .getPatientsByIdentifier(identifier)
                         return patients.map((p: any) => {
                             const patient = new Patientservice(p)
                             return [
@@ -86,7 +91,9 @@ export default defineComponent({
                                     name: 'View',
                                     action: () => {
                                         modalController.dismiss().then(() => {
-                                            this.$router.push(`/patient/dashboard/${patient.getID()}`)
+                                            this.$router.push(
+                                                `/patient/dashboard/${patient.getID()}`
+                                            )
                                         })
                                     }
                                 }
@@ -97,8 +104,8 @@ export default defineComponent({
             })
             modal.present()
         },
-        async getRows(idType: number) {
-            return (await IdentifierService.getDuplicateIndentifiers(idType))
+        async getRows() {
+            return (await this.service.getDuplicateIndentifiers())
                 .map((i: DuplicateIdentifiersInterface) => ([
                     table.td(i.identifier),
                     table.td(i.count),
