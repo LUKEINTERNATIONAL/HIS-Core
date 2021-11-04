@@ -232,10 +232,12 @@ export class StockService extends Service {
 		return finalList;
 	}
 	static getShortName(drugID: number) {
-		return finalList.filter(d => d.drugID === drugID)[0].shortName
+		const drugs = finalList.filter(d => d.drugID === drugID);
+		return drugs.length > 0 ? drugs[0].shortName : ''
 	}
 	static getPackSize(drugID: number) {
-		return finalList.filter(d => d.drugID === drugID)[0].packSizes[0]
+		const drugs = finalList.filter(d => d.drugID === drugID);
+		return drugs.length > 0 ? drugs[0].packSizes[0] : 30
 	}
 	// Waiting to get new list of paediatric drugs and adult drugs
 	//     var adults_drugs_hash = {
