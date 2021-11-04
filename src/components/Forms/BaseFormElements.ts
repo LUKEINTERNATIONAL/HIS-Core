@@ -25,6 +25,7 @@ import AppointmentPicker from "@/components/FormElements/HisAppointmentPicker.vu
 import PersonSearchView from "@/components/FormElements/PersonSearchView.vue"
 import RelationSelection from "@/components/FormElements/RelationsSelection.vue"
 import FilingNumberView from "@/components/FormElements/FilingNumberView.vue"
+import PersonMatchView from "@/components/FormElements/PersonMatchView.vue"
 
 // Reference names for BaseFormComponents
 export enum FieldType {
@@ -54,7 +55,8 @@ export enum FieldType {
     TT_PERSON_RESULT_VIEW = 'PersonSearchView',
     TT_RELATION_SELECTION = 'RelationSelection',
     TT_FILING_NUMBER_VIEW = 'FilingNumberView',
-    TT_CARD_SELECTOR = 'SingleSelectCards'
+    TT_CARD_SELECTOR = 'SingleSelectCards',
+    TT_PERSON_MATCH_VIEW = 'PersonMatchView'
 }
 // Components to be rendered
 export const BaseFormComponents = {
@@ -83,5 +85,6 @@ export const BaseFormComponents = {
     PersonSearchView,
     RelationSelection,
     FilingNumberView,
-    SingleSelectCards
+    SingleSelectCards,
+    PersonMatchView
 }

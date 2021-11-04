@@ -484,7 +484,7 @@ export default defineComponent({
         return {
             id: 'possible_duplicates',
             helpText: 'Possible Duplicate(s)',
-            type: FieldType.TT_PERSON_RESULT_VIEW,
+            type: FieldType.TT_PERSON_MATCH_VIEW,
             condition: async (f: any, c: any) => {
                 createdPerson = PersonField.resolvePerson(c)
                 duplicatePatients = await this.ddeInstance
@@ -492,45 +492,48 @@ export default defineComponent({
                 return this.ddeInstance.isEnabled() && duplicatePatients.length >= 1
             },
             options: async () => {
-                return duplicatePatients.map(({ person }: any) => {
+                const toDate = (date: string) => HisDate.toStandardHisDisplayFormat(date)
+                return duplicatePatients.map(({ score, person }: any) => {
                     const name = `${person.given_name} ${person.family_name}`
                     return {
                         label: name,
                         value: person.patient_id,
                         other: {
-                            options:  [
-                                {
-                                    label: `${createdPerson.given_name} ${createdPerson.family_name}`,
-                                    value: `${person.given_name} ${person.family_name}`
-                                },
-                                {
-                                    label: createdPerson.gender,
-                                    value: person.gender
-                                },
-                                {
-                                    label: createdPerson.birthdate,
-                                    value: person.birthdate
-                                },
-                                {
-                                    label: createdPerson.home_district,
-                                    value: person.home_district
-                                },
-                                {
-                                    label: createdPerson.home_traditional_authority,
-                                    value: person.home_traditional_authority
-                                },
-                                {
-                                    label: createdPerson.home_district,
-                                    value: person.home_district
-                                }
+                            score: `${score * 100}%`,
+                            newPerson: createdPerson,
+                            foundPerson: person,
+                            comparisons: [
+                                [
+                                    'Name',
+                                    `${createdPerson.given_name} ${createdPerson.family_name}`,
+                                    `${person.given_name} ${person.family_name}`
+                                ],
+                                [
+                                    'Gender',
+                                    createdPerson.gender,
+                                    person.gender
+                                ],
+                                [
+                                    'Birthdate',
+                                    toDate(createdPerson.birthdate),
+                                    toDate(person.birthdate)
+                                ],
+                                [
+                                    'Home District',
+                                    createdPerson.home_district,
+                                    person.home_district
+                                ],
+                                [
+                                    'Home TA',
+                                    createdPerson.home_traditional_authority,
+                                    person.home_traditional_authority
+                                ]
                             ]
                         }
                     }
                 })
             },
             config: {
-                foundRecordsTitle: 'Similar people found:',
-                detailsTitle: 'Match Comparison:',
                 hiddenFooterBtns: [
                     'Clear',
                     'Next'
