@@ -125,7 +125,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         },
         conditions: {
             dde({localNpidDiff, remoteNpidDiff}: any) {
-                return localNpidDiff != remoteNpidDiff
+                return !localNpidDiff && localNpidDiff != remoteNpidDiff
             },
             globalProperties({ddeEnabled}: any) {
                 return ddeEnabled === true
