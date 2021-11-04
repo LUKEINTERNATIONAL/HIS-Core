@@ -9,6 +9,7 @@ import HisDate from "@/utils/Date"
 import {Observation} from "@/interfaces/observation"
 import  { BMIService } from "@/services/bmi_service"
 import { find, isEmpty } from 'lodash';
+import { isValueEmpty } from '@/utils/Strs';
 
 export class Patientservice extends Service {
     patient: Patient;
@@ -251,9 +252,25 @@ export class Patientservice extends Service {
     getAttribute(personAttributeTypeID: number) {
         return getPersonAttribute(this.patient.person.person_attributes, personAttributeTypeID);
     }
+
     getPatientIdentifier(patientIdentifierTypeID: number) {
         return getPatientIdentifier(this.patient.patient_identifiers, patientIdentifierTypeID);
     }
+
+    patientIsComplete() {
+        const attributes = [
+            this.getNationalID(),
+            this.getGender(),
+            this.getBirthdate(),
+            this.getGivenName(),
+            this.getFamilyName(),
+            ...Object.values(this.getAddresses())
+        ]
+        return attributes.map(
+            (a: any) => !isValueEmpty(a)
+        ).some(Boolean)
+    }
+
     getAddresses() {
         const addressOBJ = {
             ancestryDistrict: '',
