@@ -268,7 +268,7 @@ export class Patientservice extends Service {
         ]
         return attributes.map(
             (a: any) => !isValueEmpty(a)
-        ).some(Boolean)
+        ).every(Boolean)
     }
 
     getAddresses() {
