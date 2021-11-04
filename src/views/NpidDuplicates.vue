@@ -11,12 +11,16 @@
             <ion-list> 
                 <ion-item v-for="(item, index) in items" :key="index">
                     <ion-checkbox 
-                        slot="start" 
+                        slot="start"
                         :checked="item.isChecked"
                         @ionChange="(e) => check(e, item)"
                         >
                     </ion-checkbox>
-                    <ion-label> {{item.name}} </ion-label>
+                    <ion-label> 
+                        {{item.name}} ({{item.gender}}) {{item.birthdate}} <br/> 
+                        Current District: <b>{{item.curDistrict || 'Unknown'}}</b> 
+                        Current Village: <b>{{item.curVillage || 'Unknown'}}</b> 
+                    </ion-label>
                     <ion-button
                        @click="onAction(() => reassignIdentifier(item), 'reassign')"> 
                         Re-Assign 
@@ -79,6 +83,7 @@ import { PatientDemographicsExchangeService } from "@/services/patient_demograph
 import { Patientservice } from '@/services/patient_service'
 import { alertConfirmation, toastWarning } from '@/utils/Alerts'
 import { nextTask } from "@/utils/WorkflowTaskHelper"
+import HisDate from "@/utils/Date"
 
 export default defineComponent({
     components: {
@@ -117,6 +122,9 @@ export default defineComponent({
     methods: {
         check(e: any, i: any) {
             i.isChecked = e.detail.checked
+        },
+        toDate(date: string | Date) {
+            return HisDate.toStandardHisDisplayFormat(date)
         },
         async onAction(action: Function, context='proceed') {
             const ok = await alertConfirmation(`
@@ -161,6 +169,10 @@ export default defineComponent({
                     isChecked: false,
                     patientID: p.getID(),
                     name: p.getFullName(),
+                    gender: p.getGender(),
+                    birthdate: this.toDate(p.getBirthdate()),
+                    curDistrict: p.getCurrentDistrict(),
+                    homeVillage: p.getHomeVillage(),
                     docID: p.getPatientIdentifier(27)
                 }
             })
