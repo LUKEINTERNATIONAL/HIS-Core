@@ -5,7 +5,8 @@ export default [
       "name": "Art clinic location"
    },
    {
-      "categories": [],
+      "categories": ['art_patient_type'],
+      "order": 2,
       "concept_id": 10522,
       "name": "Drug Refill"
    },
@@ -845,8 +846,9 @@ export default [
    },
    {
       "categories": [
-         ""
+         'art_patient_type'
       ],
+      "order": 1,
       "concept_id": 7572,
       "name": "New patient"
    },
@@ -866,9 +868,10 @@ export default [
    },
    {
       "categories": [
-         ""
+         'art_patient_type'
       ],
       "concept_id": 9684,
+      "order": 3,
       "name": "External consultation"
    },
    {
