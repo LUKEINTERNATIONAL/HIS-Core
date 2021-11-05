@@ -16,7 +16,7 @@ import { GeneralDataInterface } from "@/apps/interfaces/AppInterface";
 import { AppEncounterService } from "@/services/app_encounter_service"
 import { GlobalPropertyService } from "@/services/global_property_service"
 
-async function enrollInArtProgram(patientID: number, patientType: string) {
+async function enrollInArtProgram(patientID: number, patientType: string, clinic: string) {
     const program = new PatientProgramService(patientID)
     const enroll = await program.enrollProgram()
     if (enroll) {
@@ -27,6 +27,9 @@ async function enrollInArtProgram(patientID: number, patientType: string) {
     // Create registration encounter
     const encounter = new AppEncounterService(patientID, 5)
     await encounter.createEncounter()
+    await encounter.saveValueTextObs(
+        'Art clinic location', clinic
+    )
     await encounter.saveValueCodedObs(
         'Type of patient', patientType
     )
@@ -53,7 +56,7 @@ export async function init() {
 }
 
 export async function onRegisterPatient(patientID: number, person: any, attr: any, router: any) {
-    await enrollInArtProgram(patientID, person.patient_type)
+    await enrollInArtProgram(patientID, person.patient_type, person.location)
     // Assign filing number if property use_filing_numbers is enabled
     const canFilingNumber = await GlobalPropertyService.get('use_filing_numbers')
     if (canFilingNumber==='true') {

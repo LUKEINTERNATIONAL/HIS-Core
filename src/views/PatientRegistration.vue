@@ -277,7 +277,10 @@ export default defineComponent({
     },
     facilityLocationField(): Field {
        const facility: Field = PersonField.getFacilityLocationField()
-       facility.condition = (form: any) => form.patient_type.value === 'External consultation'
+       facility.condition = (form: any) => [
+           'Drug Refill',
+           'External consultation'
+       ].includes(form.patient_type.value)
        return facility
     },
     landmarkField(): Field {
@@ -295,7 +298,8 @@ export default defineComponent({
             validation: (val: any) => Validation.required(val),
             options: () => this.mapToOption([
                 'New patient',
-                'External consultation',
+                'Drug Refill',
+                'External consultation'
             ])
         }
     },
