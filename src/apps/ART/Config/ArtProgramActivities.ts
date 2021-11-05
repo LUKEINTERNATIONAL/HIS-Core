@@ -127,7 +127,9 @@ export const SECONDARY_ACTIVITIES: TaskInterface[] = [
     id: "change_patient_type",
     name: "Change patient type",
     description: "Change patient type",
-    url: "/",
+    action: ({ patient }: any, router: any) => {
+      router.push(`/art/encounters/patient_type/${patient.patient_id}`)
+    },
     icon: "patient-type.png"
   }
 ]
