@@ -1,11 +1,23 @@
 import { Role } from "@/interfaces/role";
 import { Service } from "./service";
+import {User} from "@/interfaces/user"
 
 export class UserService extends Service {
 	constructor() {
 		super()
 	}
-  
+
+  static getCurrentUser(): Promise<User> | undefined {
+    const userID: null | number = Service.getUserID()
+    if (userID) {
+      return this.getUserByID(userID)
+    }
+  }
+
+  static getUserByID(userID: number) {
+    return this.getJson(`users/${userID}`)
+  }
+
   static createUser(data: Record<string, any>) {
     return this.postJson(`users`, data)
   }
