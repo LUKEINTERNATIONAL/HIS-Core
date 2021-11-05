@@ -14,6 +14,28 @@ export async function getFacilities(filter=''): Promise<Option[]> {
     }))
 }
 
+export async function getFacilityWards(filter=''): Promise<Option[]> {
+    const wards = await LocationService.getFacilities({
+        name: filter,
+        tag: 'Facility adult sections'
+    })
+
+    return wards.map((ward: any) => ({
+        label: ward.name,
+        value: ward.name,
+        other: ward
+    }))
+}
+
+export async function getSpecialistClinics(): Promise<Option[]> {
+    const clinics = await LocationService.getSpecialistClinics()
+    return clinics.map((clinic: any) => ({
+        label: clinic.name,
+        value: clinic.name,
+        other: clinic
+    }))
+}
+
 export async function getRegions(): Promise<Option[]> {
     const regions = await LocationService.getRegions()
     return regions.map((region: any) => ({

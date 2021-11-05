@@ -14,4 +14,9 @@ export default [
     path: "/opd/encounters/diagnosis/:patient_id",
     component: () => import('@/apps/OPD/views/encounters/Diagnosis.vue')
   },
+  {
+    name: "outcome status",
+    path: "/opd/encounters/outcome-status/:patient_id",
+    component: () => import('@/apps/OPD/views/encounters/OutcomeStatus.vue')
+  }
 ]
