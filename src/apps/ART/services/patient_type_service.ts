@@ -25,6 +25,10 @@ export class PatientTypeService extends AppEncounterService {
     if (pType) this.patientType = pType
   }
 
+  saveLocationClinic(clinic: string) {
+    return this.saveValueTextObs('Art clinic location', clinic)
+  }
+
   savePatientType(type: string) {
     return this.saveValueCodedObs('Type of patient', type)
   }

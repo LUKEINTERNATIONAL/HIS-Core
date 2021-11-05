@@ -15,6 +15,8 @@ import Validation from "@/components/Forms/validations/StandardValidations";
 import EncounterMixinVue from "./EncounterMixin.vue";
 import { PatientTypeService } from "@/apps/ART/services/patient_type_service";
 import { toastSuccess, toastWarning } from "@/utils/Alerts";
+import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
+import { Field } from "@/components/Forms/FieldInterface"
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -38,13 +40,24 @@ export default defineComponent({
 
       if (!encounter) return toastWarning("Unable to create encounter");
 
-      const obs = await this.patientType.savePatientType(formData.patient_type.value)
+      await this.patientType.savePatientType(formData.patient_type.value)
 
-      if (!obs) return toastWarning("Unable to save patient observations");
+      if (['External consultation', 'Drug Refill']
+        .includes(formData.patient_type.value)) {
+          await this.patientType.saveLocationClinic(formData.location.label)
+        }
 
       toastSuccess("Observations and encounter created!");
 
       this.nextTask();
+    },
+    facilityLocationField(): Field {
+       const facility: Field = PersonField.getFacilityLocationField()
+       facility.condition = (form: any) => [
+           'Drug Refill',
+           'External consultation'
+       ].includes(form.patient_type.value)
+       return facility
     },
     getFields(): any {
       return [
@@ -56,7 +69,8 @@ export default defineComponent({
             Validation.required(val) ||
             Validation.notTheSame(val, this.patientType.getType()),
           options: () => PatientTypeService.getPatientTypes()
-        }
+        },
+        this.facilityLocationField()
       ]
     }
   }

@@ -13,8 +13,8 @@ import { ObservationService } from "@/services/observation_service";
 import { ConceptService } from "@/services/concept_service"
 import HisDate from "@/utils/Date"
 import { GeneralDataInterface } from "@/apps/interfaces/AppInterface";
-import { AppEncounterService } from "@/services/app_encounter_service"
 import { GlobalPropertyService } from "@/services/global_property_service"
+import { PatientTypeService } from "@/apps/ART/services/patient_type_service"
 
 async function enrollInArtProgram(patientID: number, patientType: string, clinic: string) {
     const program = new PatientProgramService(patientID)
@@ -24,15 +24,12 @@ async function enrollInArtProgram(patientID: number, patientType: string, clinic
         program.setStateId(1) 
         await program.updateState()
     }
-    // Create registration encounter
-    const encounter = new AppEncounterService(patientID, 5)
-    await encounter.createEncounter()
-    await encounter.saveValueTextObs(
-        'Art clinic location', clinic
-    )
-    await encounter.saveValueCodedObs(
-        'Type of patient', patientType
-    )
+    const patientTypeService = new PatientTypeService(patientID, -1)
+    await patientTypeService.createEncounter()
+    await patientTypeService.savePatientType(patientType)
+    if (['External Consultation', 'Drug Refill'].includes(patientType)) {
+        await patientTypeService.saveLocationClinic(clinic)
+    }
 }
 
 export async function init() {
