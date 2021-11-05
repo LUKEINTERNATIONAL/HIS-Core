@@ -1,8 +1,10 @@
 <template>
     <ion-button 
+        color="light"
         v-if="showingChildNodes"
         @click="onBack"
         >
+        <ion-icon :icon="arrowBack"> </ion-icon>
         Back 
     </ion-button>
     <ion-grid> 
@@ -30,12 +32,19 @@ import img from '@/utils/Img'
 import {
     IonButton,
     IonGrid,
+    IonIcon,
     IonRow,
     IonCol
 } from "@ionic/vue";
-
+import { arrowBack } from 'ionicons/icons';
 export default defineComponent({
+    setup() {
+        return {
+            arrowBack
+        }
+    },
     components: { 
+        IonIcon,
         TaskCard,
         IonButton,
         IonGrid,
