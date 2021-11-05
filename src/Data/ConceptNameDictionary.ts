@@ -1,5 +1,15 @@
 export default [
    {
+      "categories": [],
+      "concept_id": 7054,
+      "name": "Art clinic location"
+   },
+   {
+      "categories": [],
+      "concept_id": 10522,
+      "name": "Drug Refill"
+   },
+   {
       "categories": ['risk factors'],
       "concept_id": 3720,
       "name": "Diabetes"
