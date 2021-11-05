@@ -1,4 +1,5 @@
 import { AppEncounterService } from "@/services/app_encounter_service";
+import { ConceptService } from "@/services/concept_service";
 
 export class PatientTypeService extends AppEncounterService {
   patientType: string
@@ -9,6 +10,13 @@ export class PatientTypeService extends AppEncounterService {
 
   getType() {
     return this.patientType
+  }
+
+  static getPatientTypes() {
+    return ConceptService
+      .getConceptsByCategory('art_patient_type')
+      .sort((a: any,  b: any) => a.order < b.order ? 0 : 1)
+      .map(({name }: any) => ({ label: name, value: name }))
   }
 
   async loadPatientType() {

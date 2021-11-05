@@ -55,19 +55,10 @@ export default defineComponent({
           validation: (val: any) =>
             Validation.required(val) ||
             Validation.notTheSame(val, this.patientType.getType()),
-          options: () => [
-            {
-              label: "New patient",
-              value: "New patient",
-            },
-            {
-              label: "External consultation",
-              value: "External consultation",
-            },
-          ],
-        },
-      ];
-    },
-  },
+          options: () => PatientTypeService.getPatientTypes()
+        }
+      ]
+    }
+  }
 });
 </script>

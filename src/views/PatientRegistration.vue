@@ -26,6 +26,7 @@ import { PatientRegistrationService } from "@/services/patient_registration_serv
 import App from "@/apps/app_lib"
 import { AppInterface } from "@/apps/interfaces/AppInterface"
 import { nextTask } from "@/utils/WorkflowTaskHelper"
+import { PatientTypeService } from "@/apps/ART/services/patient_type_service";
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -296,11 +297,7 @@ export default defineComponent({
             computedValue: (val: Option) => ({person: val.value}),
             condition: () => this.editConditionCheck(['patient_type']) && this.showPatientType,
             validation: (val: any) => Validation.required(val),
-            options: () => this.mapToOption([
-                'New patient',
-                'Drug Refill',
-                'External consultation'
-            ])
+            options: () => PatientTypeService.getPatientTypes()
         }
     },
     occupationField(): Field {
