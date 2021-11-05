@@ -27,6 +27,7 @@ export default defineComponent({
     presets: {} as any,
     userData: {} as any,
     fieldComponent: '' as string,
+    isSessionPasswordChange: false as boolean,
     activeField: '' as string,
     form: {} as Record<string, Option> | Record<string, null>
   }),
@@ -41,6 +42,17 @@ export default defineComponent({
                 this.activity = query.activity
             } else {
                 this.activity = 'add'
+            }
+            /**
+             * Jump straight to update the current user's password
+             */
+            if (query.update_password) {
+                this.userData = this.toUserData(
+                    (await UserService.getCurrentUser())
+                )
+                this.isSessionPasswordChange = true
+                this.activeField = 'new_password'
+                this.fieldComponent = this.activeField
             }
             this.fields = this.getFields()
         },
@@ -58,6 +70,9 @@ export default defineComponent({
                 break;
             case 'edit':
                 await this.update(data)
+                if (this.isSessionPasswordChange) {
+                    this.$router.push('/')
+                }
                 break;
         }
         this.formKey += 1
