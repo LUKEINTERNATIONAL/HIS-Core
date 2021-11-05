@@ -10,6 +10,7 @@ function globalPropConfig(label: string, prop: string) {
 export const PROPERTIES: FolderInterface[] = [
     {
         name: "Drug Management",
+        icon: "drug.png",
         files: [
             {
                 name: "Enter Receipts",
@@ -35,6 +36,7 @@ export const PROPERTIES: FolderInterface[] = [
     },
     {
         name: 'System Preferences',
+        icon: 'hiv-staging.png',
         files: [
             globalPropConfig(
                 'Activate Extended Lab',

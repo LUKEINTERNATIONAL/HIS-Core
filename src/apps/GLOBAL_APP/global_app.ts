@@ -4,6 +4,7 @@ export default {
   GlobalAppSettings: [
     {
       name: 'Session Management',
+      icon: 'time.png',
       files: [
         {
           name: 'Change session date',
@@ -13,6 +14,7 @@ export default {
     },
     {
       name: 'Portal Settings',
+      icon: 'portal.png',
       files: [
         {
           name: "Portal settings",
@@ -22,6 +24,7 @@ export default {
     },
     {
       name: 'Location',
+      icon: 'location.png',
       files: [
         {
           name: "Print Location",
@@ -39,6 +42,7 @@ export default {
     },
     {
       name: 'User management',
+      icon: 'edit-user.png',
       files: [
         {
           name: "New user",
@@ -55,7 +59,8 @@ export default {
       ]
     },
     {
-      name: 'Data Management', 
+      name: 'Data Management',
+      icon: 'list.png',
       files: [
         {
           name: "Data Cleaning",
