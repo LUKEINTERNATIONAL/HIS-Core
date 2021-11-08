@@ -36,7 +36,7 @@ export class UserService extends Service {
 	static isAdmin() {
     const roles = super.getUserRoles().filter(
         (role: Role) => {
-          return role.role.match(/super|admin/i);
+          return role.role.match(/Program Manager|Superuser|System Developer/i);
         }
       );
       return roles.length > 0;

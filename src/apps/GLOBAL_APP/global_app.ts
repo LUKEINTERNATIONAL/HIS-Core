@@ -1,4 +1,5 @@
 import { PatientPrintoutService } from "@/services/patient_printout_service"
+import { UserService } from "@/services/user_service"
 
 export default {
   GlobalAppSettings: [
@@ -15,6 +16,7 @@ export default {
     {
       name: 'Portal Settings',
       icon: 'portal.png',
+      condition: () => UserService.isAdmin(),
       files: [
         {
           name: "Portal settings",
@@ -32,10 +34,12 @@ export default {
         },
         {
           name: "Set Site Location",
+          condition: () => UserService.isAdmin(),
           pathUrl:"/location/update/site",
         },
         {
           name: "Set Site Code",
+          condition: () => UserService.isAdmin(),
           pathUrl:"/location/update/code",
         }
       ]
@@ -46,10 +50,12 @@ export default {
       files: [
         {
           name: "New user",
+          condition: () => UserService.isAdmin(),
           pathUrl: "/user?activity=add",
         },
         {
           name: "Edit Users",
+          condition: () => UserService.isAdmin(),
           pathUrl: "/user?activity=edit",
         },
         {
@@ -58,13 +64,15 @@ export default {
         },
         {
           name: 'System usage report',
-          pathUrl: '/users/usage'
-        },
+          pathUrl: '/users/usage',
+          condition: () => UserService.isAdmin()
+        }
       ]
     },
     {
       name: 'Data Management',
       icon: 'list.png',
+      condition: () => UserService.isAdmin(),
       files: [
         {
           name: "Data Cleaning",

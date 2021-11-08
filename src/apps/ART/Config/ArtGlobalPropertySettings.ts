@@ -1,4 +1,5 @@
 import { FolderInterface } from "@/apps/interfaces/AppInterface";
+import { UserService } from "@/services/user_service"
 
 function globalPropConfig(label: string, prop: string) {
     return {
@@ -11,6 +12,7 @@ export const PROPERTIES: FolderInterface[] = [
     {
         name: "Drug Management",
         icon: "drug.png",
+        condition: () => UserService.isAdmin(),
         files: [
             {
                 name: "Enter Receipts",
@@ -37,6 +39,7 @@ export const PROPERTIES: FolderInterface[] = [
     {
         name: 'System Preferences',
         icon: 'hiv-staging.png',
+        condition: () => UserService.isAdmin(),
         files: [
             globalPropConfig(
                 'Activate Extended Lab',
