@@ -60,6 +60,11 @@ export class Service {
         return HisApp.getActiveApp() || {}
     }
 
+    static getUserID(): null | number {
+        const userID = sessionStorage.getItem('userID')
+        return userID ? parseInt(userID): null
+    }
+
     static getUserLocation() {
         return sessionStorage.getItem('userLocation')
     }

@@ -13,10 +13,10 @@ import { ObservationService } from "@/services/observation_service";
 import { ConceptService } from "@/services/concept_service"
 import HisDate from "@/utils/Date"
 import { GeneralDataInterface } from "@/apps/interfaces/AppInterface";
-import { AppEncounterService } from "@/services/app_encounter_service"
 import { GlobalPropertyService } from "@/services/global_property_service"
+import { PatientTypeService } from "@/apps/ART/services/patient_type_service"
 
-async function enrollInArtProgram(patientID: number, patientType: string) {
+async function enrollInArtProgram(patientID: number, patientType: string, clinic: string) {
     const program = new PatientProgramService(patientID)
     const enroll = await program.enrollProgram()
     if (enroll) {
@@ -24,12 +24,14 @@ async function enrollInArtProgram(patientID: number, patientType: string) {
         program.setStateId(1) 
         await program.updateState()
     }
-    // Create registration encounter
-    const encounter = new AppEncounterService(patientID, 5)
-    await encounter.createEncounter()
-    await encounter.saveValueCodedObs(
-        'Type of patient', patientType
-    )
+
+    const patientTypeService = new PatientTypeService(patientID, -1)
+
+    patientTypeService.setPatientType(patientType)
+    patientTypeService.setLocationName(clinic)
+
+    await patientTypeService.createEncounter()
+    await patientTypeService.save()
 }
 
 export async function init() {
@@ -53,7 +55,7 @@ export async function init() {
 }
 
 export async function onRegisterPatient(patientID: number, person: any, attr: any, router: any) {
-    await enrollInArtProgram(patientID, person.patient_type)
+    await enrollInArtProgram(patientID, person.patient_type, person.location)
     // Assign filing number if property use_filing_numbers is enabled
     const canFilingNumber = await GlobalPropertyService.get('use_filing_numbers')
     if (canFilingNumber==='true') {
