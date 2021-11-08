@@ -1,9 +1,11 @@
 import { PatientPrintoutService } from "@/services/patient_printout_service"
+import { UserService } from "@/services/user_service"
 
 export default {
   GlobalAppSettings: [
     {
       name: 'Session Management',
+      icon: 'time.png',
       files: [
         {
           name: 'Change session date',
@@ -13,6 +15,8 @@ export default {
     },
     {
       name: 'Portal Settings',
+      icon: 'portal.png',
+      condition: () => UserService.isAdmin(),
       files: [
         {
           name: "Portal settings",
@@ -22,6 +26,7 @@ export default {
     },
     {
       name: 'Location',
+      icon: 'location.png',
       files: [
         {
           name: "Print Location",
@@ -29,33 +34,45 @@ export default {
         },
         {
           name: "Set Site Location",
+          condition: () => UserService.isAdmin(),
           pathUrl:"/location/update/site",
         },
         {
           name: "Set Site Code",
+          condition: () => UserService.isAdmin(),
           pathUrl:"/location/update/code",
         }
       ]
     },
     {
       name: 'User management',
+      icon: 'edit-user.png',
       files: [
         {
           name: "New user",
+          condition: () => UserService.isAdmin(),
           pathUrl: "/user?activity=add",
         },
         {
           name: "Edit Users",
+          condition: () => UserService.isAdmin(),
           pathUrl: "/user?activity=edit",
         },
         {
+          name: 'Change Password',
+          pathUrl: '/user?activity=edit&update_password=true'
+        },
+        {
           name: 'System usage report',
-          pathUrl: '/users/usage'
+          pathUrl: '/users/usage',
+          condition: () => UserService.isAdmin()
         }
       ]
     },
     {
-      name: 'Data Management', 
+      name: 'Data Management',
+      icon: 'list.png',
+      condition: () => UserService.isAdmin(),
       files: [
         {
           name: "Data Cleaning",

@@ -18,7 +18,6 @@ import Validation from "@/components/Forms/validations/StandardValidations"
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import { GlobalPropertyService } from "@/services/global_property_service"
-import { ProgramService } from "@/services/program_service";
 import { WorkflowService } from "@/services/workflow_service"
 import { isPlainObject, isEmpty } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
@@ -26,6 +25,7 @@ import { PatientRegistrationService } from "@/services/patient_registration_serv
 import App from "@/apps/app_lib"
 import { AppInterface } from "@/apps/interfaces/AppInterface"
 import { nextTask } from "@/utils/WorkflowTaskHelper"
+import { PatientTypeService } from "@/apps/ART/services/patient_type_service";
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -51,11 +51,6 @@ export default defineComponent({
     presets: {} as any,
     form: {} as Record<string, Option> | Record<string, null>
   }),
-  computed: {
-    showPatientType() {
-        return ProgramService.getProgramID() == 1
-    }
-  },
   watch: {
     '$route': {
         async handler({query}: any) {
@@ -277,7 +272,10 @@ export default defineComponent({
     },
     facilityLocationField(): Field {
        const facility: Field = PersonField.getFacilityLocationField()
-       facility.condition = (form: any) => form.patient_type.value === 'External consultation'
+       facility.condition = (form: any) => [
+           'Drug Refill',
+           'External consultation'
+       ].includes(form.patient_type.value)
        return facility
     },
     landmarkField(): Field {
@@ -291,12 +289,10 @@ export default defineComponent({
             helpText: 'Type of patient',
             type: FieldType.TT_SELECT,
             computedValue: (val: Option) => ({person: val.value}),
-            condition: () => this.editConditionCheck(['patient_type']) && this.showPatientType,
+            condition: () => this.editConditionCheck(['patient_type'])
+                && this.app.applicationName === 'ART',
             validation: (val: any) => Validation.required(val),
-            options: () => this.mapToOption([
-                'New patient',
-                'External consultation',
-            ])
+            options: () => PatientTypeService.getPatientTypes()
         }
     },
     occupationField(): Field {

@@ -25,6 +25,8 @@ export default defineComponent({
     watch: {
         patient: {
             async handler(patient: any){
+                // Hide staging fields defined in StagingMixin by Default
+                this.canShowStagingFields = false
                 this.registration = new ClinicRegistrationService(patient.getID(), this.providerID)
                 this.vitals = new VitalsService(patient.getID(), this.providerID)
                 await this.initStaging(this.patient)

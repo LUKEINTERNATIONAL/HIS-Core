@@ -36,9 +36,8 @@ export default defineComponent({
         keyboard: [
             CHARACTERS_AND_NUMBERS_LO, 
             [
-                ['Done','Hide'],
+                ['Done', 'Clear'],
                 ['Space', 'Delete'],
-                ['', 'Clear']
             ]
         ] as any,
     }),
@@ -55,7 +54,12 @@ export default defineComponent({
         async keypress(key: any) {
             if (key.match(/done/i)) {
                 await modalController.dismiss(this.value)
-            } else {
+            }
+            else if(key.match(/clear/i)) {
+                this.value = '';
+                this.onKeyPress(parseInt(this.value))
+            }
+            else {
                 if (key.includes('.') && this.value.includes('.')) return
                 
                 if (!key.includes('.') && this.value === '0') this.value = ''

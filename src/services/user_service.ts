@@ -1,11 +1,23 @@
 import { Role } from "@/interfaces/role";
 import { Service } from "./service";
+import {User} from "@/interfaces/user"
 
 export class UserService extends Service {
 	constructor() {
 		super()
 	}
-  
+
+  static getCurrentUser(): Promise<User> | undefined {
+    const userID: null | number = Service.getUserID()
+    if (userID) {
+      return this.getUserByID(userID)
+    }
+  }
+
+  static getUserByID(userID: number) {
+    return this.getJson(`users/${userID}`)
+  }
+
   static createUser(data: Record<string, any>) {
     return this.postJson(`users`, data)
   }
@@ -24,7 +36,7 @@ export class UserService extends Service {
 	static isAdmin() {
     const roles = super.getUserRoles().filter(
         (role: Role) => {
-          return role.role.match(/super|admin/i);
+          return role.role.match(/Program Manager|Superuser|System Developer/i);
         }
       );
       return roles.length > 0;

@@ -27,6 +27,7 @@ export default defineComponent({
     presets: {} as any,
     userData: {} as any,
     fieldComponent: '' as string,
+    isSessionPasswordChange: false as boolean,
     activeField: '' as string,
     form: {} as Record<string, Option> | Record<string, null>
   }),
@@ -42,6 +43,17 @@ export default defineComponent({
             } else {
                 this.activity = 'add'
             }
+            /**
+             * Jump straight to update the current user's password
+             */
+            if (query.update_password) {
+                this.userData = this.toUserData(
+                    (await UserService.getCurrentUser())
+                )
+                this.isSessionPasswordChange = true
+                this.activeField = 'new_password'
+                this.fieldComponent = this.activeField
+            }
             this.fields = this.getFields()
         },
         immediate: true,
@@ -49,15 +61,17 @@ export default defineComponent({
     }
   },
   methods: {
-    async onFinish(form: Record<string, Option> | Record<string, null>, computeValues: any) {
-        const data = {...this.resolveData(form, 'data_field'), ...computeValues}
+    async onFinish(_: any, computeValues: any) {
         switch(this.activity) {
             case 'add':
                 this.activity = 'edit'
-                await this.create(data)
+                await this.create(computeValues)
                 break;
             case 'edit':
-                await this.update(data)
+                await this.update(computeValues)
+                if (this.isSessionPasswordChange) {
+                    this.$router.push('/')
+                }
                 break;
         }
         this.formKey += 1
@@ -81,20 +95,6 @@ export default defineComponent({
     mapToOption(listOptions: Array<string>): Array<Option> {
         return listOptions.map((item: any) => ({ label: item, value: item })) 
     },
-    resolveData(form: Record<string, Option> | Record<string, null>, group: string) {
-        const output: any = {} 
-        for(const name in form) {
-            const data = form[name]
-            const filter = this.fields.filter(item => {
-                return item.id === name && item.group === group
-            })
-
-            if (filter.length <= 0) continue 
-
-            if (data && data.value != null) output[name] = data.value
-        }
-        return output
-    },
     async getRoles() {
         const roles = await UserService.getAllRoles()
         return roles.map((r: any) => ({
@@ -117,9 +117,12 @@ export default defineComponent({
     },
     editConditionCheck(attributes=[] as Array<string>): boolean {
         if (this.activity === 'edit') {
-            return attributes.includes(this.activeField) 
+            return attributes.includes(this.activeField)
         }
         return true
+    },
+    toLcase(val: Option): string {
+        return val.value.toString().toLowerCase()
     },
     getFields: function(): Array<Field> {
         return [
@@ -127,7 +130,8 @@ export default defineComponent({
                 id: 'select_user',
                 helpText: "Select Username",
                 type: FieldType.TT_SELECT,
-                condition: () => this.activity === 'edit',
+                condition: () => this.activity === 'edit' 
+                    && UserService.isAdmin(),
                 validation: (val: any) => Validation.required(val),
                 unload: ({other}: Option) => this.userData = this.toUserData(other),
                 options: async () => {
@@ -147,7 +151,7 @@ export default defineComponent({
                 helpText: 'User information',
                 type: FieldType.TT_TABLE_VIEWER,
                 requireNext: false,
-                condition: () => this.activity === 'edit',
+                condition: () => this.activity === 'edit' && UserService.isAdmin(),
                 options: async (f: any, c: any, table: any) => {
                     const statusRowIndex = 4
                     const columns = ['Attributes', 'Values', 'Actions']
@@ -205,9 +209,10 @@ export default defineComponent({
                 id: 'given_name',
                 helpText: 'First name',
                 type: FieldType.TT_TEXT,
-                group: 'data_field',
+                computedValue: (val: Option) => val.value,
                 defaultValue: () => this.userData.given_name,
-                condition: () => this.editConditionCheck(['given_name']),
+                condition: () => this.editConditionCheck(['given_name']) 
+                    && UserService.isAdmin(),
                 validation: (val: any) => Validation.isName(val),
                 options: async (form: any) => {
                     if (!form.given_name || form.given_name.value === null) return []
@@ -220,10 +225,11 @@ export default defineComponent({
                 id: 'family_name',
                 helpText: "Last name",
                 type: FieldType.TT_TEXT,
-                group: 'data_field',
+                computedValue: (val: Option) => val.value,
                 defaultValue: () => this.userData.family_name,
                 validation: (val: any) => Validation.isName(val),
-                condition: () => this.editConditionCheck(['given_name']),
+                condition: () => this.editConditionCheck(['given_name']) 
+                    && UserService.isAdmin(),
                 options: async (form: any) => {
                     if (!form.family_name || form.family_name.value === null) return []
 
@@ -236,7 +242,8 @@ export default defineComponent({
                 helpText: "Role",
                 type: FieldType.TT_SELECT,
                 computedValue: (val: Option) => [val.value],
-                condition: () => this.editConditionCheck(['roles']),
+                condition: () => this.editConditionCheck(['roles']) 
+                    && UserService.isAdmin(),
                 validation: (val: any) => Validation.required(val),
                 options: async() => await this.getRoles(),
                 config: {
@@ -247,9 +254,10 @@ export default defineComponent({
                 id: 'must_append_roles',
                 helpText: "Would you like to append role?",
                 type: FieldType.TT_SELECT,
-                group: 'data_field',
                 computedValue: (val: Option) => val.label === 'Yes' ? true : false,
-                condition: () => this.activity === 'edit' && this.editConditionCheck(['roles']),
+                condition: () => this.activity === 'edit' 
+                    && this.editConditionCheck(['roles']) 
+                    && UserService.isAdmin(),
                 validation: (val: any) => Validation.required(val),
                 options: () => [
                     {
@@ -264,8 +272,9 @@ export default defineComponent({
                 id: 'username',
                 helpText: "Username",
                 type: FieldType.TT_TEXT,
-                group: 'data_field',
-                condition: () => this.editConditionCheck(['nothing to see here']),
+                condition: () => this.editConditionCheck(['nothing to see here']) 
+                    && UserService.isAdmin(),
+                computedValue: (val: Option) => this.toLcase(val),
                 validation: (val: any) => Validation.validateSeries([
                     () => Validation.required(val),
                     () => Validation.hasLengthRangeOf(val, 4, 15)
@@ -273,8 +282,10 @@ export default defineComponent({
             },
             {
                 id: 'new_password',
+                proxyID: "password",
                 helpText: "New Password",
                 type: FieldType.TT_TEXT,
+                computedValue: (val: Option) => this.toLcase(val),
                 condition: () => this.editConditionCheck(['new_password']),
                 validation: (val: any) => Validation.validateSeries([
                     () => Validation.required(val),
@@ -285,25 +296,25 @@ export default defineComponent({
                 }
             },
             {
-                id: 'password',
+                id: 'verify_password',
+                proxyID: "password",
                 helpText: "Confirm Password",
                 type: FieldType.TT_TEXT,
-                group: 'data_field',
+                computedValue: (val: Option) => this.toLcase(val),
                 condition: () => this.editConditionCheck(['new_password']),
                 validation: (val: any, f: any) => Validation.validateSeries([
                     () => Validation.required(val),
                     () => {
-                        if (f.new_password.value != val.value ) {
-                            return ['Confirm password doesnt match previous password']
-                        }
+                        if (this.toLcase(f.verify_password) != this.toLcase(f.new_password))
+                            return ['New password does not match current password']
                     }
                 ]),
                 config: {
                     inputType: 'password'
                 }
-            },
+            }
         ]
     }
-  },
+  }
 })
 </script>

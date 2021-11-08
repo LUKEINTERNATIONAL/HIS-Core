@@ -19,6 +19,7 @@ export default defineComponent({
     data: () => ({
         staging: {} as any,
         showStagingWeightChart: true,
+        canShowStagingFields: true as boolean,
         bmiObj: {} as any, 
         stagingFacts : {
             age: -1 as number,
@@ -47,7 +48,6 @@ export default defineComponent({
     methods: {
         async initStaging(patient: any) {
             this.staging = new StagingService(patient.getID(), patient.getAge(), this.providerID)
-
             await this.staging.loadHivConfirmatoryTestType()
             this.bmiObj = await patient.getBMI()
             this.stagingFacts.age = patient.getAge()
@@ -169,7 +169,7 @@ export default defineComponent({
             if ('has_transfer_letter' in f) {
                 return f.has_transfer_letter && f.has_transfer_letter.value === 'Yes'
             }
-            return true
+            return this.canShowStagingFields
         },
         getStagingSummaryField(helpText="Summary" as string) {
             return {

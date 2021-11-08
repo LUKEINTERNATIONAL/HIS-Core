@@ -41,8 +41,24 @@ export interface Field {
     type: FieldType;
     group?: string;  // Categories fields with related data
     computedValue?: Function;
+    /**
+     * @deprecated for setting preset values for fields that support them
+     */
     preset?: Option | Record<string, any>;
+    /**
+     * Preset value for fields that support  strings, numbers or booleans
+     */
     defaultValue?: (fdata?: any, cdata?: any, other?: any) => any;
+    /**
+     * Set default output of the field that is present when it fails to pass
+     * a condition
+     */
+    defaultOutput?: (fdata?: any, cdata?: any, other?: any) => Option | Option[];
+    /**
+     * Set default computed value output of the field that only appears when
+     * the field fails to pass a condition
+    */
+    defaultComputedOutput?: (fdata?: any, cdata?: any, other?: any) => any;
     condition?: Function;
     validation?: Function;
     beforeNext?: Function;

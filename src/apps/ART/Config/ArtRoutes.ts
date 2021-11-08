@@ -73,6 +73,31 @@ export default [
         component: () => import("@/apps/ART/views/preferences/SetAppointmentLimit.vue")
     },
     {
+        name: "Enter stock",
+        path: "/art/stock/enter",
+        component: () => import("@/apps/ART/views/ARTStock/enter_receipts.vue")
+    },
+    {
+        name: "Audit trail",
+        path: "/art/stock/trail",
+        component: () => import("@/apps/ART/views/ARTStock/AuditTrail.vue")
+    },
+    {
+        name: "Verify stock",
+        path: "/art/stock/verify",
+        component: () => import("@/apps/ART/views/ARTStock/verification.vue")
+    },
+    {
+        name: "Move stock",
+        path: "/art/stock/move",
+        component: () => import("@/apps/ART/views/ARTStock/movement.vue")
+    },
+    {
+        name: "Print drug barcode",
+        path: "/drug/print",
+        component: () => import("@/views/PrintDrug.vue")
+    },
+    {
         name: "treatment",
         path: "/art/encounters/prescriptions/:patient_id",
         component: Prescription

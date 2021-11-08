@@ -1,4 +1,5 @@
 import { FolderInterface } from "@/apps/interfaces/AppInterface";
+import { UserService } from "@/services/user_service"
 
 function globalPropConfig(label: string, prop: string) {
     return {
@@ -10,31 +11,35 @@ function globalPropConfig(label: string, prop: string) {
 export const PROPERTIES: FolderInterface[] = [
     {
         name: "Drug Management",
+        icon: "drug.png",
+        condition: () => UserService.isAdmin(),
         files: [
             {
                 name: "Enter Receipts",
-                pathUrl: "/",
+                pathUrl: "/art/stock/enter",
             },
             {
                 name: "Enter Product relocation/Disposal",
-                pathUrl: "/",
+                pathUrl: "/art/stock/move",
             },
             {
                 name: "Enter verified physical stock count",
-                pathUrl: "/",
+                pathUrl: "/art/stock/verify",
             },
             {
                 name: "Print Barcode",
-                pathUrl: "/",
+                pathUrl: "/drug/print",
             },
             {
                 name: "Audit Trail",
-                pathUrl: "/",
+                pathUrl: "/art/stock/trail",
             }
         ]
     },
     {
         name: 'System Preferences',
+        icon: 'hiv-staging.png',
+        condition: () => UserService.isAdmin(),
         files: [
             globalPropConfig(
                 'Activate Extended Lab',
