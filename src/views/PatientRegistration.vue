@@ -18,7 +18,6 @@ import Validation from "@/components/Forms/validations/StandardValidations"
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import { GlobalPropertyService } from "@/services/global_property_service"
-import { ProgramService } from "@/services/program_service";
 import { WorkflowService } from "@/services/workflow_service"
 import { isPlainObject, isEmpty } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
@@ -52,11 +51,6 @@ export default defineComponent({
     presets: {} as any,
     form: {} as Record<string, Option> | Record<string, null>
   }),
-  computed: {
-    showPatientType() {
-        return ProgramService.getProgramID() == 1
-    }
-  },
   watch: {
     '$route': {
         async handler({query}: any) {
@@ -295,7 +289,8 @@ export default defineComponent({
             helpText: 'Type of patient',
             type: FieldType.TT_SELECT,
             computedValue: (val: Option) => ({person: val.value}),
-            condition: () => this.editConditionCheck(['patient_type']) && this.showPatientType,
+            condition: () => this.editConditionCheck(['patient_type'])
+                && this.app.applicationName === 'ART',
             validation: (val: any) => Validation.required(val),
             options: () => PatientTypeService.getPatientTypes()
         }

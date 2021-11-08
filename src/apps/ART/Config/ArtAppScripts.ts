@@ -24,12 +24,14 @@ async function enrollInArtProgram(patientID: number, patientType: string, clinic
         program.setStateId(1) 
         await program.updateState()
     }
+
     const patientTypeService = new PatientTypeService(patientID, -1)
+
+    patientTypeService.setPatientType(patientType)
+    patientTypeService.setLocationName(clinic)
+
     await patientTypeService.createEncounter()
-    await patientTypeService.savePatientType(patientType)
-    if (['External Consultation', 'Drug Refill'].includes(patientType)) {
-        await patientTypeService.saveLocationClinic(clinic)
-    }
+    await patientTypeService.save()
 }
 
 export async function init() {

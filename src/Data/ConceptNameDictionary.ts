@@ -5,6 +5,14 @@ export default [
       "name": "Art clinic location"
    },
    {
+      "categories": [
+         'art_patient_type'
+      ],
+      "order": 1,
+      "concept_id": 7572,
+      "name": "New patient"
+   },
+   {
       "categories": ['art_patient_type'],
       "order": 2,
       "concept_id": 10522,
@@ -843,14 +851,6 @@ export default [
       ],
       "concept_id": 1065,
       "name": "Yes"
-   },
-   {
-      "categories": [
-         'art_patient_type'
-      ],
-      "order": 1,
-      "concept_id": 7572,
-      "name": "New patient"
    },
    {
       "categories": [

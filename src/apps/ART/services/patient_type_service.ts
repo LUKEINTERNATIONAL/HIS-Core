@@ -3,9 +3,19 @@ import { ConceptService } from "@/services/concept_service";
 
 export class PatientTypeService extends AppEncounterService {
   patientType: string
+  locationName: string
   constructor(patientID: number, providerID: number) {
     super(patientID, 5, providerID);
     this.patientType = 'N/A'
+    this.locationName = ''
+  }
+
+  setLocationName(location: string) {
+    this.locationName = location
+  }
+
+  setPatientType(type: string) {
+    this.patientType = type
   }
 
   getType() {
@@ -15,7 +25,6 @@ export class PatientTypeService extends AppEncounterService {
   static getPatientTypes() {
     return ConceptService
       .getConceptsByCategory('art_patient_type')
-      .sort((a: any,  b: any) => a.order < b.order ? 0 : 1)
       .map(({name }: any) => ({ label: name, value: name }))
   }
 
@@ -23,6 +32,16 @@ export class PatientTypeService extends AppEncounterService {
     const pType = await this.getFirstValueCoded('Type of patient')
 
     if (pType) this.patientType = pType
+  }
+
+  async save() {
+    await this.savePatientType(this.patientType)
+    if (this.locationName && [
+      'External consultation', 
+      'Drug Refill']
+      .includes(this.patientType)) {
+      await this.saveLocationClinic(this.locationName)
+    }
   }
 
   saveLocationClinic(clinic: string) {

@@ -38,18 +38,14 @@ export default defineComponent({
     async onFinish(formData: any) {
       const encounter = await this.patientType.createEncounter();
 
-      if (!encounter) return toastWarning("Unable to create encounter");
+      if (!encounter) return toastWarning("Unable to create encounter")
 
-      await this.patientType.savePatientType(formData.patient_type.value)
+      this.patientType.setLocationName(formData?.location?.label)
+      this.patientType.setPatientType(formData?.patient_type?.value)
 
-      if (['External consultation', 'Drug Refill']
-        .includes(formData.patient_type.value)) {
-          await this.patientType.saveLocationClinic(formData.location.label)
-        }
-
-      toastSuccess("Observations and encounter created!");
-
-      this.nextTask();
+      await this.patientType.save()
+      toastSuccess("Observations and encounter created!")
+      this.nextTask()
     },
     facilityLocationField(): Field {
        const facility: Field = PersonField.getFacilityLocationField()
