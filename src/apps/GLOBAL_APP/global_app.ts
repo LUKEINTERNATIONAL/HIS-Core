@@ -16,6 +16,7 @@ export default {
     {
       name: 'Portal Settings',
       icon: 'portal.png',
+      condition: () => UserService.isAdmin(),
       files: [
         {
           name: "Portal settings",
@@ -33,10 +34,12 @@ export default {
         },
         {
           name: "Set Site Location",
+          condition: () => UserService.isAdmin(),
           pathUrl:"/location/update/site",
         },
         {
           name: "Set Site Code",
+          condition: () => UserService.isAdmin(),
           pathUrl:"/location/update/code",
         }
       ]
@@ -69,6 +72,7 @@ export default {
     {
       name: 'Data Management',
       icon: 'list.png',
+      condition: () => UserService.isAdmin(),
       files: [
         {
           name: "Data Cleaning",
