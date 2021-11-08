@@ -53,9 +53,13 @@ export default {
           pathUrl: "/user?activity=edit",
         },
         {
+          name: 'Change Password',
+          pathUrl: '/user?activity=edit&update_password=true'
+        },
+        {
           name: 'System usage report',
           pathUrl: '/users/usage'
-        }
+        },
       ]
     },
     {
