@@ -1,4 +1,5 @@
 import { PatientPrintoutService } from "@/services/patient_printout_service"
+import { UserService } from "@/services/user_service"
 
 export default {
   GlobalAppSettings: [
@@ -46,15 +47,18 @@ export default {
       files: [
         {
           name: "New user",
+          condition: () => UserService.isAdmin(),
           pathUrl: "/user?activity=add",
         },
         {
           name: "Edit Users",
+          condition: () => UserService.isAdmin(),
           pathUrl: "/user?activity=edit",
         },
         {
           name: 'System usage report',
-          pathUrl: '/users/usage'
+          pathUrl: '/users/usage',
+          condition: () => UserService.isAdmin()
         }
       ]
     },

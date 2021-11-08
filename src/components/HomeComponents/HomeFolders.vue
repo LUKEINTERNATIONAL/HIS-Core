@@ -13,6 +13,7 @@
                 v-for="(item, index) in viewableItems" 
                 :key="index"
                 size="4"
+                v-show="canShowItem(item)"
                 >
                 <task-card
                     @click="onClick(item)"
@@ -74,6 +75,9 @@ export default defineComponent({
         }
     },
     methods: {
+        canShowItem(item: FolderInterface) {
+            return item.condition ? item.condition() : true
+        },
         onClick(item: any){
             if (item.files) {
                 this.showingChildNodes = true
