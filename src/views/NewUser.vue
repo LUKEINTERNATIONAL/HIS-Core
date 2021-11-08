@@ -117,7 +117,7 @@ export default defineComponent({
     },
     editConditionCheck(attributes=[] as Array<string>): boolean {
         if (this.activity === 'edit') {
-            return attributes.includes(this.activeField) 
+            return attributes.includes(this.activeField)
         }
         return true
     },
@@ -127,7 +127,8 @@ export default defineComponent({
                 id: 'select_user',
                 helpText: "Select Username",
                 type: FieldType.TT_SELECT,
-                condition: () => this.activity === 'edit',
+                condition: () => this.activity === 'edit' 
+                    && UserService.isAdmin(),
                 validation: (val: any) => Validation.required(val),
                 unload: ({other}: Option) => this.userData = this.toUserData(other),
                 options: async () => {
@@ -147,7 +148,7 @@ export default defineComponent({
                 helpText: 'User information',
                 type: FieldType.TT_TABLE_VIEWER,
                 requireNext: false,
-                condition: () => this.activity === 'edit',
+                condition: () => this.activity === 'edit' && UserService.isAdmin(),
                 options: async (f: any, c: any, table: any) => {
                     const statusRowIndex = 4
                     const columns = ['Attributes', 'Values', 'Actions']
@@ -207,7 +208,8 @@ export default defineComponent({
                 type: FieldType.TT_TEXT,
                 group: 'data_field',
                 defaultValue: () => this.userData.given_name,
-                condition: () => this.editConditionCheck(['given_name']),
+                condition: () => this.editConditionCheck(['given_name']) 
+                    && UserService.isAdmin(),
                 validation: (val: any) => Validation.isName(val),
                 options: async (form: any) => {
                     if (!form.given_name || form.given_name.value === null) return []
@@ -223,7 +225,8 @@ export default defineComponent({
                 group: 'data_field',
                 defaultValue: () => this.userData.family_name,
                 validation: (val: any) => Validation.isName(val),
-                condition: () => this.editConditionCheck(['given_name']),
+                condition: () => this.editConditionCheck(['given_name']) 
+                    && UserService.isAdmin(),
                 options: async (form: any) => {
                     if (!form.family_name || form.family_name.value === null) return []
 
@@ -236,7 +239,8 @@ export default defineComponent({
                 helpText: "Role",
                 type: FieldType.TT_SELECT,
                 computedValue: (val: Option) => [val.value],
-                condition: () => this.editConditionCheck(['roles']),
+                condition: () => this.editConditionCheck(['roles']) 
+                    && UserService.isAdmin(),
                 validation: (val: any) => Validation.required(val),
                 options: async() => await this.getRoles(),
                 config: {
@@ -249,7 +253,9 @@ export default defineComponent({
                 type: FieldType.TT_SELECT,
                 group: 'data_field',
                 computedValue: (val: Option) => val.label === 'Yes' ? true : false,
-                condition: () => this.activity === 'edit' && this.editConditionCheck(['roles']),
+                condition: () => this.activity === 'edit' 
+                    && this.editConditionCheck(['roles']) 
+                    && UserService.isAdmin(),
                 validation: (val: any) => Validation.required(val),
                 options: () => [
                     {
@@ -265,7 +271,8 @@ export default defineComponent({
                 helpText: "Username",
                 type: FieldType.TT_TEXT,
                 group: 'data_field',
-                condition: () => this.editConditionCheck(['nothing to see here']),
+                condition: () => this.editConditionCheck(['nothing to see here']) 
+                    && UserService.isAdmin(),
                 validation: (val: any) => Validation.validateSeries([
                     () => Validation.required(val),
                     () => Validation.hasLengthRangeOf(val, 4, 15)
