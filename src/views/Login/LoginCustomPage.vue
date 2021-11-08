@@ -64,13 +64,15 @@
 </template>
 
 <script lang="ts">
-import ApiClient from "@/services/api_client";
-import { toastWarning } from "@/utils/Alerts";
+import { toastWarning, toastDanger } from "@/utils/Alerts";
 import { defineComponent } from 'vue';
+import { AuthService, InvalidCredentialsError } from "@/services/auth_service"
+
 export default defineComponent({
   props: ["keys"],
   data: function () {
     return {
+      auth: {} as any,
       userInput: {
         type: String,
         username: "",
@@ -91,6 +93,9 @@ export default defineComponent({
       },
     };
   }, 
+  created() {
+    this.auth = new AuthService()
+  },
   methods: {
     renderKeyBoard(e: any) {
       this.focusInput = e.currentTarget;
@@ -148,37 +153,22 @@ export default defineComponent({
     },
     doLogin: async function () {
       if (this.userInput.username && this.userInput.password) {
-        const params = {
-          username: this.userInput.username,
-          password: this.userInput.password,
-        };
-        const response = await ApiClient.post("auth/login", params).catch(
-          (error) => {
-            toastWarning('log in error');
-            console.warn(error);
-          }
-        );
-        if (response) {
-          if (response.status === 200) {
-            const {
-              authorization: { token, user },
-            } = await response.json();
-            sessionStorage.setItem("apiKey", token);
-            sessionStorage.setItem("username", user.username);
-            sessionStorage.setItem("userID", user.user_id);
-            sessionStorage.setItem("userRoles", JSON.stringify(user.roles));
-            this.$router.push("/select_hc_location");
-          } else if (response.status === 401) {
+        this.auth.setUsername(this.userInput.username)
+        try {
+          await this.auth.login(this.userInput.password)
+          this.auth.startSession()
+          this.$router.push("/select_hc_location");
+        } catch (e) {
+          if (e instanceof InvalidCredentialsError ) {
             toastWarning("Invalid username or password");
           } else {
-            toastWarning("An error has occured");
-            console.warn(`Response: ${response.status} - ${response.body}`);
+            toastDanger(e)
           }
         }
       } else {
         toastWarning("Complete form to log in");
       }
-    },
+    }
   },
   computed: {
     btnStyles(): string {

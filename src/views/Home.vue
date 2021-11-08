@@ -120,6 +120,8 @@ import { AppInterface, FolderInterface } from "@/apps/interfaces/AppInterface";
 import { Service } from "@/services/service"
 import ProgramIcon from "@/components/DataViews/DashboardAppIcon.vue"
 import HomeFolder from "@/components/HomeComponents/HomeFolders.vue"
+import { AuthService } from "@/services/auth_service"
+
 import Img from "@/utils/Img"
 import { 
   apps, 
@@ -223,25 +225,6 @@ export default defineComponent({
 
       if (uuid) sessionStorage.siteUUID = uuid
     },
-    fetchSessionDate: async function () {
-      const response = await ApiClient.get("current_time");
-
-      if (!response || response.status !== 200) return; // NOTE: Targeting Firefox 65, can't `response?.status`
-
-      const data = await response.json();
-      this.sessionDate = HisDate.toStandardHisDisplayFormat(data.date);
-      sessionStorage.sessionDate = data.date;
-      // this.fetchLocationName(data.current_health_center_id);
-    },
-    async fetchAPIVersion() {
-      const response = await ApiClient.get("version");
-      if (!response || response.status !== 200) return;
-
-      const data = await response.json();
-
-      this.APIVersion = data["System version"];
-      sessionStorage.APIVersion = data["System version"];
-    },
     async fetchLocationName(locationID: string) {
       const response = await ApiClient.get("locations/" + locationID);
 
@@ -256,16 +239,14 @@ export default defineComponent({
       sessionStorage.locationName = data.name;
     },
     loadApplicationData() {
-      if (!Service.isBDE()) {
-        this.fetchSessionDate();
-      } else {
-        this.sessionDate = Service.getSessionDate()
-        this.isBDE = true
-      }
       this.ready = true;
+      this.isBDE = Service.isBDE() === true
       this.userLocation = sessionStorage.userLocation;
       this.userName = sessionStorage.username;
       this.fetchLocationID();
+      this.sessionDate = HisDate.toStandardHisDisplayFormat(
+        Service.getSessionDate()
+      )
     },
     async openModal() {
       const data = await HisApp.selectApplication() 
@@ -283,15 +264,15 @@ export default defineComponent({
       }
     },
     async signOut() {
+      const auth = new AuthService()
       const portalStatus = await GlobalPropertyService.get('portal.enabled');
       if(portalStatus === "true") {
         const portalLocation = await GlobalPropertyService.get('portal.properties');
-        sessionStorage.clear();
         window.location = portalLocation;
       }else {
-        sessionStorage.clear();
         this.$router.push('/login')
       }
+      auth.clearSession()
     }
   },
   created() {
