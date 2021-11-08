@@ -61,15 +61,14 @@ export default defineComponent({
     }
   },
   methods: {
-    async onFinish(form: Record<string, Option> | Record<string, null>, computeValues: any) {
-        const data = {...this.resolveData(form, 'data_field'), ...computeValues}
+    async onFinish(_: any, computeValues: any) {
         switch(this.activity) {
             case 'add':
                 this.activity = 'edit'
-                await this.create(data)
+                await this.create(computeValues)
                 break;
             case 'edit':
-                await this.update(data)
+                await this.update(computeValues)
                 if (this.isSessionPasswordChange) {
                     this.$router.push('/')
                 }
@@ -96,20 +95,6 @@ export default defineComponent({
     mapToOption(listOptions: Array<string>): Array<Option> {
         return listOptions.map((item: any) => ({ label: item, value: item })) 
     },
-    resolveData(form: Record<string, Option> | Record<string, null>, group: string) {
-        const output: any = {} 
-        for(const name in form) {
-            const data = form[name]
-            const filter = this.fields.filter(item => {
-                return item.id === name && item.group === group
-            })
-
-            if (filter.length <= 0) continue 
-
-            if (data && data.value != null) output[name] = data.value
-        }
-        return output
-    },
     async getRoles() {
         const roles = await UserService.getAllRoles()
         return roles.map((r: any) => ({
@@ -135,6 +120,9 @@ export default defineComponent({
             return attributes.includes(this.activeField) 
         }
         return true
+    },
+    toLcase(val: Option): string {
+        return val.value.toString().toLowerCase()
     },
     getFields: function(): Array<Field> {
         return [
@@ -220,7 +208,7 @@ export default defineComponent({
                 id: 'given_name',
                 helpText: 'First name',
                 type: FieldType.TT_TEXT,
-                group: 'data_field',
+                computedValue: (val: Option) => val.value,
                 defaultValue: () => this.userData.given_name,
                 condition: () => this.editConditionCheck(['given_name']),
                 validation: (val: any) => Validation.isName(val),
@@ -235,7 +223,7 @@ export default defineComponent({
                 id: 'family_name',
                 helpText: "Last name",
                 type: FieldType.TT_TEXT,
-                group: 'data_field',
+                computedValue: (val: Option) => val.value,
                 defaultValue: () => this.userData.family_name,
                 validation: (val: any) => Validation.isName(val),
                 condition: () => this.editConditionCheck(['given_name']),
@@ -262,7 +250,6 @@ export default defineComponent({
                 id: 'must_append_roles',
                 helpText: "Would you like to append role?",
                 type: FieldType.TT_SELECT,
-                group: 'data_field',
                 computedValue: (val: Option) => val.label === 'Yes' ? true : false,
                 condition: () => this.activity === 'edit' && this.editConditionCheck(['roles']),
                 validation: (val: any) => Validation.required(val),
@@ -279,7 +266,7 @@ export default defineComponent({
                 id: 'username',
                 helpText: "Username",
                 type: FieldType.TT_TEXT,
-                group: 'data_field',
+                computedValue: (val: Option) => this.toLcase(val),
                 condition: () => this.editConditionCheck(['nothing to see here']),
                 validation: (val: any) => Validation.validateSeries([
                     () => Validation.required(val),
@@ -288,8 +275,10 @@ export default defineComponent({
             },
             {
                 id: 'new_password',
+                proxyID: "password",
                 helpText: "New Password",
                 type: FieldType.TT_TEXT,
+                computedValue: (val: Option) => this.toLcase(val),
                 condition: () => this.editConditionCheck(['new_password']),
                 validation: (val: any) => Validation.validateSeries([
                     () => Validation.required(val),
@@ -300,25 +289,25 @@ export default defineComponent({
                 }
             },
             {
-                id: 'password',
+                id: 'verify_password',
+                proxyID: "password",
                 helpText: "Confirm Password",
                 type: FieldType.TT_TEXT,
-                group: 'data_field',
+                computedValue: (val: Option) => this.toLcase(val),
                 condition: () => this.editConditionCheck(['new_password']),
                 validation: (val: any, f: any) => Validation.validateSeries([
                     () => Validation.required(val),
                     () => {
-                        if (f.new_password.value != val.value ) {
-                            return ['Confirm password doesnt match previous password']
-                        }
+                        if (this.toLcase(f.verify_password) != this.toLcase(f.new_password))
+                            return ['New password does not match current password']
                     }
                 ]),
                 config: {
                     inputType: 'password'
                 }
-            },
+            }
         ]
     }
-  },
+  }
 })
 </script>
