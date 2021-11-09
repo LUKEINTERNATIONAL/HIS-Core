@@ -20,13 +20,11 @@ import { findIndex, isEmpty, find } from "lodash";
 import { ConsultationService } from "@/apps/ART/services/consultation_service";
 import { UserService } from "@/services/user_service";
 import { OrderService } from "@/services/order_service";
-import HisApp from "@/apps/app_lib";
 import { ConceptService } from "@/services/concept_service";
 import { modalController } from "@ionic/vue";
 import VLReminderModal from "@/components/DataViews/VLReminderModal.vue";
 import { ProgramService } from "@/services/program_service";
-import { LabService } from "../../services/lab_service";
-import { ObservationService } from "@/services/observation_service";
+import { ARTLabService } from "../../services/lab_service";
 import { infoActionSheet } from "@/utils/ActionSheets";
 
 export default defineComponent({
@@ -136,19 +134,10 @@ export default defineComponent({
       }
     },
     async waitForVL(milestone: any = null) {
-      const orderService = new LabService(this.patientID, this.providerID);
+      const orderService = new ARTLabService(this.patientID, this.providerID);
 
       const encounter = await orderService.createEncounter();
-      const concept = await ObservationService.getConceptID("HIV viral load");
-      const coded = await ObservationService.getConceptID("Delayed milestones");
-
-        const observations = [
-          {
-            'concept_id': concept,
-            'value_text': "Wait till next milestone",
-            'value_coded': coded,
-            'value_numeric': milestone,
-          }]
+       const observations = await orderService.buildDefferedOrder(milestone);
       if (!encounter) return toastWarning("Unable to create encounter");
       await orderService.saveObservationList(observations);
     },
