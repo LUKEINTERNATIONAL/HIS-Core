@@ -14,7 +14,10 @@ export class ProgramService extends Service {
     static getPatientPrograms(patientID: number) {
       return super.getJson(`patients/${patientID}/programs`)
     }
-
+    static getPatientVLInfo(patientID: number) {
+      const programID = super.getProgramID();
+      return super.getJson(`programs/${programID}/patients/${patientID}/vl_info`, {date: this.getSessionDate()})
+    }
     static getProgramWorkflows(program: number) {
       return super.getJson(`programs/${program}/workflows`)
     }
