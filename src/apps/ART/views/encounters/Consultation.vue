@@ -27,6 +27,7 @@ import VLReminderModal from "@/components/DataViews/VLReminderModal.vue";
 import { ProgramService } from "@/services/program_service";
 import { LabService } from "../../services/lab_service";
 import { ObservationService } from "@/services/observation_service";
+import { infoActionSheet } from "@/utils/ActionSheets";
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -34,6 +35,7 @@ export default defineComponent({
   data: () => ({
     fields: [] as any,
     labOrderFieldContext: {} as any,
+    prescriptionContext: {} as any,
     consultation: {} as any,
     hasTBTherapyObs: false,
     allergicToSulphur: false,
@@ -911,8 +913,35 @@ export default defineComponent({
           helpText: "Medication to prescribe during this visit",
           type: FieldType.TT_MULTIPLE_SELECT,
           validation: (data: any) => Validation.required(data),
+          onload: (context: any) => {this.prescriptionContext = context},
           onValueUpdate: (listData: Array<Option>, value: Option) => {
             return this.disablePrescriptions(listData, value);
+          },
+          config: {
+          footerBtns: [
+            {
+              name: 'Update allergic to CPT',
+              onClick: async () => {
+                  const action = await infoActionSheet(
+                    "Allergic to Cotrimoxazole update",
+                    `Is the patient allergic to cotrimoxazole.`,
+                    "",
+                    [
+                      { name: "Allergic", slot: "start", color: "success" },
+                      { name: "NOT Allergic", slot: "end" },
+                    ]
+                  );
+
+                  if (action === "Allergic") {
+                    this.allergicToSulphur = true;
+                    this.prescriptionContext.listData = this.getPrescriptionFields([]);
+                  }else {
+                    this.allergicToSulphur = false;
+                    this.prescriptionContext.listData = this.getPrescriptionFields([]);
+                  }
+                }
+              }
+            ],
           },
           options: (_: any, checked: Array<Option>) =>
             this.getPrescriptionFields(checked),
