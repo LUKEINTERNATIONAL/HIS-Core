@@ -1,16 +1,28 @@
 <template>
   <ion-header>
     <ion-toolbar>
-      <ion-title>Stock levels (Consumption rate calculated over a 3 month period)</ion-title>
+      <ion-title
+        >Stock levels (Consumption rate calculated over a 3 month
+        period)</ion-title
+      >
+      <ion-button color="danger" slot="end" @click="closeModal()">X</ion-button>
     </ion-toolbar>
   </ion-header>
   <ion-content class="ion-padding">
-      <apexchart
-          width="100%"
-          type="bar"
-          :options="options"
-          :series="series"
-        ></apexchart>
+    <ion-segment @ionChange="segmentChanged($event)" :value="segment">
+      <ion-segment-button value="paeds">
+        <ion-label>Paeds</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="adults">
+        <ion-label>Adults</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+    <apexchart
+      width="100%"
+      type="bar"
+      :options="options"
+      :series="series"
+    ></apexchart>
   </ion-content>
 </template>
 <script lang="ts">
@@ -20,69 +32,113 @@ import {
   IonHeader,
   IonTitle,
   IonToolbar,
-  IonLabel,
+  IonSegment,
+  IonSegmentButton,
   modalController,
-  IonList,
-  IonItem,
-  IonCheckbox,
 } from "@ionic/vue";
-import { defineComponent, PropType } from "vue";
-import { toastWarning } from "@/utils/Alerts"
-import ApiClient from "@/services/api_client";
-import { ActivityInterface } from "@/apps/interfaces/AppInterface"
+import { defineComponent } from "vue";
+import { StockService } from "../views/ARTStock/stock_service";
 
 export default defineComponent({
   name: "Modal",
-  props: {
-    activities: {
-      type: Object as PropType<ActivityInterface[]>,
-      required: true
-    },
-    title: {
-      type: String, 
-      default: ""
-    },
-  },
-  methods: {
-    //
-  },
-  data() {
-    return {
-      options: {
-        chart: {
-          id: "vuechart-example",
-        },
-        plotOptions: {
-              bar: {
-                borderRadius: 4,
-                horizontal: true,
-              }
-            },
-            grid: {
-  // row: {
-  //   colors: ['#F44336', '#E91E63', '#9C27B0']
-  // },
-  column: {
-    colors: ['#FFFFFF', '#FFFFFF', 'green']
-  }
-}
-        // xaxis: {
-        //   categories: ["", "", "", "", ""],
-        // },
-      },
-      series: [
-        {
-          name: "complete",
-          data: [5, 9, 2, 3, 4],
-        }
-      ],
-    };
-  },
   components: {
     IonContent,
     IonHeader,
     IonTitle,
     IonToolbar,
+    IonButton,
+    IonSegment,
+    IonSegmentButton
   },
+  methods: {
+    async closeModal() {
+      await modalController.dismiss();
+    },
+    getDrugs() {
+      this.paedDrugs = StockService.getPaedeatricDrugs();
+      this.adultDrugs = StockService.getAdultDrugs();
+      this.formatDrugs();
+    },
+    segmentChanged(ev: CustomEvent) {
+      this.segment = ev.detail.value;
+      this.formatDrugs();
+    },
+    async formatDrugs() {
+      const service = new StockService();
+      const drugs = this.segment === "paeds" ? this.paedDrugs : this.adultDrugs;
+      const data: any = [];
+      this.series[0].data = [...data];
+      drugs.forEach(async (element: any) => {
+        const stockLevels = await service.getConsumptionRate(element.drugID);
+        const stockLevelInMonths = parseInt(stockLevels["stock_level_in_months"]);
+
+        this.series[0].data.push({
+          x: element.shortName,
+          y: stockLevelInMonths,
+        });
+      });
+    },
+  },
+  created() {
+    this.getDrugs();
+  },
+  data() {
+    return {
+      paedDrugs: [] as any,
+      adultDrugs: [] as any,
+      segment: "paeds",
+      options: {
+        chart: {
+          id: "vuechart-example",
+        },
+        plotOptions: {
+          bar: {
+            borderRadius: 4,
+            horizontal: true,
+            colors: {ranges: [{
+                  from: 0,
+                  to: 2,
+                  color: '#ff0000'
+              },
+              {
+                  from: 2,
+                  to: 4,
+                  color: '#66CDAA'
+              },
+              {
+                  from: 4,
+                  to: 1000000,
+                  color: '#ffff00'
+              }
+              ],
+          },
+          },
+        },
+        grid: {
+          column: {
+            colors: ["#FFFFFF", "#FFFFFF", "green"],
+          },
+         
+        },
+        yaxis: {
+          min: 1,
+          max: 9,
+          fillColor: '#ffff00',
+          tickAmount: 1,
+        },
+        xaxis: {
+          
+          fillColor: '#ffff00',
+        },
+      },
+      series: [
+        {
+          name: "Available",
+          data: [] as any,
+        },
+      ],
+    };
+  },
+ 
 });
 </script>

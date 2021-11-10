@@ -261,15 +261,17 @@ export default defineComponent({
     },
     async showStock() {
         const prop = await GlobalPropertyService.isStockManagementEnabled();
-        if(prop === "true") {
-         const modal = await modalController.create({
-        component: DrugModalVue,
-        cssClass: "large-modal",
-        backdropDismiss: false
-    });
+        const isART = Service.getProgramID() === 1;
+        if(prop === "true" && isART) {
+          const modal = await modalController.create({
+          component: DrugModalVue,
+          cssClass: "large-modal",
+          backdropDismiss: false
+          });
 
-    modal.present() 
+          modal.present() 
         }
+        return
     },
     checkForbarcode(){
       if(this.patientBarcode.match(/.+\$$/i) != null){
