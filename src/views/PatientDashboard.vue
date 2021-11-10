@@ -1,20 +1,19 @@
 <template>
     <ion-page>
         <full-toolbar
-            id="full-toolbar"
+            class="full-component-view"
             :appIcon="app.applicationIcon"
             :patientCardInfo="patientCardInfo"
             :programCardInfo="programCardInfo"
         />
         <minimal-toolbar
-            id="minimal-toolbar"
+            class="mobile-component-view"
             :title="patientName"
             :menuTitle="visitDatesTitle"
             :menuItems="visitDates"
             :appIcon="app.applicationIcon"
             @onClickMenuItem="onActiveVisitDate"
         />
-        <patient-toolbar />
         <ion-content id="main-content">
             <!--RENDER PROGRAM CUSTOM DASHBOARD AS COMPONENT -->
             <component
@@ -450,10 +449,10 @@ export default defineComponent({
     ion-icon {
         padding: 0.2em;
     }
-    #full-toolbar {
+    .full-component-view {
         display: block;
     }
-    #minimal-toolbar {
+    .mobile-component-view {
         display: none;
     }
     .next-task {
@@ -470,10 +469,10 @@ export default defineComponent({
         padding: 1.0%;
     }
     @media (max-width:780px) {
-        #full-toolbar {
+        .full-component-view {
             display: none;
         }
-        #minimal-toolbar {
+        .mobile-component-view {
             display: block;
         }
     }
