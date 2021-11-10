@@ -3,18 +3,18 @@
   <ion-menu menu-id="app-menu" content-id="main-content" type="overlay">
     <ion-header>
       <ion-toolbar>
-        <ion-title> {{title}} </ion-title>
+        <ion-title> {{ menuTitle }} </ion-title>
       </ion-toolbar>
     </ion-header>
     <ion-content>
       <ion-list>
         <ion-item
-          v-for="(p, i) in appPages" :key="i"
-          :router-link="p.url" 
+          v-for="(item, i) in menuItems" :key="i"
           detail="true" 
           class="hydrated"
+          @click="onClickItem(item)"
           >
-          <ion-label>{{ p.title }}</ion-label>
+          <ion-label>{{ item.label }}</ion-label>
         </ion-item>
       </ion-list>
     </ion-content>
@@ -48,13 +48,20 @@ import {
   IonThumbnail,
   IonToolbar,
   IonHeader,
-  IonLabel
+  IonLabel,
+  menuController
 } from "@ionic/vue";
+import { Option } from "../Forms/FieldInterface";
 export default defineComponent({
   name: "App",
+  emits: [ 'onClickMenuItem'],
   props: {
     title: String,
-    subtitle: String,
+    menuTitle: String,
+    menuItems: {
+        type: Array,
+        default: () => ([])
+    },
     appIcon: {
         type: String,
         required: true
@@ -73,31 +80,13 @@ export default defineComponent({
     IonHeader,
     IonLabel
   },
-  setup(props) {
-    const appPages = [
-      {
-        title: "Dashboard",
-        url: "/emc/home",
-      },
-      {
-        title: "Search/ Create client",
-        url: "/emc/newpatient",
-      },
-      {
-        title: "Reports",
-        url: "/emc/reports",
-      },
-      {
-        title: "Data cleaning tools",
-        url: "/emc/cleaningtools",
-      },
-      {
-        title: "Users",
-        url: "/emc/users",
-      },
-    ];
+  setup(props, context) {
+    function onClickItem(item: Option) {
+        menuController.close('app-menu')
+        context.emit('onClickMenuItem', item)
+    }
     return {
-      appPages,
+      onClickItem,
       appIconPath: Img(props.appIcon)
     }
   },

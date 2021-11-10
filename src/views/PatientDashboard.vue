@@ -9,9 +9,10 @@
         <minimal-toolbar
             id="minimal-toolbar"
             :title="patientName"
-            :subtitle="patientDescription"
+            :menuTitle="visitDatesTitle"
             :menuItems="visitDates"
             :appIcon="app.applicationIcon"
+            @onClickMenuItem="onActiveVisitDate"
         />
         <patient-toolbar />
         <ion-content id="main-content">
