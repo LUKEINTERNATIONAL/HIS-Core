@@ -1,7 +1,20 @@
 <template>
-    <ion-page> 
-        <patient-header :appIcon="app.applicationIcon" :patientCardInfo="patientCardInfo" :programCardInfo="programCardInfo" />
-        <ion-content>
+    <ion-page>
+        <full-toolbar
+            id="full-toolbar"
+            :appIcon="app.applicationIcon"
+            :patientCardInfo="patientCardInfo"
+            :programCardInfo="programCardInfo"
+        />
+        <minimal-toolbar
+            id="minimal-toolbar"
+            :title="patientName"
+            :subtitle="patientDescription"
+            :menuItems="visitDates"
+            :appIcon="app.applicationIcon"
+        />
+        <patient-toolbar />
+        <ion-content id="main-content">
             <!--RENDER PROGRAM CUSTOM DASHBOARD AS COMPONENT -->
             <component
                 v-if="appHasCustomDashboard"
@@ -111,13 +124,14 @@ import { ObservationService } from "@/services/observation_service"
 import { DrugOrderService } from "@/services/drug_order_service"
 import { OrderService } from "@/services/order_service"
 import TaskSelector from "@/components/DataViews/TaskSelectorModal.vue"
-import PatientHeader from "@/components/Toolbars/PatientDashboardToolBar.vue"
 import EncounterView from "@/components/DataViews/DashboardEncounterModal.vue"
 import CardDrilldown from "@/components/DataViews/DashboardTableModal.vue"
 import { man, woman } from "ionicons/icons";
 import { WorkflowService } from "@/services/workflow_service"
 import { toastSuccess, toastDanger, alertConfirmation } from "@/utils/Alerts";
 import _, { isEmpty } from "lodash"
+import MinimalToolbar from "@/components/PatientDashboard/MinimalToolbar.vue"
+import FullToolbar from "@/components/PatientDashboard/FullToolbar.vue"
 import {
     clipboardOutline, 
     appsOutline, 
@@ -142,7 +156,8 @@ import {
 import { EncounterService } from '@/services/encounter_service'
 export default defineComponent({
     components: {
-        PatientHeader,
+        FullToolbar,
+        MinimalToolbar,
         VisitDatesCard,
         PrimaryCard,
         IonChip,
@@ -188,6 +203,16 @@ export default defineComponent({
     computed: {
         isset(i: any) {
             return isEmpty(i)
+        },
+        patientName(): string {
+            return !isEmpty(this.patient) 
+                ? this.patient.getFullName()
+                : 'N/A'
+        },
+        patientDescription(): string {
+            return !isEmpty(this.patient) 
+                ? this.patient.getPatientInfoString()
+                : 'N/A'
         },
         appHasCustomContent(): boolean {
             return !_.isEmpty(this.app.customPatientDashboardContentComponent)
@@ -424,6 +449,12 @@ export default defineComponent({
     ion-icon {
         padding: 0.2em;
     }
+    #full-toolbar {
+        display: block;
+    }
+    #minimal-toolbar {
+        display: none;
+    }
     .next-task {
         margin-top: -8px;
         font-weight: 600;
@@ -436,6 +467,14 @@ export default defineComponent({
     .his-card {
         height: 75vh;
         padding: 1.0%;
+    }
+    @media (max-width:780px) {
+        #full-toolbar {
+            display: none;
+        }
+        #minimal-toolbar {
+            display: block;
+        }
     }
     @media (min-width: 1278px) {
         .next-task {
