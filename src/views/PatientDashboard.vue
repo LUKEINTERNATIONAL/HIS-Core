@@ -14,25 +14,67 @@
             :appIcon="app.applicationIcon"
             @onClickMenuItem="onActiveVisitDate"
         />
+        <ion-toolbar class="mobile-component-view"> 
+            <ion-segment :value="activeTab" mode="ios" class="ion-justify-content-center">
+                <ion-segment-button value="1" @click="activeTab=1"> 
+                    <ion-icon :icon="folderIcon"> </ion-icon>
+                    <ion-label>Overview</ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="2" @click="activeTab=2"> 
+                    <ion-icon :icon="folderIcon"> </ion-icon>
+                    <ion-label>Patient</ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="3" @click="activeTab=3"> 
+                    <ion-icon :icon="folderIcon"> </ion-icon>
+                    <ion-label>Program</ion-label>
+                </ion-segment-button>
+            </ion-segment>
+        </ion-toolbar>
+    
         <ion-content id="main-content">
-            <ion-grid v-if="!appHasCustomDashboard" class="mobile-component-view"> 
-                <ion-row> 
-                    <ion-col size="12">
-                        <primary-card :icon="timeIcon" :counter="encountersCardItems.length" title="Activities" :items="encountersCardItems" titleColor="#658afb" @click="showAllEncounters"> </primary-card>
-                    </ion-col>
-                    <ion-col size="12">
-                        <primary-card :icon="timeIcon" :counter="labOrderCardItems.length" title="Lab Orders" :items="labOrderCardItems" titleColor="#69bb7b" @click="showAllLabOrders"> </primary-card>
-                    </ion-col>
-                </ion-row>
-                <ion-row> 
-                    <ion-col size="12"> 
-                        <primary-card :icon="warningIcon" :counter="alertCardItems.length" title="Alerts" :items="alertCardItems" titleColor="#f95d5d"> </primary-card>
-                    </ion-col>
-                    <ion-col size="12"> 
-                        <primary-card :icon="timeIcon" :counter="medicationCardItems.length" title="Medications" :items="medicationCardItems" titleColor="#fdb044" @click="showAllMedications"> </primary-card>
-                    </ion-col>
-                </ion-row>
-            </ion-grid>
+            <!-- Mobile dashboard view -->
+            <div class="mobile-component-view" v-if="!appHasCustomDashboard">
+                <!-- Patient Treatment TAB --->
+                <ion-grid v-if="activeTab === 1"> 
+                    <ion-row> 
+                        <ion-col size="12">
+                            <primary-card :icon="timeIcon" :counter="encountersCardItems.length" title="Activities" :items="encountersCardItems" titleColor="#658afb" @click="showAllEncounters"> </primary-card>
+                        </ion-col>
+                        <ion-col size="12">
+                            <primary-card :icon="timeIcoaxzn" :counter="labOrderCardItems.length" title="Lab Orders" :items="labOrderCardItems" titleColor="#69bb7b" @click="showAllLabOrders"> </primary-card>
+                        </ion-col>
+                    </ion-row>
+                    <ion-row> 
+                        <ion-col size="12"> 
+                            <primary-card :icon="warningIcon" :counter="alertCardItems.length" title="Alerts" :items="alertCardItems" titleColor="#f95d5d"> </primary-card>
+                        </ion-col>
+                        <ion-col size="12"> 
+                            <primary-card :icon="timeIcon" :counter="medicationCardItems.length" title="Medications" :items="medicationCardItems" titleColor="#fdb044" @click="showAllMedications"> </primary-card>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>
+                <!-- Patient Information TAB --->
+                <ion-list v-if="activeTab === 2">
+                    <div class="his-card" :style="{height: '100%'}"
+                        v-for="(item, rIndex) in patientCardInfo" 
+                        :key="rIndex"> 
+                        <ion-item lines="none"> 
+                            <ion-label> {{item.label}} </ion-label>
+                            <ion-label slot="end"> <b>{{item.value}}</b> </ion-label>
+                        </ion-item>
+                    </div>
+                </ion-list>
+                <ion-list v-if="activeTab === 3"> 
+                    <div class="his-card" :style="{height: '100%'}"
+                        v-for="(item, rIndex) in programCardInfo" 
+                        :key="rIndex"> 
+                        <ion-item lines="none"> 
+                            <ion-label> {{item.label}} </ion-label>
+                            <ion-label slot="end"> <b>{{item.value}}</b> </ion-label>
+                        </ion-item>
+                    </div>
+                </ion-list>
+            </div>
             <!-- RENDER DEFAULT PATIENT DASHBOARD -->
             <ion-grid v-if="!appHasCustomDashboard" class='full-component-view grid-custom vertically-align'>
                 <ion-row>
@@ -160,6 +202,8 @@ import {
     warningOutline 
 } from "ionicons/icons";
 import {
+  IonSegment,
+  IonSegmentButton,
   IonPage,
   IonIcon,
   IonChip,
@@ -175,6 +219,8 @@ import {
 import { EncounterService } from '@/services/encounter_service'
 export default defineComponent({
     components: {
+        IonSegment,
+        IonSegmentButton,
         FullToolbar,
         MinimalToolbar,
         VisitDatesCard,
@@ -197,6 +243,7 @@ export default defineComponent({
         logOutIcon: logOutOutline,
         warningIcon: warningOutline,
         clipboardIcon: clipboardOutline,
+        activeTab: 1 as number,
         app: {} as any,
         dashboardComponent: {} as any,
         isBDE: false as boolean,
@@ -487,6 +534,11 @@ export default defineComponent({
         height: 75vh;
         padding: 1.0%;
     }
+    #mobile-content-area {
+        overflow-y: auto;
+        height: 99%;
+    }
+
     @media (max-width:900px) {
         .full-component-view {
             display: none;
