@@ -1,8 +1,10 @@
 <template>
     <ion-button 
+        color="light"
         v-if="showingChildNodes"
         @click="onBack"
         >
+        <ion-icon :icon="arrowBack"> </ion-icon>
         Back 
     </ion-button>
     <ion-grid> 
@@ -11,6 +13,7 @@
                 v-for="(item, index) in viewableItems" 
                 :key="index"
                 size="4"
+                v-show="canShowItem(item)"
                 >
                 <task-card
                     @click="onClick(item)"
@@ -30,12 +33,19 @@ import img from '@/utils/Img'
 import {
     IonButton,
     IonGrid,
+    IonIcon,
     IonRow,
     IonCol
 } from "@ionic/vue";
-
+import { arrowBack } from 'ionicons/icons';
 export default defineComponent({
+    setup() {
+        return {
+            arrowBack
+        }
+    },
     components: { 
+        IonIcon,
         TaskCard,
         IonButton,
         IonGrid,
@@ -65,6 +75,9 @@ export default defineComponent({
         }
     },
     methods: {
+        canShowItem(item: FolderInterface) {
+            return item.condition ? item.condition() : true
+        },
         onClick(item: any){
             if (item.files) {
                 this.showingChildNodes = true

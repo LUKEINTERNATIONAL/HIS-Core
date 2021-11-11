@@ -44,12 +44,15 @@
       <div id="container" class="his-card overview" v-if="ready">
         <ion-segment mode="ios" scrollable :value="activeTab" class="ion-justify-content-center">
           <ion-segment-button :value="1" @click="activeTab = 1">
+            <ion-icon :icon="statsChart"> </ion-icon>
             <ion-label>Overview</ion-label>
           </ion-segment-button>
           <ion-segment-button v-if="canReport" :value="2" @click="activeTab = 2">
+            <ion-icon :icon="pieChart"> </ion-icon>
             <ion-label>Reports</ion-label>
           </ion-segment-button>
           <ion-segment-button :value="3" @click="activeTab = 3">
+            <ion-icon :icon="settings"> </ion-icon>
             <ion-label>Administration</ion-label>
           </ion-segment-button>
         </ion-segment>
@@ -76,25 +79,25 @@
         <ion-row>
           <ion-col>
             <ion-button color="danger left" size="large" @click="signOut">
-              <ion-icon :icon="logoutIcon"></ion-icon>
+              <ion-icon :icon="logOut"></ion-icon>
                 Logout
               </ion-button>
           </ion-col>
           <ion-col v-if="canFindByIdentifier">
             <ion-button color="primary" size="large" router-link="/patients/search/id">
-              <ion-icon :icon="searchIcon"> </ion-icon>
+              <ion-icon :icon="search"> </ion-icon>
               Find By
             </ion-button>
           </ion-col>
           <ion-col>
             <ion-button color="primary" size="large" router-link="/patient/registration">
-              <ion-icon :icon="personIcon"></ion-icon>
+              <ion-icon :icon="person"></ion-icon>
                 Find or Register
               </ion-button>
           </ion-col>
           <ion-col>
             <ion-button color="primary" size="large" @click="openModal">
-              <ion-icon :icon="appsIcon"></ion-icon>
+              <ion-icon :icon="apps"></ion-icon>
               <ion-label>
                 Applications
               </ion-label>
@@ -107,6 +110,28 @@
 </template>
 
 <script lang="ts">
+import HisApp from "@/apps/app_lib"
+import { defineComponent } from "vue";
+import { barcode } from "ionicons/icons";
+import { GlobalPropertyService } from "@/services/global_property_service"
+import ApiClient from "@/services/api_client";
+import HisDate from "@/utils/Date"
+import { AppInterface, FolderInterface } from "@/apps/interfaces/AppInterface";
+import { Service } from "@/services/service"
+import ProgramIcon from "@/components/DataViews/DashboardAppIcon.vue"
+import HomeFolder from "@/components/HomeComponents/HomeFolders.vue"
+import { AuthService } from "@/services/auth_service"
+
+import Img from "@/utils/Img"
+import { 
+  apps, 
+  person, 
+  search, 
+  logOut,
+  statsChart,
+  pieChart,
+  settings
+} from 'ionicons/icons';
 import {
   IonContent,
   IonHeader,
@@ -121,19 +146,6 @@ import {
   IonSegmentButton,
   IonLabel
 } from "@ionic/vue";
-import HisApp from "@/apps/app_lib"
-import { defineComponent } from "vue";
-import { barcode } from "ionicons/icons";
-import { GlobalPropertyService } from "@/services/global_property_service"
-import ApiClient from "@/services/api_client";
-import HisDate from "@/utils/Date"
-import { AppInterface, FolderInterface } from "@/apps/interfaces/AppInterface";
-import { Service } from "@/services/service"
-import ProgramIcon from "@/components/DataViews/DashboardAppIcon.vue"
-import HomeFolder from "@/components/HomeComponents/HomeFolders.vue"
-import Img from "@/utils/Img"
-import { appsOutline, personOutline, searchOutline, logOutOutline } from 'ionicons/icons';
-
 export default defineComponent({
   name: "Home",
   components: {
@@ -152,12 +164,20 @@ export default defineComponent({
     IonSegmentButton,
     IonLabel
   },
+  setup() {
+    return {
+      barcode,
+      apps, 
+      person, 
+      search, 
+      logOut,
+      statsChart,
+      pieChart,
+      settings
+    }
+  },
   data() {
     return {
-      appsIcon: appsOutline,
-      personIcon: personOutline,
-      searchIcon: searchOutline,
-      logoutIcon: logOutOutline,
       app: {} as AppInterface,
       facilityName: "",
       userLocation: "",
@@ -205,25 +225,6 @@ export default defineComponent({
 
       if (uuid) sessionStorage.siteUUID = uuid
     },
-    fetchSessionDate: async function () {
-      const response = await ApiClient.get("current_time");
-
-      if (!response || response.status !== 200) return; // NOTE: Targeting Firefox 65, can't `response?.status`
-
-      const data = await response.json();
-      this.sessionDate = HisDate.toStandardHisDisplayFormat(data.date);
-      sessionStorage.sessionDate = data.date;
-      // this.fetchLocationName(data.current_health_center_id);
-    },
-    async fetchAPIVersion() {
-      const response = await ApiClient.get("version");
-      if (!response || response.status !== 200) return;
-
-      const data = await response.json();
-
-      this.APIVersion = data["System version"];
-      sessionStorage.APIVersion = data["System version"];
-    },
     async fetchLocationName(locationID: string) {
       const response = await ApiClient.get("locations/" + locationID);
 
@@ -238,16 +239,14 @@ export default defineComponent({
       sessionStorage.locationName = data.name;
     },
     loadApplicationData() {
-      if (!Service.isBDE()) {
-        this.fetchSessionDate();
-      } else {
-        this.sessionDate = Service.getSessionDate()
-        this.isBDE = true
-      }
       this.ready = true;
+      this.isBDE = Service.isBDE() === true
       this.userLocation = sessionStorage.userLocation;
       this.userName = sessionStorage.username;
       this.fetchLocationID();
+      this.sessionDate = HisDate.toStandardHisDisplayFormat(
+        Service.getSessionDate()
+      )
     },
     async openModal() {
       const data = await HisApp.selectApplication() 
@@ -265,15 +264,15 @@ export default defineComponent({
       }
     },
     async signOut() {
+      const auth = new AuthService()
       const portalStatus = await GlobalPropertyService.get('portal.enabled');
       if(portalStatus === "true") {
         const portalLocation = await GlobalPropertyService.get('portal.properties');
-        sessionStorage.clear();
         window.location = portalLocation;
       }else {
-        sessionStorage.clear();
         this.$router.push('/login')
       }
+      auth.clearSession()
     }
   },
   created() {
@@ -293,11 +292,6 @@ export default defineComponent({
       this.loadApplicationData();
     }
   },
-  setup() {
-    return {
-      barcode,
-    };
-  },
   watch: {
     patientBarcode: function() {
       this.checkForbarcode();
@@ -308,7 +302,7 @@ export default defineComponent({
 
 <style scoped>
 ion-icon {
-  padding: 0.3em;
+  padding: 0.2em;
 }
 .tool-bar-medium-content {
   padding: 10px;
@@ -324,29 +318,10 @@ ion-button {
   width: 100%;
 }
 .overview {
-  min-height: 66vh;
-  margin: 14px;
-}
-.subheader {
-  font-weight: bold;
-}
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
+  min-height: 65vh;
+  margin: 0.5em;
 }
 
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
-}
-
-#container a {
-  text-decoration: none;
-}
 .barcode-input{
   font-size: 3em;
   width: 100%;
