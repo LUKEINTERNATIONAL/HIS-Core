@@ -586,7 +586,7 @@ export default defineComponent({
           condition: (formData: any) => this.declinedFPM(formData),
           unload: (data: any) => {
             this.reasonForNoFPM = this.consultation.buildValueText(
-              "Why does the woman not want to use birth control",
+              "Why does the woman not use birth control",
               data.value
             );
           },

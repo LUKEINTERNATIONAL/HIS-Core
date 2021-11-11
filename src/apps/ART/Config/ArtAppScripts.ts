@@ -15,6 +15,7 @@ import HisDate from "@/utils/Date"
 import { GeneralDataInterface } from "@/apps/interfaces/AppInterface";
 import { GlobalPropertyService } from "@/services/global_property_service"
 import { PatientTypeService } from "@/apps/ART/services/patient_type_service"
+import DrugModalVue from "@/apps/ART/Components/DrugModal.vue";
 
 async function enrollInArtProgram(patientID: number, patientType: string, clinic: string) {
     const program = new PatientProgramService(patientID)
@@ -34,7 +35,10 @@ async function enrollInArtProgram(patientID: number, patientType: string, clinic
     await patientTypeService.save()
 }
 
-export async function init() {
+/**
+ * Present a modal to select Art activities
+ */
+async function showArtActivities() {
     const activities = PRIMARY_ACTIVITIES
         .map((activity: TaskInterface)=> ({
             value: activity.workflowID 
@@ -51,7 +55,28 @@ export async function init() {
     });
     modal.present();
     await modal.onDidDismiss()
-    return modal;
+}
+
+/**
+ * Present a modal to show drug chart
+ */
+async function showStockManagementChart() {
+    const prop = await GlobalPropertyService.isStockManagementEnabled();
+    if(prop === "true") {
+        const drugModal = await modalController.create({
+        component: DrugModalVue,
+        cssClass: "large-modal",
+        backdropDismiss: false
+        });
+
+        drugModal.present() 
+        await drugModal.onDidDismiss()
+    }
+}
+
+export async function init() {
+    await showArtActivities()
+    await showStockManagementChart()
 }
 
 export async function onRegisterPatient(patientID: number, person: any, attr: any, router: any) {

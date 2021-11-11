@@ -42,5 +42,6 @@ export class GlobalPropertyService extends Service {
 
     static isHTNEnabled() { return this.get('activate.htn.enhancement') }
     static getAppointmentLimit() { return this.get('clinic.appointment.limit') }
+    static isStockManagementEnabled() { return this.get('activate.drug.management') }
 
 }
