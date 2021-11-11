@@ -18,7 +18,7 @@
             <ion-segment :value="activeTab" mode="ios" class="ion-justify-content-center">
                 <ion-segment-button value="1" @click="activeTab=1"> 
                     <ion-icon :icon="folderIcon"> </ion-icon>
-                    <ion-label>Overview</ion-label>
+                    <ion-label>Visits</ion-label>
                 </ion-segment-button>
                 <ion-segment-button value="2" @click="activeTab=2"> 
                     <ion-icon :icon="folderIcon"> </ion-icon>
@@ -64,6 +64,7 @@
                         </ion-item>
                     </div>
                 </ion-list>
+                <!-- Program Information TAB -->
                 <ion-list v-if="activeTab === 3"> 
                     <div class="his-card" :style="{height: '100%'}"
                         v-for="(item, rIndex) in programCardInfo" 
