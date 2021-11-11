@@ -51,7 +51,7 @@ import {
   IonLabel,
   menuController
 } from "@ionic/vue";
-import { Option } from "../Forms/FieldInterface";
+import { Option } from "../../Forms/FieldInterface";
 export default defineComponent({
   name: "App",
   emits: [ 'onClickMenuItem'],

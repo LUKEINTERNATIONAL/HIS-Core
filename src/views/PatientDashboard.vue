@@ -231,8 +231,8 @@ import CardDrilldown from "@/components/DataViews/DashboardTableModal.vue"
 import { WorkflowService } from "@/services/workflow_service"
 import { toastSuccess, toastDanger, alertConfirmation } from "@/utils/Alerts";
 import _, { isEmpty } from "lodash"
-import MinimalToolbar from "@/components/PatientDashboard/MinimalToolbar.vue"
-import FullToolbar from "@/components/PatientDashboard/FullToolbar.vue"
+import MinimalToolbar from "@/components/PatientDashboard/Poc/MinimalToolbar.vue"
+import FullToolbar from "@/components/PatientDashboard/Poc/FullToolbar.vue"
 import {
     man,
     time,
