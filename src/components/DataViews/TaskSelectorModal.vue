@@ -7,7 +7,7 @@
   <ion-grid class="selector">
     <ion-row>
       <ion-col 
-        size-md="4"
+        size-lg="4"
         size-sm="6" 
         v-for="(taskItem, index) in filteredItems" 
         :key="index">
