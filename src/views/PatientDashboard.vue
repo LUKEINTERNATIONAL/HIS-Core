@@ -157,18 +157,18 @@
                         <div v-if="!appHasCustomContent">
                         <ion-row> 
                             <ion-col size-md="6" size-sm="12">
-                                <primary-card :icon="timeIcon" :counter="encountersCardItems.length" title="Activities" :items="encountersCardItems" titleColor="#658afb" @click="showAllEncounters"> </primary-card>
+                                <primary-card :icon="timeOutline" :counter="encountersCardItems.length" title="Activities" :items="encountersCardItems" titleColor="#658afb" @click="showAllEncounters"> </primary-card>
                             </ion-col>
                             <ion-col size-md="6" size-sm="12">
-                                <primary-card :icon="timeIcon" :counter="labOrderCardItems.length" title="Lab Orders" :items="labOrderCardItems" titleColor="#69bb7b" @click="showAllLabOrders"> </primary-card>
+                                <primary-card :icon="timeOutline" :counter="labOrderCardItems.length" title="Lab Orders" :items="labOrderCardItems" titleColor="#69bb7b" @click="showAllLabOrders"> </primary-card>
                             </ion-col>
                         </ion-row>
                         <ion-row> 
                             <ion-col size-md="6" size-sm="12"> 
-                                <primary-card :icon="warningIcon" :counter="alertCardItems.length" title="Alerts" :items="alertCardItems" titleColor="#f95d5d"> </primary-card>
+                                <primary-card :icon="warningOutline" :counter="alertCardItems.length" title="Alerts" :items="alertCardItems" titleColor="#f95d5d"> </primary-card>
                             </ion-col>
                             <ion-col size-md="6" size-sm="12"> 
-                                <primary-card :icon="timeIcon" :counter="medicationCardItems.length" title="Medications" :items="medicationCardItems" titleColor="#fdb044" @click="showAllMedications"> </primary-card>
+                                <primary-card :icon="timeOutline" :counter="medicationCardItems.length" title="Medications" :items="medicationCardItems" titleColor="#fdb044" @click="showAllMedications"> </primary-card>
                             </ion-col>
                         </ion-row>
                         </div>
@@ -180,32 +180,32 @@
         <ion-footer> 
             <ion-toolbar color="dark">
                 <ion-button class="full-component-view" color="primary" size="large" slot="end" @click="showTasks"> 
-                    <ion-icon :icon="clipboardIcon"> </ion-icon>
+                    <ion-icon :icon="clipboardOutline"> </ion-icon>
                     Tasks
                 </ion-button>
                 <ion-button class="mobile-component-view" color="primary" size="medium" slot="end" @click="showTasks"> 
-                    <ion-icon :icon="clipboardIcon"> </ion-icon>
+                    <ion-icon :icon="clipboard"> </ion-icon>
                 </ion-button>
                 <ion-button class="full-component-view" color="primary" size="large" slot="end" @click="showOptions">
-                    <ion-icon :icon="folderIcon"> </ion-icon>
+                    <ion-icon :icon="folderOutline"> </ion-icon>
                     Printouts/Other
                 </ion-button>
                 <ion-button class="mobile-component-view" color="primary" size="medium" slot="end" @click="showOptions">
-                    <ion-icon :icon="folderIcon"> </ion-icon>
+                    <ion-icon :icon="folder"> </ion-icon>
                 </ion-button>
                 <ion-button class="full-component-view" color="primary" size="large" slot="end" @click="changeApp"> 
-                    <ion-icon :icon="appsIcon"> </ion-icon>
+                    <ion-icon :icon="appsOutline"> </ion-icon>
                     Applications
                 </ion-button>
                 <ion-button class="mobile-component-view" color="primary" size="medium" slot="end" @click="changeApp"> 
-                    <ion-icon :icon="appsIcon"> </ion-icon>
+                    <ion-icon :icon="apps"> </ion-icon>
                 </ion-button>
                 <ion-button class="full-component-view" color="success" size="large" slot="end" @click="onCancel">
-                    <ion-icon :icon="logOutIcon"> </ion-icon>
+                    <ion-icon :icon="logOutOutline"> </ion-icon>
                     Finish
                 </ion-button>
                 <ion-button class="mobile-component-view" color="success" size="medium" slot="end" @click="onCancel">
-                    <ion-icon :icon="logOutIcon"> </ion-icon>
+                    <ion-icon :icon="logOut"> </ion-icon>
                 </ion-button>
             </ion-toolbar>
         </ion-footer>
@@ -242,8 +242,12 @@ import {
     woman,
     clipboardOutline, 
     appsOutline, 
-    folderOutline, 
+    folderOutline,
     logOutOutline, 
+    clipboard, 
+    apps, 
+    folder,
+    logOut, 
     timeOutline, 
     warningOutline 
 } from "ionicons/icons";
@@ -285,20 +289,24 @@ export default defineComponent({
     setup() {
         return {
             man,
-            person,
             time,
-            woman,
+            person,
             calendar,
-            medical
+            medical,
+            woman,
+            clipboard, 
+            apps, 
+            folder,
+            logOut, 
+            timeOutline, 
+            warningOutline,
+            clipboardOutline, 
+            appsOutline, 
+            folderOutline,
+            logOutOutline, 
         }
     },
     data: () => ({
-        appsIcon: appsOutline,
-        timeIcon: timeOutline,
-        folderIcon: folderOutline,
-        logOutIcon: logOutOutline,
-        warningIcon: warningOutline,
-        clipboardIcon: clipboardOutline,
         activeTab: 1 as number,
         app: {} as any,
         dashboardComponent: {} as any,
