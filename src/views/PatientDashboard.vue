@@ -89,21 +89,33 @@
         </ion-content>
         <ion-footer> 
             <ion-toolbar color="dark">
-                <ion-button color="primary" size="large" slot="end" @click="showTasks"> 
+                <ion-button class="full-component-view" color="primary" size="large" slot="end" @click="showTasks"> 
                     <ion-icon :icon="clipboardIcon"> </ion-icon>
                     Tasks
                 </ion-button>
-                <ion-button color="primary" size="large" slot="end" @click="showOptions">
+                <ion-button class="mobile-component-view" color="primary" size="medium" slot="end" @click="showTasks"> 
+                    <ion-icon :icon="clipboardIcon"> </ion-icon>
+                </ion-button>
+                <ion-button class="full-component-view" color="primary" size="large" slot="end" @click="showOptions">
                     <ion-icon :icon="folderIcon"> </ion-icon>
                     Printouts/Other
                 </ion-button>
-                <ion-button color="primary" size="large" slot="end" @click="changeApp"> 
+                <ion-button class="mobile-component-view" color="primary" size="medium" slot="end" @click="showOptions">
+                    <ion-icon :icon="folderIcon"> </ion-icon>
+                </ion-button>
+                <ion-button class="full-component-view" color="primary" size="large" slot="end" @click="changeApp"> 
                     <ion-icon :icon="appsIcon"> </ion-icon>
                     Applications
                 </ion-button>
-                <ion-button color="success" size="large" slot="end" @click="onCancel">
+                <ion-button class="mobile-component-view" color="primary" size="medium" slot="end" @click="changeApp"> 
+                    <ion-icon :icon="appsIcon"> </ion-icon>
+                </ion-button>
+                <ion-button class="full-component-view" color="success" size="large" slot="end" @click="onCancel">
                     <ion-icon :icon="logOutIcon"> </ion-icon>
                     Finish
+                </ion-button>
+                <ion-button class="mobile-component-view" color="success" size="medium" slot="end" @click="onCancel">
+                    <ion-icon :icon="logOutIcon"> </ion-icon>
                 </ion-button>
             </ion-toolbar>
         </ion-footer>
@@ -468,7 +480,7 @@ export default defineComponent({
         height: 75vh;
         padding: 1.0%;
     }
-    @media (max-width:780px) {
+    @media (max-width:900px) {
         .full-component-view {
             display: none;
         }
