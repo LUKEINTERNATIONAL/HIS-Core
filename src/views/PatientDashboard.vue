@@ -323,9 +323,6 @@ export default defineComponent({
         alertCardItems: [] as Array<Option>
     }),
     computed: {
-        isset(i: any) {
-            return isEmpty(i)
-        },
         patientName(): string {
             return !isEmpty(this.patient) 
                 ? this.patient.getFullName()
@@ -389,25 +386,27 @@ export default defineComponent({
             this.patientCardInfo = this.getPatientCardInfo(this.patient)
             this.programCardInfo = await this.getProgramCardInfo(this.patientProgram) || []
             this.currentDate = HisDate.currentDisplayDate()
-            this.sessionDate = HisDate.toStandardHisDisplayFormat(ProgramService.getSessionDate())
+            this.sessionDate = this.toDate(ProgramService.getSessionDate())
             this.isBDE = ProgramService.isBDE() || false
             this.nextTask = await this.getNextTask(this.patientId)
             this.visitDates = await this.getPatientVisitDates(this.patientId)
             this.alertCardItems = await this.getPatientAlertCardInfo() || []
             this.programID = ProgramService.getProgramID()
         },
+        toDate(date: string | Date) {
+            return HisDate.toStandardHisDisplayFormat(date)
+        },
+        toTime(date: string | Date) {
+            return HisDate.toStandardHisTimeFormat(date)
+        },
         async fetchPatient(patientId: number | string){
             const patient: Patient = await Patientservice.findByID(patientId);
             return patient ? new Patientservice(patient): {}
         },
-        getProp(data: any, prop: string): string {
-            return prop in data ? data[prop]() : '-'
-        },
         async getPatientVisitDates(patientId: number) {
             const dates = await Patientservice.getPatientVisits(patientId)
             return dates.map((date: string) => ({
-                label: HisDate.toStandardHisDisplayFormat(date),
-                value: date
+                label: this.toDate(date), value: date
             }))
         },
         async getNextTask(patientId: number) {
@@ -417,14 +416,17 @@ export default defineComponent({
             this.activeVisitDate = data.value
         },
         getPatientCardInfo(patient: any) {
-            const {toStandardHisDisplayFormat, getAgeInYears} = HisDate
-            const birthDate = this.getProp(patient, 'getBirthdate')
-            const genderIcon = this.getProp(patient, 'getGender') === 'M' ? man : woman
+            const birthDate = patient.getBirthdate() //this.getProp(patient, 'getBirthdate')
+            const genderIcon = patient.getGender() === 'M' ? man : woman
             return [
-                { label: "Name", value: this.getProp(patient, 'getFullName'), other: { icon: genderIcon}},
-                { label: "Birthdate", value: `${toStandardHisDisplayFormat(birthDate)} (${getAgeInYears(birthDate)}) (${this.getProp(patient, 'getNationalID')})`},
-                { label: "Current Village", value: this.getProp(patient, 'getCurrentVillage')},
-                { label: "Phone#", value: this.getProp(patient, 'getPhoneNumber')}
+                { label: "Name", value: patient.getFullName(), other: { icon: genderIcon}},
+                { label: "Birthdate", value: `
+                    ${this.toDate(birthDate)}
+                    (${patient.getAge()}) 
+                    (${patient.getNationalID()})`
+                },
+                { label: "Current Village", value: patient.getCurrentVillage() },
+                { label: "Phone#", value: patient.getPhoneNumber()}
             ]
         },
         getProgramCardInfo(info: any) {
@@ -435,7 +437,7 @@ export default defineComponent({
         getActivitiesCardInfo(encounters: Array<Encounter>) {
             return encounters.map((encounter: Encounter) => ({
                 label: encounter.type.name,
-                value: HisDate.toStandardHisTimeFormat(encounter.encounter_datetime),
+                value: this.toTime(encounter.encounter_datetime),
                 other: {
                     id: encounter.encounter_id,
                     columns: ['Observation', 'Value', 'Time'],
@@ -467,13 +469,13 @@ export default defineComponent({
         getMedicationCardInfo(medications: any) {
             return medications.map((medication: any) => ({
                 label: medication.drug.name,
-                value: HisDate.toStandardHisTimeFormat(medication.order.start_date)
+                value: this.toTime(medication.order.start_date)
             }))
         },
         getLabOrderCardInfo(labOrders: any) {
             return labOrders.map((labOrder: any) => ({
                 label: labOrder.specimen.name,
-                value: HisDate.toStandardHisTimeFormat(labOrder.order_date)
+                value: this.toTime(labOrder.order_date)
             }))
         },
         async getPatientAlertCardInfo(){
@@ -505,7 +507,7 @@ export default defineComponent({
             }
         },
         async openModal(items: any, title: string, component: any) {
-            const date = HisDate.toStandardHisDisplayFormat(this.activeVisitDate.toString())
+            const date = this.toDate(this.activeVisitDate.toString())
             const modal = await modalController.create({
                 component: component,
                 backdropDismiss: false,
@@ -524,7 +526,7 @@ export default defineComponent({
             modal.present()
         },
         async openTableModal(columns: any, rows: any, title: string) {
-            const date = HisDate.toStandardHisDisplayFormat(this.activeVisitDate.toString())
+            const date = this.toDate(this.activeVisitDate.toString())
             const modal = await modalController.create({
                 component: CardDrilldown,
                 backdropDismiss: false,
@@ -544,8 +546,8 @@ export default defineComponent({
             const columns = ['Medication', 'Start date', 'End date', 'Amount given']
             const rows = this.medications.map((medication: any) => ([
                 medication.drug.name, 
-                HisDate.toStandardHisDisplayFormat(medication.order.start_date),
-                HisDate.toStandardHisDisplayFormat(medication.order.auto_expire_date),
+                this.toDate(medication.order.start_date),
+                this.toDate(medication.order.auto_expire_date),
                 medication.quantity
             ]))
             this.openTableModal(columns, rows, 'Medication History')
@@ -555,7 +557,7 @@ export default defineComponent({
             const rows = this.labOrders.map((order: any) => ([
                 order.accession_number, 
                 order.specimen.name,
-                HisDate.toStandardHisTimeFormat(order.order_date)
+                this.toTime(order.order_date)
             ]))
             this.openTableModal(columns, rows, `Lab Orders`)
         },
