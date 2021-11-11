@@ -30,12 +30,20 @@
                 </ion-segment-button>
             </ion-segment>
         </ion-toolbar>
-    
+        <ion-toolbar class="mobile-component-view" v-if="nextTask.name"> 
+            <ion-button
+                :style="{width: '100%'}"
+                size="medium"
+                color="light"
+                @click="$router.push(nextTask)">
+                <b>NEXT TASK: {{ nextTask.name.toUpperCase() }}</b>
+            </ion-button>
+        </ion-toolbar>
         <ion-content id="main-content">
             <!-- Mobile dashboard view -->
             <div class="mobile-component-view" v-if="!appHasCustomDashboard">
                 <!-- Patient Treatment TAB --->
-                <ion-grid v-if="activeTab === 1"> 
+                <ion-grid v-if="activeTab === 1">
                     <ion-row> 
                         <ion-col size="12">
                             <primary-card :icon="timeIcon" :counter="encountersCardItems.length" title="Activities" :items="encountersCardItems" titleColor="#658afb" @click="showAllEncounters"> </primary-card>
