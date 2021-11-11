@@ -17,15 +17,15 @@
         <ion-toolbar class="mobile-component-view"> 
             <ion-segment :value="activeTab" mode="ios" class="ion-justify-content-center">
                 <ion-segment-button value="1" @click="activeTab=1"> 
-                    <ion-icon :icon="folderIcon"> </ion-icon>
+                    <ion-icon :icon="calendar"> </ion-icon>
                     <ion-label>Visits</ion-label>
                 </ion-segment-button>
                 <ion-segment-button value="2" @click="activeTab=2"> 
-                    <ion-icon :icon="folderIcon"> </ion-icon>
+                    <ion-icon :icon="person"> </ion-icon>
                     <ion-label>Patient</ion-label>
                 </ion-segment-button>
                 <ion-segment-button value="3" @click="activeTab=3"> 
-                    <ion-icon :icon="folderIcon"> </ion-icon>
+                    <ion-icon :icon="medical"> </ion-icon>
                     <ion-label>Program</ion-label>
                 </ion-segment-button>
             </ion-segment>
@@ -196,13 +196,17 @@ import { OrderService } from "@/services/order_service"
 import TaskSelector from "@/components/DataViews/TaskSelectorModal.vue"
 import EncounterView from "@/components/DataViews/DashboardEncounterModal.vue"
 import CardDrilldown from "@/components/DataViews/DashboardTableModal.vue"
-import { man, woman } from "ionicons/icons";
 import { WorkflowService } from "@/services/workflow_service"
 import { toastSuccess, toastDanger, alertConfirmation } from "@/utils/Alerts";
 import _, { isEmpty } from "lodash"
 import MinimalToolbar from "@/components/PatientDashboard/MinimalToolbar.vue"
 import FullToolbar from "@/components/PatientDashboard/FullToolbar.vue"
 import {
+    man,
+    person,
+    calendar,
+    medical,
+    woman,
     clipboardOutline, 
     appsOutline, 
     folderOutline, 
@@ -244,6 +248,15 @@ export default defineComponent({
         IonGrid,
         IonRow,
         IonCol,
+    },
+    setup() {
+        return {
+            man,
+            person, 
+            woman,
+            calendar,
+            medical
+        }
     },
     data: () => ({
         appsIcon: appsOutline,
