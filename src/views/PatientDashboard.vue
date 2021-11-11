@@ -307,7 +307,7 @@ export default defineComponent({
     },
     data: () => ({
         activeTab: 1 as number,
-        app: {} as any,
+        app: ProgramService.getActiveApp() as any,
         dashboardComponent: {} as any,
         isBDE: false as boolean,
         currentDate: '',
@@ -336,33 +336,17 @@ export default defineComponent({
                 ? this.patient.getFullName()
                 : 'N/A'
         },
-        patientDescription(): string {
-            return !isEmpty(this.patient) 
-                ? this.patient.getPatientInfoString()
-                : 'N/A'
-        },
         appHasCustomContent(): boolean {
             return !_.isEmpty(this.app.customPatientDashboardContentComponent)
-                ? true
-                : false
-        },
-        appHasCustomDashboard(): boolean {
-            return !_.isEmpty(this.app.customPatientDashboardComponent)
                 ? true
                 : false
         },
         customDashboardContent(): any {
             return this.app.customPatientDashboardContentComponent
         },
-        customDashboard(): boolean {
-            return this.app.customPatientDashboardComponent
-        },
         visitDatesTitle(): string {
             return `${this.visitDates.length} Visits`
         }
-    },
-    created() {
-        this.app = ProgramService.getActiveApp()
     },
     watch: {
         "$route" : {
@@ -377,7 +361,7 @@ export default defineComponent({
             immediate: true
         },
         async activeVisitDate(date: string) {
-            if (!(this.appHasCustomContent || this.appHasCustomDashboard)) {
+            if (!(this.appHasCustomContent)) {
                 this.encounters = await EncounterService.getEncounters(this.patientId, {date})
                 this.medications = await DrugOrderService.getOrderByPatient(this.patientId, {'start_date': date})
                 this.labOrders = await OrderService.getOrders(this.patientId, {date})
@@ -639,17 +623,15 @@ export default defineComponent({
         font-weight: 600;
         font-size: 0.74em;
     }
+
     .grid-custom {
         overflow-y: auto;
         font-size: 0.9em;
     }
+
     .his-card {
         height: 75vh;
         padding: 1.0%;
-    }
-    #mobile-content-area {
-        overflow-y: auto;
-        height: 99%;
     }
 
     @media (max-width:900px) {
@@ -660,6 +642,7 @@ export default defineComponent({
             display: block;
         }
     }
+
     @media (min-width: 1278px) {
         .next-task {
             font-size: 1.0em;
