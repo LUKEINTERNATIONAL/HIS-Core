@@ -8,7 +8,7 @@
       <ion-button color="danger" slot="end" @click="closeModal()">X</ion-button>
     </ion-toolbar>
   </ion-header>
-  <ion-content class="ion-padding">
+  <ion-toolbar>
     <ion-segment @ionChange="segmentChanged($event)" :value="segment">
       <ion-segment-button value="paeds">
         <ion-label>Paeds</ion-label>
@@ -17,6 +17,8 @@
         <ion-label>Adults</ion-label>
       </ion-segment-button>
     </ion-segment>
+  </ion-toolbar>
+  <ion-content class="ion-padding">
     <apexchart
       width="100%"
       type="bar"
@@ -48,7 +50,7 @@ export default defineComponent({
     IonToolbar,
     IonButton,
     IonSegment,
-    IonSegmentButton
+    IonSegmentButton,
   },
   methods: {
     async closeModal() {
@@ -70,7 +72,9 @@ export default defineComponent({
       this.series[0].data = [...data];
       drugs.forEach(async (element: any) => {
         const stockLevels = await service.getConsumptionRate(element.drugID);
-        const stockLevelInMonths = parseInt(stockLevels["stock_level_in_months"]);
+        const stockLevelInMonths = parseInt(
+          stockLevels["stock_level_in_months"]
+        );
 
         this.series[0].data.push({
           x: element.shortName,
@@ -95,40 +99,40 @@ export default defineComponent({
           bar: {
             borderRadius: 4,
             horizontal: true,
-            colors: {ranges: [{
+            colors: {
+              ranges: [
+                {
                   from: 0,
                   to: 2,
-                  color: '#ff0000'
-              },
-              {
+                  color: "#ff0000",
+                },
+                {
                   from: 2,
                   to: 4,
-                  color: '#66CDAA'
-              },
-              {
+                  color: "#66CDAA",
+                },
+                {
                   from: 4,
                   to: 1000000,
-                  color: '#ffff00'
-              }
+                  color: "#ffff00",
+                },
               ],
-          },
+            },
           },
         },
         grid: {
           column: {
             colors: ["#FFFFFF", "#FFFFFF", "green"],
           },
-         
         },
         yaxis: {
           min: 1,
           max: 9,
-          fillColor: '#ffff00',
+          fillColor: "#ffff00",
           tickAmount: 1,
         },
         xaxis: {
-          
-          fillColor: '#ffff00',
+          fillColor: "#ffff00",
         },
       },
       series: [
@@ -139,6 +143,5 @@ export default defineComponent({
       ],
     };
   },
- 
 });
 </script>
