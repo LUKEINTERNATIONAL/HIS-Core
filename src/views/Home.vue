@@ -147,7 +147,6 @@ import {
   IonLabel,
   modalController
 } from "@ionic/vue";
-import DrugModalVue from "@/apps/ART/Components/DrugModal.vue";
 export default defineComponent({
   name: "Home",
   components: {
@@ -255,23 +254,8 @@ export default defineComponent({
       if (data) {
         this.app = data
         this.activeTab = 1
-        this.showStock();
         this.loadApplicationData();
       }
-    },
-    async showStock() {
-        const prop = await GlobalPropertyService.isStockManagementEnabled();
-        const isART = Service.getProgramID() === 1;
-        if(prop === "true" && isART) {
-          const modal = await modalController.create({
-          component: DrugModalVue,
-          cssClass: "large-modal",
-          backdropDismiss: false
-          });
-
-          modal.present() 
-        }
-        return
     },
     checkForbarcode(){
       if(this.patientBarcode.match(/.+\$$/i) != null){

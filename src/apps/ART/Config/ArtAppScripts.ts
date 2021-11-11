@@ -15,6 +15,7 @@ import HisDate from "@/utils/Date"
 import { GeneralDataInterface } from "@/apps/interfaces/AppInterface";
 import { GlobalPropertyService } from "@/services/global_property_service"
 import { PatientTypeService } from "@/apps/ART/services/patient_type_service"
+import DrugModalVue from "@/apps/ART/Components/DrugModal.vue";
 
 async function enrollInArtProgram(patientID: number, patientType: string, clinic: string) {
     const program = new PatientProgramService(patientID)
@@ -51,6 +52,17 @@ export async function init() {
     });
     modal.present();
     await modal.onDidDismiss()
+    const prop = await GlobalPropertyService.isStockManagementEnabled();
+    if(prop === "true") {
+        const drugModal = await modalController.create({
+        component: DrugModalVue,
+        cssClass: "large-modal",
+        backdropDismiss: false
+        });
+
+        drugModal.present() 
+        await drugModal.onDidDismiss()
+    }
     return modal;
 }
 
