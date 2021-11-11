@@ -37,9 +37,12 @@
         </ion-toolbar>
 
         <ion-toolbar class="mobile-component-view" v-if="nextTask.name"> 
-            <ion-button :style="{width: '100%'}" color="light"
+            <ion-button 
+                :style="{width: '100%'}" 
+                color="success"
                 @click="$router.push(nextTask)">
-                <b>NEXT TASK: {{ nextTask.name.toUpperCase() }}</b>
+                <ion-label><b>Next Task{{ nextTask.name.toUpperCase() }}</b></ion-label>
+                <ion-icon :icon="alertCircle"> </ion-icon>
             </ion-button>
         </ion-toolbar>
 
@@ -73,7 +76,7 @@
                 </ion-grid>
                 <!-- Patient Information TAB --->
                 <ion-list v-if="activeTab === 2">
-                    <div class="his-card" :style="{height: '100%'}"
+                    <div class="his-card info-card-item"
                         v-for="(item, rIndex) in patientCardInfo" 
                         :key="rIndex"> 
                         <ion-item lines="none"> 
@@ -84,30 +87,31 @@
                 </ion-list>
                 <!-- Program Information TAB -->
                 <ion-list v-if="activeTab === 3"> 
-                    <div class="his-card" :style="{height: '100%'}"
+                    <div class="his-card info-card-item"
                         v-for="(item, rIndex) in programCardInfo" 
-                        :key="rIndex"> 
+                        :key="rIndex">
                         <ion-item lines="none"> 
                             <ion-label> {{item.label}} </ion-label>
                             <ion-label slot="end"> <b>{{item.value}}</b> </ion-label>
                         </ion-item>
+                        <p/>
                     </div>
                 </ion-list>
                 <!-- Dates TAB -->
                 <ion-list v-if="activeTab === 4"> 
-                    <div class="his-card" :style="{height: '100%'}"> 
+                    <div class="his-card info-card-item"> 
                         <ion-item lines="none"> 
                             <ion-label> Today </ion-label>
                             <ion-label slot="end"> <b>{{currentDate}}</b> </ion-label>
                         </ion-item>
                     </div>
-                    <div class="his-card" :style="{height: '100%'}">     
+                    <div class="his-card info-card-item">     
                         <ion-item lines="none"> 
                             <ion-label> Session </ion-label>
                             <ion-label slot="end"> <b>{{sessionDate}}</b> </ion-label>
                         </ion-item>
                     </div>
-                    <div class="his-card" :style="{height: '100%'}"> 
+                    <div class="his-card info-card-item"> 
                         <ion-item lines="none"> 
                             <ion-label> Current visit date </ion-label>
                             <ion-label slot="end"> <b>{{activeVisitDate}}</b> </ion-label>
@@ -246,7 +250,8 @@ import {
     clipboard, 
     apps, 
     folder,
-    logOut, 
+    logOut,
+    alertCircle,
     timeOutline, 
     warningOutline 
 } from "ionicons/icons";
@@ -302,7 +307,8 @@ export default defineComponent({
             clipboardOutline, 
             appsOutline, 
             folderOutline,
-            logOutOutline, 
+            logOutOutline,
+            alertCircle
         }
     },
     data: () => ({
@@ -611,6 +617,10 @@ export default defineComponent({
 <style scoped>
     ion-icon {
         padding: 0.2em;
+    }
+    .info-card-item {
+        height: 100%!important;
+        margin: 1.2em;
     }
     .full-component-view {
         display: block;
