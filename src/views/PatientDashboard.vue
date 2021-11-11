@@ -14,6 +14,7 @@
             :appIcon="app.applicationIcon"
             @onClickMenuItem="onActiveVisitDate"
         />
+
         <ion-toolbar class="mobile-component-view"> 
             <ion-segment :value="activeTab" mode="ios" class="ion-justify-content-center">
                 <ion-segment-button value="1" @click="activeTab=1"> 
@@ -34,19 +35,17 @@
                 </ion-segment-button>
             </ion-segment>
         </ion-toolbar>
+
         <ion-toolbar class="mobile-component-view" v-if="nextTask.name"> 
-            <ion-button
-                :style="{width: '100%'}"
-                size="medium"
-                color="light"
+            <ion-button :style="{width: '100%'}" color="light"
                 @click="$router.push(nextTask)">
                 <b>NEXT TASK: {{ nextTask.name.toUpperCase() }}</b>
             </ion-button>
         </ion-toolbar>
+
         <ion-content id="main-content">
             <!-- Mobile dashboard view -->
             <div class="mobile-component-view">
-                <!-- Patient Treatment TAB --->
                 <component
                     v-if="appHasCustomContent && activeTab === 1" 
                     v-bind:is="customDashboardContent"
@@ -55,20 +54,20 @@
                     >  
                 </component>
                 <ion-grid v-if="!appHasCustomContent && activeTab === 1">
-                    <ion-row> 
-                        <ion-col size="12">
-                            <primary-card :icon="timeIcon" :counter="encountersCardItems.length" title="Activities" :items="encountersCardItems" titleColor="#658afb" @click="showAllEncounters"> </primary-card>
-                        </ion-col>
-                        <ion-col size="12">
-                            <primary-card :icon="timeIcoaxzn" :counter="labOrderCardItems.length" title="Lab Orders" :items="labOrderCardItems" titleColor="#69bb7b" @click="showAllLabOrders"> </primary-card>
-                        </ion-col>
-                    </ion-row>
-                    <ion-row> 
-                        <ion-col size="12"> 
-                            <primary-card :icon="warningIcon" :counter="alertCardItems.length" title="Alerts" :items="alertCardItems" titleColor="#f95d5d"> </primary-card>
-                        </ion-col>
-                        <ion-col size="12"> 
-                            <primary-card :icon="timeIcon" :counter="medicationCardItems.length" title="Medications" :items="medicationCardItems" titleColor="#fdb044" @click="showAllMedications"> </primary-card>
+                    <ion-row>
+                        <ion-col size="12"
+                            v-for="(card, cardIndex) in patientCards"
+                            :key="cardIndex"
+                            >
+                            <primary-card
+                                :counter="card.items.length"
+                                :icon="card.icon"
+                                :title="card.label"
+                                :titleColor="card.color"
+                                :items="card.items"
+                                @click="card.onClick"
+                                > 
+                            </primary-card>
                         </ion-col>
                     </ion-row>
                 </ion-grid>
@@ -155,22 +154,22 @@
                         </component>
                         <!--Default patient dashboard content-->
                         <div v-if="!appHasCustomContent">
-                        <ion-row> 
-                            <ion-col size-md="6" size-sm="12">
-                                <primary-card :icon="timeOutline" :counter="encountersCardItems.length" title="Activities" :items="encountersCardItems" titleColor="#658afb" @click="showAllEncounters"> </primary-card>
-                            </ion-col>
-                            <ion-col size-md="6" size-sm="12">
-                                <primary-card :icon="timeOutline" :counter="labOrderCardItems.length" title="Lab Orders" :items="labOrderCardItems" titleColor="#69bb7b" @click="showAllLabOrders"> </primary-card>
-                            </ion-col>
-                        </ion-row>
-                        <ion-row> 
-                            <ion-col size-md="6" size-sm="12"> 
-                                <primary-card :icon="warningOutline" :counter="alertCardItems.length" title="Alerts" :items="alertCardItems" titleColor="#f95d5d"> </primary-card>
-                            </ion-col>
-                            <ion-col size-md="6" size-sm="12"> 
-                                <primary-card :icon="timeOutline" :counter="medicationCardItems.length" title="Medications" :items="medicationCardItems" titleColor="#fdb044" @click="showAllMedications"> </primary-card>
-                            </ion-col>
-                        </ion-row>
+                            <ion-row> 
+                                <ion-col 
+                                    size="6"
+                                    v-for="(card, cardIndex) in patientCards"
+                                    :key="cardIndex">
+                                    <primary-card
+                                        :counter="card.items.length"
+                                        :icon="card.icon"
+                                        :title="card.label"
+                                        :titleColor="card.color"
+                                        :items="card.items"
+                                        @click="card.onClick"
+                                        > 
+                                    </primary-card>
+                                </ion-col>
+                            </ion-row>
                         </div>
                         </div>
                     </ion-col>
@@ -328,7 +327,8 @@ export default defineComponent({
         encountersCardItems: [] as Array<Option>,
         medicationCardItems: [] as Array<Option>,
         labOrderCardItems: [] as Array<Option>,
-        alertCardItems: [] as Array<Option>
+        alertCardItems: [] as Array<Option>,
+        patientCards: [] as Array<any>
     }),
     computed: {
         patientName(): string {
@@ -384,6 +384,7 @@ export default defineComponent({
                 this.encountersCardItems = this.getActivitiesCardInfo(this.encounters)
                 this.medicationCardItems = this.getMedicationCardInfo(this.medications)
                 this.labOrderCardItems = this.getLabOrderCardInfo(this.labOrders)
+                this.updateCards()
             }
         }
     },
@@ -400,12 +401,79 @@ export default defineComponent({
             this.visitDates = await this.getPatientVisitDates(this.patientId)
             this.alertCardItems = await this.getPatientAlertCardInfo() || []
             this.programID = ProgramService.getProgramID()
+            this.updateCards()
         },
         toDate(date: string | Date) {
             return HisDate.toStandardHisDisplayFormat(date)
         },
         toTime(date: string | Date) {
             return HisDate.toStandardHisTimeFormat(date)
+        },
+        updateCards() {
+            this.patientCards = [
+                this.activitiesCard(),
+                this.labOrderCard(),
+                this.alertsCard(),
+                this.medicationCard(),
+            ]
+        },
+        activitiesCard() {
+            return {
+                label: 'Activities',
+                items: this.encountersCardItems,
+                icon: timeOutline,
+                color: '#658afb',
+                onClick: () => this.openModal(
+                    this.encountersCardItems, 
+                    'Select Activities', 
+                    EncounterView
+                )
+            }
+        },
+        labOrderCard() {
+            const label = 'Lab Orders'
+            return {
+                label,
+                color: '#69bb7b',
+                icon: timeOutline,
+                items: this.labOrderCardItems,
+                onClick: () => {
+                    const columns = ['Accession#',  'Specimen', 'Time']
+                    const rows = this.labOrders.map((order: any) => ([
+                        order.accession_number, 
+                        order.specimen.name,
+                        this.toTime(order.order_date)
+                    ]))
+                    this.openTableModal(columns, rows, `Lab Orders`)
+                }
+            }
+        },
+        alertsCard() {
+            return {
+                label: 'Alerts',
+                color: '#f95d5d',
+                icon: warningOutline,
+                items: this.alertCardItems,
+                onClick: () => { /* TODO, list all alerts */ }
+            }
+        },
+        medicationCard() {
+            return {
+                label: 'Medications',
+                color: '#fdb044',
+                icon: timeOutline,
+                items: this.medicationCardItems,
+                onClick: () => {
+                    const columns = ['Medication', 'Start date', 'End date', 'Amount given']
+                    const rows = this.medications.map((medication: any) => ([
+                        medication.drug.name, 
+                        this.toDate(medication.order.start_date),
+                        this.toDate(medication.order.auto_expire_date),
+                        medication.quantity
+                    ]))
+                    this.openTableModal(columns, rows, 'Medication History')
+                }
+            }
         },
         async fetchPatient(patientId: number | string){
             const patient: Patient = await Patientservice.findByID(patientId);
@@ -453,6 +521,7 @@ export default defineComponent({
                         try {
                             await EncounterService.voidEncounter(encounter.encounter_id, reason)
                             _.remove(this.encountersCardItems, { label: encounter.type.name })
+                            this.updateCards()
                             this.nextTask = await this.getNextTask(this.patientId)
                             toastSuccess('Encounter has been voided!', 3000)
                         }catch(e) {
@@ -477,7 +546,7 @@ export default defineComponent({
         getMedicationCardInfo(medications: any) {
             return medications.map((medication: any) => ({
                 label: medication.drug.name,
-                value: this.toTime(medication.order.start_date)
+                value: this.toTime(medication.order.start_date),
             }))
         },
         getLabOrderCardInfo(labOrders: any) {
@@ -546,28 +615,6 @@ export default defineComponent({
                 }
             })
             modal.present()
-        },
-        showAllEncounters() {
-            this.openModal(this.encountersCardItems, 'Activities', EncounterView)
-        },
-        showAllMedications() {
-            const columns = ['Medication', 'Start date', 'End date', 'Amount given']
-            const rows = this.medications.map((medication: any) => ([
-                medication.drug.name, 
-                this.toDate(medication.order.start_date),
-                this.toDate(medication.order.auto_expire_date),
-                medication.quantity
-            ]))
-            this.openTableModal(columns, rows, 'Medication History')
-        },
-        showAllLabOrders() {
-            const columns = ['Accession#',  'Specimen', 'Time']
-            const rows = this.labOrders.map((order: any) => ([
-                order.accession_number, 
-                order.specimen.name,
-                this.toTime(order.order_date)
-            ]))
-            this.openTableModal(columns, rows, `Lab Orders`)
         },
         async onCancel() {
             const confirmation = await alertConfirmation('Are you sure you want to cancel?')
