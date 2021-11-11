@@ -41,7 +41,7 @@
                 :style="{width: '100%'}" 
                 color="success"
                 @click="$router.push(nextTask)">
-                <ion-label><b>Next Task{{ nextTask.name.toUpperCase() }}</b></ion-label>
+                <ion-label><b>Next Task: {{ nextTask.name.toUpperCase() }}</b></ion-label>
                 <ion-icon :icon="alertCircle"> </ion-icon>
             </ion-button>
         </ion-toolbar>
