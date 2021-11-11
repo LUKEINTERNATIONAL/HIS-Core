@@ -90,6 +90,8 @@ export default {
     },
     {
       name: 'DDE Settings', 
+      icon: 'programs.png',
+      condition: () => UserService.isAdmin(),
       files: [
         {
           name: "DDE Activation",
