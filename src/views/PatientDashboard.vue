@@ -15,19 +15,26 @@
             @onClickMenuItem="onActiveVisitDate"
         />
         <ion-content id="main-content">
-            <!--RENDER PROGRAM CUSTOM DASHBOARD AS COMPONENT -->
-            <component
-                v-if="appHasCustomDashboard"
-                v-bind:is="customDashboard"
-                :patient="patient"
-                :program="patientProgram"
-                :currentDate="currentDate"
-                :sessionDate="sessionDate"
-                :isBDE="isBDE"
-                > 
-            </component>
+            <ion-grid v-if="!appHasCustomDashboard" class="mobile-component-view"> 
+                <ion-row> 
+                    <ion-col size="12">
+                        <primary-card :icon="timeIcon" :counter="encountersCardItems.length" title="Activities" :items="encountersCardItems" titleColor="#658afb" @click="showAllEncounters"> </primary-card>
+                    </ion-col>
+                    <ion-col size="12">
+                        <primary-card :icon="timeIcon" :counter="labOrderCardItems.length" title="Lab Orders" :items="labOrderCardItems" titleColor="#69bb7b" @click="showAllLabOrders"> </primary-card>
+                    </ion-col>
+                </ion-row>
+                <ion-row> 
+                    <ion-col size="12"> 
+                        <primary-card :icon="warningIcon" :counter="alertCardItems.length" title="Alerts" :items="alertCardItems" titleColor="#f95d5d"> </primary-card>
+                    </ion-col>
+                    <ion-col size="12"> 
+                        <primary-card :icon="timeIcon" :counter="medicationCardItems.length" title="Medications" :items="medicationCardItems" titleColor="#fdb044" @click="showAllMedications"> </primary-card>
+                    </ion-col>
+                </ion-row>
+            </ion-grid>
             <!-- RENDER DEFAULT PATIENT DASHBOARD -->
-            <ion-grid v-if="!appHasCustomDashboard" class='grid-custom vertically-align'>
+            <ion-grid v-if="!appHasCustomDashboard" class='full-component-view grid-custom vertically-align'>
                 <ion-row>
                     <ion-col size="2.4">
                         <visit-dates-card :title="visitDatesTitle" :items="visitDates" @onselect="onActiveVisitDate"> </visit-dates-card>
