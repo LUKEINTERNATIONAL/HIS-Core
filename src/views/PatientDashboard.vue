@@ -24,9 +24,13 @@
                     <ion-icon :icon="person"> </ion-icon>
                     <ion-label>Patient</ion-label>
                 </ion-segment-button>
-                <ion-segment-button value="3" @click="activeTab=3"> 
+                <ion-segment-button value="3" @click="activeTab=3">
                     <ion-icon :icon="medical"> </ion-icon>
                     <ion-label>Program</ion-label>
+                </ion-segment-button>
+                <ion-segment-button value="4" @click="activeTab=4"> 
+                    <ion-icon :icon="time"> </ion-icon>
+                    <ion-label>Dates</ion-label>
                 </ion-segment-button>
             </ion-segment>
         </ion-toolbar>
@@ -87,6 +91,27 @@
                         <ion-item lines="none"> 
                             <ion-label> {{item.label}} </ion-label>
                             <ion-label slot="end"> <b>{{item.value}}</b> </ion-label>
+                        </ion-item>
+                    </div>
+                </ion-list>
+                <!-- Dates TAB -->
+                <ion-list v-if="activeTab === 4"> 
+                    <div class="his-card" :style="{height: '100%'}"> 
+                        <ion-item lines="none"> 
+                            <ion-label> Today </ion-label>
+                            <ion-label slot="end"> <b>{{currentDate}}</b> </ion-label>
+                        </ion-item>
+                    </div>
+                    <div class="his-card" :style="{height: '100%'}">     
+                        <ion-item lines="none"> 
+                            <ion-label> Session </ion-label>
+                            <ion-label slot="end"> <b>{{sessionDate}}</b> </ion-label>
+                        </ion-item>
+                    </div>
+                    <div class="his-card" :style="{height: '100%'}"> 
+                        <ion-item lines="none"> 
+                            <ion-label> Current visit date </ion-label>
+                            <ion-label slot="end"> <b>{{activeVisitDate}}</b> </ion-label>
                         </ion-item>
                     </div>
                 </ion-list>
@@ -210,6 +235,7 @@ import MinimalToolbar from "@/components/PatientDashboard/MinimalToolbar.vue"
 import FullToolbar from "@/components/PatientDashboard/FullToolbar.vue"
 import {
     man,
+    time,
     person,
     calendar,
     medical,
@@ -259,7 +285,8 @@ export default defineComponent({
     setup() {
         return {
             man,
-            person, 
+            person,
+            time,
             woman,
             calendar,
             medical
