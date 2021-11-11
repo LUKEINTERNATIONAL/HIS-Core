@@ -41,9 +41,16 @@
         </ion-toolbar>
         <ion-content id="main-content">
             <!-- Mobile dashboard view -->
-            <div class="mobile-component-view" v-if="!appHasCustomDashboard">
+            <div class="mobile-component-view">
                 <!-- Patient Treatment TAB --->
-                <ion-grid v-if="activeTab === 1">
+                <component
+                    v-if="appHasCustomContent && activeTab === 1" 
+                    v-bind:is="customDashboardContent"
+                    :patient="patient"
+                    :visitDate="activeVisitDate"
+                    >  
+                </component>
+                <ion-grid v-if="!appHasCustomContent && activeTab === 1">
                     <ion-row> 
                         <ion-col size="12">
                             <primary-card :icon="timeIcon" :counter="encountersCardItems.length" title="Activities" :items="encountersCardItems" titleColor="#658afb" @click="showAllEncounters"> </primary-card>
