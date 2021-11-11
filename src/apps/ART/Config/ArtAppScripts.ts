@@ -35,7 +35,10 @@ async function enrollInArtProgram(patientID: number, patientType: string, clinic
     await patientTypeService.save()
 }
 
-export async function init() {
+/**
+ * Present a modal to select Art activities
+ */
+async function showArtActivities() {
     const activities = PRIMARY_ACTIVITIES
         .map((activity: TaskInterface)=> ({
             value: activity.workflowID 
@@ -52,6 +55,12 @@ export async function init() {
     });
     modal.present();
     await modal.onDidDismiss()
+}
+
+/**
+ * Present a modal to show drug chart
+ */
+async function showStockManagementChart() {
     const prop = await GlobalPropertyService.isStockManagementEnabled();
     if(prop === "true") {
         const drugModal = await modalController.create({
@@ -63,7 +72,11 @@ export async function init() {
         drugModal.present() 
         await drugModal.onDidDismiss()
     }
-    return modal;
+}
+
+export async function init() {
+    await showArtActivities()
+    await showStockManagementChart()
 }
 
 export async function onRegisterPatient(patientID: number, person: any, attr: any, router: any) {
