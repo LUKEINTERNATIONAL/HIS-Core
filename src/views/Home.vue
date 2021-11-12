@@ -144,7 +144,8 @@ import {
   IonButton,
   IonSegment,
   IonSegmentButton,
-  IonLabel
+  IonLabel,
+  modalController
 } from "@ionic/vue";
 export default defineComponent({
   name: "Home",
