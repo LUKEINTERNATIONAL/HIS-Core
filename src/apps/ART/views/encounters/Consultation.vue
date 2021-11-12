@@ -13,18 +13,17 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import { Option } from "@/components/Forms/FieldInterface";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
-import EncounterMixinVue from "./EncounterMixin.vue";
 import { alertAction, toastSuccess, toastWarning } from "@/utils/Alerts";
 import HisDate from "@/utils/Date";
 import { findIndex, isEmpty, find } from "lodash";
 import { ConsultationService } from "@/apps/ART/services/consultation_service";
 import { UserService } from "@/services/user_service";
 import { OrderService } from "@/services/order_service";
-import HisApp from "@/apps/app_lib";
 import { ConceptService } from "@/services/concept_service";
+import AdherenceMixinVue from "./AdherenceMixin.vue";
 
 export default defineComponent({
-  mixins: [EncounterMixinVue],
+  mixins: [AdherenceMixinVue],
   components: { HisStandardForm },
   data: () => ({
     fields: [] as any,
@@ -57,6 +56,7 @@ export default defineComponent({
           this.fields = this.getFields();
           this.consultation = new ConsultationService(this.patientID, this.providerID);
           this.completedTBTherapy();
+          await this.initAdherence(this.patient, this.providerID)
         }
       },
       deep: true,
@@ -86,9 +86,13 @@ export default defineComponent({
         this.sulphurObs,
         this.referObs,
         ...this.medicationObs,
-      ]);
-      const filtered = data.filter((d) => !isEmpty(d));
-      const obs = await this.consultation.saveObservationList(filtered);
+      ])
+
+      const filtered = data.filter((d) => !isEmpty(d))
+
+      const obs = await this.consultation.saveObservationList(filtered)
+
+      await this.saveAdherence()
 
       if (!obs) return toastWarning("Unable to save patient observations");
 
@@ -831,6 +835,7 @@ export default defineComponent({
           type: FieldType.TT_SELECT,
           options: () => this.getYesNo(),
         },
+        ...this.getAdherenceFields(),
         {
           id: "prescription",
           helpText: "Medication to prescribe during this visit",
@@ -840,9 +845,9 @@ export default defineComponent({
             return this.disablePrescriptions(listData, value);
           },
           options: (_: any, checked: Array<Option>) => this.getPrescriptionFields(checked),
-        },
-      ];
-    },
-  },
-});
+        }
+      ]
+    }
+  }
+})
 </script>
