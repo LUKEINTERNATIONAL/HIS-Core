@@ -40,9 +40,24 @@ export default [
       "name": "patient smokes"
    },
    {
+      "categories": ['risk factors'],
+      "concept_id": 2318,
+      "name": "Patient drinks alcohol"
+   },
+   {
       "categories": [],
       "concept_id": 9675,
       "name": "Referral"
+   },
+   {
+      "categories": [],
+      "concept_id": 1054,
+      "name": "Marital status"
+   },
+   {
+      "categories": [],
+      "concept_id": 8366,
+      "name": "Religion"
    },
    {
       "categories": [],
