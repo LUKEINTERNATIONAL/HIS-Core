@@ -54,19 +54,21 @@ export default defineComponent({
     sulphurObs: {} as any,
     referObs: {} as any,
     medicationObs: [] as any,
+    askAdherence: false as boolean
   }),
   watch: {
     ready: {
       async handler(value: boolean) {
         if (value) {
-          this.fields = this.getFields();
           this.consultation = new ConsultationService(
             this.patientID,
             this.providerID
           );
+          await this.initAdherence(this.patient, this.providerID)
+          this.askAdherence = this.adherence.receivedDrugsBefore()
+          this.fields = this.getFields();
           await this.checkVLReminder();
           this.completedTBTherapy();
-          await this.initAdherence(this.patient, this.providerID)
         }
       },
       deep: true,
@@ -102,7 +104,7 @@ export default defineComponent({
 
       const obs = await this.consultation.saveObservationList(filtered)
 
-      await this.saveAdherence()
+      if (this.askAdherence) await this.saveAdherence()
 
       if (!obs) return toastWarning("Unable to save patient observations");
 
@@ -902,7 +904,7 @@ export default defineComponent({
           type: FieldType.TT_SELECT,
           options: () => this.getYesNo(),
         },
-        ...this.getAdherenceFields(),
+        ...this.getAdherenceFields(this.askAdherence),
         {
           id: "prescription",
           helpText: "Medication to prescribe during this visit",

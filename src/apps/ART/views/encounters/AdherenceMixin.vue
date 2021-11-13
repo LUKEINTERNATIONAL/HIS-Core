@@ -94,12 +94,13 @@ export default defineComponent({
                 d.quantity, d.equivalent_daily_dose, d.order.start_date
             )
         },
-        getAdherenceFields(): Array<Field> {
+        getAdherenceFields(showFields=true): Array<Field> {
             return [
                 {
                     id: 'pills_brought',
                     helpText: 'Pills remaining (brought to clinic)',
                     type: FieldType.TT_ADHERENCE_INPUT,
+                    condition: () => showFields,
                     validation: (val: any) => {
                         if (Validation.required(val)) return ['No drugs available']
 
@@ -139,6 +140,7 @@ export default defineComponent({
                     id: "adherence_report",
                     helpText: "ART adherence",
                     type: FieldType.TT_TABLE_VIEWER,
+                    condition: () => showFields,
                     options: (d: any) => this.buildAdherenceReport(
                         d.pills_brought.map((i: Option) => ({ 
                             ...i.other, pillsBrought: i.value
@@ -154,7 +156,7 @@ export default defineComponent({
                     id: "agree_with_calculation",
                     helpText: "Agree with adherence calculation",
                     type: FieldType.TT_SELECT,
-                    condition: () => this.askReasonForPoorAdherence,
+                    condition: () => this.askReasonForPoorAdherence && showFields,
                     validation: (val: Option) => Validation.required(val),
                     unload: ({ value }: Option) => {
                         this.calculationAgreementObs = [ this.adherence.buildValueCoded(
