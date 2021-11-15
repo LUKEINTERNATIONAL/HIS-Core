@@ -12,6 +12,7 @@
           v-model="userInput.username"
           v-on:click="renderKeyBoard($event)"
           class="input-boxes"
+          :readonly="isReadOnly"
         />
       </div>
     </div>
@@ -26,6 +27,7 @@
           v-on:click="renderKeyBoard($event)"
           class="input-boxes"
           placeholder="Password"
+          :readonly="isReadOnly"
         />
       </div>
     </div>
@@ -67,12 +69,14 @@
 import { toastWarning, toastDanger } from "@/utils/Alerts";
 import { defineComponent } from 'vue';
 import { AuthService, InvalidCredentialsError } from "@/services/auth_service"
+import { isPlatform } from "@ionic/vue"
 
 export default defineComponent({
   props: ["keys"],
   data: function () {
     return {
       auth: {} as any,
+      isReadOnly: false as boolean,
       userInput: {
         type: String,
         username: "",
@@ -95,6 +99,7 @@ export default defineComponent({
   }, 
   created() {
     this.auth = new AuthService()
+    this.isReadOnly = !isPlatform('desktop')
   },
   methods: {
     renderKeyBoard(e: any) {
