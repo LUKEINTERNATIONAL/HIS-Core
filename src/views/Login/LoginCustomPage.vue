@@ -31,37 +31,37 @@
         />
       </div>
     </div>
-    <div id="keyboard" :style="btnStyles" class="keyboard">
-      <span v-bind:key="k" v-for="k in keys">
-        <div class="rows">
-          <div class="cells" v-bind:key="r" v-for="r in k">
-            <button
-              v-if="r === 'Next' || r === 'Login'"
-              :id="btnCaption"
-              class="keyboard-btn login-btn"
-              v-on:click="keyPress($event)"
-            >
-              {{ btnCaption }}
-            </button>
+  </div>
+  <div id="keyboard" :style="btnStyles"  class="keyboard">
+    <span v-bind:key="k" v-for="k in LOGIN_KEYBOARD">
+      <div class="rows">
+        <div class="cells" v-bind:key="r" v-for="r in k">
+          <button
+            v-if="r === 'Next' || r === 'Login'"
+            :id="btnCaption"
+            class="keyboard-btn login-btn"
+            v-on:click="keyPress($event)"
+          >
+            {{ btnCaption }}
+          </button>
 
-            <button
-              v-if="r != 'Login' && r != 'Next'"
-              :id="Caps.on ? r.toUpperCase() : r.toLowerCase()"
-              class="keyboard-btn"
-              v-on:click="keyPress($event)"
-            >
-              {{
-                r === "Del." || r === "Caps"
-                  ? r
-                  : Caps.on
-                  ? r.toUpperCase()
-                  : r.toLowerCase()
-              }}
-            </button>
-          </div>
+          <button
+            v-if="r != 'Login' && r != 'Next'"
+            :id="Caps.on ? r.toUpperCase() : r.toLowerCase()"
+            class="keyboard-btn"
+            v-on:click="keyPress($event)"
+          >
+            {{
+              r === "Del." || r === "Caps"
+                ? r
+                : Caps.on
+                ? r.toUpperCase()
+                : r.toLowerCase()
+            }}
+          </button>
         </div>
-      </span>
-    </div>
+      </div>
+    </span>
   </div>
 </template>
 
@@ -70,11 +70,12 @@ import { toastWarning, toastDanger } from "@/utils/Alerts";
 import { defineComponent } from 'vue';
 import { AuthService, InvalidCredentialsError } from "@/services/auth_service"
 import { isPlatform } from "@ionic/vue"
+import { LOGIN_KEYBOARD } from "@/components/Keyboard/KbLayouts"
 
 export default defineComponent({
-  props: ["keys"],
   data: function () {
     return {
+      LOGIN_KEYBOARD: LOGIN_KEYBOARD,
       auth: {} as any,
       isReadOnly: false as boolean,
       userInput: {
@@ -114,8 +115,9 @@ export default defineComponent({
       inputPos = parseInt(inputPos);
 
       this.keyboardLeft = width / 2 - 447 + "px;";
-      this.keyboardTop = inputPos + 77 + "px;";
+      this.keyboardTop = inputPos + 20 + "px;";
       this.display = "table";
+      window.scrollTo(0,9999);
     },
     keyPress(e: any) {
       const key = e.currentTarget.id;
@@ -207,11 +209,10 @@ export default defineComponent({
 }
 
 .keyboard {
-  z-index: 40;
-  /*width: auto;*/
+  text-align: center;
   position: absolute;
   background-color: white;
-  width: 50%;
+  width: 56%;
   margin: auto;
   background-color: rgba(255, 255, 255, 0.9);
   border: 1px solid rgb(204, 204, 204);

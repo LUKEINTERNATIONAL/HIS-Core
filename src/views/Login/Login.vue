@@ -13,7 +13,7 @@
         </ion-label>
       </ion-toolbar>
     </ion-header>
-    <ion-content>
+    <ion-content fullscreen="false">
       <inputs></inputs>
     </ion-content>
     <ion-footer>
