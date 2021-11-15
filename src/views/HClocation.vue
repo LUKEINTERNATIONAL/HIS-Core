@@ -8,6 +8,7 @@
     <ion-content>
       <barcode-input 
         class="his-card"
+        :clearValue="clearValue"
         @onValue="onbarcodeText" 
         @onScan="onScan">
       </barcode-input>
@@ -65,20 +66,22 @@ export default defineComponent({
   },
   setup() {
     const barcodeText = ref('')
-
+    const clearValue = ref('')
+  
     async function searchLocation() {
       if (!barcodeText.value.includes('$')) {
         barcodeText.value += '$'
       }
       const response = await Service.getJson(`locations/${barcodeText.value}`)
       if (isEmpty(response)) {
-        barcodeText.value = ''
         toastWarning("Invalid location")
       }else {
         const data = response
         sessionStorage.userLocation = data.name;
         router.push("/");
       }
+      clearValue.value = barcodeText.value
+      barcodeText.value = ''
     }
 
     function onbarcodeText(t: string) {
@@ -94,6 +97,7 @@ export default defineComponent({
       onbarcodeText,
       onScan,
       searchLocation,
+      clearValue,
       barcodeText
     }
   }

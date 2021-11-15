@@ -19,6 +19,7 @@ export default defineComponent({
     IonRow,
     IonCol,
   },
+  props: ['clearValue'],
   data: () => ({
     barcodeText: ''
   }),
@@ -41,9 +42,14 @@ export default defineComponent({
     }
   },
   watch: {
+    clearValue() {
+      this.barcodeText = ''
+    },
     barcodeText: function(text) {
-      this.checkForbarcode();
-      this.$emit('onValue', text)
+      if (text) {
+        this.checkForbarcode();
+        this.$emit('onValue', text)
+      }
     }
   }
 });
