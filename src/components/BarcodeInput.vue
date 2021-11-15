@@ -41,8 +41,9 @@ export default defineComponent({
     }
   },
   watch: {
-    barcodeText: function() {
+    barcodeText: function(text) {
       this.checkForbarcode();
+      this.$emit('onValue', text)
     }
   }
 });
