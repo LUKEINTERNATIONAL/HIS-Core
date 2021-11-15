@@ -9,10 +9,16 @@
       <barcode-input 
         class="his-card"
         :clearValue="clearValue"
+        :virtualText="kbText"
         @onValue="onbarcodeText" 
         @onScan="onScan">
       </barcode-input>
     </ion-content>
+    <his-keyboard
+      v-if="isTouchPlatform"
+      :kbConfig="NUMBERS" 
+      :onKeyPress="onKbClick"> 
+    </his-keyboard>
     <ion-footer> 
       <ion-toolbar color="dark"> 
         <ion-button 
@@ -49,8 +55,11 @@ import {
   IonTitle, 
   IonToolbar,
   IonButton,
-  IonFooter
+  IonFooter,
+  getPlatforms
 } from '@ionic/vue';
+import HisKeyboard from '@/components/Keyboard/HisKeyboard.vue';
+import {NUMBERS} from "@/components/Keyboard/HisKbConfigurations"
 
 export default defineComponent({
   name: 'HC location',
@@ -62,12 +71,21 @@ export default defineComponent({
     IonTitle,
     IonToolbar,
     IonButton,
-    IonFooter
+    IonFooter,
+    HisKeyboard
   },
   setup() {
     const barcodeText = ref('')
     const clearValue = ref('')
-  
+    const kbText = ref('')
+    const isTouchPlatform = getPlatforms().filter(p => [
+      'ios', 
+      'iphone', 
+      'android', 
+      'mobileweb', 
+      'tablet'
+    ].includes(p)).length >= 1
+
     async function searchLocation() {
       if (!barcodeText.value.includes('$')) {
         barcodeText.value += '$'
@@ -82,10 +100,15 @@ export default defineComponent({
       }
       clearValue.value = barcodeText.value
       barcodeText.value = ''
+      kbText.value = barcodeText.value
     }
 
     function onbarcodeText(t: string) {
       barcodeText.value = t
+    }
+
+    function onKbClick(t: string) {
+      kbText.value = t
     }
 
     async function onScan(t: string) {
@@ -96,15 +119,22 @@ export default defineComponent({
     return {
       onbarcodeText,
       onScan,
+      onKbClick,
       searchLocation,
+      isTouchPlatform,
+      kbText,
       clearValue,
-      barcodeText
+      barcodeText,
+      NUMBERS
     }
   }
 })
 </script>
 
 <style scoped>
+.his-floating-keyboard  {
+  bottom: 70px!important;
+}
 .his-card {
   margin: auto;
   width: 95%;
