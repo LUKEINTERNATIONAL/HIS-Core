@@ -1,5 +1,5 @@
 import { Service } from "./service";
-import { modalController } from "@ionic/vue";
+import { getPlatforms, modalController } from "@ionic/vue";
 import ZebraPrinterComponent from "@/components/ZebraPrinterImage.vue"
 import { delayPromise } from "@/utils/Timers";
 import ApiClient from "./api_client";
@@ -19,7 +19,13 @@ export class PrintoutService extends Service {
 
     async printLbl(url: any) {
         PrintoutService.showPrinterImage()
-        document.location = (await ApiClient.expandPath(url)).url as any
+        const isNative = getPlatforms().filter(p => [
+            'android', 
+            ].includes(p)).length >= 1
+            if(!isNative) {
+
+            document.location = (await ApiClient.expandPath(url)).url as any
+            } 
         await delayPromise(3000)
         await modalController.dismiss({})
     }
