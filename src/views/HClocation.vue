@@ -138,6 +138,5 @@ export default defineComponent({
 .his-card {
   margin: auto;
   width: 95%;
-  margin-top: 5%;
 }
 </style>

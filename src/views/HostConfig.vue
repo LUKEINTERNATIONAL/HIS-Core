@@ -30,7 +30,8 @@ export default defineComponent({
           id: "ip_address",
           helpText: "Enter IP Address",
           type: FieldType.TT_TEXT,
-          validation: (val: any) => Validation.required(val) || Validation.isIPAddress(val),
+          validation: (val: any) => Validation.required(val) 
+            || Validation.isIPAddress(val),
           config: {
             customKeyboard: [
               CHARACTERS_AND_NUMBERS_LO,
