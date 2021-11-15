@@ -8,32 +8,33 @@
             <b style="color: #cd853f">EMR</b>
           </ion-label>
         </ion-title>
-        <ion-label slot="end">
-          Version: <b>{{ versionDetails.version }}</b>
+        <ion-label class="ion-padding" slot="end">
+          Version: <b>{{ version }}</b>
         </ion-label>
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <inputs v-bind:keys="keys"></inputs>
+      <inputs></inputs>
     </ion-content>
     <ion-footer>
       <ion-toolbar>
         <span>
           <img
             id="coat"
-            src="/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png"
+            :src="coatImg"
             alt="Malawi Coat of Arms logo"
           />
           <img
             id="pepfar"
-            src="/assets/images/login-logos/PEPFAR.png"
+            :src="pepfarImg"
             alt="PEPFAR logo"
           />
         </span>
         <ion-button
+          slot="end"
           class="config"
           router-link="/settings/host"
-          v-if="showConfig()">
+          v-if="showConfig">
           Configuration
         </ion-button>
       </ion-toolbar>
@@ -43,44 +44,40 @@
 
 <script lang="ts">
 import Inputs from "./LoginCustomPage.vue";
-import {LOGIN_KEYBOARD} from "@/components/Keyboard/KbLayouts";
 import { 
   IonButton, 
   IonPage, 
   IonContent, 
   IonFooter,
   IonHeader,
-  IonToolbar
+  IonToolbar,
+  IonTitle,
+  IonLabel
 } from "@ionic/vue";
+import img from '@/utils/Img';
 export default {
   name: "login",
   components: {
     Inputs,
     IonButton,
+    IonTitle,
+    IonLabel,
     IonPage,
     IonHeader,
     IonToolbar,
     IonContent,
     IonFooter,
   },
-  data() {
+  setup() {
     return {
-      versionDetails: {
-        type: String,
-        version: "1.0.0",
-      },
-      keys: LOGIN_KEYBOARD,
-    };
-  },
-  methods: {
-    showConfig(): boolean {
-      if (localStorage.getItem("useLocalStorage") === "true") return true;
-      return false;
-    },
-  },
-};
+      version: "1.0.0",
+      coatImg: img('login-logos/Malawi-Coat_of_arms_of_arms.png'),
+      pepfarImg: img('login-logos/PEPFAR.png'),
+      showConfig: localStorage.getItem("useLocalStorage") === "true"
+    }
+  }
+}
 </script>
-
 <style scoped>
 #coat {
   width: 8vw;
@@ -89,10 +86,5 @@ export default {
 #pepfar {
   width: 6vw;
   height: 6vw;
-}
-.config {
-  margin: auto;
-  float: right;
-  margin-top: 20px;
 }
 </style>
