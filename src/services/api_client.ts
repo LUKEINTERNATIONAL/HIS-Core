@@ -99,7 +99,7 @@ const ApiClient = (() => {
             let response;
 
             try {
-                EventBus.emit(ApiBusEvents.BEFORE_API_REQUEST)
+                EventBus.emit(ApiBusEvents.BEFORE_API_REQUEST, uri)
 
                 response = await fetch(url, params);
 
