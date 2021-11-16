@@ -16,15 +16,12 @@ export default defineComponent({
   mixins: [EncounterMixinVue],
   data: () => ({
     complaintsService: {} as any,
-    complaints: [] as Array<any>,
-    complaintsGroup: [] as Array<any>
   }),
   watch: {
     ready: {
       async handler(isReady: boolean) {
         if(isReady){
           this.complaintsService = new PatientComplaintsService(this.patientID, this.providerID)
-          this.complaintsGroup = await PatientComplaintsService.getComplaintsList('Presenting complaint group')
           this.fields = this.getFields()
         }
       },
@@ -33,13 +30,10 @@ export default defineComponent({
     }
   },
   methods: {
-    async onSubmit(_: any, computedData: any){   
-      await this.complaintsService.createEncounter()
-      await this.complaintsService.createEncounter()
-      
-      const data = await Promise.all(computedData.complaints)     
+    async onSubmit(_: any, computedData: any){     
+      const data = await Promise.all(computedData.complaints)   
+      await this.complaintsService.createEncounter()    
       await this.complaintsService.saveObservationList(data)
-
       this.nextTask()        
     },
     getFields(): Array<Field>{
