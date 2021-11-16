@@ -1,6 +1,6 @@
 import router from '@/router/index';
 import EventBus from '@/utils/EventBus';
-import { toastDanger, alertConfirmation } from "@/utils/Alerts"
+import { toastDanger } from "@/utils/Alerts"
 /** Nprogress */
 import 'nprogress/nprogress.css'
 import nprogress from 'nprogress'
@@ -102,12 +102,12 @@ const ApiClient = (() => {
 
             let response;
             try {
-                EventBus.emit(ApiBusEvents.API_SUCCESS)
-
                 nprogress.start()
                 response = await fetch(url, params);
                 nprogress.done()
 
+                EventBus.emit(ApiBusEvents.API_SUCCESS)
+                
                 if (response.status === 401 && !noRedirectCodes.includes(response.status)
                     && window.location.href.search(/login\/?$/) < 0) {
                     router.push('/login');
