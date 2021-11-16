@@ -1,10 +1,16 @@
 import router from '@/router/index';
+import EventBus from '@/utils/EventBus';
 import { toastDanger, alertConfirmation } from "@/utils/Alerts"
 /** Nprogress */
 import 'nprogress/nprogress.css'
 import nprogress from 'nprogress'
 
 nprogress.configure({ easing: 'ease', speed: 870, trickleSpeed:1 });
+
+export enum ApiBusEvents {
+    UNREACHABLE_API = 'un_reachable_api',
+    API_SUCCESS = 'api_success'
+}
 
 const ApiClient = (() => {
     interface Config {
@@ -85,6 +91,7 @@ const ApiClient = (() => {
 
     async function execFetch(uri: string, params: object, noRedirectCodes: number[] = []) {
         const pathData = await expandPath(uri)
+
         if (pathData.status == "complete") {
             const url = pathData.url;
             params = { ...params, mode: 'cors' };
@@ -95,10 +102,10 @@ const ApiClient = (() => {
 
             let response;
             try {
-                nprogress.start()
- 
-                response = await fetch(url, params);
+                EventBus.emit(ApiBusEvents.API_SUCCESS)
 
+                nprogress.start()
+                response = await fetch(url, params);
                 nprogress.done()
 
                 if (response.status === 401 && !noRedirectCodes.includes(response.status)
@@ -113,13 +120,8 @@ const ApiClient = (() => {
                     return response;
                 }
             } catch (e) {
-                toastDanger(`Failed to fetch ${url}`);
-                const confirmation = await alertConfirmation('Can not connect to API, enter manual configuration?') 
-                const path = '/settings/host'
-                if (confirmation) {
-                    !path ? router.back() : router.push({path})
-                }
-                return null;
+                EventBus.emit(ApiBusEvents.UNREACHABLE_API)
+                nprogress.done()
             }
         }
         else {
