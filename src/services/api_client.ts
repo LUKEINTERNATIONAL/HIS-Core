@@ -1,4 +1,3 @@
-import router from '@/router/index';
 import EventBus from '@/utils/EventBus';
 import { toastDanger } from "@/utils/Alerts"
 
@@ -104,18 +103,8 @@ const ApiClient = (() => {
                 response = await fetch(url, params);
 
                 EventBus.emit(ApiBusEvents.AFTER_API_REQUEST, response)
-
-                if (response.status === 401 && !noRedirectCodes.includes(response.status)
-                    && window.location.href.search(/login\/?$/) < 0) {
-                    router.push('/login');
-                    return null;
-                } else if (response.status >= 500 && !noRedirectCodes.includes(response.status)) {
-                    const { error, exception } = await response.json();
-                    toastDanger(`${error} - ${exception}`);
-                    return null;
-                } else {
-                    return response;
-                }
+                
+                return response
             } catch (e) {
                 EventBus.emit(ApiBusEvents.ON_API_CRASH, e)
             }

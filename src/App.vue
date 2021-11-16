@@ -28,11 +28,12 @@ import { IonApp, IonRouterOutlet, IonButton } from '@ionic/vue';
 import { defineComponent, ref, watch } from 'vue';
 import ApiClient, { ApiBusEvents } from "@/services/api_client"
 import EventBus from "@/utils/EventBus"
-import { toastWarning } from './utils/Alerts';
+import { toastWarning, toastDanger } from './utils/Alerts';
 import { useRoute } from 'vue-router';
 /** Nprogress */
 import 'nprogress/nprogress.css'
 import nprogress from 'nprogress'
+import router from '@/router/index';
 
 export default defineComponent({
   name: 'App',
@@ -66,7 +67,8 @@ export default defineComponent({
       }
     )
 
-    EventBus.on(ApiBusEvents.BEFORE_API_REQUEST, 
+    EventBus.on(
+      ApiBusEvents.BEFORE_API_REQUEST, 
       (url: string) => {
         // Use stealth for health checks
         if (url != '/api/v1/_health/') {
@@ -75,14 +77,23 @@ export default defineComponent({
       }
     )
 
-    EventBus.on(ApiBusEvents.AFTER_API_REQUEST, 
-      () => {
+    EventBus.on(
+      ApiBusEvents.AFTER_API_REQUEST, 
+      async (res: any) => {
+        if (res && res.status === 401
+            && window.location.href.search(/login\/?$/) < 0) {
+              router.push('/login')
+        } else if (res.status >= 500) {
+          const { error, exception } = await res.json();
+          toastDanger(`${error} - ${exception}`);
+        }
         apiOk.value = true
         nprogress.done()
       }
     )
 
-    EventBus.on(ApiBusEvents.ON_API_CRASH, 
+    EventBus.on(
+      ApiBusEvents.ON_API_CRASH, 
       () => {
         if (apiOk.value) {
           toastWarning('Unable to reach api. You can fix the error below')
