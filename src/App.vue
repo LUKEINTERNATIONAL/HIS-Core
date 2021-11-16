@@ -80,9 +80,8 @@ export default defineComponent({
     EventBus.on(
       ApiBusEvents.AFTER_API_REQUEST, 
       async (res: any) => {
-        console.log(route.name)
         if (res && res.status === 401 && route.name != 'Login') {
-              router.push('/login')
+          router.push('/login')
         } else if (res.status >= 500) {
           const { error, exception } = await res.json();
           toastDanger(`${error} - ${exception}`);

@@ -1,5 +1,4 @@
 import EventBus from '@/utils/EventBus';
-import { toastDanger } from "@/utils/Alerts"
 
 export enum ApiBusEvents {
     BEFORE_API_REQUEST = 'before_api_request',
@@ -51,8 +50,9 @@ const ApiClient = (() => {
     async function expandPath(resourcePath: string) {
         const config = await getConfig();
         if(config.message) {
-            toastDanger(config.message);
+            throw config.message
         }
+
         if (config.data) {
             return {
                 status: "complete",
@@ -108,9 +108,8 @@ const ApiClient = (() => {
             } catch (e) {
                 EventBus.emit(ApiBusEvents.ON_API_CRASH, e)
             }
-        }
-        else {
-            toastDanger('could not configure services');
+        } else {
+            throw 'could not configure services'
         }
     }
     
