@@ -15,14 +15,25 @@ import {
 } from "@/components/Keyboard/KbLayouts";
 import ApiClient from "@/services/api_client";
 import { infoActionSheet } from "@/utils/ActionSheets";
+import { toastWarning } from "@/utils/Alerts"
+
 export default defineComponent({
   components: { HisStandardForm },
   methods: {
-    onFinish(formData: any) {
+    async onFinish(formData: any) {
       const ipAddress = formData.ip_address.value;
       const port = formData.port.value;
       ApiClient.setLocalStorage(ipAddress, port);
-      this.$router.back();
+
+      const res = await ApiClient.healthCheck()
+      if (!(res && res.status === 200) || !res) {
+        toastWarning(`
+          Unable to connect to:
+          ${formData.ip_address.value}://${formData.port.value}
+        `)
+      } else {
+        this.$router.back();
+      }
     },
     getFields() {
       this.fields = [
