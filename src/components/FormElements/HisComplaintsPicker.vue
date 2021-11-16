@@ -16,7 +16,7 @@
                   v-for="(data, index) in listData" :key="index"
                   @click="getSpecificComplaints(data.value)"
                   :detail="true"
-                  :color="data.isChecked ? 'light':''"
+                  :color="ActiveCategory === data.label ? 'light':''"
                 > 
                   <ion-label> {{ data.label }} </ion-label>
                 </ion-item>
