@@ -1,15 +1,11 @@
 import router from '@/router/index';
 import EventBus from '@/utils/EventBus';
 import { toastDanger } from "@/utils/Alerts"
-/** Nprogress */
-import 'nprogress/nprogress.css'
-import nprogress from 'nprogress'
-
-nprogress.configure({ easing: 'ease', speed: 870, trickleSpeed:1 });
 
 export enum ApiBusEvents {
-    UNREACHABLE_API = 'un_reachable_api',
-    API_SUCCESS = 'api_success'
+    BEFORE_API_REQUEST = 'before_api_request',
+    AFTER_API_REQUEST = 'after_api_request',
+    ON_API_CRASH = 'un_reachable_api',
 }
 
 const ApiClient = (() => {
@@ -101,13 +97,14 @@ const ApiClient = (() => {
             }
 
             let response;
-            try {
-                nprogress.start()
-                response = await fetch(url, params);
-                nprogress.done()
 
-                EventBus.emit(ApiBusEvents.API_SUCCESS)
-                
+            try {
+                EventBus.emit(ApiBusEvents.BEFORE_API_REQUEST)
+
+                response = await fetch(url, params);
+
+                EventBus.emit(ApiBusEvents.AFTER_API_REQUEST, response)
+
                 if (response.status === 401 && !noRedirectCodes.includes(response.status)
                     && window.location.href.search(/login\/?$/) < 0) {
                     router.push('/login');
@@ -120,8 +117,7 @@ const ApiClient = (() => {
                     return response;
                 }
             } catch (e) {
-                EventBus.emit(ApiBusEvents.UNREACHABLE_API)
-                nprogress.done()
+                EventBus.emit(ApiBusEvents.ON_API_CRASH, e)
             }
         }
         else {

@@ -30,6 +30,10 @@ import ApiClient, { ApiBusEvents } from "@/services/api_client"
 import EventBus from "@/utils/EventBus"
 import { toastWarning } from './utils/Alerts';
 import { useRoute } from 'vue-router';
+/** Nprogress */
+import 'nprogress/nprogress.css'
+import nprogress from 'nprogress'
+
 export default defineComponent({
   name: 'App',
   components: {
@@ -41,6 +45,12 @@ export default defineComponent({
     const apiOk = ref(true)
     const route = useRoute()
     const notConfigPage = ref(true)
+    
+    nprogress.configure({ 
+      easing: 'ease', 
+      speed: 870, 
+      trickleSpeed:1 
+    })
 
     function refresh() {
       location.reload()
@@ -55,16 +65,25 @@ export default defineComponent({
         immediate: true
       }
     )
-
-    EventBus.on(ApiBusEvents.API_SUCCESS, 
-      () => apiOk.value = true
+    EventBus.on(ApiBusEvents.BEFORE_API_REQUEST, 
+      () => {
+        nprogress.start()
+      }
     )
-    EventBus.on(ApiBusEvents.UNREACHABLE_API, 
+    EventBus.on(ApiBusEvents.AFTER_API_REQUEST, 
+      () => {
+        apiOk.value = true
+        nprogress.done()
+      }
+    )
+
+    EventBus.on(ApiBusEvents.ON_API_CRASH, 
       () => {
         if (apiOk.value) {
           toastWarning('Unable to reach api. You can fix the error below')
           apiOk.value = false
         }
+        nprogress.done()
       }
     )
     return {
