@@ -1,7 +1,7 @@
 <template>
   <ion-app>
     <ion-router-outlet :key="$route.fullPath"/>
-    <div id="api-error" v-if="!apiOk && notConfigPage">
+    <div id="api-error" class="his-card" v-if="!apiOk && notConfigPage">
       <p>
         Unable to connect to BHT-API. 
         Please check: 
