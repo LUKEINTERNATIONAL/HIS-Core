@@ -5,7 +5,7 @@
       <p>
         Unable to connect to BHT-API. 
         Please check: 
-        <ul> 
+        <ul :style="{listStyle:'none'}"> 
           <li> Your configuration </li>
           <li> The service is running </li>
           <li> Your network cable is ok </li>
@@ -28,7 +28,7 @@ import { IonApp, IonRouterOutlet, IonButton } from '@ionic/vue';
 import { defineComponent, ref, watch } from 'vue';
 import ApiClient, { ApiBusEvents } from "@/services/api_client"
 import EventBus from "@/utils/EventBus"
-import { toastDanger } from './utils/Alerts';
+import { toastWarning } from './utils/Alerts';
 import { useRoute } from 'vue-router';
 export default defineComponent({
   name: 'App',
@@ -47,7 +47,7 @@ export default defineComponent({
     }
 
     // Do the annoying health checks every X amount of Miliseconds
-    setInterval(() => ApiClient.healthCheck(), 8000)
+    setInterval(() => ApiClient.healthCheck(), 10000)
 
     watch(route, (route) => 
       notConfigPage.value = route.name != 'API host settings',
@@ -62,7 +62,7 @@ export default defineComponent({
     EventBus.on(ApiBusEvents.UNREACHABLE_API, 
       () => {
         if (apiOk.value) {
-          toastDanger('Unable to reach api. You can fix the error below')
+          toastWarning('Unable to reach api. You can fix the error below')
           apiOk.value = false
         }
       }
