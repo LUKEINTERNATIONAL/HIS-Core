@@ -142,7 +142,7 @@ export default {
                 showKeyboard: true
             },
             defaultOutput: () => ({label: 'N/A', value: 'N/A'}),
-            defaultComputedOutput: () => ({ person: 'N/A'}),
+            defaultComputedOutput: () => ({ person: 'Unknown'}),
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
             options: (form: any) => getTraditionalAuthorities(form.home_district.value)
@@ -158,7 +158,7 @@ export default {
             },
             requireNext: false,
             defaultOutput: () => ({ label: 'N/A', value: 'N/A' }),
-            defaultComputedOutput: () =>  ({ person: 'N/A'}),
+            defaultComputedOutput: () =>  ({ person: 'Unknown'}),
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
             options: (form: any) => getVillages(form.home_traditional_authority.value)
@@ -193,7 +193,7 @@ export default {
             requireNext: false,
             type: FieldType.TT_SELECT,
             defaultOutput: () => ({label: 'N/A', value: 'N/A'}),
-            defaultComputedOutput: () => ({ person: 'N/A'}),
+            defaultComputedOutput: () => ({ person: 'Unknown'}),
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
             options: (form: any) => getTraditionalAuthorities(form.current_district.value)
@@ -206,7 +206,7 @@ export default {
             requireNext: false,
             type: FieldType.TT_SELECT,
             defaultOutput: () => ({label: 'N/A', value: 'N/A'}),
-            defaultComputedOutput: () =>  ({ person: 'N/A'}),
+            defaultComputedOutput: () =>  ({ person: 'Unknown'}),
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
             options: (form: any) => getVillages(form.current_traditional_authority.value)
