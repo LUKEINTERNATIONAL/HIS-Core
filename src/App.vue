@@ -26,7 +26,7 @@
 <script lang="ts">
 import { IonApp, IonRouterOutlet, IonButton } from '@ionic/vue';
 import { defineComponent, ref, watch } from 'vue';
-import { ApiBusEvents } from "@/services/api_client"
+import ApiClient, { ApiBusEvents } from "@/services/api_client"
 import EventBus from "@/utils/EventBus"
 import { toastDanger } from './utils/Alerts';
 import { useRoute } from 'vue-router';
@@ -45,6 +45,9 @@ export default defineComponent({
     function refresh() {
       location.reload()
     }
+
+    // Do the annoying health checks every X amount of Miliseconds
+    setInterval(() => ApiClient.healthCheck(), 8000)
 
     watch(route, (route) => 
       notConfigPage.value = route.name != 'API host settings',
