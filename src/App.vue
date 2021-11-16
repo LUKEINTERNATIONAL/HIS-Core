@@ -6,16 +6,18 @@
         Unable to connect to BHT-API. 
         Please check: 
         <ol :style="{textAlign: 'left'}"> 
-          <li> your configuration </li>
+          <li> Verify your configuration </li>
           <li> Verify that the service is running </li>
-          <li> Check if your network cable is loose </li>
-          <li> Or Configure a new connection below </li>
+          <li> Verify your network cable is ok </li>
         </ol> 
       </p>
       <ion-button 
         router-link='/settings/host' 
         color="warning"> 
-        Configure connection
+        New Config
+      </ion-button>
+      <ion-button @click="refresh" color="warning"> 
+        Refresh
       </ion-button>
     </div>
   </ion-app>
@@ -40,6 +42,10 @@ export default defineComponent({
     const route = useRoute()
     const notConfigPage = ref(true)
 
+    function refresh() {
+      location.reload()
+    }
+
     watch(route, (route) => 
       notConfigPage.value = route.name != 'API host settings',
       {
@@ -60,6 +66,7 @@ export default defineComponent({
     )
     return {
       apiOk,
+      refresh,
       notConfigPage
     }
   },
