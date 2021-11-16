@@ -5,11 +5,11 @@
       <p>
         Unable to connect to BHT-API. 
         Please check: 
-        <ol :style="{textAlign: 'left'}"> 
-          <li> Verify your configuration </li>
-          <li> Verify that the service is running </li>
-          <li> Verify your network cable is ok </li>
-        </ol> 
+        <ul> 
+          <li> Your configuration </li>
+          <li> The service is running </li>
+          <li> Your network cable is ok </li>
+        </ul> 
       </p>
       <ion-button 
         router-link='/settings/host' 
