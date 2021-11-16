@@ -84,7 +84,7 @@ const ApiClient = (() => {
         });
     }
 
-    async function execFetch(uri: string, params: object, noRedirectCodes: number[] = []) {
+    async function execFetch(uri: string, params: any, noRedirectCodes: number[] = []) {
         const pathData = await expandPath(uri)
 
         if (pathData.status == "complete") {
@@ -128,7 +128,7 @@ const ApiClient = (() => {
     const post = (uri: string, data: object, options = []) => execFetch(uri, { method: 'POST', body: JSON.stringify(data) }, options);
     const remove = (uri: string, data: object, options = []) => execFetch(uri, { method: 'DELETE', body: JSON.stringify(data) }, options);
     const put = (uri: string, data: object, options = []) => execFetch(uri, { method: 'PUT', body: JSON.stringify(data) }, options);
-    const healthCheck = () => get('/api/v1/_health/')
+    const healthCheck = () => get('_health')
     return { get, post, put, remove, getConfig, setLocalStorage, removeOnly, healthCheck };
 })();
 
