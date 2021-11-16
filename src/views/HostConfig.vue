@@ -16,6 +16,7 @@ import {
 import ApiClient from "@/services/api_client";
 import { infoActionSheet } from "@/utils/ActionSheets";
 import { toastWarning } from "@/utils/Alerts"
+import { loadingController } from "@ionic/vue"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -24,8 +25,18 @@ export default defineComponent({
       const ipAddress = formData.ip_address.value;
       const port = formData.port.value;
       ApiClient.setLocalStorage(ipAddress, port);
+      
+      const loading = await loadingController
+        .create({
+          message: 'Please wait...',
+          backdropDismiss: false
+        })
+      await loading.present()
 
       const res = await ApiClient.healthCheck()
+
+      loadingController.dismiss()
+
       if (!(res && res.status === 200) || !res) {
         toastWarning(`
           Unable to connect to:

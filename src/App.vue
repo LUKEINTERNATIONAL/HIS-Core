@@ -58,7 +58,11 @@ export default defineComponent({
     }
 
     // Do the annoying health checks every X amount of Miliseconds
-    setInterval(() => ApiClient.healthCheck(), 10000)
+    setInterval(() => {
+      if (route.name != 'API host settings') {
+        ApiClient.healthCheck()
+      }
+    }, 10000)
 
     watch(route, (route) => 
       notConfigPage.value = route.name != 'API host settings',
