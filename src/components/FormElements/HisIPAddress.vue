@@ -28,6 +28,7 @@
         > 
     </his-keyboard>
 </template>
+
 <script lang="ts">
 import { defineComponent, onActivated, ref, watch } from 'vue'
 import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
@@ -71,7 +72,6 @@ export default defineComponent({
             const value = handleVirtualInput(
                 input, addressInputs.value[index]
             )
-            console.log(value)
             if (value.length > 3) {
                 switch(activeIndex.value) {
                     case 'first':
@@ -101,19 +101,14 @@ export default defineComponent({
 
         watch(addressInputs, () => {
             const complete = Object.values(addressInputs.value)
-                .map((i: any) => {
-                    const num = parseInt(i)
-                    return !isNaN(num)
-                        && num >= 0 
-                        && num <= 255
-                })
+                .map((i: any) => i ? true : false)
             if (complete.every(Boolean)) {
                 const value = Object.values(addressInputs.value)
                     .map(i => i)
                     .join('.')
                 emit('onValue', {label: value, value})
             }
-        }, {deep: true, immediate: true})
+        }, { deep: true, immediate: true })
         return {
             keypress,
             activeIndex,
