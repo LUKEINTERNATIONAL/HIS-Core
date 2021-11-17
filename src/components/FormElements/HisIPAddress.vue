@@ -8,6 +8,9 @@
                     > 
                     <ion-input
                         type="number"
+                        :class="{
+                            'highlighted-input' : index === activeIndex
+                        }"
                         v-model="addressInputs[index]"
                         @click="onAddressClick(index)"
                         :style="{ textAlign: 'center' }"
@@ -20,15 +23,15 @@
     </view-port>   
     <his-keyboard 
         v-if="showKeyboard"
-        :kbConfig="NUMBERS_ONLY" 
         :onKeyPress="keypress" 
+        :kbConfig="numbers" 
         > 
     </his-keyboard>
 </template>
 <script lang="ts">
 import { defineComponent, onActivated, ref, watch } from 'vue'
 import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
-import { NUMBERS_ONLY } from "@/components/Keyboard/HisKbConfigurations"
+import { NUMBER_PAD_LO } from "@/components/Keyboard/KbLayouts"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue'
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
@@ -65,10 +68,11 @@ export default defineComponent({
                 return
             } 
             const index = activeIndex.value
-            addressInputs.value[index] = handleVirtualInput(
+            const value = handleVirtualInput(
                 input, addressInputs.value[index]
             )
-            if (addressInputs.value[index].length >= 3) {
+            console.log(value)
+            if (value.length > 3) {
                 switch(activeIndex.value) {
                     case 'first':
                         activeIndex.value = 'second'
@@ -82,6 +86,10 @@ export default defineComponent({
                     case 'fourth':
                         activeIndex.value = ''
                 }
+            } else {
+                addressInputs.value[index] = value === '0'
+                    ? ''
+                    : value
             }
         }
 
@@ -107,10 +115,17 @@ export default defineComponent({
         }, {deep: true, immediate: true})
         return {
             keypress,
+            activeIndex,
             onAddressClick,
             showKeyboard,
             addressInputs,
-            NUMBERS_ONLY
+            numbers: [
+                NUMBER_PAD_LO,
+                [
+                   ['Delete'],
+                   [ 'Clear' ]
+                ]
+            ]
         }
     }
 })
@@ -119,5 +134,9 @@ export default defineComponent({
 <style scoped> 
 #view-port {
     height: 53vh;
+}
+.highlighted-input {
+    color: #3880ff;
+    border-bottom: 3px solid #3880ff;
 }
 </style>
