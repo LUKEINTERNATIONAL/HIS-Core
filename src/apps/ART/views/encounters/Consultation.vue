@@ -20,8 +20,12 @@ import { findIndex, isEmpty, find } from "lodash";
 import { ConsultationService } from "@/apps/ART/services/consultation_service";
 import { UserService } from "@/services/user_service";
 import { OrderService } from "@/services/order_service";
-import HisApp from "@/apps/app_lib";
 import { ConceptService } from "@/services/concept_service";
+import { modalController } from "@ionic/vue";
+import VLReminderModal from "@/components/DataViews/VLReminderModal.vue";
+import { ProgramService } from "@/services/program_service";
+import { ARTLabService } from "../../services/lab_service";
+import { infoActionSheet } from "@/utils/ActionSheets";
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -29,6 +33,7 @@ export default defineComponent({
   data: () => ({
     fields: [] as any,
     labOrderFieldContext: {} as any,
+    prescriptionContext: {} as any,
     consultation: {} as any,
     hasTBTherapyObs: false,
     allergicToSulphur: false,
@@ -55,7 +60,11 @@ export default defineComponent({
       async handler(value: boolean) {
         if (value) {
           this.fields = this.getFields();
-          this.consultation = new ConsultationService(this.patientID, this.providerID);
+          this.consultation = new ConsultationService(
+            this.patientID,
+            this.providerID
+          );
+          await this.checkVLReminder();
           this.completedTBTherapy();
         }
       },
@@ -99,8 +108,41 @@ export default defineComponent({
     isGender(gender: string) {
       return this.patient.getGender() === gender;
     },
+    async checkVLReminder() {
+      const vals = await ProgramService.getPatientVLInfo(this.patientID);
+      if (vals.eligibile === true) {
+        const modal = await modalController.create({
+          component: VLReminderModal,
+          backdropDismiss: false,
+          cssClass: "large-modal",
+          componentProps: { VLData: vals },
+        });
+        modal.present();
+        const { data } = await modal.onDidDismiss();
+        switch (data) {
+          case "order":
+            await this.labOrderFieldContext.launchOrderSelection();
+            break;
+          case "wait":
+            await this.waitForVL();
+            break;
+          case "later":
+            break;
+          default:
+            break;
+        }
+      }
+    },
+    async waitForVL(milestone: any = null) {
+      const orderService = new ARTLabService(this.patientID, this.providerID);
+
+      const encounter = await orderService.createEncounter();
+       const observations = await orderService.buildDefferedOrder(milestone);
+      if (!encounter) return toastWarning("Unable to create encounter");
+      await orderService.saveObservationList(observations);
+    },
     async completedTBTherapy() {
-      const obs = await this.patient.getCompleteTBTherapyHistory(); 
+      const obs = await this.patient.getCompleteTBTherapyHistory();
       this.hasTBTherapyObs = obs.length > 0;
     },
     isOfChildBearingAge() {
@@ -192,7 +234,7 @@ export default defineComponent({
       return listData;
     },
     setDrugOrderObs(listData: Array<Option>) {
-      let prescribeDrugs = 'Yes';
+      let prescribeDrugs = "Yes";
       listData.forEach((element) => {
         if (element.label != "NONE OF THE ABOVE" && element.isChecked) {
           this.medicationObs.push(
@@ -203,7 +245,7 @@ export default defineComponent({
           );
         }
         if (element.label === "NONE OF THE ABOVE" && element.isChecked) {
-         prescribeDrugs = 'No'; 
+          prescribeDrugs = "No";
         }
       });
       this.medicationObs.push(
@@ -283,36 +325,47 @@ export default defineComponent({
       ];
     },
     getFPMethods(exclusionList: string[] = [], preChecked: Array<Option>) {
-      const methods = this.consultation.getFamilyPlanningMethods(); 
-      const filtered = methods.filter((data: string) => !exclusionList.includes(data));
+      const methods = this.consultation.getFamilyPlanningMethods();
+      const filtered = methods.filter(
+        (data: string) => !exclusionList.includes(data)
+      );
       return filtered.map((method: any) => ({
-        label: method, 
+        label: method,
         value: method,
-        isChecked: preChecked.map(i => i.label).includes(method)
+        isChecked: preChecked.map((i) => i.label).includes(method),
       }));
     },
     async getOptions(options: string[], preValues: Array<Option>) {
       return options.map((data: any) => {
-        const preValue = find(preValues, { label: data })
+        const preValue = find(preValues, { label: data });
         return {
           label: data,
-          value: preValue ? preValue.value : '',
+          value: preValue ? preValue.value : "",
           other: {
             values: this.getYesNo(),
-          }
-        }
-      })
+          },
+        };
+      });
     },
     getContraindications(preValues: Array<Option>) {
-      const contraIndications = ConceptService.getConceptsByCategory('contraindication').map(data => data.name);
-      return this.getOptions([...contraIndications, 'Other'], preValues);
+      const contraIndications = ConceptService.getConceptsByCategory(
+        "contraindication"
+      ).map((data) => data.name);
+      return this.getOptions([...contraIndications, "Other"], preValues);
     },
     getOtherContraindications(preValues: Array<Option>) {
-      const contraIndications = ConceptService.getConceptsByCategory('side_effect').map(data => data.name);
-      return this.getOptions([...contraIndications, 'Other (Specify)'], preValues);
+      const contraIndications = ConceptService.getConceptsByCategory(
+        "side_effect"
+      ).map((data) => data.name);
+      return this.getOptions(
+        [...contraIndications, "Other (Specify)"],
+        preValues
+      );
     },
     getTBSymptoms(preValues: Array<Option>) {
-      const contraIndications = ConceptService.getConceptsByCategory('tb_symptom').map(data => data.name);
+      const contraIndications = ConceptService.getConceptsByCategory(
+        "tb_symptom"
+      ).map((data) => data.name);
       return this.getOptions([...contraIndications], preValues);
     },
     getPrescriptionFields(preChecked: Array<Option>) {
@@ -339,12 +392,12 @@ export default defineComponent({
           { value: "3HP (RFP + INH)", description: "Completed TPT" }
         );
       }
-      const data = vals.map(v => {
+      const data = vals.map((v) => {
         if (!isEmpty(preChecked)) {
-          v.isChecked = preChecked.map(v => v.value).includes(v.value)
+          v.isChecked = preChecked.map((v) => v.value).includes(v.value);
         }
-        return v
-      })
+        return v;
+      });
       return [...this.removeAndDisable(data, exclusions)];
     },
     removeAndDisable(initialFields: any[], exclusionList: any[]) {
@@ -382,7 +435,8 @@ export default defineComponent({
           onValueUpdate: (listData: Array<Option>, value: Option) => {
             return this.disablePrescriptions(listData, value);
           },
-          options: (_: any, checked: Array<Option>) => this.getPrescriptionFields(checked),
+          options: (_: any, checked: Array<Option>) =>
+            this.getPrescriptionFields(checked),
           condition: () => false, // show if guardian only visit
         },
         {
@@ -390,7 +444,7 @@ export default defineComponent({
           helpText: "Lab orders",
           type: FieldType.TT_LAB_ORDERS,
           onload: (fieldContext: any) => {
-            this.labOrderFieldContext = fieldContext
+            this.labOrderFieldContext = fieldContext;
           },
           options: async () => {
             const orders = await OrderService.getOrders(this.patientID);
@@ -416,7 +470,7 @@ export default defineComponent({
                 visible: true,
                 onClick: async () => {
                   if (!isEmpty(this.labOrderFieldContext)) {
-                    await this.labOrderFieldContext.launchOrderSelection()
+                    await this.labOrderFieldContext.launchOrderSelection();
                   }
                 },
                 visibleOnStateChange: (state: Record<string, any>) => {
@@ -431,10 +485,11 @@ export default defineComponent({
           helpText: `Patient Pregnant or breastfeeding?`,
           condition: () => this.showPregnancyQuestions(),
           type: FieldType.TT_MULTIPLE_YES_NO,
-          validation: (data: any) => this.validateSeries([
-            () => Validation.required(data), 
-            () => Validation.anyEmpty(data)
-          ]),
+          validation: (data: any) =>
+            this.validateSeries([
+              () => Validation.required(data),
+              () => Validation.anyEmpty(data),
+            ]),
           unload: (data: any) => {
             this.pregnancy = data.map((data: Option) => {
               return this.consultation.buildValueCoded(
@@ -467,22 +522,22 @@ export default defineComponent({
           helpText: "Patient weight chart",
           type: FieldType.TT_WEIGHT_CHART,
           options: async () => {
-            const bmi = await this.patient.getBMI()
-            const values = await this.patient.getWeightHistory()
+            const bmi = await this.patient.getBMI();
+            const values = await this.patient.getWeightHistory();
             return [
               {
                 label: "Weight for patient",
                 value: "Weight trail",
                 other: {
                   bmi,
-                  values: values.map((d: any) => ({ 
-                    x: HisDate.toStandardHisDisplayFormat(d.date), 
-                    y: d.weight
+                  values: values.map((d: any) => ({
+                    x: HisDate.toStandardHisDisplayFormat(d.date),
+                    y: d.weight,
                   })),
-                  age: this.patient.getAge()
-                }
-              }
-            ]
+                  age: this.patient.getAge(),
+                },
+              },
+            ];
           },
           config: {
             hiddenFooterBtns: ["Clear"],
@@ -503,7 +558,8 @@ export default defineComponent({
           condition: (formData: any) =>
             this.showCurrentContraceptionMethods(formData),
           type: FieldType.TT_MULTIPLE_SELECT,
-          options: (_: any, checked: Array<Option>) => this.getFPMethods([], checked),
+          options: (_: any, checked: Array<Option>) =>
+            this.getFPMethods([], checked),
         },
         {
           id: "fp_methods",
@@ -520,7 +576,8 @@ export default defineComponent({
             });
           },
           type: FieldType.TT_MULTIPLE_SELECT,
-          options: (_: any, checked: Array<Option>) => this.getFPMethods([], checked),
+          options: (_: any, checked: Array<Option>) =>
+            this.getFPMethods([], checked),
         },
         {
           id: "reason_for_no_fpm",
@@ -529,7 +586,7 @@ export default defineComponent({
           condition: (formData: any) => this.declinedFPM(formData),
           unload: (data: any) => {
             this.reasonForNoFPM = this.consultation.buildValueText(
-              "Why does the woman not want to use birth control",
+              "Why does the woman not use birth control",
               data.value
             );
           },
@@ -619,16 +676,19 @@ export default defineComponent({
               return this.consultation.buildValueCoded(data.label, data.value);
             });
           },
-          options: (_: any, checked: Array<Option>) => this.getFPMethods(["NONE"], checked),
+          options: (_: any, checked: Array<Option>) =>
+            this.getFPMethods(["NONE"], checked),
         },
         {
           id: "side_effects",
-          helpText: "Contraindications / Side effects (select either 'Yes' or 'No')",
+          helpText:
+            "Contraindications / Side effects (select either 'Yes' or 'No')",
           type: FieldType.TT_MULTIPLE_YES_NO,
-          validation: (data: any) => this.validateSeries([
-            () => Validation.required(data), 
-            () => Validation.anyEmpty(data)
-          ]),
+          validation: (data: any) =>
+            this.validateSeries([
+              () => Validation.required(data),
+              () => Validation.anyEmpty(data),
+            ]),
           unload: async (data: any) => {
             this.sideEffects = await data.map(async (data: Option) => {
               const host = await this.consultation.buildValueCoded(
@@ -644,19 +704,22 @@ export default defineComponent({
                 child: {
                   ...child,
                 },
-              }
-            })
+              };
+            });
           },
-          options: (_: any, checked: Array<Option>) => this.getContraindications(checked),
+          options: (_: any, checked: Array<Option>) =>
+            this.getContraindications(checked),
         },
         {
           id: "other_side_effects",
           condition: (formData: any) => this.showOtherSideEffects(formData),
-          validation: (data: any) => this.validateSeries([
-            () => Validation.required(data), 
-            () => Validation.anyEmpty(data)
-          ]),
-          helpText: "Other Contraindications / Side effects (select either 'Yes' or 'No')",
+          validation: (data: any) =>
+            this.validateSeries([
+              () => Validation.required(data),
+              () => Validation.anyEmpty(data),
+            ]),
+          helpText:
+            "Other Contraindications / Side effects (select either 'Yes' or 'No')",
           type: FieldType.TT_MULTIPLE_YES_NO,
           unload: async (data: any) => {
             const filtered = data.filter((d: any) => {
@@ -679,7 +742,8 @@ export default defineComponent({
               };
             });
           },
-          options: (_: any, checked: Array<Option>) => this.getOtherContraindications(checked)
+          options: (_: any, checked: Array<Option>) =>
+            this.getOtherContraindications(checked),
         },
         {
           id: "on_tb_treatment",
@@ -702,10 +766,11 @@ export default defineComponent({
         {
           id: "tb_side_effects",
           helpText: "TB Associated symptoms",
-          validation: (data: any) => this.validateSeries([
-            () => Validation.required(data), 
-            () => Validation.anyEmpty(data)
-          ]),
+          validation: (data: any) =>
+            this.validateSeries([
+              () => Validation.required(data),
+              () => Validation.anyEmpty(data),
+            ]),
           condition: (formData: any) => this.notOnTBTreatment(formData),
           unload: async (vals: any) => {
             const val =
@@ -731,7 +796,8 @@ export default defineComponent({
             });
           },
           type: FieldType.TT_MULTIPLE_YES_NO,
-          options: (_: any, checked: Array<Option>) => this.getTBSymptoms(checked)
+          options: (_: any, checked: Array<Option>) =>
+            this.getTBSymptoms(checked),
         },
         {
           id: "tb_status",
@@ -836,10 +902,38 @@ export default defineComponent({
           helpText: "Medication to prescribe during this visit",
           type: FieldType.TT_MULTIPLE_SELECT,
           validation: (data: any) => Validation.required(data),
+          onload: (context: any) => {this.prescriptionContext = context},
           onValueUpdate: (listData: Array<Option>, value: Option) => {
             return this.disablePrescriptions(listData, value);
           },
-          options: (_: any, checked: Array<Option>) => this.getPrescriptionFields(checked),
+          config: {
+          footerBtns: [
+            {
+              name: 'Update allergic to CPT',
+              onClick: async () => {
+                  const action = await infoActionSheet(
+                    "Allergic to Cotrimoxazole update",
+                    `Is the patient allergic to cotrimoxazole.`,
+                    "",
+                    [
+                      { name: "Allergic", slot: "start", color: "success" },
+                      { name: "NOT Allergic", slot: "end" },
+                    ]
+                  );
+
+                  if (action === "Allergic") {
+                    this.allergicToSulphur = true;
+                    this.prescriptionContext.listData = this.getPrescriptionFields([]);
+                  }else {
+                    this.allergicToSulphur = false;
+                    this.prescriptionContext.listData = this.getPrescriptionFields([]);
+                  }
+                }
+              }
+            ],
+          },
+          options: (_: any, checked: Array<Option>) =>
+            this.getPrescriptionFields(checked),
         },
       ];
     },

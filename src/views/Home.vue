@@ -40,22 +40,26 @@
       </ion-toolbar>
     </ion-header>
 
+    <ion-toolbar> 
+      <ion-segment mode="ios" scrollable :value="activeTab" class="ion-justify-content-center">
+        <ion-segment-button :value="1" @click="activeTab = 1">
+          <ion-icon :icon="statsChart"> </ion-icon>
+          <ion-label>Overview</ion-label>
+        </ion-segment-button>
+        <ion-segment-button v-if="canReport" :value="2" @click="activeTab = 2">
+          <ion-icon :icon="pieChart"> </ion-icon>
+          <ion-label>Reports</ion-label>
+        </ion-segment-button>
+        <ion-segment-button :value="3" @click="activeTab = 3">
+          <ion-icon :icon="settings"> </ion-icon>
+          <ion-label>Administration</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-toolbar>
+    
     <ion-content :fullscreen="true">
       <div id="container" class="his-card overview" v-if="ready">
-        <ion-segment mode="ios" scrollable :value="activeTab" class="ion-justify-content-center">
-          <ion-segment-button :value="1" @click="activeTab = 1">
-            <ion-icon :icon="statsChart"> </ion-icon>
-            <ion-label>Overview</ion-label>
-          </ion-segment-button>
-          <ion-segment-button v-if="canReport" :value="2" @click="activeTab = 2">
-            <ion-icon :icon="pieChart"> </ion-icon>
-            <ion-label>Reports</ion-label>
-          </ion-segment-button>
-          <ion-segment-button :value="3" @click="activeTab = 3">
-            <ion-icon :icon="settings"> </ion-icon>
-            <ion-label>Administration</ion-label>
-          </ion-segment-button>
-        </ion-segment>
+        
         <component 
           v-if ="activeTab == 1" 
           v-bind:is="appOverview"
@@ -144,7 +148,8 @@ import {
   IonButton,
   IonSegment,
   IonSegmentButton,
-  IonLabel
+  IonLabel,
+  modalController
 } from "@ionic/vue";
 export default defineComponent({
   name: "Home",
