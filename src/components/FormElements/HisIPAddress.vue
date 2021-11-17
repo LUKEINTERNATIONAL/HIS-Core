@@ -42,6 +42,7 @@ import {
     IonCol,
     IonGrid
 } from "@ionic/vue"
+import { isEmpty } from 'lodash'
 
 export default defineComponent({
     components: { 
@@ -53,6 +54,19 @@ export default defineComponent({
         ViewPort
     },
     mixins: [FieldMixinVue],
+    watch: {
+        clear(ok: any) {
+            if (ok) {
+                this.addressInputs = {
+                    first:  '',
+                    second: '',
+                    third:  '',
+                    fourth: ''
+                }
+                this.$emit('onClear')
+            }
+        }
+    },
     setup(props, {emit}) {
         onActivated(() => emit('onFieldActivated', this))
         const showKeyboard = ref(false)
@@ -103,15 +117,21 @@ export default defineComponent({
             showKeyboard.value = true
         }
 
-        watch(addressInputs, () => {
+        watch(addressInputs, (address) => {
+            if (!address) return
             // Only Emit the IP Address if all the parts are set
-            const complete = Object.values(addressInputs.value)
-                .map((i: any) => i ? true : false)
+            const complete = Object.values(address)
+                .map(
+                    (i: any) => !isEmpty(i)
+                )
             if (complete.every(Boolean)) {
-                const value = Object.values(addressInputs.value)
+                const value = Object
+                    .values(address)
                     .map(i => i)
                     .join('.')
                 emit('onValue', {label: value, value})
+            } else {
+                emit('onValue', null)
             }
         }, { deep: true, immediate: true })
 
