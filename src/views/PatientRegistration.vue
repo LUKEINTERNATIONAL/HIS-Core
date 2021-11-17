@@ -1,4 +1,4 @@
-a<template>
+<template>
   <his-standard-form
     @onIndex="fieldComponent=''"
     :skipSummary="skipSummary"

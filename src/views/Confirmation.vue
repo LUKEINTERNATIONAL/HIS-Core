@@ -171,7 +171,7 @@ export default defineComponent({
         birthdate: '' as string,
       } as any,
       globalProperties: {
-        useFilingNumbers: 'use_filing_numbers=true',
+        useFilingNumbers: 'use.filing.numbers=true',
         ddeEnabled: 'dde_enabled=true'
       } as any
     }
