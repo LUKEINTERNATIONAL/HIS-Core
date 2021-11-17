@@ -61,10 +61,28 @@ export default defineComponent({
         }) as any
 
         function keypress(input: string) {
+            if (!activeIndex.value) {
+                return
+            } 
             const index = activeIndex.value
             addressInputs.value[index] = handleVirtualInput(
                 input, addressInputs.value[index]
             )
+            if (addressInputs.value[index].length >= 3) {
+                switch(activeIndex.value) {
+                    case 'first':
+                        activeIndex.value = 'second'
+                        break
+                    case 'second':
+                        activeIndex.value = 'third'
+                        break
+                    case 'third':
+                        activeIndex.value = 'fourth'
+                        break
+                    case 'fourth':
+                        activeIndex.value = ''
+                }
+            }
         }
 
         function onAddressClick(index: string) {
