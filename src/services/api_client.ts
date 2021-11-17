@@ -31,7 +31,7 @@ const ApiClient = (() => {
 
     function getLocalConfig(): Config | null {
         const host = localStorage.apiURL;
-        const port = localStorage.apiURL;
+        const port = localStorage.apiPort;
         const protocol = localStorage.apiProtocol;
         return (host && port && protocol) 
             ? { host, port, protocol }
@@ -94,9 +94,7 @@ const ApiClient = (() => {
         
         try {
             const url = await expandPath(uri)
-
             EventBus.emit(ApiBusEvents.BEFORE_API_REQUEST, uri)
-
             const response = await fetch(url, params);
             EventBus.emit(ApiBusEvents.AFTER_API_REQUEST, response)            
             return response

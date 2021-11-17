@@ -31,6 +31,7 @@ export default defineComponent({
           message: 'Please wait...',
           backdropDismiss: false
         })
+
       await loading.present()
 
       const res = await ApiClient.healthCheck()
@@ -41,6 +42,7 @@ export default defineComponent({
         toastWarning(`
           Unable to connect to: ${protocol}://${ipAddress}: ${port}
         `)
+        this.clearLocalStorage()
       } else {
         this.$router.back();
       }
