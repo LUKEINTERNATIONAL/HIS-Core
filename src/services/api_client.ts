@@ -8,62 +8,61 @@ export enum ApiBusEvents {
 
 const ApiClient = (() => {
     interface Config {
-        protocol?: string;
-        host?: string;
-        port?: string;
-        apiVersion?: string;
-        username?: string;
-        password?: string;
-        version?: string;
-        source?: string;
+        host: string;
+        port: string;
+        protocol: string;
     }
-    async function getConfig(): Promise<{ status: string; data?: Config | undefined; message?: string }> {
-        try {
-            const config: Config = {};
-            if(localStorage.useLocalStorage) {
-                config.host = localStorage.apiURL;
-                config.port = localStorage.apiPort;
-                config.protocol = localStorage.apiProtocol;
-                config.source = JSON.stringify(localStorage);
-            }else {
-                const response = await fetch('/config.json');
 
-                if (response.status !== 200) {
-                    const message = `Looks like there was a problem. Status Code: ${response.status}`;
-                    return { status: "error", message:  message};
-                }
-                const data = await response.json();
-                sessionStorage.setItem("apiURL", data.apiURL);
-                config.host = data.apiURL;
-                sessionStorage.setItem("apiPort", data.apiPort);
-                config.port = data.apiPort;
-                sessionStorage.setItem("apiProtocol", data.apiProtocol);
-                config.protocol = data.apiProtocol;
-                config.version = data.version;
-                config.source = data;
-            }
-            return { status: "complete", data: config };
-        } catch (err) {
-            return { status: "error" };
+    async function getFileConfig(): Promise<Config> {
+        const response = await fetch('/config.json')
+        if (!response || response.status != 200) {
+            throw 'Unable to retrieve configuration file/ Invalid config.json'
+        }
+        const data = await response.json()
+        sessionStorage.setItem("apiURL", data.apiURL);
+        sessionStorage.setItem("apiPort", data.apiPort);
+        sessionStorage.setItem("apiProtocol", data.apiProtocol);
+        return {
+            host: data.apiUrl,
+            port: data.apiPort,
+            protocol: data.apiProtocol
         }
     }
+
+    function getLocalConfig(): Config | null {
+        const host = localStorage.apiURL;
+        const port = localStorage.apiURL;
+        const protocol = localStorage.apiProtocol;
+        return (host && port && protocol) 
+            ? { host, port, protocol }
+            : null
+    }
+
+    function getSessionConfig(): Config | null {
+        const host = sessionStorage.apiURL
+        const port = sessionStorage.apiPort
+        const protocol = sessionStorage.apiProtocol
+
+        return (host && port && protocol) 
+            ? { host, port, protocol }
+            : null
+    }
+
+    function getConfig(): Promise<Config> | Config {
+        const localConfig: Config | null = getLocalConfig()
+        const sessionConfig: Config | null = getSessionConfig()
+
+        if (localStorage.useLocalStorage && localConfig)
+            return localConfig
+
+        if (sessionConfig) return sessionConfig
+
+        return getFileConfig()
+    }
+
     async function expandPath(resourcePath: string) {
-        const config = await getConfig();
-        if(config.message) {
-            throw config.message
-        }
-
-        if (config.data) {
-            return {
-                status: "complete",
-                url: `${config.data.protocol}://${config.data.host}:${config.data.port}/api/v1/${resourcePath}`
-            };
-        } else {
-            return {
-                status: "failed",
-                url: "/"
-            };
-        }
+        const config: Promise<Config> | Config = await getConfig();
+        return `${config.protocol}://${config.host}:${config.port}/api/v1/${resourcePath}`
     }
 
     function headers() {
@@ -83,38 +82,31 @@ const ApiClient = (() => {
     function removeOnly(inclusions: string[]) {
         inclusions.forEach(element => {
            inclusions.includes(element) && localStorage.removeItem(element)
-        });
+        })
     }
 
     async function execFetch(uri: string, params: any) {
-        const pathData = await expandPath(uri)
+        const url = await expandPath(uri)
 
-        if (pathData.status == "complete") {
-            const url = pathData.url;
-            params = { ...params, mode: 'cors' };
+        params = { ...params, mode: 'cors' };
 
-            if (!('headers' in params)) {
-                params = { ...params, headers: headers() };
-            }
-            try {
-                EventBus.emit(ApiBusEvents.BEFORE_API_REQUEST, uri)
+        if (!('headers' in params)) {
+            params = { ...params, headers: headers() };
+        }
 
-                const response = await fetch(url, params);
+        try {
+            EventBus.emit(ApiBusEvents.BEFORE_API_REQUEST, uri)
 
-                EventBus.emit(ApiBusEvents.AFTER_API_REQUEST, response)
-                
-                return response
-            } catch (e) {
-                EventBus.emit(ApiBusEvents.ON_API_CRASH, e)
-            }
-        } else {
-            throw 'could not configure services'
+            const response = await fetch(url, params);
+
+            EventBus.emit(ApiBusEvents.AFTER_API_REQUEST, response)
+            
+            return response
+        } catch (e) {
+            EventBus.emit(ApiBusEvents.ON_API_CRASH, e)
         }
     }
     
-
-    const get = (uri: string) => execFetch(uri, { method: 'GET' })
-
     // /**
     //  * Perform a POST request on the API
     //  * 
@@ -124,6 +116,7 @@ const ApiClient = (() => {
     //  * Example:
     //  *   const response = post('people', {given_name: 'Foo', family_name: 'Bar}).then((response) => console.log(response));
     //  */
+    const get = (uri: string) => execFetch(uri, { method: 'GET' })
     const post = (uri: string, data: object) => execFetch(uri, { method: 'POST', body: JSON.stringify(data) });
     const remove = (uri: string, data: object) => execFetch(uri, { method: 'DELETE', body: JSON.stringify(data)});
     const put = (uri: string, data: object) => execFetch(uri, { method: 'PUT', body: JSON.stringify(data) });
