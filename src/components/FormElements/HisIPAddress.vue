@@ -57,6 +57,7 @@ export default defineComponent({
         onActivated(() => emit('onFieldActivated', this))
         const showKeyboard = ref(false)
         const activeIndex = ref('')
+        // Track IP Address parts
         const addressInputs = ref({
             first:  '',
             second: '',
@@ -72,6 +73,7 @@ export default defineComponent({
             const value = handleVirtualInput(
                 input, addressInputs.value[index]
             )
+            // Tab to next IP Address part if value exceeds 3
             if (value.length > 3) {
                 switch(activeIndex.value) {
                     case 'first':
@@ -87,6 +89,8 @@ export default defineComponent({
                         activeIndex.value = ''
                 }
             } else {
+                // Do a check here to prevent the first letter being 
+                // a zero for that IP Address
                 addressInputs.value[index] = 
                     value.charAt(0) === '0' && value.length > 1
                     ? value.substring(1)
@@ -100,6 +104,7 @@ export default defineComponent({
         }
 
         watch(addressInputs, () => {
+            // Only Emit the IP Address if all the parts are set
             const complete = Object.values(addressInputs.value)
                 .map((i: any) => i ? true : false)
             if (complete.every(Boolean)) {
@@ -109,6 +114,7 @@ export default defineComponent({
                 emit('onValue', {label: value, value})
             }
         }, { deep: true, immediate: true })
+
         return {
             keypress,
             activeIndex,
