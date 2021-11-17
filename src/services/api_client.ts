@@ -72,19 +72,21 @@ const ApiClient = (() => {
             'Content-Type': 'application/json'
         };
     }
-    function setLocalStorage(ipAddress: string, port: string) {
+
+    function setLocalStorage(protocol: string, ipAddress: string, port: string) {
         localStorage.setItem('useLocalStorage', 'true');
         localStorage.setItem('apiURL', ipAddress);
         localStorage.setItem('apiPort', port);
-        localStorage.setItem('apiProtocol', 'http');
+        localStorage.setItem('apiProtocol', protocol);
     }
+
     function removeOnly(inclusions: string[]) {
         inclusions.forEach(element => {
            inclusions.includes(element) && localStorage.removeItem(element)
         });
     }
 
-    async function execFetch(uri: string, params: any, noRedirectCodes: number[] = []) {
+    async function execFetch(uri: string, params: any) {
         const pathData = await expandPath(uri)
 
         if (pathData.status == "complete") {
@@ -94,13 +96,10 @@ const ApiClient = (() => {
             if (!('headers' in params)) {
                 params = { ...params, headers: headers() };
             }
-
-            let response;
-
             try {
                 EventBus.emit(ApiBusEvents.BEFORE_API_REQUEST, uri)
 
-                response = await fetch(url, params);
+                const response = await fetch(url, params);
 
                 EventBus.emit(ApiBusEvents.AFTER_API_REQUEST, response)
                 
@@ -114,7 +113,7 @@ const ApiClient = (() => {
     }
     
 
-    const get = (uri: string, options = []) => execFetch(uri, { method: 'GET' }, options)
+    const get = (uri: string) => execFetch(uri, { method: 'GET' })
 
     // /**
     //  * Perform a POST request on the API
@@ -125,9 +124,9 @@ const ApiClient = (() => {
     //  * Example:
     //  *   const response = post('people', {given_name: 'Foo', family_name: 'Bar}).then((response) => console.log(response));
     //  */
-    const post = (uri: string, data: object, options = []) => execFetch(uri, { method: 'POST', body: JSON.stringify(data) }, options);
-    const remove = (uri: string, data: object, options = []) => execFetch(uri, { method: 'DELETE', body: JSON.stringify(data) }, options);
-    const put = (uri: string, data: object, options = []) => execFetch(uri, { method: 'PUT', body: JSON.stringify(data) }, options);
+    const post = (uri: string, data: object) => execFetch(uri, { method: 'POST', body: JSON.stringify(data) });
+    const remove = (uri: string, data: object) => execFetch(uri, { method: 'DELETE', body: JSON.stringify(data)});
+    const put = (uri: string, data: object) => execFetch(uri, { method: 'PUT', body: JSON.stringify(data) });
     const healthCheck = () => get('_health')
     return { get, post, put, remove, getConfig, setLocalStorage, removeOnly, healthCheck };
 })();

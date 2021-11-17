@@ -1,7 +1,7 @@
 <template>
   <his-standard-form
     :fields="fields"
-    @onFinish="onFinish"
+    :onFinishAction="onFinish"
     :skipSummary="true"
   />
 </template> 
@@ -22,9 +22,11 @@ export default defineComponent({
   components: { HisStandardForm },
   methods: {
     async onFinish(formData: any) {
+      const protocol = formData.protocol.value;
       const ipAddress = formData.ip_address.value;
       const port = formData.port.value;
-      ApiClient.setLocalStorage(ipAddress, port);
+
+      ApiClient.setLocalStorage(protocol, ipAddress, port);
       
       const loading = await loadingController
         .create({
@@ -48,6 +50,23 @@ export default defineComponent({
     },
     getFields() {
       this.fields = [
+        {
+          id: "protocol",
+          helpText: "Select Protocol",
+          type: FieldType.TT_SELECT,
+          requireNext: false,
+          validation: (val: any) => Validation.required(val),
+          options: () => [
+            {
+              label: 'HTTP',
+              value: 'http'
+            },
+            {
+              label: 'HTTPS',
+              value: 'https'
+            }
+          ]
+        },
         {
           id: "ip_address",
           helpText: "Enter IP Address",
