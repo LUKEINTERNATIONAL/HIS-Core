@@ -85,7 +85,7 @@ export default defineComponent({
       ApiBusEvents.AFTER_API_REQUEST, 
       async (res: any) => {
         if (!apiOk.value) {
-          toastSuccess('Yay! Back online', 3000)
+          toastSuccess('Yay! Back online', 4500)
         }
         if (res && res.status === 401 && route.name != 'Login') {
           router.push('/login')
