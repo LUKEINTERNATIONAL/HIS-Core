@@ -87,8 +87,9 @@ export default defineComponent({
                         activeIndex.value = ''
                 }
             } else {
-                addressInputs.value[index] = value === '0'
-                    ? ''
+                addressInputs.value[index] = 
+                    value.charAt(0) === '0' && value.length > 1
+                    ? value.substring(1)
                     : value
             }
         }
