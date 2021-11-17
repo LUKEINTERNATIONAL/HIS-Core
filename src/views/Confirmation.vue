@@ -305,7 +305,7 @@ export default defineComponent({
       this.facts.demographics.ancestryVillage = this.patient.getHomeVillage()
       this.facts.demographics.currentDistrict = this.patient.getCurrentDistrict()
       this.facts.demographics.currentTA = this.patient.getCurrentTA()
-      this.facts.demographics.currentVillage = this.patient.getHomeVillage()
+      this.facts.demographics.currentVillage = this.patient.getCurrentVillage()
       this.facts.identifiers = this.patient.getIdentifiers()
         .map((id: any) => id.type.name)
       this.facts.currentNpid = this.patient.getNationalID()
