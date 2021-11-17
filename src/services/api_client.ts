@@ -15,48 +15,45 @@ const ApiClient = (() => {
 
     async function getFileConfig(): Promise<Config> {
         const response = await fetch('/config.json')
-        if (!response || response.status != 200) {
+        if (!response.ok) {
             throw 'Unable to retrieve configuration file/ Invalid config.json'
         }
-        const data = await response.json()
-        sessionStorage.setItem("apiURL", data.apiURL);
-        sessionStorage.setItem("apiPort", data.apiPort);
-        sessionStorage.setItem("apiProtocol", data.apiProtocol);
+        const { apiURL, apiPort, apiProtocol } = await response.json()
+        sessionStorage.setItem("apiURL", apiURL);
+        sessionStorage.setItem("apiPort", apiPort);
+        sessionStorage.setItem("apiProtocol", apiProtocol);
         return {
-            host: data.apiUrl,
-            port: data.apiPort,
-            protocol: data.apiProtocol
+            host: apiURL,
+            port: apiPort,
+            protocol: apiProtocol
         }
     }
 
-    function getLocalConfig(): Config | null {
+    function getLocalConfig(): Config | undefined {
         const host = localStorage.apiURL;
         const port = localStorage.apiPort;
         const protocol = localStorage.apiProtocol;
-        return (host && port && protocol) 
-            ? { host, port, protocol }
-            : null
+        if ((host && port && protocol))
+            return { host, port, protocol }
     }
 
-    function getSessionConfig(): Config | null {
+    function getSessionConfig(): Config | undefined {
         const host = sessionStorage.apiURL
         const port = sessionStorage.apiPort
         const protocol = sessionStorage.apiProtocol
-
-        return (host && port && protocol) 
-            ? { host, port, protocol }
-            : null
+        if ((host && port && protocol))
+            return { host, port, protocol }
     }
 
     function getConfig(): Promise<Config> | Config {
-        const localConfig: Config | null = getLocalConfig()
-        const sessionConfig: Config | null = getSessionConfig()
+        const localConfig: Config | undefined = getLocalConfig()
+        const sessionConfig: Config | undefined = getSessionConfig()
 
         if (localStorage.useLocalStorage && localConfig)
             return localConfig
 
         if (sessionConfig) return sessionConfig
-
+        
         return getFileConfig()
     }
 
@@ -91,9 +88,10 @@ const ApiClient = (() => {
         if (!('headers' in params)) {
             params = { ...params, headers: headers() };
         }
-        
+
+        const url = await expandPath(uri)
+
         try {
-            const url = await expandPath(uri)
             EventBus.emit(ApiBusEvents.BEFORE_API_REQUEST, uri)
             const response = await fetch(url, params);
             EventBus.emit(ApiBusEvents.AFTER_API_REQUEST, response)            
