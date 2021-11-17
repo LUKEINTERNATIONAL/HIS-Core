@@ -481,11 +481,14 @@ export default defineComponent({
             id: 'possible_duplicates',
             helpText: 'Possible Duplicate(s)',
             type: FieldType.TT_PERSON_MATCH_VIEW,
-            condition: async (f: any, c: any) => {
-                createdPerson = PersonField.resolvePerson(c)
-                duplicatePatients = await this.ddeInstance
-                    .checkPotentialDuplicates(createdPerson)
-                return this.ddeInstance.isEnabled() && duplicatePatients.length >= 1
+            condition: async (_: any, c: any) => {
+                if (this.ddeInstance.isEnabled() && !this.editPerson) {
+                    createdPerson = PersonField.resolvePerson(c)
+                    duplicatePatients = await this.ddeInstance
+                        .checkPotentialDuplicates(createdPerson)
+                    return duplicatePatients.length >= 1
+                }
+                return false
             },
             options: async () => {
                 const toDate = (date: string) => HisDate.toStandardHisDisplayFormat(date)
