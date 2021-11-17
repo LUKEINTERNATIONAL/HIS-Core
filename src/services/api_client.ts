@@ -85,22 +85,20 @@ const ApiClient = (() => {
         })
     }
 
-    async function execFetch(uri: string, params: any) {
-        const url = await expandPath(uri)
-
+    async function execFetch(uri: string, params: any) {        
         params = { ...params, mode: 'cors' };
-
+        
         if (!('headers' in params)) {
             params = { ...params, headers: headers() };
         }
-
+        
         try {
+            const url = await expandPath(uri)
+
             EventBus.emit(ApiBusEvents.BEFORE_API_REQUEST, uri)
 
             const response = await fetch(url, params);
-
-            EventBus.emit(ApiBusEvents.AFTER_API_REQUEST, response)
-            
+            EventBus.emit(ApiBusEvents.AFTER_API_REQUEST, response)            
             return response
         } catch (e) {
             EventBus.emit(ApiBusEvents.ON_API_CRASH, e)
