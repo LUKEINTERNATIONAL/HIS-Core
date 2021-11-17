@@ -76,6 +76,15 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
 
 export const SECONDARY_ACTIVITIES: TaskInterface[] = [
   {
+    id: "master_card",
+    name: "Master card",
+    description: "View mastercard",
+    action: ({ patient }: any, router: any) => {
+      router.push(`/art/mastercard/${patient.patient_id}`)
+    },
+    icon: "card.png"
+  },
+  {
     id: "f_number",
     name: "Filing Number (Print)",
     description: "Print Patient Filing Number",
