@@ -41,8 +41,7 @@ export default defineComponent({
 
       if (!(res && res.status === 200) || !res) {
         toastWarning(`
-          Unable to connect to:
-          ${formData.ip_address.value}://${formData.port.value}
+          Unable to connect to: ${protocol}://${ipAddress}: ${port}
         `)
       } else {
         this.$router.back();
