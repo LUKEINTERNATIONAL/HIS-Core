@@ -101,6 +101,7 @@ const ApiClient = (() => {
             EventBus.emit(ApiBusEvents.AFTER_API_REQUEST, response)            
             return response
         } catch (e) {
+            console.error(e)
             EventBus.emit(ApiBusEvents.ON_API_CRASH, e)
         }
     }

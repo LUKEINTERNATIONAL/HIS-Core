@@ -6,6 +6,7 @@
         Unable to connect to BHT-API. 
         Please check: 
         <ul :style="{listStyle:'none'}"> 
+          <li> Check the HIS-Core configuration file </li>
           <li> Your configuration </li>
           <li> The service is running </li>
           <li> Your network cable is ok </li>
