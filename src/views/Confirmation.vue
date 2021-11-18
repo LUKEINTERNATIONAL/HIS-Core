@@ -393,7 +393,7 @@ export default defineComponent({
      */
     async drawPatientCards() {
       if (!this.app.confirmationSummary) return
-
+      this.cards = []
       const summaryEntries: Record<string, Function> 
         = await this.app.confirmationSummary(this.patient, this.program)
 
