@@ -74,12 +74,7 @@ export default defineComponent({
 
     EventBus.on(
       ApiBusEvents.BEFORE_API_REQUEST, 
-      (url: string) => {
-        // Use stealth for health checks
-        if (url != '_health') {
-          nprogress.start()
-        }
-      }
+      () => nprogress.start()
     )
 
     EventBus.on(
