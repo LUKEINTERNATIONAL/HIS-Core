@@ -14,7 +14,7 @@ import MultiYesNo from "@/components/FormElements/MultiYesNoSelect.vue"
 import WeightChart from "@/components/FormElements/HisWeightChart.vue"
 import VitalsEntry from "@/components/FormElements/HisVitalsEntry.vue"
 import AppointmentsEntry from "@/components/FormElements/HisAppointments.vue"
-
+import ComplaintsPicker from "@/components/FormElements/HisComplaintsPicker.vue";
 import SummaryPage from "@/components/FormElements/HisSummary.vue"
 import ArtStagingSummary from "@/components/FormElements/ArtStagingSummary.vue"
 import AdherenceInput from "@/components/FormElements/HisAdherenceInput.vue"
@@ -63,8 +63,8 @@ export enum FieldType {
     TT_FULL_DATE = 'date-input',
     TT_BATCH_ENTRY = 'batch-entry',
     TT_BATCH_VERIFICATION = 'batch-verification',
-    TT_BATCH_MOVEMENT = 'batch-movement'
-
+    TT_BATCH_MOVEMENT = 'batch-movement',
+    TT_COMPLAINTS_PICKER = 'complaints-picker'
 }
 // Components to be rendered
 export const BaseFormComponents = {
@@ -97,5 +97,6 @@ export const BaseFormComponents = {
     DateInput,
     BatchEntry,
     BatchVerification,
-    BatchMovement
+    BatchMovement,
+    ComplaintsPicker
 }

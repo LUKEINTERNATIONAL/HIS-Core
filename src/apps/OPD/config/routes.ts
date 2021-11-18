@@ -23,5 +23,10 @@ export default [
     name: "social history",
     path: "/opd/encounters/social/:patient_id",
     component: () => import('@/apps/OPD/views/encounters/SocialHistory.vue')
+  },
+  {
+    name: "presenting complaints",
+    path: "/opd/encounters/complaints/:patient_id",
+    component: () => import('@/apps/OPD/views/encounters/Complaints.vue')
   }
 ]
