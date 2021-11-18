@@ -555,8 +555,8 @@ export default defineComponent({
 
             if (!app) return
 
-            if (app.programID != this.programID){
-                return this.$router.push(`/patients/confirm?person_id=${this.patientId}`)
+            if (app.programID != this.programID) {
+                return this.$router.push(`/patients/confirm?patient_barcode=${this.patient.getNationalID()}`)
             } else {
                 await this.init()
             }

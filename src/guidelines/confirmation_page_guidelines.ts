@@ -4,25 +4,134 @@
  * a Patient's state.
 */
 import { GuideLineInterface } from "@/utils/GuidelineEngine"
-import { infoActionSheet } from "@/utils/ActionSheets"
-import { isEmpty } from "lodash"
+import { infoActionSheet, tableActionSheet } from "@/utils/ActionSheets"
 
 export enum TargetEvent {
     ON_CONTINUE = 'oncontinue',
     ONLOAD = 'onload'
 }
-
 export enum FlowState {
     FORCE_EXIT = 'forceExit',
+    GO_HOME = 'gotoHome',
+    GO_BACK = 'goBack',
     CONTINUE = 'continue',
     ENROLL = 'enroll',
     EXIT = 'exit',
     ACTIVATE_FN = 'activateFn',
     ASSIGN_NPID = 'assignNpid',
-    UPDATE_DMG = 'updateDemographics'
+    UPDATE_DMG = 'updateDemographics',
+    PRINT_NPID = 'printNPID',
+    CREATE_NPID_WITH_REMOTE_DIFF = 'createNpiDWithRemote',
+    REFRESH_DDE_DEMOGRAPHICS = 'refreshDemographicsDDE',
+    UPDATE_LOCAL_DDE_DIFFS = 'updateLocalDiffs',
+    RESOLVE_DUPLICATE_NPIDS = 'resolveDuplicateNpids'
 }
-
 export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = {
+    "Do not proceed if patient is not found in the system" : {
+        priority: 1,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async () => {
+                const action = await infoActionSheet(
+                    ' 0 Search results',
+                    'Patient has not been found',
+                    'Choose how to proceed',
+                    [
+                        { 
+                            name: 'Go Home', 
+                            slot: 'start', 
+                            color: 'primary',
+                        },
+                        { 
+                            name: 'Go Back', 
+                            slot: 'start', 
+                            color: 'primary',
+                        }
+                    ],
+                    'his-danger-color'
+                )
+                return action === 'Go Home' ? FlowState.GO_HOME : FlowState.GO_BACK
+            }
+        },
+        conditions: {
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled === false
+            },
+            patientFound(yes: boolean) {
+                return yes === false
+            }
+        }
+    },
+    "[DDE] Do not proceed if NPID is not found and Provide history of voided NPIDS" : {
+        priority: 1,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async (facts: any) => {
+                const action = await tableActionSheet(
+                    `Voided patients with ID ${facts.scannedNpid}`,
+                    'NPID was not found. Please review available patient with similar ID',
+                    facts.dde.voidedNpids.cols,
+                    facts.dde.voidedNpids.rows,
+                    [
+                        { 
+                            name: 'Go Home', 
+                            slot: 'start', 
+                            color: 'primary',
+                        },
+                        { 
+                            name: 'Go Back', 
+                            slot: 'start', 
+                            color: 'primary',
+                        }
+                    ],
+                    'his-danger-color'
+                )
+                return action === 'Go Home' 
+                    ? FlowState.GO_HOME 
+                    : action ===  FlowState.GO_BACK
+                    ? FlowState.GO_BACK
+                    : FlowState.FORCE_EXIT
+            }
+        },
+        conditions: {
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled === true
+            },
+            patientFound(yes: boolean) {
+                return yes === false
+            }
+        }
+    },
+    "[DDE] Notify the user to proceed with Remote NPID if local NPID does not match remote": {
+        priority: 1,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async ({dde}: any) => {
+                await infoActionSheet(
+                    'Missing Local NPID',
+                    `Patient has a missing local NPID "${dde.remoteNpidDiff}"`,
+                    `Proceed to Fix issue`,
+                    [
+                        { 
+                            name: 'Resolve issue', 
+                            slot: 'start', 
+                            color: 'danger'
+                        }
+                    ],
+                    'his-danger-color'
+                )
+                return FlowState.CREATE_NPID_WITH_REMOTE_DIFF
+            }
+        },
+        conditions: {
+            dde({localNpidDiff, remoteNpidDiff}: any) {
+                return !localNpidDiff && localNpidDiff != remoteNpidDiff
+            },
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled === true
+            }
+        }
+    },
     "Warn if patient is missing National ID and assign them one": {
         priority: 1,
         targetEvent: TargetEvent.ONLOAD,
@@ -38,13 +147,42 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'start', 
                             color: 'primary'
                         }
-                    ]
+                    ],
+                    'his-danger-color'
                 )
                 return FlowState.ASSIGN_NPID
             }
         },
         conditions: {
-            identifiers: (ids: string[]) => !ids.includes('National id')
+            identifiers: (ids: string[]) => !ids.includes('National id'),
+            currentNpid: (npid: string) => !npid
+        }
+    },
+    "Detect NPID duplicates and prompt the user to resolve them" : {
+        priority: 1,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async ({ scannedNpid }: any) => {
+                await infoActionSheet(
+                    'DUPLICATE NPID',
+                    `NPID ${scannedNpid} is currently assigned to multiple patients`,
+                    'Proceed to resolve the issue',
+                    [
+                        { 
+                            name: 'Resolve Duplicate NPIDs', 
+                            slot: 'start', 
+                            color: 'danger'
+                        }
+                    ],
+                    'his-danger-color'
+                )
+                return FlowState.RESOLVE_DUPLICATE_NPIDS
+            }
+        },
+        conditions: {
+            npidHasDuplicates(isTrue: boolean) {
+                return isTrue
+            }
         }
     },
     "Warn before proceeding if patient is deceased based on current Patient state": {
@@ -67,7 +205,8 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'end', 
                             color: 'success'
                         }
-                    ]
+                    ],
+                    'his-warning-color'
                 )
                 return action === 'Yes' ? FlowState.CONTINUE : FlowState.FORCE_EXIT
             }
@@ -96,7 +235,8 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'end', 
                             color: 'success'
                         }
-                    ]
+                    ],
+                    'his-warning-color'
                 )
                 return action === 'Yes' ? FlowState.CONTINUE : FlowState.FORCE_EXIT
             }
@@ -125,7 +265,8 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'end', 
                             color: 'success'
                         }
-                    ]
+                    ],
+                    'his-warning-color'
                 )
                 return action === 'Yes' ? FlowState.CONTINUE : FlowState.FORCE_EXIT
             }
@@ -135,7 +276,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         }
     },
     "Prompt patient enrollment in current programme if not enrolled" : {
-        priority: 1,
+        priority: 4,
         targetEvent: TargetEvent.ONLOAD,
         actions: {
             alert: async () => {
@@ -202,7 +343,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         }
     },
     "Prompt the user to update patient demographics when data is incomplete": {
-        priority: 2,
+        priority: 1,
         targetEvent: TargetEvent.ONLOAD,
         actions: {
             alert: async () => {
@@ -221,43 +362,118 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                             slot: 'end', 
                             color: 'danger'
                         }
-                    ])
+                    ],
+                    'his-danger-color'
+                )
                 return action === 'Yes' ? FlowState.UPDATE_DMG : FlowState.EXIT
             }
         },
         conditions: {
-            demographics: (data: Record<string, any>) => {
-                const demo = {...data}
-                delete demo['landmark']
-                const checks = Object.values(demo)
-                    .map((d: any) => isEmpty(d) || d.match(/n\/a/i))
-                return checks.some(Boolean)
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled === false
+            },
+            demographics: ({patientIsComplete}: any) => {
+                return patientIsComplete === false
             }
         }
     },
-    "(ART) Warn if Viral load is High": {
+    "[DDE] Alert When remote Patient demographics dont match Local Demographics ": {
         priority: 3,
         targetEvent: TargetEvent.ONLOAD,
         actions: {
-            alert: async () => {
-                await infoActionSheet(
-                    'Viral Load',
-                    'Patient has High viral load, please take action',
-                    '',
+            alert: async ({dde}: any) => {
+                const action = await tableActionSheet(
+                    'Demographics Mismatch',
+                    'Local Demographics do not match Remote Demographics',
+                    ['Attributes', 'Local', 'Remote'],
+                    dde.diffRows,
                     [
                         { 
-                            name: 'Ok', 
+                            name: 'Use Local',
                             slot: 'start', 
-                            color: 'danger'
+                            color: 'primary'
+                        },
+                        { 
+                            name: 'Use Remote', 
+                            slot: 'start', 
+                            color: 'primary'
                         }
-                    ]
+                    ], 
+                    'his-danger-color',
+                    dde.diffRowColors
                 )
-                return FlowState.CONTINUE
+                return action === 'Use Local' 
+                    ? FlowState.UPDATE_LOCAL_DDE_DIFFS
+                    : FlowState.REFRESH_DDE_DEMOGRAPHICS
             }
         },
         conditions: {
-            programName: (programName: string) => programName === 'HIV PROGRAM',
-            viralLoadStatus: (viralLoadStatus: string) => viralLoadStatus === 'High'
+            dde({hasDemographicConflict}: any) {
+                return hasDemographicConflict
+            }
+        }
+    },
+    "[DDE] Alert to print newer NPID when the scanned NPID doesnt match active NPID": {
+        priority: 2,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async ({ currentNpid }: any) => {
+                await infoActionSheet(
+                    '[DDE] NATIONAL ID',
+                    `Patient has a newer National Identifier ${currentNpid}`,
+                    'Print and proceed',
+                    [
+                        { 
+                            name: 'Print', 
+                            slot: 'start', 
+                            color: 'primary'
+                        }
+                    ])
+                return FlowState.PRINT_NPID
+            }
+        },
+        conditions: {
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled
+            },
+            scannedNpid(scannedNpid: string, {currentNpid}: any) {
+                return !scannedNpid.match(new RegExp(currentNpid, 'i'))
+            }
+        }
+    },
+    "[DDE] Force Users to update Incomplete Patient demographics": {
+        priority: 1,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async () => {
+                const action = await infoActionSheet(
+                    'Patient Demographics',
+                    'Demographic data is incomplete',
+                    'Continue to update',
+                    [
+                        { 
+                            name: 'Update', 
+                            slot: 'start', 
+                            color: 'success'
+                        },
+                        { 
+                            name: 'Cancel', 
+                            slot: 'start', 
+                            color: 'danger'
+                        }
+                    ],
+                    'his-warning-color'
+                )
+                return action === 'Cancel' ? FlowState.GO_HOME : FlowState.UPDATE_DMG
+            }
+        },
+        conditions: {
+            globalProperties({ddeEnabled}: any) {
+                return ddeEnabled === true
+            },
+            demographics: ({patientIsComplete}: any) => {
+                return patientIsComplete === false
+            }
         }
     }
 }

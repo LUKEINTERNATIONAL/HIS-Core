@@ -24,6 +24,7 @@ import ProgramManagement from "@/views/ProgramManagement.vue"
 import LabResults from "@/views/LabResults.vue"
 import User from "@/views/NewUser.vue"
 import PatientMerging from "@/views/PatientMerging.vue"
+import NpidDuplicates from "@/views/NpidDuplicates.vue"
 
 const HIS_APP_ROUTES = (() => {
   let routes: Array<RouteRecordRaw> = []
@@ -42,6 +43,11 @@ const routes: Array<RouteRecordRaw> = [
     redirect: '/home'
   },
   {
+    path: '/npid/duplicates/:npid',
+    name: 'NPID Duplicates',
+    component: NpidDuplicates
+  },
+  {
     path: '/home',
     name: 'Home',
     component: Home,
@@ -51,6 +57,11 @@ const routes: Array<RouteRecordRaw> = [
       }
       next();
     }, 
+  },
+  {
+    name: 'View Duplicates',
+    path: '/view_duplicates',
+    component : () => import('@/views/DuplicateIdentifiers.vue')
   },
   {
     name: 'Update site location',

@@ -86,12 +86,27 @@ export default {
       condition: () => UserService.isAdmin(),
       files: [
         {
+          name: "View Duplicates",
+          pathUrl: '/view_duplicates'
+        },
+        {
           name: "Data Cleaning",
           pathUrl: "/data_cleaning",
         },
         {
           name: "Merge patients",
           pathUrl: "/patients/merge",
+        }
+      ]
+    },
+    {
+      name: 'DDE Settings', 
+      icon: 'programs.png',
+      condition: () => UserService.isAdmin(),
+      files: [
+        {
+          name: "DDE Activation",
+          pathUrl: "/preferences?label=Activate DDE&property=dde_enabled"
         }
       ]
     }

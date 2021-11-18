@@ -33,6 +33,9 @@
                         :color="item?.event?.color || ''"
                         :class="item.cssClass"
                         :style="item.style"
+                        :disabled="item?.event?.disabled != undefined
+                            ? item.event.disabled === true
+                            : false"
                         v-if="item.event.obj === 'button'"
                         @click="item.event.click()">
                         {{ item.td }}
