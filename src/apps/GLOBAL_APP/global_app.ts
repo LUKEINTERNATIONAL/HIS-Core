@@ -25,6 +25,17 @@ export default {
       ]
     },
     {
+      name: 'Network',
+      icon: 'portal.png',
+      condition: () => UserService.isAdmin(),
+      files: [
+        {
+          name: "IP Configuration",
+          pathUrl: "/settings/host",
+        }
+      ]
+    },
+    {
       name: 'Location',
       icon: 'location.png',
       files: [

@@ -13,7 +13,6 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import { Option } from "@/components/Forms/FieldInterface";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
-import EncounterMixinVue from "./EncounterMixin.vue";
 import { alertAction, toastSuccess, toastWarning } from "@/utils/Alerts";
 import HisDate from "@/utils/Date";
 import { findIndex, isEmpty, find } from "lodash";
@@ -21,6 +20,7 @@ import { ConsultationService } from "@/apps/ART/services/consultation_service";
 import { UserService } from "@/services/user_service";
 import { OrderService } from "@/services/order_service";
 import { ConceptService } from "@/services/concept_service";
+import AdherenceMixinVue from "./AdherenceMixin.vue";
 import { modalController } from "@ionic/vue";
 import VLReminderModal from "@/components/DataViews/VLReminderModal.vue";
 import { ProgramService } from "@/services/program_service";
@@ -28,7 +28,7 @@ import { ARTLabService } from "../../services/lab_service";
 import { infoActionSheet } from "@/utils/ActionSheets";
 
 export default defineComponent({
-  mixins: [EncounterMixinVue],
+  mixins: [AdherenceMixinVue],
   components: { HisStandardForm },
   data: () => ({
     fields: [] as any,
@@ -54,16 +54,19 @@ export default defineComponent({
     sulphurObs: {} as any,
     referObs: {} as any,
     medicationObs: [] as any,
+    askAdherence: false as boolean
   }),
   watch: {
     ready: {
       async handler(value: boolean) {
         if (value) {
-          this.fields = this.getFields();
           this.consultation = new ConsultationService(
             this.patientID,
             this.providerID
           );
+          await this.initAdherence(this.patient, this.providerID)
+          this.askAdherence = this.adherence.receivedDrugsBefore()
+          this.fields = this.getFields();
           await this.checkVLReminder();
           this.completedTBTherapy();
         }
@@ -95,9 +98,13 @@ export default defineComponent({
         this.sulphurObs,
         this.referObs,
         ...this.medicationObs,
-      ]);
-      const filtered = data.filter((d) => !isEmpty(d));
-      const obs = await this.consultation.saveObservationList(filtered);
+      ])
+
+      const filtered = data.filter((d) => !isEmpty(d))
+
+      const obs = await this.consultation.saveObservationList(filtered)
+
+      if (this.askAdherence) await this.saveAdherence()
 
       if (!obs) return toastWarning("Unable to save patient observations");
 
@@ -897,6 +904,7 @@ export default defineComponent({
           type: FieldType.TT_SELECT,
           options: () => this.getYesNo(),
         },
+        ...this.getAdherenceFields(this.askAdherence),
         {
           id: "prescription",
           helpText: "Medication to prescribe during this visit",

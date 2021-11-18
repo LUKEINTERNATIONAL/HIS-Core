@@ -30,7 +30,7 @@ import DateInput from "@/components/FormElements/HisDateInput.vue"
 import BatchEntry from "@/components/FormElements/HisBatchEntry.vue"
 import BatchVerification from "@/components/FormElements/HisBatchVerification.vue"
 import BatchMovement from "@/components/FormElements/HisBatchMovement.vue"
-
+import IPAddressInput from "@/components/FormElements/HisIPAddress.vue"
 
 // Reference names for BaseFormComponents
 export enum FieldType {
@@ -65,9 +65,10 @@ export enum FieldType {
     TT_FULL_DATE = 'date-input',
     TT_BATCH_ENTRY = 'batch-entry',
     TT_BATCH_VERIFICATION = 'batch-verification',
-    TT_BATCH_MOVEMENT = 'batch-movement'
-
+    TT_BATCH_MOVEMENT = 'batch-movement',
+    TT_IP_ADDRESS = 'IPAddressInput'
 }
+
 // Components to be rendered
 export const BaseFormComponents = {
     TextInput,
@@ -100,5 +101,6 @@ export const BaseFormComponents = {
     DateInput,
     BatchEntry,
     BatchVerification,
-    BatchMovement
+    BatchMovement,
+    IPAddressInput
 }

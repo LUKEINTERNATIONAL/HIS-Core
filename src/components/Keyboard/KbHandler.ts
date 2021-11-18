@@ -1,6 +1,9 @@
 export default function kbHandler(newInput: string, accumulator: string): string {
     let output = accumulator
-    if (newInput.match(/delete|del/i)) {
+
+    if (newInput.match(/clear/i)) {
+        return ''
+    } else if (newInput.match(/delete|del/i)) {
         // Override Unknown text with new input
         if (output.match(/unknown/i) || output.match(/n\/a/i)) {
             output = ''

@@ -1,6 +1,7 @@
 import { AppEncounterService } from "@/services/app_encounter_service"
 import { DrugInterface } from "@/interfaces/Drug"
 import HisDate from "@/utils/Date"
+import { isEmpty } from "lodash"
 
 export class AdherenceService extends AppEncounterService {
     lastDrugs: Array<DrugInterface>
@@ -35,6 +36,8 @@ export class AdherenceService extends AppEncounterService {
     getReceiptDate() { return this.lastReceiptDate }
 
     getLastDrugs() { return this.lastDrugs }
+
+    receivedDrugsBefore() { return !isEmpty(this.lastDrugs) }
 
     buildPillCountObs(orderId: number, pillCount: number) {
         return this.buildValueNumber('Number of tablets brought to clinic', pillCount, null, orderId)
