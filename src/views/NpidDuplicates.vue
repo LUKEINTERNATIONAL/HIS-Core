@@ -85,7 +85,7 @@ import {
 } from "@ionic/vue"
 import { PatientDemographicsExchangeService } from "@/services/patient_demographics_exchange_service"
 import { Patientservice } from '@/services/patient_service'
-import { alertConfirmation, toastWarning } from '@/utils/Alerts'
+import { alertConfirmation, toastDanger, toastWarning } from '@/utils/Alerts'
 import { nextTask } from "@/utils/WorkflowTaskHelper"
 import HisDate from "@/utils/Date"
 
@@ -181,9 +181,20 @@ export default defineComponent({
                         isComplete: p.patientIsComplete()
                     }
                 } catch (e) {
+                    toastDanger(`An error has occured while building data`)
                     console.error(e)
                 }
-                return {}
+                return {
+                    isChecked: false,
+                    patientID: 'N/A',
+                    name: 'N/A',
+                    gender: 'N/A',
+                    birthdate: 'N/A',
+                    curDistrict: 'N/A',
+                    homeVillage: 'N/A',
+                    docID: 'N/A',
+                    isComplete: false
+                }
             })
         },
         clear() {
