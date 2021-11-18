@@ -7,12 +7,15 @@
                     :key="index"
                     > 
                     <ion-input
+                        mode='md'
+                        inputmode="numeric"
                         type="number"
+                        :max="255"
                         :class="{
                             'highlighted-input' : index === activeIndex
                         }"
                         v-model="addressInputs[index]"
-                        @click="onAddressClick(index)"
+                        @ionFocus="onAddressClick(index)"
                         :style="{ textAlign: 'center' }"
                         placeholder="0"
                         class="input_display"
