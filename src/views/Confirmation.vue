@@ -332,14 +332,10 @@ export default defineComponent({
         let local = this.facts.demographics[k]
         let remote = local
 
-        if (diffs[refs[k].ref]?.local) {
+        if (refs[k].ref in diffs) {
           diffIndexes.indexes.push(index)
-          local = diffs[refs[k].ref]?.local
-        }
-
-        if (diffs[refs[k].ref]?.remote) {
-          diffIndexes.indexes.push(index)
-          remote = diffs[refs[k].ref]?.remote
+          local = diffs[refs[k].ref].local
+          remote = diffs[refs[k].ref].remote
         }
 
         comparisons.push([
