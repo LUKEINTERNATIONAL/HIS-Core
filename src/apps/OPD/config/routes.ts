@@ -1,3 +1,5 @@
+import BaseReport from '@/views/reports/BaseReport.vue'
+
 export default [
   {
     name: "patient registration",
@@ -23,5 +25,16 @@ export default [
     name: "social history",
     path: "/opd/encounters/social/:patient_id",
     component: () => import('@/apps/OPD/views/encounters/SocialHistory.vue')
-  }
+  },
+  {
+    path: '/opd/reports/clinic',
+    component: BaseReport,
+    children: [
+      {
+        name: 'clinic_with_nids',
+        path: "clinic_with_nids",
+        component: () => import('@/apps/OPD/views/reports/clinic/ClinicWithNIDsReport.vue')
+      },
+    ]
+  },
 ]
