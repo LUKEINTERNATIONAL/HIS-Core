@@ -167,18 +167,23 @@ export default defineComponent({
         },
         buildItems(items: any) {
             return items.map((i: any) => {
-                const p = new Patientservice(i)
-                return {
-                    isChecked: false,
-                    patientID: p.getID(),
-                    name: p.getFullName(),
-                    gender: p.getGender(),
-                    birthdate: this.toDate(p.getBirthdate()),
-                    curDistrict: p.getCurrentDistrict(),
-                    homeVillage: p.getHomeVillage(),
-                    docID: p.getPatientIdentifier(27),
-                    isComplete: p.patientIsComplete()
+                try {
+                    const p = new Patientservice(i)
+                    return {
+                        isChecked: false,
+                        patientID: p.getID(),
+                        name: p.getFullName(),
+                        gender: p.getGender(),
+                        birthdate: this.toDate(p.getBirthdate()),
+                        curDistrict: p.getCurrentDistrict(),
+                        homeVillage: p.getHomeVillage(),
+                        docID: p.getPatientIdentifier(27),
+                        isComplete: p.patientIsComplete()
+                    }
+                } catch (e) {
+                    console.error(e)
                 }
+                return {}
             })
         },
         clear() {
