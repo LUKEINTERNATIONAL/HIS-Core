@@ -3,6 +3,8 @@
     :title="title"
     :rows="rows" 
     :columns="columns"
+    :itemsPerPage="12"
+    paginated
   ></report-template>
 </template>
 

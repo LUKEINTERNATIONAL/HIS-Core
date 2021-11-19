@@ -29,8 +29,10 @@
       <div class="report-content">
         <report-table
           :rows="rows"
-          :columns="columns">
-        </report-table>
+          :columns="columns"
+          :paginated="paginated"
+          :itemsPerPage="itemsPerPage"
+        ></report-table>
       </div>
     </ion-content>
     <his-footer :btns="btns"></his-footer>
@@ -88,6 +90,14 @@ export default defineComponent({
     rows: {
       type: Object as PropType<Array<RowInterface[]>>,
       required: true
+    },
+    paginated: {
+        type: Boolean,
+        default: false
+    },
+    itemsPerPage: {
+        type: Number,
+        default: 5
     },
     customBtns: {
       type: Array,
