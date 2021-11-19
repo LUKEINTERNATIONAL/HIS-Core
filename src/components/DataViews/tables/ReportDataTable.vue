@@ -45,7 +45,7 @@
         </tr>
     </tbody>
   </table>
-  <div class="pagination">
+  <div class="pagination" v-if="showPagination">
         <div class="btn-group">
             <ion-button color="light" @click="prevPage">
                 <ion-icon :icon="caretBack"></ion-icon>
@@ -94,6 +94,10 @@ export default defineComponent({
     rows: {
       type: Object as PropType<Array<RowInterface[]>>,
       required: true
+    },
+    paginated: {
+        type: Boolean,
+        default: false
     }
   },
   data: () => ({
@@ -178,6 +182,9 @@ export default defineComponent({
     },
     pages(): number[] {
         return Array.from(Array(this.totalPages).keys())
+    },
+    showPagination(): boolean {
+       return this.paginated && !!this.paginatedItems.length && this.totalPages > 1
     }
   }
 })
