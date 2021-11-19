@@ -50,6 +50,10 @@ export class OpdReportService extends Service {
         return this.getReport('drugs_given_without_prescription')
     }
 
+    getDrugsGivenWithPrescription() {
+        return this.getReport('drugs_given_with_prescription')
+    }
+
     getDateIntervalPeriod() {
         return `${HisDate.toStandardHisDisplayFormat(this.startDate)} - ${HisDate.toStandardHisDisplayFormat(this.endDate)}`
     }

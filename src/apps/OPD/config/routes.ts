@@ -40,6 +40,11 @@ export default [
         path: "clinic_drugs_given",
         component: () => import('@/apps/OPD/views/reports/clinic/DrugsGiven.vue')
       },
+      {
+        name: 'clinic_drugs',
+        path: "clinic_drugs",
+        component: () => import('@/apps/OPD/views/reports/clinic/DrugsGivenWithPrescription.vue')
+      },
     ]
   },
 ]
