@@ -35,6 +35,11 @@ export default [
         path: "clinic_with_nids",
         component: () => import('@/apps/OPD/views/reports/clinic/ClinicWithNIDsReport.vue')
       },
+      {
+        name: 'clinic_drugs_given',
+        path: "clinic_drugs_given",
+        component: () => import('@/apps/OPD/views/reports/clinic/DrugsGiven.vue')
+      },
     ]
   },
 ]
