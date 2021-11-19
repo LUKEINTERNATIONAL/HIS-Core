@@ -8,6 +8,7 @@
     :period="period"
     :reportReady="reportReady"
     :isLoading="isLoading"
+    :onReportConfiguration="init"
     paginated
   ></report-template>
 </template>
