@@ -97,7 +97,7 @@ export default defineComponent({
     },
     paginated: {
         type: Boolean,
-        default: true
+        default: false
     },
     itemsPerPage: {
         type: Number,
