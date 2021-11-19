@@ -97,7 +97,11 @@ export default defineComponent({
     },
     paginated: {
         type: Boolean,
-        default: false
+        default: true
+    },
+    itemsPerPage: {
+        type: Number,
+        default: 5
     }
   },
   data: () => ({
@@ -109,7 +113,6 @@ export default defineComponent({
     sortOrder: 'descSort' as 'ascSort' | 'descSort',
     tableColumns: [] as Array<ColumnInterface[]>,
     tableRows: [] as Array<RowInterface[]>,
-    itemsPerPage: 10,
     currentPage: 0,
   }),
   watch: {
@@ -172,6 +175,7 @@ export default defineComponent({
   },
   computed: {
     paginatedItems(): RowInterface[][] {
+        if (!this.paginated) return this.tableRows
         return this.tableRows.slice(
             this.itemsPerPage * this.currentPage,
             this.itemsPerPage * (this.currentPage + 1)
