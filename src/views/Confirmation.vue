@@ -236,13 +236,15 @@ export default defineComponent({
       let searchResults: any = {}
 
       if (!this.useDDE) {
-        const res = await Patientservice.findByNpid(nationalID)
-        if (!isEmpty(res)) {
-          this.facts.npidHasDuplicates = res.length > 1
-          searchResults = res[0]
-        } 
-      } else if (id) {
-        searchResults = await Patientservice.findByID(id)
+        if (id) {
+          searchResults = await Patientservice.findByID(id)
+        } else if(nationalID) {
+          const res = await Patientservice.findByNpid(nationalID)
+          if (!isEmpty(res)) {
+            this.facts.npidHasDuplicates = res.length > 1
+            searchResults = res[0]
+          } 
+        }
       }
 
       if (!isEmpty(searchResults)) {
