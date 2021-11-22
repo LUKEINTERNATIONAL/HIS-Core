@@ -59,7 +59,7 @@ export const PROPERTIES: FolderInterface[] = [
             ),
             globalPropConfig(
                 "Activate drug management", 
-                "activate_drug_management"
+                "activate.drug.management"
             ),
             globalPropConfig(
                 "Activate Hypertension screening", 
