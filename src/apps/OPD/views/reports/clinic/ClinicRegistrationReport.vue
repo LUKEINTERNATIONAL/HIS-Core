@@ -9,6 +9,7 @@
     :reportReady="reportReady"
     :isLoading="isLoading"
     :onReportConfiguration="init"
+    :customBtns="customBtns"
     paginated
   ></report-template>
 </template>
@@ -20,6 +21,8 @@ import ReportTemplate from "@/views/reports/BaseTableReport.vue"
 import table, { ColumnInterface, RowInterface } from "@/components/DataViews/tables/ReportDataTable"
 import HisDate from '@/utils/Date'
 import ReportMixin from '@/apps/ART/views/reports/ReportMixin.vue'
+import { modalController } from '@ionic/core'
+import SummaryModal from "@/apps/OPD/components/RegistrationSummaryModal.vue";
 
 export default defineComponent({
   components: { ReportTemplate },
@@ -29,6 +32,7 @@ export default defineComponent({
     rows: [] as RowInterface[][], 
     isLoading: false,
     reportReady: false,
+    reportData: [] as any,
     columns: [[
       table.thTxt('Reg'),
       table.thTxt('First Name'),
@@ -37,10 +41,20 @@ export default defineComponent({
       table.thTxt('DOB'),
       table.thTxt('Date reg.'),
       // table.thTxt('Address'),
-    ]] as ColumnInterface[][]
+    ]] as ColumnInterface[][],
+    customBtns: [] as any
   }),
   created(){
     this.fields = this.getDateDurationFields()
+    this.customBtns.push({
+      name: "High level view",
+      size: "large",
+      slot: "start",
+      color: "primary",
+      visible: true,
+      onClick: async () => this.showModal()
+    })
+    
   },
   methods: {
     async init(_: any, config: any){
@@ -51,10 +65,10 @@ export default defineComponent({
       reportService.setEndDate(config.end_date)
       this.period = reportService.getDateIntervalPeriod()
       const data = await reportService.getClinicRegistrations()
-      const sortedData = data.sort((a: any, b: any) => 
+      this.reportData = data.sort((a: any, b: any) => 
         a.visit_type > b.visit_type ? 1 : a.visit_type < b.visit_type ? -1 : 0
       )
-      this.rows = this.buildRows(sortedData)
+      this.rows = this.buildRows(this.reportData)
     },
     buildRows(data: any[]): RowInterface[][] {
       if(!data.length) return []
@@ -67,6 +81,22 @@ export default defineComponent({
         table.td(HisDate.toStandardHisDisplayFormat(record.visit_date)),
         // table.td(''),
       ])
+    },
+    async showModal() {
+      const data = [
+        { label: "New patient", value: [...this.reportData.filter((d: any) => d.visit_type === 'New patient')].length },
+        { label: "Referral", value: [...this.reportData.filter((d: any) => d.visit_type === 'Referral')].length },
+        { label: "Revisiting", value: [...this.reportData.filter((d: any) => d.visit_type === 'Revisiting')].length }
+      ]
+      const modal = await modalController.create({
+        component: SummaryModal,
+        backdropDismiss: true,
+        cssClass: 'action-sheet-modal',
+        componentProps: {
+          list: data
+        } 
+      })
+      modal.present()
     }
   },
 })
