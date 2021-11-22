@@ -45,6 +45,11 @@ export default [
         path: "clinic_drugs",
         component: () => import('@/apps/OPD/views/reports/clinic/DrugsGivenWithPrescription.vue')
       },
+      {
+        name: 'clinic_registration',
+        path: "cclinic_registration",
+        component: () => import('@/apps/OPD/views/reports/clinic/ClinicRegistrationReport.vue')
+      },
     ]
   },
 ]
