@@ -1,5 +1,7 @@
 import { Service } from "@/services/service";
 import HisDate from "@/utils/Date"
+import { PrintoutService } from '@/services/printout_service';
+import Url from "@/utils/Url";
 
 export interface QuarterInterface {
     name: string;
@@ -26,6 +28,13 @@ export const OTHER_AGE_GROUPS = [
     '35-39 years', '40-44 years',
     '45-49 years', '50 plus years'
 ]
+
+export const LA_TYPES: Record<string, string> = {
+    one: 'AL 1', 
+    two: 'AL 2', 
+    three: 'AL 3', 
+    four: 'LA 4'
+}
 
 export class OpdReportService extends Service {
     programID: number;
@@ -56,6 +65,29 @@ export class OpdReportService extends Service {
 
     getDrugsGivenWithPrescription() {
         return this.getReport('drugs_given_with_prescription')
+    }
+
+    getLaPrescriptions(){
+        const url = `programs/${this.programID}/reports/la_prescriptions`
+        return Service.getJson(url, {
+            'start_date': this.startDate,
+            'end_date': this.endDate
+        })
+    }
+
+    printLaReport(data: Record<string, any>){
+        const printService = new PrintoutService()
+        const url = `programs/${this.programID}/barcodes/la_report`
+        const params: Record<string, any> = {
+            "date[start]": this.startDate,
+            "date[end]": this.endDate
+        }
+        Object.keys(LA_TYPES).forEach((v, i) => {
+            i++
+            params[`${i}[prescription]`] = data[`total_la_${v}_prescribed_drugs`]
+            params[`${i}[dispensed]`] = data[`total_la_${v}_dispensed_drugs`]
+        })
+        return printService.printLbl(`${url}?${Url.parameterizeObjToString(params)}`)
     }
 
     getDateIntervalPeriod() {
