@@ -191,6 +191,12 @@ export default defineComponent({
         }
         return true
     },
+    confirmPatient() {
+        if (!this.patient.getNationalID().match(/unknown/i)) {
+            return  this.$router.push(`/patients/confirm?patient_barcode=${this.patient.getNationalID()}`)
+        }
+        this.$router.push(`/patients/confirm?person_id=${this.patient.getID()}`)
+    },
     resolvePersonAttributes(form: Record<string, Option> | Record<string, null>) {
         return Object.values(form)
                     .filter((d: any) => isPlainObject(d) && 'personAttributes' in d)
@@ -657,7 +663,7 @@ export default defineComponent({
                             try {
                                 await this.ddeInstance.reassignNpid(this.ddeDocID, this.editPerson)
                                 await this.ddeInstance.printNpid()
-                                this.$router.push(`/patients/confirm?person_id=${this.editPerson}`)
+                                this.confirmPatient()
                             } catch(e) {
                                 toastWarning(e)
                             }
@@ -675,12 +681,7 @@ export default defineComponent({
                                 onload: () => !this.ddeIsReassign && !this.hasIncompleteData
                             }
                         },
-                        onClick: () => {
-                            if (!this.patient.getNationalID().match(/unknown/i)) {
-                                return  this.$router.push(`/patients/confirm?patient_barcode=${this.patient.getNationalID()}`)
-                            }
-                            this.$router.push(`/patients/confirm?person_id=${this.patient.getID()}`)
-                        }
+                        onClick: () => this.confirmPatient()
                     }
                 ],
                 hiddenFooterBtns: ['Clear', 'Next']
