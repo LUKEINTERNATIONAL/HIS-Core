@@ -206,19 +206,6 @@ export default defineComponent({
         }
       },
       immediate: true
-    },
-    async patient(patient: any) {
-      await this.presentLoading()
-      await this.resolveGlobalPropertyFacts()
-      if (!isEmpty(patient)) {
-        await this.drawPatientCards()
-        this.setPatientFacts()
-        this.program = new PatientProgramService(this.patient.getID())
-        await this.setProgramFacts()
-      }
-      if (this.useDDE) await this.setDDEFacts()
-      loadingController.dismiss()
-      await this.onEvent(TargetEvent.ONLOAD)
     }
   },
   methods: {
@@ -233,6 +220,11 @@ export default defineComponent({
       await this.ddeInstance.loadDDEStatus()
       this.useDDE = this.ddeInstance.isEnabled()
 
+      if (!this.facts.scannedNpid && npid) 
+        this.facts.scannedNpid = npid
+
+      await this.resolveGlobalPropertyFacts()
+
       if (this.useDDE && npid) {
         await this.handleSearchResults((await this.ddeInstance.searchNpid(npid)))
       } else if (id) {
@@ -240,10 +232,9 @@ export default defineComponent({
       } else {
         await this.handleSearchResults((await Patientservice.findByNpid(npid as string)))
       }
-      if (!this.facts.scannedNpid && npid) {
-        this.facts.scannedNpid = npid
-      } 
+
       await loadingController.dismiss()
+      await this.onEvent(TargetEvent.ONLOAD)
     },
     async handleSearchResults(patient: Promise<Patient | Patient[]>) {
       let results: Patient[] | Patient = []
@@ -257,12 +248,16 @@ export default defineComponent({
       }
       this.facts.patientFound = !isEmpty(results)
       if (this.facts.patientFound) {
-        this.facts.npidHasDuplicates = Array.isArray(results) && results.length > 1
         this.patient = new Patientservice(
           Array.isArray(results) 
             ? results[0]
             : results
           )
+        this.program = new PatientProgramService(this.patient.getID())
+        this.setPatientFacts()
+        await this.setProgramFacts()
+        await this.drawPatientCards()
+        this.facts.npidHasDuplicates = Array.isArray(results) && results.length > 1
       }
     },
     /**
