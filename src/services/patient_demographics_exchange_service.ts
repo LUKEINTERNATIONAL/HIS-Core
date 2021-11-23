@@ -3,6 +3,13 @@ import { isEmpty } from 'lodash';
 import { GlobalPropertyService } from './global_property_service'
 import { PatientPrintoutService } from './patient_printout_service';
 import HisDate from "@/utils/Date"
+import { Patientservice } from './patient_service';
+
+export interface DDESearchDemographics {
+    given_name: string;
+    family_name: string;
+    gender: string;
+}
 
 export class PatientDemographicsExchangeService extends Service {
     patientID: number;
@@ -53,6 +60,31 @@ export class PatientDemographicsExchangeService extends Service {
         )).some(Boolean)
     }
 
+    /**
+     * 
+     * @param npid 
+     * @returns 
+     */
+    async searchDemographics(demographics: DDESearchDemographics) {
+        const req = await Service.getJson(`dde/patients/find_by_name_and_gender`, {
+            'program_id': Service.getProgramID(),
+            ...demographics,
+        })
+        const mapResults = (d: any, type: string) => {
+            const p = new Patientservice(d)
+            return {
+                'patient_type': type,
+                'doc_id': p.getPatientIdentifier(27),
+                ...d,
+            }
+        }
+        if (req) {
+            const locals = req.locals.map((i: any) => mapResults(i, 'Local'))
+            const remote = req.remotes.map((i: any) => mapResults(i, 'Remote'))
+            return locals.concat(remote)
+        }
+        return []
+    }
     /**
      * Searches and returns result object combining local and remote details
      * @param npid 
