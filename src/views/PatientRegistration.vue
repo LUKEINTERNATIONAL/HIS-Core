@@ -676,6 +676,9 @@ export default defineComponent({
                             }
                         },
                         onClick: () => {
+                            if (!this.patient.getNationalID().match(/unknown/i)) {
+                                return  this.$router.push(`/patients/confirm?patient_barcode=${this.patient.getNationalID()}`)
+                            }
                             this.$router.push(`/patients/confirm?person_id=${this.patient.getID()}`)
                         }
                     }
