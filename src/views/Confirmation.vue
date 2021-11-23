@@ -83,6 +83,7 @@ import { matchToGuidelines } from "@/utils/GuidelineEngine"
 import { Patientservice } from "@/services/patient_service";
 import { PatientProgramService } from "@/services/patient_program_service"
 import { alertConfirmation, toastDanger } from "@/utils/Alerts"
+import { Patient } from "@/interfaces/patient"
 import {
   IonContent,
   IonHeader,
@@ -228,58 +229,41 @@ export default defineComponent({
     */
     async findAndSetPatient(id: number | undefined, npid: string | undefined) {
       await this.presentLoading()
-      let patient: any = {}
-      let nationalID = npid || ''
       this.ddeInstance = new PatientDemographicsExchangeService()
       await this.ddeInstance.loadDDEStatus()
       this.useDDE = this.ddeInstance.isEnabled()
-      let searchResults: any = {}
 
-      if (!this.useDDE) {
-        if (id) {
-          searchResults = await Patientservice.findByID(id)
-        } else if(nationalID) {
-          const res = await Patientservice.findByNpid(nationalID)
-          if (!isEmpty(res)) {
-            this.facts.npidHasDuplicates = res.length > 1
-            searchResults = res[0]
-          } 
-        }
+      if (this.useDDE && npid) {
+        await this.handleSearchResults((await this.ddeInstance.searchNpid(npid)))
+      } else if (id) {
+        await this.handleSearchResults((await Patientservice.findByID(id)))
+      } else {
+        await this.handleSearchResults((await Patientservice.findByNpid(npid as string)))
       }
-
-      if (!isEmpty(searchResults)) {
-        patient = new Patientservice(searchResults)
-        nationalID = patient.getNationalID()
-        this.facts.patientFound = true
-        this.facts.demographics.patientIsComplete = patient.patientIsComplete()
-      }
-
-      if (this.useDDE && nationalID) {
-        try {
-          const res = await this.ddeInstance.searchNpid(nationalID)
-          if (!isEmpty(res)) {
-            patient = new Patientservice(res[0])
-            this.facts.npidHasDuplicates = res.length > 1
-            this.facts.patientFound = true
-            this.facts.demographics.patientIsComplete = patient.patientIsComplete()
-          } else {
-            this.facts.patientFound = false
-            await this.setVoidedNpidFacts(nationalID)
-          }
-        }catch(e) {
-          if (e instanceof IncompleteEntityError) {
-            patient = new Patientservice(e.entity)
-            this.facts.patientFound = true
-            this.facts.demographics.patientIsComplete = false
-          }
-        }
-      }
-
-      if (!this.facts.scannedNpid) 
-        this.facts.scannedNpid = nationalID
-      this.patient = patient
-     
+      if (!this.facts.scannedNpid && npid) {
+        this.facts.scannedNpid = npid
+      } 
       await loadingController.dismiss()
+    },
+    async handleSearchResults(patient: Promise<Patient | Patient[]>) {
+      let results: Patient[] | Patient = []
+      try {
+        results = await patient as Patient[] | Patient
+      } catch (e) {
+        if (e instanceof IncompleteEntityError 
+          && !isEmpty(results)) {
+          results = e.entity
+        }
+      }
+      this.facts.patientFound = !isEmpty(results)
+      if (this.facts.patientFound) {
+        this.facts.npidHasDuplicates = Array.isArray(results) && results.length > 1
+        this.patient = new Patientservice(
+          Array.isArray(results) 
+            ? results[0]
+            : results
+          )
+      }
     },
     /**
      * Reloads patient facts and information.
@@ -295,6 +279,7 @@ export default defineComponent({
      * on the User interface
     */
     setPatientFacts() {
+      this.facts.demographics.patientIsComplete = this.patient.patientIsComplete()
       this.facts.demographics.patientName = this.patient.getFullName()
       this.facts.demographics.givenName = this.patient.getGivenName()
       this.facts.demographics.familyName = this.patient.getFamilyName()
