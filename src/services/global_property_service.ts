@@ -6,17 +6,24 @@ export class GlobalPropertyService extends Service {
     }
 
     static async get(prop: string) {
-        const res = await super.getJson('global_properties', { property: prop })
+        try {
+            const res = await super.getJson('global_properties', { property: prop })
+            if (res && prop in res) return res[prop]
+        } catch (e) {
+            console.error(e)
+        }
 
-        if (res && prop in res) return res[prop]
     }
 
     static async isProp(property: string) {
-        const [prop, val] = property.split('=')
-        const curVal = await this.get(prop)
+        try {
+            const [prop, val] = property.split('=')
+            const curVal = await this.get(prop)
 
-        if (curVal) return val === curVal
-
+            if (curVal) return val === curVal
+        } catch (e) {
+            console.error(e)
+        }
         return false
     }
 
