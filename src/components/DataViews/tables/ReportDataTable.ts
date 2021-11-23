@@ -151,16 +151,20 @@ function tdLink(td: string | number | Date, click: Function, params={}): RowInte
     }
 }
 
-function tdBtn(td: string | number | Date, click: Function, params={}, color=''): RowInterface {
-    return {
+function tdBtn(td: string | number | Date, click: Function, params={} as any, color=''): RowInterface {
+    const data = {
         td,
         event: {
             click,
             color: color,
             obj: 'button'
-        },
-        ...params
+        }
     }
+    if (params.event) {
+        data.event = { ...data.event, ...params.event}
+        delete params.event
+    }
+    return Object.assign(data, params)
 }
 export default {
     thTxt,

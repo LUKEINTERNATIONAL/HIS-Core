@@ -6,7 +6,11 @@
   </ion-header>
   <ion-content class="ion-padding">
     <ion-row>
-       <ion-col v-for="app, index in apps" :key="index" size="4">
+       <ion-col 
+          v-for="app, index in apps" 
+          :key="index"
+          size-md="6" 
+          size-sm="12">
         <application-card 
           @click="setApplication(app)" 
           :name="app.applicationName" 

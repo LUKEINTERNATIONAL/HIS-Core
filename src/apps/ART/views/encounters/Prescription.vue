@@ -67,7 +67,7 @@ export default defineComponent({
 
                 if (!this.prescription.medicationOrdersAvailable() && !this.prescription.isFastTrack()) {
                     toastWarning('Patient is not eligible for treatment Today! Please check HIV Clinic Consultation')
-                    return this.nextTask()
+                    return this.gotoPatientDashboard()
                 }
 
                 await this.prescription.loadRegimenExtras()

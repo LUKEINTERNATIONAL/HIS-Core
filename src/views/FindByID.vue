@@ -69,7 +69,6 @@ export default defineComponent({
     },
     setApp() {
       const app = HisApp.getActiveApp()
-      
       if (app) this.app = app
     },
     async onFinish(formData: any) {
@@ -80,7 +79,8 @@ export default defineComponent({
           idType, identifier
         )
       if (!isEmpty(res)) {
-        this.$router.push(`/patients/confirm?person_id=${res[0].patient_id}`);
+        const patient = new Patientservice(res[0])
+        this.$router.push(`/patients/confirm?person_id=${patient.getID()}`);
       } else {
         toastWarning('Client not found')
       }
