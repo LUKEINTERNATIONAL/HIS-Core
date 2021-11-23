@@ -289,7 +289,7 @@ export default {
         const prop = (patient: any, prop: string) => prop in patient ? patient[prop]() : '-'
         return {
             label: patient.getPatientInfoString(),
-            value: patient.getID(),
+            value: patient.getID() || patient.getNationalID(),
             other: {
                 npid: patient.getNationalID(),
                 person,
