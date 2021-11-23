@@ -226,11 +226,11 @@ export default defineComponent({
       await this.resolveGlobalPropertyFacts()
 
       if (this.useDDE && npid) {
-        await this.handleSearchResults((await this.ddeInstance.searchNpid(npid)))
+        await this.handleSearchResults(this.ddeInstance.searchNpid(npid))
       } else if (id) {
-        await this.handleSearchResults((await Patientservice.findByID(id)))
+        await this.handleSearchResults(Patientservice.findByID(id))
       } else {
-        await this.handleSearchResults((await Patientservice.findByNpid(npid as string)))
+        await this.handleSearchResults(Patientservice.findByNpid(npid as string))
       }
 
       await loadingController.dismiss()
@@ -242,7 +242,7 @@ export default defineComponent({
         results = await patient as Patient[] | Patient
       } catch (e) {
         if (e instanceof IncompleteEntityError 
-          && !isEmpty(results)) {
+          && !isEmpty(e.entity)) {
           results = e.entity
         }
       }
