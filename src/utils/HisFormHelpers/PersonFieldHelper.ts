@@ -295,7 +295,7 @@ export default {
                 person,
                 options: [
                     {
-                        label: "Patient ID",
+                        label: "National ID",
                         value: prop(patient, 'getNationalID')
                     },
                     {
