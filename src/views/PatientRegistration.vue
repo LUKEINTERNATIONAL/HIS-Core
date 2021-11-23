@@ -419,11 +419,29 @@ export default defineComponent({
             condition: () => !this.isEditMode(),
             validation: (val: Option) => Validation.required(val),
             options: async (form: any) => {
-                const patients = await Patientservice.search({
+                const payload = {
                     'given_name': form.given_name.value,
                     'family_name': form.family_name.value,
-                    'gender': form.gender.value,
-                });
+                    'gender': form.gender.value
+                }
+                // DDE enabled search
+                if (this.ddeInstance.isEnabled()) {
+                    const patients = await this.ddeInstance.searchDemographics(payload)
+                    return patients.map((item: any) => {
+                        const itemData = PersonField.getPersonAttributeOptions(item)
+                        itemData.other.options.push({
+                            label: 'Patient Type',
+                            value: item.patient_type
+                        })
+                        itemData.other.options.push({
+                            label: 'Doc ID',
+                            value: item.doc_id
+                        })
+                        return itemData
+                    })
+                }
+                // Regular search
+                const patients = await Patientservice.search(payload);
                 return patients.map((item: any) => PersonField.getPersonAttributeOptions(item))
             },
             config: {

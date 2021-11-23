@@ -80,8 +80,8 @@ export class PatientDemographicsExchangeService extends Service {
         }
         if (req) {
             const locals = req.locals.map((i: any) => mapResults(i, 'Local'))
-            const remote = req.remotes.map((i: any) => mapResults(i, 'Remote'))
-            return locals.concat(remote)
+            const remotes = req.remotes.map((i: any) => mapResults(i, 'Remote'))
+            return locals.concat(remotes)
         }
         return []
     }
