@@ -226,7 +226,7 @@ export default defineComponent({
       await this.resolveGlobalPropertyFacts()
 
       if (this.useDDE && npid) {
-        await this.handleSearchResults(this.ddeInstance.searchNpid(npid))
+        await this.handleSearchResults(this.ddeInstance.searchNpid(npid), npid)
       } else if (id) {
         await this.handleSearchResults(Patientservice.findByID(id))
       } else {
@@ -236,7 +236,7 @@ export default defineComponent({
       await loadingController.dismiss()
       await this.onEvent(TargetEvent.ONLOAD)
     },
-    async handleSearchResults(patient: Promise<Patient | Patient[]>) {
+    async handleSearchResults(patient: Promise<Patient | Patient[]>, npid = '') {
       let results: Patient[] | Patient = []
       try {
         results = await patient as Patient[] | Patient
@@ -258,6 +258,8 @@ export default defineComponent({
         await this.setProgramFacts()
         await this.drawPatientCards()
         this.facts.npidHasDuplicates = Array.isArray(results) && results.length > 1
+      } else {
+        if (npid) await this.setVoidedNpidFacts(npid)
       }
     },
     /**
