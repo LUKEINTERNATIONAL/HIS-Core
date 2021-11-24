@@ -273,7 +273,6 @@ export default defineComponent({
             ? results[0]
             : results
           )
-        this.program = new PatientProgramService(this.patient.getID())
         this.setPatientFacts()
         await this.setProgramFacts()
         await this.drawPatientCards()
@@ -376,6 +375,7 @@ export default defineComponent({
       }
     },
     async setProgramFacts() {
+      this.program = new PatientProgramService(this.patient.getID())
       const { program, outcome }: any =  await this.program.getProgram()
       this.facts.currentOutcome = outcome
       this.facts.programName = program
