@@ -16,7 +16,12 @@
                     :src="barcodeLogo"/>
                 </ion-col>
                 <ion-col size-lg="7" size-sm="8"> 
-                  <input v-model="patientBarcode" class="barcode-input" ref="scanBarcode"/>
+                  <input 
+                    :readonly="isReadOnly" 
+                    v-model="patientBarcode" 
+                    class="barcode-input" 
+                    ref="scanBarcode"
+                  />
                 </ion-col>
               </ion-row>
             </div>
@@ -149,7 +154,7 @@ import {
   IonSegment,
   IonSegmentButton,
   IonLabel,
-  modalController
+  isPlatform
 } from "@ionic/vue";
 export default defineComponent({
   name: "Home",
@@ -178,7 +183,8 @@ export default defineComponent({
       logOut,
       statsChart,
       pieChart,
-      settings
+      settings,
+      isReadOnly: !isPlatform('desktop')
     }
   },
   data() {
