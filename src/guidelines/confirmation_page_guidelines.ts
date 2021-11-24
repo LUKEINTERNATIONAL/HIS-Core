@@ -28,7 +28,7 @@ export enum FlowState {
 }
 export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = {
     "Do not proceed if patient is not found in the system" : {
-        priority: 1,
+        priority: 2,
         targetEvent: TargetEvent.ONLOAD,
         actions: {
             alert: async () => {
@@ -59,6 +59,34 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
             },
             patientFound(yes: boolean) {
                 return yes === false
+            }
+        }
+    },
+    "[DDE] Show invalid attributes for a patient whose remote": {
+        priority: 1,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async (facts: any) => {
+                await tableActionSheet(
+                    `DDE Entity Error`,
+                    'Remote patient has invalid attributes',
+                    [ 'Attribute', 'Errors' ],
+                    facts.demographics.invalidDemographics,
+                    [
+                        { 
+                            name: 'Exit', 
+                            slot: 'start', 
+                            color: 'danger',
+                        }
+                    ],
+                    'his-danger-color'
+                )
+                return FlowState.GO_BACK
+            }
+        },
+        conditions: {
+            demographics({hasInvalidDemographics}: any) {
+                return hasInvalidDemographics === true
             }
         }
     },

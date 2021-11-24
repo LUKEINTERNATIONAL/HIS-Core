@@ -72,7 +72,7 @@
 </template>
 
 <script lang="ts">
-import { isEmpty } from "lodash";
+import { isEmpty, isPlainObject } from "lodash";
 import HisDate from "@/utils/Date"
 import HisApp from "@/apps/app_lib"
 import { defineComponent } from "vue";
@@ -109,7 +109,7 @@ import { PatientPrintoutService } from "@/services/patient_printout_service";
 import { AppInterface } from "@/apps/interfaces/AppInterface";
 import { GlobalPropertyService } from "@/services/global_property_service"
 import { PatientDemographicsExchangeService } from "@/services/patient_demographics_exchange_service"
-import { IncompleteEntityError } from "@/services/service"
+import { IncompleteEntityError, BadRequestError } from "@/services/service"
 export default defineComponent({
   name: "Patient Confirmation",
   components: {
@@ -157,6 +157,8 @@ export default defineComponent({
       } as any,
       demographics: {
         patientIsComplete: false as boolean,
+        hasInvalidDemographics: false as boolean,
+        invalidDemographics: [] as string[],
         givenName: '' as string,
         familyName: '' as string,
         patientName: '' as string,
@@ -241,9 +243,14 @@ export default defineComponent({
       try {
         results = await patient as Patient[] | Patient
       } catch (e) {
-        if (e instanceof IncompleteEntityError 
-          && !isEmpty(e.entity)) {
+        if (e instanceof IncompleteEntityError && !isEmpty(e.entity)) {
           results = e.entity
+        }
+        if (e instanceof BadRequestError && Array.isArray(e.errors)) {
+          const [msg, ...entities] = e.errors
+          if (typeof msg === 'string' && msg === "Invalid parameter(s)") {
+            this.setInvalidParametersFacts(entities)
+          }
         }
       }
       this.facts.patientFound = !isEmpty(results)
@@ -261,6 +268,16 @@ export default defineComponent({
       } else {
         if (npid) await this.setVoidedNpidFacts(npid)
       }
+    },
+    setInvalidParametersFacts(errorExceptions: any) {
+      this.facts.demographics.hasInvalidDemographics = true
+      this.facts.demographics.invalidDemographics =
+        errorExceptions.map((e: any) => {
+          const data = Object.entries(e)
+          const entity = data[0][0]
+          const errors = data[0][1] as string[]
+          return [entity, errors.join(', ')]
+        })      
     },
     /**
      * Reloads patient facts and information.
