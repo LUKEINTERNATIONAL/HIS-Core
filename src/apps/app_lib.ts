@@ -33,11 +33,14 @@ function getActiveApp(): AppInterface | undefined {
     }
 }
 
-async function selectApplication(context='') {
+async function selectApplication(context='', canClose=false) {
     const modal = await modalController.create({
         component: ApplicationModal,
         cssClass: "large-modal",
-        backdropDismiss: false
+        backdropDismiss: false,
+        componentProps: {
+            canClose
+        }
     });
 
     modal.present()
