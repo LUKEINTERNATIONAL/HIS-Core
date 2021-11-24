@@ -714,8 +714,9 @@ export default defineComponent({
               () => Validation.required(data),
               () => Validation.anyEmpty(data),
             ]),
-          unload: async (data: any) => {
+          beforeNext: async (data: any) => {
             const reasons = await this.getSideEffectsReasons(data);
+            if (isEmpty(reasons)) return false
             const concept = ConceptService.getCachedConceptID("Drug induced");
             const sides = reasons.map((r: any) => {
               const c = ConceptService.getCachedConceptID(r.label);
@@ -750,6 +751,7 @@ export default defineComponent({
                 },
               };
             });
+            return true
           },
           options: (_: any, checked: Array<Option>) =>
             this.getContraindications(checked),
