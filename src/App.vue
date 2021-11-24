@@ -29,7 +29,7 @@ import { IonApp, IonRouterOutlet, IonButton } from '@ionic/vue';
 import { defineComponent, ref, watch } from 'vue';
 import ApiClient, { ApiBusEvents } from "@/services/api_client"
 import EventBus from "@/utils/EventBus"
-import { toastWarning, toastDanger, toastSuccess } from './utils/Alerts';
+import { toastWarning, toastDanger, alertConfirmation } from './utils/Alerts';
 import { useRoute } from 'vue-router';
 /** Nprogress */
 import 'nprogress/nprogress.css'
@@ -81,7 +81,11 @@ export default defineComponent({
       ApiBusEvents.AFTER_API_REQUEST, 
       async (res: any) => {
         if (!apiOk.value) {
-          toastSuccess('Yay! Back online', 4500)
+          const confirm = await alertConfirmation(
+            'Do you want to refresh the page?',
+            'API connection is back'
+          )
+          if (confirm) refresh()
         }
         if (res && res.status === 401 && route.name != 'Login') {
           router.push('/login')
