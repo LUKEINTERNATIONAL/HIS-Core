@@ -59,6 +59,11 @@ export default [
         name: 'clinic_cases_seen',
         path: 'clinic_cases_seen',
         component: () => import('@/apps/OPD/views/reports/clinic/ClinicCasesSeen.vue')
+      },
+      {
+        name: 'clinic_mental_health',
+        path: 'clinic_mental_health',
+        component: () => import('@/apps/OPD/views/reports/clinic/MentalHealth.vue')
       }
     ]
   },

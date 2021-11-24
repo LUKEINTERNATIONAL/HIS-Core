@@ -50,6 +50,29 @@ export const NCD_TYPES = [
     'Epilepsy'
 ]
 
+export const MENTAL_HEALTH_DIAGNOSIS = [
+    'Organic mental disorder (Chronic)',
+    'Organic mental disorder (acute)',
+    'Alcohol use mental disorder',
+    'Drug use mental disorder',
+    'Schizophrenia',
+    'Acute and transient psychotic disorder',
+    'Schizo-affective disorder',
+    'Mood-affective disorder (MANIC)',
+    'Mood-affective disorder (BIPOLAR)',
+    'Mood-affective disorder (DEPRESSION)',
+    'Anxiety disorder',
+    'Stress reaction adjustment disorder',
+    'Dissociative conversion disorder',
+    'Somatoform disorder',
+    'Puerperal mental disorder',
+    'Personality/Behaviour disorder',
+    'Mental retardation',
+    'Psychological mental disorder',
+    'Hyperkinetic conduct disorder',
+    'Epilepsy'
+]
+
 export class OpdReportService extends Service {
     programID: number;
     startDate: string;
