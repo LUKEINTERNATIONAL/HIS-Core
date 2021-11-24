@@ -57,6 +57,7 @@
   </ion-content>
   <ion-footer>
     <ion-toolbar> 
+      <ion-button @click="closeModal" slot="end" color="danger"> Close </ion-button>
       <ion-button @click="postSideEffects" slot="end" :disabled="!allSelected"> Save </ion-button>
     </ion-toolbar>
   </ion-footer>
@@ -91,6 +92,9 @@ export default defineComponent({
     },
   },
   methods: {
+    closeModal() {
+      modalController.dismiss()
+    },
     async postSideEffects() {
       await modalController.dismiss(this.sides);
     },
