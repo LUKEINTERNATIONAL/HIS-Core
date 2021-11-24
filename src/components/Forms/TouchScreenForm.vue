@@ -458,7 +458,12 @@ export default defineComponent({
       }
       // Run callback before proceeding to next field
       if (this.currentField.beforeNext) {
-        if (!(await this.currentField.beforeNext())) {
+        if (!(await this.currentField.beforeNext(
+            this.formData[this.currentField.id],
+            this.formData,
+            this.computedFormData,
+            this
+        ))) {
           return
         }
       }
