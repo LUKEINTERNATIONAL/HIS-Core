@@ -36,6 +36,20 @@ export const LA_TYPES: Record<string, string> = {
     four: 'LA 4'
 }
 
+export const NCD_TYPES = [
+    'Diabetes',
+    'Hypertension',
+    'Stroke',
+    'Suspected cancer',
+    'Confirmed cancer',
+    'Palliative cancer',
+    'Asthma',
+    'Depression',
+    'Acute psychosis',
+    'Chronic psychosis',
+    'Epilepsy'
+]
+
 export class OpdReportService extends Service {
     programID: number;
     startDate: string;

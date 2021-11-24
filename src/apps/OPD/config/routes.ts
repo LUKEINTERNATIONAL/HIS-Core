@@ -54,6 +54,11 @@ export default [
         name: 'clinic_la',
         path: 'clinic_la',
         component: () => import('@/apps/OPD/views/reports/clinic/LaReport.vue')
+      },
+      {
+        name: 'clinic_cases_seen',
+        path: 'clinic_cases_seen',
+        component: () => import('@/apps/OPD/views/reports/clinic/ClinicCasesSeen.vue')
       }
     ]
   },
