@@ -231,6 +231,8 @@ export default defineComponent({
       if (this.useDDE && npid) {
         await this.handleSearchResults(this.ddeInstance.searchNpid(npid))
       } else if (id) {
+        // We need to maintain DDE workflow if an npid wasnt used to find the patient.
+        // So find them locally first and then check with DDE if service is enabled
         if (this.useDDE) {
           const res = await Patientservice.findByID(id)
           if (res) {
@@ -256,9 +258,12 @@ export default defineComponent({
       try {
         results = await patient as Patient[] | Patient
       } catch (e) {
+        // [DDE] A person might have missing attributes such as home_village, 
+        // or home_ta.
         if (e instanceof IncompleteEntityError && !isEmpty(e.entity)) {
           results = e.entity
         }
+        // DDE might send attribute validation errors for a person
         if (e instanceof BadRequestError && Array.isArray(e.errors)) {
           const [msg, ...entities] = e.errors
           if (typeof msg === 'string' && msg === "Invalid parameter(s)") {
@@ -279,7 +284,8 @@ export default defineComponent({
         this.facts.currentNpid = this.patient.getNationalID()
         this.facts.npidHasDuplicates = Array.isArray(results) && results.length > 1
       } else {
-        // For DDE only
+        // [DDE] a user might scan a deleted npid but might have a newer one.
+        // The function below checks for newer version
         if (this.facts.scannedNpid) await this.setVoidedNpidFacts(this.facts.scannedNpid)
       }
     },
@@ -289,6 +295,7 @@ export default defineComponent({
      */
     setInvalidParametersFacts(errorExceptions: any) {
       this.facts.demographics.hasInvalidDemographics = true
+      // Create a turple of attribute and error pairs
       this.facts.demographics.invalidDemographics =
         errorExceptions.map((e: any) => {
           const data = Object.entries(e)
