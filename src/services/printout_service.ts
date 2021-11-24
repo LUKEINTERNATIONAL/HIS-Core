@@ -23,8 +23,7 @@ export class PrintoutService extends Service {
             'android', 
             ].includes(p)).length >= 1
             if(!isNative) {
-
-            document.location = (await ApiClient.expandPath(url)).url as any
+                document.location = (await ApiClient.expandPath(url)) as any
             } 
         await delayPromise(3000)
         await modalController.dismiss({})
