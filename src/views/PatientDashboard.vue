@@ -551,7 +551,7 @@ export default defineComponent({
             }
         },
         async changeApp() {
-            const app = await HisApp.selectApplication();
+            const app = await HisApp.selectApplication('PatientDashboard');
 
             if (!app) return
 

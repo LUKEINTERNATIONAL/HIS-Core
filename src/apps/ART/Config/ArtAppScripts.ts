@@ -79,9 +79,11 @@ async function showStockManagementChart() {
     
 }
 
-export async function init() {
+export async function init(context='') {
     await showArtActivities()
-    await showStockManagementChart()
+    if (context === 'HomePage') {
+        await showStockManagementChart()
+    }
 }
 
 export async function onRegisterPatient(patientID: number, person: any, attr: any, router: any) {
