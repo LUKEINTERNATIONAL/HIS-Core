@@ -26,6 +26,7 @@ import VLReminderModal from "@/components/DataViews/VLReminderModal.vue";
 import { ProgramService } from "@/services/program_service";
 import { ARTLabService } from "../../services/lab_service";
 import { infoActionSheet } from "@/utils/ActionSheets";
+import SideEffectsModalVue from "@/components/DataViews/SideEffectsModal.vue";
 
 export default defineComponent({
   mixins: [AdherenceMixinVue],
@@ -54,7 +55,8 @@ export default defineComponent({
     sulphurObs: {} as any,
     referObs: {} as any,
     medicationObs: [] as any,
-    askAdherence: false as boolean
+    relatedObs: [] as any,
+    askAdherence: false as boolean,
   }),
   watch: {
     ready: {
@@ -64,8 +66,8 @@ export default defineComponent({
             this.patientID,
             this.providerID
           );
-          await this.initAdherence(this.patient, this.providerID)
-          this.askAdherence = this.adherence.receivedDrugsBefore()
+          await this.initAdherence(this.patient, this.providerID);
+          this.askAdherence = this.adherence.receivedDrugsBefore();
           this.fields = this.getFields();
           await this.checkVLReminder();
           this.completedTBTherapy();
@@ -98,13 +100,14 @@ export default defineComponent({
         this.sulphurObs,
         this.referObs,
         ...this.medicationObs,
-      ])
+        ...this.relatedObs,
+      ]);
 
-      const filtered = data.filter((d) => !isEmpty(d))
+      const filtered = data.filter((d) => !isEmpty(d));
 
-      const obs = await this.consultation.saveObservationList(filtered)
+      const obs = await this.consultation.saveObservationList(filtered);
 
-      if (this.askAdherence) await this.saveAdherence()
+      if (this.askAdherence) await this.saveAdherence();
 
       if (!obs) return toastWarning("Unable to save patient observations");
 
@@ -144,7 +147,7 @@ export default defineComponent({
       const orderService = new ARTLabService(this.patientID, this.providerID);
 
       const encounter = await orderService.createEncounter();
-       const observations = await orderService.buildDefferedOrder(milestone);
+      const observations = await orderService.buildDefferedOrder(milestone);
       if (!encounter) return toastWarning("Unable to create encounter");
       await orderService.saveObservationList(observations);
     },
@@ -330,6 +333,21 @@ export default defineComponent({
           value: "No",
         },
       ];
+    },
+    async getSideEffectsReasons(sideEffects: Option[]) {
+      const lastDrugs = await this.consultation.getPreviousDrugs();
+      const allYes = sideEffects.filter(
+        (sideEffect) => sideEffect.value === "Yes" && sideEffect.label  !== "Other"
+      );
+      const modal = await modalController.create({
+        component: SideEffectsModalVue,
+        backdropDismiss: false,
+        cssClass: "large-modal",
+        componentProps: { sideEffects: allYes, drugs: lastDrugs },
+      });
+      modal.present();
+      const { data } = await modal.onDidDismiss();
+      return data;
     },
     getFPMethods(exclusionList: string[] = [], preChecked: Array<Option>) {
       const methods = this.consultation.getFamilyPlanningMethods();
@@ -696,7 +714,27 @@ export default defineComponent({
               () => Validation.required(data),
               () => Validation.anyEmpty(data),
             ]),
-          unload: async (data: any) => {
+          beforeNext: async (data: any) => {
+            const reasons = await this.getSideEffectsReasons(data);
+            if (isEmpty(reasons)) return false
+            const concept = ConceptService.getCachedConceptID("Drug induced");
+            const sides = reasons.map((r: any) => {
+              const c = ConceptService.getCachedConceptID(r.label);
+              if (r.reason === "other" || r.reason === "drug") {
+                return {
+                  'concept_id': concept,
+                  'value_coded': c,
+                  'value_text': "Past medication history",
+                };
+              } else {
+                return {
+                  'concept_id': concept,
+                  'value_coded': c,
+                  'value_drug': r.reason,
+                };
+              }
+            });
+            this.relatedObs = [...this.relatedObs, ...sides];
             this.sideEffects = await data.map(async (data: Option) => {
               const host = await this.consultation.buildValueCoded(
                 "Malawi ART side effects",
@@ -713,6 +751,7 @@ export default defineComponent({
                 },
               };
             });
+            return true
           },
           options: (_: any, checked: Array<Option>) =>
             this.getContraindications(checked),
@@ -729,6 +768,25 @@ export default defineComponent({
             "Other Contraindications / Side effects (select either 'Yes' or 'No')",
           type: FieldType.TT_MULTIPLE_YES_NO,
           unload: async (data: any) => {
+            const reasons = await this.getSideEffectsReasons(data);
+            const concept = ConceptService.getCachedConceptID("Drug induced");
+            const sides = reasons.map((r: any) => {
+              const c = ConceptService.getCachedConceptID(r.label);
+              if (r.reason === "other" || r.reason === "drug") {
+                return {
+                  'concept_id': concept,
+                  'value_coded': c,
+                  'value_text': "Past medication history",
+                };
+              } else {
+                return {
+                  'concept_id': concept,
+                  'value_coded': c,
+                  'value_drug': r.reason,
+                };
+              }
+            });
+            this.relatedObs = [...this.relatedObs, ...sides];
             const filtered = data.filter((d: any) => {
               return d.label !== "Other (Specify)";
             });
@@ -910,15 +968,17 @@ export default defineComponent({
           helpText: "Medication to prescribe during this visit",
           type: FieldType.TT_MULTIPLE_SELECT,
           validation: (data: any) => Validation.required(data),
-          onload: (context: any) => {this.prescriptionContext = context},
+          onload: (context: any) => {
+            this.prescriptionContext = context;
+          },
           onValueUpdate: (listData: Array<Option>, value: Option) => {
             return this.disablePrescriptions(listData, value);
           },
           config: {
-          footerBtns: [
-            {
-              name: 'Update allergic to CPT',
-              onClick: async () => {
+            footerBtns: [
+              {
+                name: "Update allergic to CPT",
+                onClick: async () => {
                   const action = await infoActionSheet(
                     "Allergic to Cotrimoxazole update",
                     `Is the patient allergic to cotrimoxazole.`,
@@ -931,13 +991,15 @@ export default defineComponent({
 
                   if (action === "Allergic") {
                     this.allergicToSulphur = true;
-                    this.prescriptionContext.listData = this.getPrescriptionFields([]);
-                  }else {
+                    this.prescriptionContext.listData =
+                      this.getPrescriptionFields([]);
+                  } else {
                     this.allergicToSulphur = false;
-                    this.prescriptionContext.listData = this.getPrescriptionFields([]);
+                    this.prescriptionContext.listData =
+                      this.getPrescriptionFields([]);
                   }
-                }
-              }
+                },
+              },
             ],
           },
           options: (_: any, checked: Array<Option>) =>

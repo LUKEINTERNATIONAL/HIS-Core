@@ -61,7 +61,8 @@ async function showArtActivities() {
  * Present a modal to show drug chart
  */
 async function showStockManagementChart() {
-    const prop = await GlobalPropertyService.isStockManagementEnabled();
+    try {
+     const prop = await GlobalPropertyService.isStockManagementEnabled();
     if(prop === "true") {
         const drugModal = await modalController.create({
         component: DrugModalVue,
@@ -71,7 +72,11 @@ async function showStockManagementChart() {
 
         drugModal.present() 
         await drugModal.onDidDismiss()
+    }   
+    } catch (error) {
+       // 
     }
+    
 }
 
 export async function init() {
