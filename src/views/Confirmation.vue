@@ -179,9 +179,15 @@ export default defineComponent({
       } as any
     }
   }),
-  created() {
+  async created() {
     const app = HisApp.getActiveApp()
     if (app) this.app = app
+
+    this.ddeInstance = new PatientDemographicsExchangeService()
+
+    await this.ddeInstance.loadDDEStatus()
+
+    this.useDDE = this.ddeInstance.isEnabled()
   },
   computed: {
     demographics(): any {
@@ -201,7 +207,7 @@ export default defineComponent({
       async handler({query}: any) {
         if (!isEmpty(query) && (
           query.person_id || query.patient_barcode
-        )) {
+        )) {      
           await this.findAndSetPatient(
             query.person_id, query.patient_barcode
           )
@@ -218,11 +224,8 @@ export default defineComponent({
     */
     async findAndSetPatient(id: number | undefined, npid: string | undefined) {
       await this.presentLoading()
-      this.ddeInstance = new PatientDemographicsExchangeService()
-      await this.ddeInstance.loadDDEStatus()
-      this.useDDE = this.ddeInstance.isEnabled()
 
-      if (!this.facts.scannedNpid && npid) this.facts.scannedNpid = npid
+      if (this.facts.scannedNpid && npid) this.facts.scannedNpid = npid
 
       await this.resolveGlobalPropertyFacts()
 
