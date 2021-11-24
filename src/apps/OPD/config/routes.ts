@@ -64,6 +64,11 @@ export default [
         name: 'clinic_mental_health',
         path: 'clinic_mental_health',
         component: () => import('@/apps/OPD/views/reports/clinic/MentalHealth.vue')
+      },
+      {
+        name: 'clinic_diagnosis',
+        path: 'clinic_diagnosis',
+        component: () => import('@/apps/OPD/views/reports/clinic/Diagnosis.vue')
       }
     ]
   },
