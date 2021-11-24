@@ -462,7 +462,7 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
         },
         conditions: {
             globalProperties({ddeEnabled}: any) {
-                return ddeEnabled
+                return ddeEnabled === true
             },
             scannedNpid(scannedNpid: string, {currentNpid}: any) {
                 return !scannedNpid.match(new RegExp(currentNpid, 'i'))

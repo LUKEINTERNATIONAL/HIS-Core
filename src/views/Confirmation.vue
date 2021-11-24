@@ -225,10 +225,9 @@ export default defineComponent({
     async findAndSetPatient(id: number | undefined, npid: string | undefined) {
       await this.presentLoading()
 
-      if (this.facts.scannedNpid && npid) this.facts.scannedNpid = npid
+      if (!this.facts.scannedNpid) this.facts.scannedNpid = npid || ''
 
       await this.resolveGlobalPropertyFacts()
-
       if (this.useDDE && npid) {
         await this.handleSearchResults(this.ddeInstance.searchNpid(npid))
       } else if (id) {
@@ -245,7 +244,6 @@ export default defineComponent({
       } else {
         await this.handleSearchResults(Patientservice.findByNpid(npid as string))
       }
-
       await loadingController.dismiss()
       await this.onEvent(TargetEvent.ONLOAD)
     },
@@ -279,6 +277,7 @@ export default defineComponent({
         this.setPatientFacts()
         await this.setProgramFacts()
         await this.drawPatientCards()
+        this.facts.currentNpid = this.patient.getNationalID()
         this.facts.npidHasDuplicates = Array.isArray(results) && results.length > 1
       } else {
         // For DDE only
@@ -329,7 +328,6 @@ export default defineComponent({
       this.facts.demographics.currentVillage = this.patient.getCurrentVillage()
       this.facts.identifiers = this.patient.getIdentifiers()
         .map((id: any) => id.type.name)
-      this.facts.currentNpid = this.patient.getNationalID()
     },
     buildDDEDiffs(diffs: any) {
       const comparisons: Array<string[]> = []
