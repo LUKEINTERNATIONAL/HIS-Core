@@ -238,6 +238,10 @@ export default defineComponent({
       await loadingController.dismiss()
       await this.onEvent(TargetEvent.ONLOAD)
     },
+    /**
+     * Handle search result promises and handle entity related errors.
+     * This is also an entrypoint to initialise Ui Data and facts
+     */
     async handleSearchResults(patient: Promise<Patient | Patient[]>, npid = '') {
       let results: Patient[] | Patient = []
       try {
@@ -266,9 +270,14 @@ export default defineComponent({
         await this.drawPatientCards()
         this.facts.npidHasDuplicates = Array.isArray(results) && results.length > 1
       } else {
+        // For DDE only
         if (npid) await this.setVoidedNpidFacts(npid)
       }
     },
+    /**
+     * DDE sometimes sends 400 bad request which contains
+     * a list of invalid demographic attributes 
+     */
     setInvalidParametersFacts(errorExceptions: any) {
       this.facts.demographics.hasInvalidDemographics = true
       this.facts.demographics.invalidDemographics =
