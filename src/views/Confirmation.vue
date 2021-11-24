@@ -72,7 +72,7 @@
 </template>
 
 <script lang="ts">
-import { isEmpty, isPlainObject } from "lodash";
+import { isEmpty } from "lodash";
 import HisDate from "@/utils/Date"
 import HisApp from "@/apps/app_lib"
 import { defineComponent } from "vue";
@@ -222,15 +222,23 @@ export default defineComponent({
       await this.ddeInstance.loadDDEStatus()
       this.useDDE = this.ddeInstance.isEnabled()
 
-      if (!this.facts.scannedNpid && npid) 
-        this.facts.scannedNpid = npid
+      if (!this.facts.scannedNpid && npid) this.facts.scannedNpid = npid
 
       await this.resolveGlobalPropertyFacts()
 
       if (this.useDDE && npid) {
-        await this.handleSearchResults(this.ddeInstance.searchNpid(npid), npid)
+        await this.handleSearchResults(this.ddeInstance.searchNpid(npid))
       } else if (id) {
-        await this.handleSearchResults(Patientservice.findByID(id))
+        if (this.useDDE) {
+          const res = await Patientservice.findByID(id)
+          if (res) {
+            const p = new Patientservice(res)
+            this.facts.scannedNpid = p.getNationalID()
+            await this.handleSearchResults(this.ddeInstance.searchNpid(p.getNationalID()))
+          }
+        } else {
+          await this.handleSearchResults(Patientservice.findByID(id))
+        }
       } else {
         await this.handleSearchResults(Patientservice.findByNpid(npid as string))
       }
@@ -242,7 +250,7 @@ export default defineComponent({
      * Handle search result promises and handle entity related errors.
      * This is also an entrypoint to initialise Ui Data and facts
      */
-    async handleSearchResults(patient: Promise<Patient | Patient[]>, npid = '') {
+    async handleSearchResults(patient: Promise<Patient | Patient[]>) {
       let results: Patient[] | Patient = []
       try {
         results = await patient as Patient[] | Patient
@@ -271,7 +279,7 @@ export default defineComponent({
         this.facts.npidHasDuplicates = Array.isArray(results) && results.length > 1
       } else {
         // For DDE only
-        if (npid) await this.setVoidedNpidFacts(npid)
+        if (this.facts.scannedNpid) await this.setVoidedNpidFacts(this.facts.scannedNpid)
       }
     },
     /**
