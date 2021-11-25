@@ -70,7 +70,6 @@ export default defineComponent({
           await this.initAdherence(this.patient, this.providerID);
           this.askAdherence = this.adherence.receivedDrugsBefore();
           this.fields = this.getFields();
-          await this.checkVLReminder();
           this.lastDrugsReceived = await this.consultation.getPreviousDrugs();
 
           this.completedTBTherapy();
@@ -458,22 +457,23 @@ export default defineComponent({
     },
     getFields(): any {
       return [
-        {
-          id: "prescription",
-          helpText: "Medication to prescribe during this visit",
-          type: FieldType.TT_MULTIPLE_SELECT,
-          validation: (data: any) => Validation.required(data),
-          onValueUpdate: (listData: Array<Option>, value: Option) => {
-            return this.disablePrescriptions(listData, value);
-          },
-          options: (_: any, checked: Array<Option>) =>
-            this.getPrescriptionFields(checked),
-          condition: () => false, // show if guardian only visit
-        },
+        // {
+        //   id: "prescription",
+        //   helpText: "Medication to prescribe during this visit",
+        //   type: FieldType.TT_MULTIPLE_SELECT,
+        //   validation: (data: any) => Validation.required(data),
+        //   onValueUpdate: (listData: Array<Option>, value: Option) => {
+        //     return this.disablePrescriptions(listData, value);
+        //   },
+        //   options: (_: any, checked: Array<Option>) =>
+        //     this.getPrescriptionFields(checked),
+        //   condition: () => false, // show if guardian only visit
+        // },
         {
           id: "patient_lab_orders",
           helpText: "Lab orders",
           type: FieldType.TT_LAB_ORDERS,
+          unload: () => this.checkVLReminder(),
           onload: (fieldContext: any) => {
             this.labOrderFieldContext = fieldContext;
           },
@@ -522,12 +522,14 @@ export default defineComponent({
               () => Validation.anyEmpty(data),
             ]),
           unload: (data: any) => {
-            this.pregnancy = data.map((data: Option) => {
-              return this.consultation.buildValueCoded(
-                data.other.concept,
-                data.value
-              );
-            });
+            if (data) {
+              this.pregnancy = data.map((data: Option) => {
+                return this.consultation.buildValueCoded(
+                  data.other.concept,
+                  data.value
+                );
+              });
+            }
           },
           options: () => [
             {
