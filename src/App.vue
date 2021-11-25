@@ -81,6 +81,7 @@ export default defineComponent({
       ApiBusEvents.AFTER_API_REQUEST, 
       async (res: any) => {
         if (!apiOk.value) {
+          apiOk.value = true
           const confirm = await alertConfirmation(
             'Do you want to refresh the page?',
             'API connection is back'
@@ -93,7 +94,6 @@ export default defineComponent({
           const { error, exception } = await res.json();
           toastDanger(`${error} - ${exception}`);
         }
-        apiOk.value = true
         nprogress.done()
       }
     )
