@@ -32,7 +32,9 @@ export interface DateFieldInterface {
     config?: any;
 }
 
-export function getYearField(id: string, name: string): Field {
+export function getYearField(id: string, name: string, showUnknown=true): Field {
+    const primaryFunctions = ['TODAY']
+    if (showUnknown) primaryFunctions.push('UNKNOWN')
     return {
         id,
         helpText: `${name} Year`,
@@ -42,7 +44,7 @@ export function getYearField(id: string, name: string): Field {
             customKeyboard: [
                 NUMBER_PAD_LO,
                 [
-                    ['TODAY', 'UNKNOWN'],
+                    primaryFunctions,
                     ['DELETE']
                 ]
             ]
@@ -147,7 +149,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     const ageEstimateID = `age_estimate_${field.id}`
     const durationEstimateID = `duration_estimate_${field.id}`
 
-    const year = getYearField(yearID, field.helpText)
+    const year = getYearField(yearID, field.helpText, field.estimation.allowUnknown)
     const month = getMonthField(monthID, field.helpText)
     const day = getDayField(dayID, field.helpText)
 
@@ -218,7 +220,6 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             return field.computeValue(fullDate, false)
         }
         if (val && val.value === 'TODAY') {
-            console.log(Service.getCachedApiDate())
             return field.computeValue(Service.getCachedApiDate(), false)
         }
         if (val && val.value === 'Unknown') {
