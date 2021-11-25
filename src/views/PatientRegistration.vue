@@ -191,6 +191,12 @@ export default defineComponent({
         }
         return true
     },
+    confirmPatient() {
+        if (!this.patient.getNationalID().match(/unknown/i)) {
+            return  this.$router.push(`/patients/confirm?patient_barcode=${this.patient.getNationalID()}`)
+        }
+        this.$router.push(`/patients/confirm?person_id=${this.patient.getID()}`)
+    },
     resolvePersonAttributes(form: Record<string, Option> | Record<string, null>) {
         return Object.values(form)
                     .filter((d: any) => isPlainObject(d) && 'personAttributes' in d)
@@ -419,11 +425,29 @@ export default defineComponent({
             condition: () => !this.isEditMode(),
             validation: (val: Option) => Validation.required(val),
             options: async (form: any) => {
-                const patients = await Patientservice.search({
+                const payload = {
                     'given_name': form.given_name.value,
                     'family_name': form.family_name.value,
-                    'gender': form.gender.value,
-                });
+                    'gender': form.gender.value
+                }
+                // DDE enabled search
+                if (this.ddeInstance.isEnabled()) {
+                    const patients = await this.ddeInstance.searchDemographics(payload)
+                    return patients.map((item: any) => {
+                        const itemData = PersonField.getPersonAttributeOptions(item)
+                        itemData.other.options.push({
+                            label: 'Patient Type',
+                            value: item.patient_type
+                        })
+                        itemData.other.options.push({
+                            label: 'Doc ID',
+                            value: item.doc_id
+                        })
+                        return itemData
+                    })
+                }
+                // Regular search
+                const patients = await Patientservice.search(payload);
                 return patients.map((item: any) => PersonField.getPersonAttributeOptions(item))
             },
             config: {
@@ -639,7 +663,7 @@ export default defineComponent({
                             try {
                                 await this.ddeInstance.reassignNpid(this.ddeDocID, this.editPerson)
                                 await this.ddeInstance.printNpid()
-                                this.$router.push(`/patients/confirm?person_id=${this.editPerson}`)
+                                this.confirmPatient()
                             } catch(e) {
                                 toastWarning(e)
                             }
@@ -657,9 +681,7 @@ export default defineComponent({
                                 onload: () => !this.ddeIsReassign && !this.hasIncompleteData
                             }
                         },
-                        onClick: () => {
-                            this.$router.push(`/patients/confirm?person_id=${this.patient.getID()}`)
-                        }
+                        onClick: () => this.confirmPatient()
                     }
                 ],
                 hiddenFooterBtns: ['Clear', 'Next']

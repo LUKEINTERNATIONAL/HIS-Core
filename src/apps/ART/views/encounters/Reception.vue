@@ -119,7 +119,7 @@ export default defineComponent({
           helpText: "ART number",
           type: FieldType.TT_TEXT,
           computedValue: ({ value }: Option) => {
-            return this.reception.buildArvNumber(value)
+            return value
           },
           validation: (val: any) => Validation.required(val),
           condition: (f: any) => !this.hasARVNumber && f.capture_arv.value === "Yes",

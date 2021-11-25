@@ -83,6 +83,7 @@ import { matchToGuidelines } from "@/utils/GuidelineEngine"
 import { Patientservice } from "@/services/patient_service";
 import { PatientProgramService } from "@/services/patient_program_service"
 import { alertConfirmation, toastDanger } from "@/utils/Alerts"
+import { Patient } from "@/interfaces/patient"
 import {
   IonContent,
   IonHeader,
@@ -108,7 +109,7 @@ import { PatientPrintoutService } from "@/services/patient_printout_service";
 import { AppInterface } from "@/apps/interfaces/AppInterface";
 import { GlobalPropertyService } from "@/services/global_property_service"
 import { PatientDemographicsExchangeService } from "@/services/patient_demographics_exchange_service"
-import { IncompleteEntityError } from "@/services/service"
+import { IncompleteEntityError, BadRequestError } from "@/services/service"
 export default defineComponent({
   name: "Patient Confirmation",
   components: {
@@ -156,6 +157,8 @@ export default defineComponent({
       } as any,
       demographics: {
         patientIsComplete: false as boolean,
+        hasInvalidDemographics: false as boolean,
+        invalidDemographics: [] as string[],
         givenName: '' as string,
         familyName: '' as string,
         patientName: '' as string,
@@ -176,9 +179,15 @@ export default defineComponent({
       } as any
     }
   }),
-  created() {
+  async created() {
     const app = HisApp.getActiveApp()
     if (app) this.app = app
+
+    this.ddeInstance = new PatientDemographicsExchangeService()
+
+    await this.ddeInstance.loadDDEStatus()
+
+    this.useDDE = this.ddeInstance.isEnabled()
   },
   computed: {
     demographics(): any {
@@ -198,26 +207,13 @@ export default defineComponent({
       async handler({query}: any) {
         if (!isEmpty(query) && (
           query.person_id || query.patient_barcode
-        )) {
+        )) {      
           await this.findAndSetPatient(
             query.person_id, query.patient_barcode
           )
         }
       },
       immediate: true
-    },
-    async patient(patient: any) {
-      await this.presentLoading()
-      await this.resolveGlobalPropertyFacts()
-      if (!isEmpty(patient)) {
-        await this.drawPatientCards()
-        this.setPatientFacts()
-        this.program = new PatientProgramService(this.patient.getID())
-        await this.setProgramFacts()
-      }
-      if (this.useDDE) await this.setDDEFacts()
-      loadingController.dismiss()
-      await this.onEvent(TargetEvent.ONLOAD)
     }
   },
   methods: {
@@ -228,58 +224,85 @@ export default defineComponent({
     */
     async findAndSetPatient(id: number | undefined, npid: string | undefined) {
       await this.presentLoading()
-      let patient: any = {}
-      let nationalID = npid || ''
-      this.ddeInstance = new PatientDemographicsExchangeService()
-      await this.ddeInstance.loadDDEStatus()
-      this.useDDE = this.ddeInstance.isEnabled()
-      let searchResults: any = {}
 
-      if (!this.useDDE) {
-        if (id) {
-          searchResults = await Patientservice.findByID(id)
-        } else if(nationalID) {
-          const res = await Patientservice.findByNpid(nationalID)
-          if (!isEmpty(res)) {
-            this.facts.npidHasDuplicates = res.length > 1
-            searchResults = res[0]
-          } 
-        }
-      }
+      if (!this.facts.scannedNpid) this.facts.scannedNpid = npid || ''
 
-      if (!isEmpty(searchResults)) {
-        patient = new Patientservice(searchResults)
-        nationalID = patient.getNationalID()
-        this.facts.patientFound = true
-        this.facts.demographics.patientIsComplete = patient.patientIsComplete()
-      }
-
-      if (this.useDDE && nationalID) {
-        try {
-          const res = await this.ddeInstance.searchNpid(nationalID)
-          if (!isEmpty(res)) {
-            patient = new Patientservice(res[0])
-            this.facts.npidHasDuplicates = res.length > 1
-            this.facts.patientFound = true
-            this.facts.demographics.patientIsComplete = patient.patientIsComplete()
-          } else {
-            this.facts.patientFound = false
-            await this.setVoidedNpidFacts(nationalID)
+      await this.resolveGlobalPropertyFacts()
+      if (this.useDDE && npid) {
+        await this.handleSearchResults(this.ddeInstance.searchNpid(npid))
+      } else if (id) {
+        // We need to maintain DDE workflow if an npid wasnt used to find the patient.
+        // So find them locally first and then check with DDE if service is enabled
+        if (this.useDDE) {
+          const res = await Patientservice.findByID(id)
+          if (res) {
+            const p = new Patientservice(res)
+            this.facts.scannedNpid = p.getNationalID()
+            await this.handleSearchResults(this.ddeInstance.searchNpid(p.getNationalID()))
           }
-        }catch(e) {
-          if (e instanceof IncompleteEntityError) {
-            patient = new Patientservice(e.entity)
-            this.facts.patientFound = true
-            this.facts.demographics.patientIsComplete = false
-          }
+        } else {
+          await this.handleSearchResults(Patientservice.findByID(id))
         }
+      } else {
+        await this.handleSearchResults(Patientservice.findByNpid(npid as string))
       }
-
-      if (!this.facts.scannedNpid) 
-        this.facts.scannedNpid = nationalID
-      this.patient = patient
-     
       await loadingController.dismiss()
+      await this.onEvent(TargetEvent.ONLOAD)
+    },
+    /**
+     * Handle search result promises and handle entity related errors.
+     * This is also an entrypoint to initialise Ui Data and facts
+     */
+    async handleSearchResults(patient: Promise<Patient | Patient[]>) {
+      let results: Patient[] | Patient = []
+      try {
+        results = await patient as Patient[] | Patient
+      } catch (e) {
+        // [DDE] A person might have missing attributes such as home_village, 
+        // or home_ta.
+        if (e instanceof IncompleteEntityError && !isEmpty(e.entity)) {
+          results = e.entity
+        }
+        // DDE might send attribute validation errors for a person
+        if (e instanceof BadRequestError && Array.isArray(e.errors)) {
+          const [msg, ...entities] = e.errors
+          if (typeof msg === 'string' && msg === "Invalid parameter(s)") {
+            this.setInvalidParametersFacts(entities)
+          }
+        }
+      }
+      this.facts.patientFound = !isEmpty(results)
+      if (this.facts.patientFound) {
+        this.patient = new Patientservice(
+          Array.isArray(results) 
+            ? results[0]
+            : results
+          )
+        this.setPatientFacts()
+        await this.setProgramFacts()
+        await this.drawPatientCards()
+        this.facts.currentNpid = this.patient.getNationalID()
+        this.facts.npidHasDuplicates = Array.isArray(results) && results.length > 1
+      } else {
+        // [DDE] a user might scan a deleted npid but might have a newer one.
+        // The function below checks for newer version
+        if (this.facts.scannedNpid) await this.setVoidedNpidFacts(this.facts.scannedNpid)
+      }
+    },
+    /**
+     * DDE sometimes sends 400 bad request which contains
+     * a list of invalid demographic attributes 
+     */
+    setInvalidParametersFacts(errorExceptions: any) {
+      this.facts.demographics.hasInvalidDemographics = true
+      // Create a turple of attribute and error pairs
+      this.facts.demographics.invalidDemographics =
+        errorExceptions.map((e: any) => {
+          const data = Object.entries(e)
+          const entity = data[0][0]
+          const errors = data[0][1] as string[]
+          return [entity, errors.join(', ')]
+        })      
     },
     /**
      * Reloads patient facts and information.
@@ -295,6 +318,7 @@ export default defineComponent({
      * on the User interface
     */
     setPatientFacts() {
+      this.facts.demographics.patientIsComplete = this.patient.patientIsComplete()
       this.facts.demographics.patientName = this.patient.getFullName()
       this.facts.demographics.givenName = this.patient.getGivenName()
       this.facts.demographics.familyName = this.patient.getFamilyName()
@@ -310,7 +334,6 @@ export default defineComponent({
       this.facts.demographics.currentVillage = this.patient.getCurrentVillage()
       this.facts.identifiers = this.patient.getIdentifiers()
         .map((id: any) => id.type.name)
-      this.facts.currentNpid = this.patient.getNationalID()
     },
     buildDDEDiffs(diffs: any) {
       const comparisons: Array<string[]> = []
@@ -359,6 +382,7 @@ export default defineComponent({
       }
     },
     async setProgramFacts() {
+      this.program = new PatientProgramService(this.patient.getID())
       const { program, outcome }: any =  await this.program.getProgram()
       this.facts.currentOutcome = outcome
       this.facts.programName = program

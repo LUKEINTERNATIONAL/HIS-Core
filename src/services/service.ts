@@ -17,9 +17,11 @@ class NotFoundError extends Error {
     }
 }
 
-class BadRequestError extends Error {
-    constructor(message: string) {
-        super(`BAD REQUEST: ${message}`)
+export class BadRequestError extends Error {
+    errors: any
+    constructor(message: string, errors: any) {
+        super(message)
+        this.errors = errors
     }
 }
 
@@ -71,7 +73,7 @@ export class Service {
 
             if (response.status === 400) {
                 const {errors} = await response?.json()
-                throw new BadRequestError(errors)
+                throw new BadRequestError(response.statusText, errors)
             }
 
             if (response.status === 404) {
