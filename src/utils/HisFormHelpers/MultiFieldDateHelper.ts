@@ -220,7 +220,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             return field.computeValue(fullDate, false)
         }
         if (val && val.value === 'TODAY') {
-            return field.computeValue(Service.getCachedApiDate(), false)
+            return field.computeValue(Service.getSessionDate(), false)
         }
         if (val && val.value === 'Unknown') {
             return field.computeValue('Unknown', false)
