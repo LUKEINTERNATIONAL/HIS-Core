@@ -948,6 +948,7 @@ export default defineComponent({
             return [...this.getYesNo(), { label: "Unknown", value: "Unknown" }];
           },
         },
+        ...this.getAdherenceFields(this.askAdherence),
         {
           id: "refer_to_clinician",
           helpText: "Refer to clinician",
@@ -962,7 +963,6 @@ export default defineComponent({
           type: FieldType.TT_SELECT,
           options: () => this.getYesNo(),
         },
-        ...this.getAdherenceFields(this.askAdherence),
         {
           id: "prescription",
           helpText: "Medication to prescribe during this visit",
