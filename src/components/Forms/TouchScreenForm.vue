@@ -530,15 +530,13 @@ export default defineComponent({
       this.state = "unload";
       if (!isEmpty(this.currentField) && this.currentField.unload) {
         const data = this.formData[this.currentField.id];
-        if (data) {
-          await this.currentField.unload(
-            data,
-            state,
-            this.formData,
-            this.computedFormData,
-            this
-          );
-        }
+        await this.currentField.unload(
+          data,
+          state,
+          this.formData,
+          this.computedFormData,
+          this
+        );
       }
     },
     buildFormData(fields: Array<Field>): void {
