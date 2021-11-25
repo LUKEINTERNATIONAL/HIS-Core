@@ -57,6 +57,7 @@ export default defineComponent({
     medicationObs: [] as any,
     relatedObs: [] as any,
     askAdherence: false as boolean,
+    lastDrugsReceived: [] as any
   }),
   watch: {
     ready: {
@@ -69,7 +70,8 @@ export default defineComponent({
           await this.initAdherence(this.patient, this.providerID);
           this.askAdherence = this.adherence.receivedDrugsBefore();
           this.fields = this.getFields();
-          await this.checkVLReminder();
+          this.lastDrugsReceived = await this.consultation.getPreviousDrugs();
+
           this.completedTBTherapy();
         }
       },
@@ -335,19 +337,22 @@ export default defineComponent({
       ];
     },
     async getSideEffectsReasons(sideEffects: Option[]) {
-      const lastDrugs = await this.consultation.getPreviousDrugs();
+      const lastDrugs: any = this.lastDrugsReceived
       const allYes = sideEffects.filter(
         (sideEffect) => sideEffect.value === "Yes" && sideEffect.label  !== "Other"
       );
-      const modal = await modalController.create({
-        component: SideEffectsModalVue,
-        backdropDismiss: false,
-        cssClass: "large-modal",
-        componentProps: { sideEffects: allYes, drugs: lastDrugs },
-      });
-      modal.present();
-      const { data } = await modal.onDidDismiss();
-      return data;
+      if (allYes.length >= 1) {
+        const modal = await modalController.create({
+          component: SideEffectsModalVue,
+          backdropDismiss: false,
+          cssClass: "large-modal",
+          componentProps: { sideEffects: allYes, drugs: lastDrugs },
+        });
+        modal.present();
+        const { data } = await modal.onDidDismiss();
+        return data;
+      }
+      return -1
     },
     getFPMethods(exclusionList: string[] = [], preChecked: Array<Option>) {
       const methods = this.consultation.getFamilyPlanningMethods();
@@ -452,22 +457,23 @@ export default defineComponent({
     },
     getFields(): any {
       return [
-        {
-          id: "prescription",
-          helpText: "Medication to prescribe during this visit",
-          type: FieldType.TT_MULTIPLE_SELECT,
-          validation: (data: any) => Validation.required(data),
-          onValueUpdate: (listData: Array<Option>, value: Option) => {
-            return this.disablePrescriptions(listData, value);
-          },
-          options: (_: any, checked: Array<Option>) =>
-            this.getPrescriptionFields(checked),
-          condition: () => false, // show if guardian only visit
-        },
+        // {
+        //   id: "prescription",
+        //   helpText: "Medication to prescribe during this visit",
+        //   type: FieldType.TT_MULTIPLE_SELECT,
+        //   validation: (data: any) => Validation.required(data),
+        //   onValueUpdate: (listData: Array<Option>, value: Option) => {
+        //     return this.disablePrescriptions(listData, value);
+        //   },
+        //   options: (_: any, checked: Array<Option>) =>
+        //     this.getPrescriptionFields(checked),
+        //   condition: () => false, // show if guardian only visit
+        // },
         {
           id: "patient_lab_orders",
           helpText: "Lab orders",
           type: FieldType.TT_LAB_ORDERS,
+          unload: () => this.checkVLReminder(),
           onload: (fieldContext: any) => {
             this.labOrderFieldContext = fieldContext;
           },
@@ -516,12 +522,14 @@ export default defineComponent({
               () => Validation.anyEmpty(data),
             ]),
           unload: (data: any) => {
-            this.pregnancy = data.map((data: Option) => {
-              return this.consultation.buildValueCoded(
-                data.other.concept,
-                data.value
-              );
-            });
+            if (data) {
+              this.pregnancy = data.map((data: Option) => {
+                return this.consultation.buildValueCoded(
+                  data.other.concept,
+                  data.value
+                );
+              });
+            }
           },
           options: () => [
             {
@@ -716,7 +724,10 @@ export default defineComponent({
             ]),
           beforeNext: async (data: any) => {
             const reasons = await this.getSideEffectsReasons(data);
-            if (isEmpty(reasons)) return false
+            if (reasons === -1) 
+              return true
+            if (isEmpty(reasons)) 
+              return false
             const concept = ConceptService.getCachedConceptID("Drug induced");
             const sides = reasons.map((r: any) => {
               const c = ConceptService.getCachedConceptID(r.label);
@@ -908,9 +919,21 @@ export default defineComponent({
           },
           type: FieldType.TT_SELECT,
           options: () => {
+            const hasDrug = (drugName: string) => 
+              Object.values(this.lastDrugsReceived)
+                .map((d: any) => d.drug.name.match(new RegExp(drugName, 'i')))
+                .some(Boolean)
+            const prescribedInh = hasDrug('inh')
+            const prescribed3hp = hasDrug('Rifapentine')
             return [
-              { label: "Currently on IPT", value: "Currently on IPT" },
-              { label: "Currently on 3HP", value: "Currently on 3HP" },
+              { 
+                label: "Currently on IPT", 
+                value: "Currently on IPT"
+              },
+              { 
+                label: "Currently on 3HP", 
+                value: "Currently on 3HP"
+              },
               {
                 label: "Complete course of 3HP in the past (3 months RFP+INH)",
                 value: "Complete course of 3HP in the past (3 months RFP+INH)",
@@ -928,6 +951,7 @@ export default defineComponent({
               {
                 label: "Never taken IPT or 3HP",
                 value: "Never taken IPT or 3HP",
+                disabled: (prescribedInh || prescribed3hp)
               },
             ];
           },
@@ -948,6 +972,7 @@ export default defineComponent({
             return [...this.getYesNo(), { label: "Unknown", value: "Unknown" }];
           },
         },
+        ...this.getAdherenceFields(this.askAdherence),
         {
           id: "refer_to_clinician",
           helpText: "Refer to clinician",
@@ -962,7 +987,6 @@ export default defineComponent({
           type: FieldType.TT_SELECT,
           options: () => this.getYesNo(),
         },
-        ...this.getAdherenceFields(this.askAdherence),
         {
           id: "prescription",
           helpText: "Medication to prescribe during this visit",
