@@ -57,6 +57,7 @@ export default defineComponent({
     medicationObs: [] as any,
     relatedObs: [] as any,
     askAdherence: false as boolean,
+    lastDrugsReceived: [] as any
   }),
   watch: {
     ready: {
@@ -70,6 +71,8 @@ export default defineComponent({
           this.askAdherence = this.adherence.receivedDrugsBefore();
           this.fields = this.getFields();
           await this.checkVLReminder();
+          this.lastDrugsReceived = await this.consultation.getPreviousDrugs();
+
           this.completedTBTherapy();
         }
       },
@@ -335,7 +338,7 @@ export default defineComponent({
       ];
     },
     async getSideEffectsReasons(sideEffects: Option[]) {
-      const lastDrugs = await this.consultation.getPreviousDrugs();
+      const lastDrugs: any = this.lastDrugsReceived
       const allYes = sideEffects.filter(
         (sideEffect) => sideEffect.value === "Yes" && sideEffect.label  !== "Other"
       );
@@ -914,9 +917,23 @@ export default defineComponent({
           },
           type: FieldType.TT_SELECT,
           options: () => {
+            const hasDrug = (drugName: string) => 
+              Object.values(this.lastDrugsReceived)
+                .map((d: any) => d.drug.name.match(new RegExp(drugName, 'i')))
+                .some(Boolean)
+            const prescribedInh = hasDrug('inh')
+            const prescribed3hp = hasDrug('Rifapentine')
             return [
-              { label: "Currently on IPT", value: "Currently on IPT" },
-              { label: "Currently on 3HP", value: "Currently on 3HP" },
+              { 
+                label: "Currently on IPT", 
+                value: "Currently on IPT",
+                disabled: prescribedInh
+              },
+              { 
+                label: "Currently on 3HP", 
+                value: "Currently on 3HP",
+                disabled: prescribed3hp
+              },
               {
                 label: "Complete course of 3HP in the past (3 months RFP+INH)",
                 value: "Complete course of 3HP in the past (3 months RFP+INH)",
@@ -934,6 +951,7 @@ export default defineComponent({
               {
                 label: "Never taken IPT or 3HP",
                 value: "Never taken IPT or 3HP",
+                disabled: (prescribedInh || prescribed3hp)
               },
             ];
           },
