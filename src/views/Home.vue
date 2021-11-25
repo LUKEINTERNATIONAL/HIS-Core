@@ -260,7 +260,7 @@ export default defineComponent({
       )
     },
     async openModal() {
-      const data = await HisApp.selectApplication() 
+      const data = await HisApp.selectApplication('HomePage') 
       if (data) {
         this.app = data
         this.activeTab = 1
