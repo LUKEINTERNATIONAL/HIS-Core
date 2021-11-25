@@ -928,13 +928,11 @@ export default defineComponent({
             return [
               { 
                 label: "Currently on IPT", 
-                value: "Currently on IPT",
-                disabled: prescribedInh
+                value: "Currently on IPT"
               },
               { 
                 label: "Currently on 3HP", 
-                value: "Currently on 3HP",
-                disabled: prescribed3hp
+                value: "Currently on 3HP"
               },
               {
                 label: "Complete course of 3HP in the past (3 months RFP+INH)",
