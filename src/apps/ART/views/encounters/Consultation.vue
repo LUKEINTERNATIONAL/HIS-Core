@@ -339,15 +339,18 @@ export default defineComponent({
       const allYes = sideEffects.filter(
         (sideEffect) => sideEffect.value === "Yes" && sideEffect.label  !== "Other"
       );
-      const modal = await modalController.create({
-        component: SideEffectsModalVue,
-        backdropDismiss: false,
-        cssClass: "large-modal",
-        componentProps: { sideEffects: allYes, drugs: lastDrugs },
-      });
-      modal.present();
-      const { data } = await modal.onDidDismiss();
-      return data;
+      if (allYes.length >= 1) {
+        const modal = await modalController.create({
+          component: SideEffectsModalVue,
+          backdropDismiss: false,
+          cssClass: "large-modal",
+          componentProps: { sideEffects: allYes, drugs: lastDrugs },
+        });
+        modal.present();
+        const { data } = await modal.onDidDismiss();
+        return data;
+      }
+      return -1
     },
     getFPMethods(exclusionList: string[] = [], preChecked: Array<Option>) {
       const methods = this.consultation.getFamilyPlanningMethods();
@@ -716,7 +719,10 @@ export default defineComponent({
             ]),
           beforeNext: async (data: any) => {
             const reasons = await this.getSideEffectsReasons(data);
-            if (isEmpty(reasons)) return false
+            if (reasons === -1) 
+              return true
+            if (isEmpty(reasons)) 
+              return false
             const concept = ConceptService.getCachedConceptID("Drug induced");
             const sides = reasons.map((r: any) => {
               const c = ConceptService.getCachedConceptID(r.label);
