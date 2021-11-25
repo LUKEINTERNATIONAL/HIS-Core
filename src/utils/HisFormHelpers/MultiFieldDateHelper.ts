@@ -3,6 +3,8 @@ import MonthOptions from "@/utils/HisFormHelpers/MonthOptions"
 import { Field, Option } from "@/components/Forms/FieldInterface"
 import HisDate from "@/utils/Date"
 import StandardValidations from "@/components/Forms/validations/StandardValidations"
+import { NUMBER_PAD_LO } from "@/components/Keyboard/KbLayouts"
+import { Service } from "@/services/service"
 
 export enum EstimationFieldType {
     AGE_ESTIMATE_FIELD = "age-estimate-field",
@@ -35,7 +37,16 @@ export function getYearField(id: string, name: string): Field {
         id,
         helpText: `${name} Year`,
         appearInSummary: () => false,
-        type: FieldType.TT_NUMBER
+        type: FieldType.TT_TEXT,
+        config: {
+            customKeyboard: [
+                NUMBER_PAD_LO,
+                [
+                    ['TODAY', 'UNKNOWN'],
+                    ['DELETE']
+                ]
+            ]
+        }
     }
 }
 
@@ -144,9 +155,10 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     const durationEstimate = getMonthDurationEstimateField(durationEstimateID, field.helpText)
 
     const datePartCondition = (f: any) => {
-        if (f[yearID] && f[yearID].value 
-            && f[yearID].value === 'Unknown') {
-            return false
+        if (f[yearID] && f[yearID].value) {
+            if (['Unknown', 'TODAY'].includes(f[yearID].value)) {
+                return false
+            }
         }
         return field.condition ? field.condition(f) : true
     }
@@ -156,7 +168,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     year.unload = (v: Option) => yearValue = v.value.toString()
  
     // YEAR CONFIG
-    year.config = field.config
+    year.config = { ...year.config, ...field.config }
 
     year.defaultValue = () => getDefaultDate(field, 'Year')
 
@@ -173,7 +185,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             && year.toString().match(/unknown/i)) {
             return ['Value unknown is not permitted']
         }
-        if (year && year !='Unknown'
+        if (year && !['Unknown', 'TODAY'].includes(year.toString())
             && isNaN(parseInt(year.toString()))
             || year < 1900) {
             return ['Invalid Year']
@@ -204,6 +216,10 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             const [_, month, day] = fullDate.split('-')
             fullDate = `${val.value}-${month}-${day}`
             return field.computeValue(fullDate, false)
+        }
+        if (val && val.value === 'TODAY') {
+            console.log(Service.getCachedApiDate())
+            return field.computeValue(Service.getCachedApiDate(), false)
         }
         if (val && val.value === 'Unknown') {
             return field.computeValue('Unknown', false)
