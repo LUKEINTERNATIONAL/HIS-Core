@@ -8,6 +8,8 @@
 
     `sudo apt install nodejs`
 
+    also see: [Using NVM to install latest node version](https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-ubuntu-18-04)
+
 2. Install Ionic vue cli
 
     `npm install -g @ionic/cli`
