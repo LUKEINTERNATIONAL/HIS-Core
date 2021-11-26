@@ -1,7 +1,15 @@
 <template>
   <ion-page>
     <ion-header :translucent="true">
-      <ion-toolbar>
+      <ion-toolbar class="mobile-component-view">
+        <ion-title> {{ facilityName }} </ion-title>
+        <ion-buttons slot="end">
+          <ion-thumbnail> 
+            <img :src="appLogo" class="logo" alt="App Logo"/>
+          </ion-thumbnail>
+        </ion-buttons>
+      </ion-toolbar>
+      <ion-toolbar class="full-component-view">
         <ion-row>
           <ion-col>
             <div class="tool-bar-medium-card">
@@ -312,6 +320,20 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.full-component-view {
+    display: block;
+}
+.mobile-component-view {
+    display: none;
+}
+@media (max-width:900px) {
+  .full-component-view {
+      display: none;
+  }
+  .mobile-component-view {
+      display: block;
+  }
+}
 ion-icon {
   padding: 0.2em;
 }
