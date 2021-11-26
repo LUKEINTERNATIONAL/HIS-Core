@@ -13,6 +13,7 @@
                 v-for="(item, index) in viewableItems" 
                 :key="index"
                 size="4"
+                size-sm="12"
                 v-show="canShowItem(item)"
                 >
                 <task-card
