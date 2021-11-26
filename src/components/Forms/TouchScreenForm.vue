@@ -163,7 +163,12 @@ export default defineComponent({
             dataFields = [...dataFields, this.getDefaultSummaryField()];
           }
           this.currentFields = dataFields;
-          await this.onNext(); //look for a field to mount initially
+          // Use activeField as initial field if set
+          if (this.activeField) {
+            this.mountField(this.activeField)
+          } else {
+            await this.onNext(); //look for a field to mount initially
+          }
         }
       },
       immediate: true,
@@ -174,21 +179,22 @@ export default defineComponent({
     */
     activeField: {
       async handler(field: string) {
-        if (field) {
-          if (field === '_NEXT_FIELD_') {
-            await this.goNext()
-            return this.$emit('onIndex', this.currentIndex)
-          }
-          const i = findIndex(this.currentFields, { id: field });
-          if (i >= 0 && i <= this.currentFields.length) {
-            this.setActiveField(i)
-            this.$emit('onIndex', i)
-          }
-        }
+        if (field) this.mountField(field)
       }
     }
   },
   methods: {
+    async mountField(name: string) {
+      if (name === '_NEXT_FIELD_') {
+        await this.goNext()
+        return this.$emit('onIndex', this.currentIndex)
+      }
+      const i = findIndex(this.currentFields, { id: name });
+      if (i >= 0 && i <= this.currentFields.length) {
+        this.setActiveField(i)
+        this.$emit('onIndex', i)
+      }
+    },
     /**
      * Redirects to a specified route or defaults to the previous view
      */
