@@ -94,32 +94,45 @@
     <ion-footer>
       <ion-toolbar>
         <ion-row>
-          <ion-col>
-            <ion-button color="danger left" size="large" @click="signOut">
-              <ion-icon :icon="logOut"></ion-icon>
-                Logout
-              </ion-button>
-          </ion-col>
-          <ion-col v-if="canFindByIdentifier">
-            <ion-button color="primary" size="large" router-link="/patients/search/id">
-              <ion-icon :icon="search"> </ion-icon>
-              Find By
-            </ion-button>
-          </ion-col>
-          <ion-col>
-            <ion-button color="primary" size="large" router-link="/patient/registration">
-              <ion-icon :icon="person"></ion-icon>
-                Find or Register
-              </ion-button>
-          </ion-col>
-          <ion-col>
-            <ion-button color="primary" size="large" @click="openModal">
-              <ion-icon :icon="apps"></ion-icon>
-              <ion-label>
-                Applications
-              </ion-label>
-            </ion-button>
-          </ion-col>
+        <ion-col>
+          <ion-button class="xl-button mobile-component-view" color="danger" @click="signOut">
+            <ion-icon :icon="logOut"></ion-icon>
+          </ion-button>
+          <ion-button class="xl-button full-component-view" color="danger" size="large" @click="signOut">
+            <ion-icon :icon="logOut"></ion-icon>
+            <ion-label> Logout </ion-label>
+          </ion-button>
+        </ion-col>
+        
+        <ion-col>
+          <ion-button v-if="canFindByIdentifier" class="xl-button mobile-component-view" color="primary" router-link="/patients/search/id">
+            <ion-icon :icon="search"> </ion-icon>
+          </ion-button>
+          <ion-button v-if="canFindByIdentifier" class="xl-button full-component-view" color="primary" size="large" router-link="/patients/search/id">
+            <ion-icon :icon="search"> </ion-icon>
+            <ion-label> Find By </ion-label>
+          </ion-button>
+        </ion-col>
+
+        <ion-col>
+          <ion-button class="xl-button mobile-component-view" color="primary" router-link="/patient/registration">
+            <ion-icon :icon="person"></ion-icon>
+          </ion-button>
+          <ion-button class="xl-button full-component-view" color="primary" size="large" router-link="/patient/registration">
+            <ion-icon :icon="person"></ion-icon>
+            <ion-label> Find or Register </ion-label>
+          </ion-button>
+        </ion-col>
+
+        <ion-col>
+          <ion-button class="xl-button mobile-component-view" color="primary" @click="openModal">
+            <ion-icon :icon="apps"></ion-icon>
+          </ion-button>
+          <ion-button class="xl-button full-component-view" color="primary" size="large" @click="openModal">
+            <ion-icon :icon="apps"></ion-icon>
+            <ion-label> Applications </ion-label>
+          </ion-button>
+        </ion-col>
         </ion-row>
       </ion-toolbar>
     </ion-footer>
@@ -160,6 +173,7 @@ import {
   IonIcon,
   IonButton,
   IonSegment,
+  IonButtons,
   IonSegmentButton,
   IonLabel,
   isPlatform
@@ -173,6 +187,7 @@ export default defineComponent({
     IonContent,
     IonHeader,
     IonPage,
+    IonButtons,
     IonToolbar,
     IonRow,
     IonCol,
@@ -347,7 +362,7 @@ ion-icon {
 ion-col p {
   margin: 0;
 }
-ion-button {
+.xl-button {
   width: 100%;
 }
 .overview {
