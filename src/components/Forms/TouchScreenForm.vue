@@ -183,6 +183,9 @@ export default defineComponent({
       }
     }
   },
+  mounted() {
+    this.footerBtns = [this.getCancelBtn()]
+  },
   methods: {
     async mountField(name: string) {
       if (name === '_NEXT_FIELD_') {
