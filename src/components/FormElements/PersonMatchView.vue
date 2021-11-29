@@ -2,7 +2,7 @@
     <ion-row>
         <ion-col size="5">
             <div class="large-card">
-                <h3> {{ foundRecordsTitle }} ({{listData.length}}):  </h3>
+                <h3> Matches found: ({{listData.length}}):  </h3>
                 <ion-list>
                     <ion-item
                         button
@@ -14,25 +14,31 @@
                         <ion-avatar>
                           <ion-img src="/assets/images/avatar.svg"/>
                         </ion-avatar>
-                        <ion-label> {{ result.label }} </ion-label>
+                        <ion-label> 
+                            {{ result.label }} <br/>
+                            Home District: <b>{{ result.other.foundPerson.home_district }}</b> <br/>
+                            Home TA: <b>{{result.other.home_traditional_authority}}</b>
+                            Score: <b> {{result?.other?.score || '-' }} </b>
+                        </ion-label>
                     </ion-item>
                 </ion-list>
             </div>
         </ion-col>
         <ion-col size="7">
             <div class="large-card">
-                <h3> {{ detailsTitle }} </h3>
+                <h1> Match score: {{ selectedResult?.other?.score || '-' }} </h1>
                 <ion-list>
                     <ion-item
-                      v-for="(opt, index) in selectedResult?.other?.options || []"
+                      v-for="(comparison, index) in selectedResult?.other?.comparisons || []"
                       :key="index"
                       inset="none"
                       >
-                      <ion-label> 
-                          {{ opt.label }} 
-                      </ion-label>
-                      <ion-label slot="end"> 
-                          {{ opt.value }} 
+                      <ion-label
+                        color="danger"
+                        :key="rIndex"
+                        v-for="(item, rIndex) in comparison"
+                        > 
+                        <b>{{ item }}</b> 
                       </ion-label>
                     </ion-item>
                 </ion-list>
@@ -69,14 +75,6 @@ export default defineComponent({
     listData: [] as Array<Option>,
     selectedResult: {} as any
   }),
-  computed: {
-    foundRecordsTitle(): string {
-      return this.config?.foundRecordsTitle || 'Found People'
-    },
-    detailsTitle(): string {
-      return this.config?.detailsTitle || 'Details:'
-    }
-  },
   methods: {
     async onSelect(item: any) {
       if (!item) {
@@ -93,9 +91,9 @@ export default defineComponent({
     }
   },
   async activated() {
-    this.onSelect({})
     this.$emit('onFieldActivated', this)
     this.listData = await this.options(this.fdata, this)
+    this.onSelect(this.listData[0] || {})
   }
 });
 </script>

@@ -1,68 +1,65 @@
-import router from '@/router/index';
-import { toastDanger, alertConfirmation } from "@/utils/Alerts"
-/** Nprogress */
-import 'nprogress/nprogress.css'
-import nprogress from 'nprogress'
+import EventBus from '@/utils/EventBus';
 
-nprogress.configure({ easing: 'ease', speed: 870, trickleSpeed:1 });
+export enum ApiBusEvents {
+    BEFORE_API_REQUEST = 'before_api_request',
+    AFTER_API_REQUEST = 'after_api_request',
+    ON_API_CRASH = 'un_reachable_api',
+}
 
 const ApiClient = (() => {
     interface Config {
-        protocol?: string;
-        host?: string;
-        port?: string;
-        apiVersion?: string;
-        username?: string;
-        password?: string;
-        version?: string;
-        source?: string;
+        host: string;
+        port: string;
+        protocol: string;
     }
-    async function getConfig(): Promise<{ status: string; data?: Config | undefined; message?: string }> {
-        try {
-            const config: Config = {};
-            if(localStorage.useLocalStorage) {
-                config.host = localStorage.apiURL;
-                config.port = localStorage.apiPort;
-                config.protocol = localStorage.apiProtocol;
-                config.source = JSON.stringify(localStorage);
-            }else {
-                const response = await fetch('/config.json');
 
-                if (response.status !== 200) {
-                    const message = `Looks like there was a problem. Status Code: ${response.status}`;
-                    return { status: "error", message:  message};
-                }
-                const data = await response.json();
-                sessionStorage.setItem("apiURL", data.apiURL);
-                config.host = data.apiURL;
-                sessionStorage.setItem("apiPort", data.apiPort);
-                config.port = data.apiPort;
-                sessionStorage.setItem("apiProtocol", data.apiProtocol);
-                config.protocol = data.apiProtocol;
-                config.version = data.version;
-                config.source = data;
-            }
-            return { status: "complete", data: config };
-        } catch (err) {
-            return { status: "error" };
+    async function getFileConfig(): Promise<Config> {
+        const response = await fetch('/config.json')
+        if (!response.ok) {
+            throw 'Unable to retrieve configuration file/ Invalid config.json'
+        }
+        const { apiURL, apiPort, apiProtocol } = await response.json()
+        sessionStorage.setItem("apiURL", apiURL);
+        sessionStorage.setItem("apiPort", apiPort);
+        sessionStorage.setItem("apiProtocol", apiProtocol);
+        return {
+            host: apiURL,
+            port: apiPort,
+            protocol: apiProtocol
         }
     }
+
+    function getLocalConfig(): Config | undefined {
+        const host = localStorage.apiURL;
+        const port = localStorage.apiPort;
+        const protocol = localStorage.apiProtocol;
+        if ((host && port && protocol))
+            return { host, port, protocol }
+    }
+
+    function getSessionConfig(): Config | undefined {
+        const host = sessionStorage.apiURL
+        const port = sessionStorage.apiPort
+        const protocol = sessionStorage.apiProtocol
+        if ((host && port && protocol))
+            return { host, port, protocol }
+    }
+
+    function getConfig(): Promise<Config> | Config {
+        const localConfig: Config | undefined = getLocalConfig()
+        const sessionConfig: Config | undefined = getSessionConfig()
+
+        if (localStorage.useLocalStorage && localConfig)
+            return localConfig
+
+        if (sessionConfig) return sessionConfig
+        
+        return getFileConfig()
+    }
+
     async function expandPath(resourcePath: string) {
-        const config = await getConfig();
-        if(config.message) {
-            toastDanger(config.message);
-        }
-        if (config.data) {
-            return {
-                status: "complete",
-                url: `${config.data.protocol}://${config.data.host}:${config.data.port}/api/v1/${resourcePath}`
-            };
-        } else {
-            return {
-                status: "failed",
-                url: "/"
-            };
-        }
+        const config: Promise<Config> | Config = await getConfig();
+        return `${config.protocol}://${config.host}:${config.port}/api/v1/${resourcePath}`
     }
 
     function headers() {
@@ -71,65 +68,40 @@ const ApiClient = (() => {
             'Content-Type': 'application/json'
         };
     }
-    function setLocalStorage(ipAddress: string, port: string) {
+
+    function setLocalStorage(protocol: string, ipAddress: string, port: string) {
         localStorage.setItem('useLocalStorage', 'true');
         localStorage.setItem('apiURL', ipAddress);
         localStorage.setItem('apiPort', port);
-        localStorage.setItem('apiProtocol', 'http');
+        localStorage.setItem('apiProtocol', protocol);
     }
+
     function removeOnly(inclusions: string[]) {
         inclusions.forEach(element => {
            inclusions.includes(element) && localStorage.removeItem(element)
-        });
+        })
     }
 
-    async function execFetch(uri: string, params: object, noRedirectCodes: number[] = []) {
-        const pathData = await expandPath(uri)
-        if (pathData.status == "complete") {
-            const url = pathData.url;
-            params = { ...params, mode: 'cors' };
-
-            if (!('headers' in params)) {
-                params = { ...params, headers: headers() };
-            }
-
-            let response;
-            try {
-                nprogress.start()
- 
-                response = await fetch(url, params);
-
-                nprogress.done()
-
-                if (response.status === 401 && !noRedirectCodes.includes(response.status)
-                    && window.location.href.search(/login\/?$/) < 0) {
-                    router.push('/login');
-                    return null;
-                } else if (response.status >= 500 && !noRedirectCodes.includes(response.status)) {
-                    const { error, exception } = await response.json();
-                    toastDanger(`${error} - ${exception}`);
-                    return null;
-                } else {
-                    return response;
-                }
-            } catch (e) {
-                toastDanger(`Failed to fetch ${url}`);
-                const confirmation = await alertConfirmation('Can not connect to API, enter manual configuration?') 
-                const path = '/settings/host'
-                if (confirmation) {
-                    !path ? router.back() : router.push({path})
-                }
-                return null;
-            }
+    async function execFetch(uri: string, params: any) {        
+        params = { ...params, mode: 'cors' };
+        
+        if (!('headers' in params)) {
+            params = { ...params, headers: headers() };
         }
-        else {
-            toastDanger('could not configure services');
+
+        const url = await expandPath(uri)
+
+        try {
+            EventBus.emit(ApiBusEvents.BEFORE_API_REQUEST, uri)
+            const response = await fetch(url, params);
+            EventBus.emit(ApiBusEvents.AFTER_API_REQUEST, response)            
+            return response
+        } catch (e) {
+            console.error(e)
+            EventBus.emit(ApiBusEvents.ON_API_CRASH, e)
         }
     }
     
-
-    const get = (uri: string, options = []) => execFetch(uri, { method: 'GET' }, options)
-
     // /**
     //  * Perform a POST request on the API
     //  * 
@@ -139,10 +111,12 @@ const ApiClient = (() => {
     //  * Example:
     //  *   const response = post('people', {given_name: 'Foo', family_name: 'Bar}).then((response) => console.log(response));
     //  */
-    const post = (uri: string, data: object, options = []) => execFetch(uri, { method: 'POST', body: JSON.stringify(data) }, options);
-    const remove = (uri: string, data: object, options = []) => execFetch(uri, { method: 'DELETE', body: JSON.stringify(data) }, options);
-    const put = (uri: string, data: object, options = []) => execFetch(uri, { method: 'PUT', body: JSON.stringify(data) }, options);
-    return { get, post, put, remove, getConfig, setLocalStorage, removeOnly };
+    const get = (uri: string) => execFetch(uri, { method: 'GET' })
+    const post = (uri: string, data: object) => execFetch(uri, { method: 'POST', body: JSON.stringify(data) });
+    const remove = (uri: string, data: object) => execFetch(uri, { method: 'DELETE', body: JSON.stringify(data)});
+    const put = (uri: string, data: object) => execFetch(uri, { method: 'PUT', body: JSON.stringify(data) });
+    const healthCheck = () => get('_health')
+    return { get, post, put, remove, getConfig, setLocalStorage, removeOnly, expandPath, healthCheck };
 })();
 
 export default ApiClient;

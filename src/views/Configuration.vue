@@ -63,7 +63,11 @@ export default defineComponent({
     $route: {
       async handler({ query }: any) {
         if(query.label && query.property) {
-          this.val = await GlobalPropertyService.get(query.property);
+          try {
+            this.val = await GlobalPropertyService.get(query.property);
+          } catch (error) {
+            console.log('fixed global property not found error');
+          }
           this.property = query.property;
           this.label = query.label;
           this.getFields();

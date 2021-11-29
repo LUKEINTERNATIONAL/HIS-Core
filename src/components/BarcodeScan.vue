@@ -4,16 +4,21 @@
       <img id="barcode-img" src="/assets/images/barcode.svg"/>
     </ion-col>
     <ion-col size="10">
-      <input ref="barcode" :autofocus="true" id="barcode-inputbox" v-model="barcodeText"/>
+      <input 
+        ref="barcode" 
+        :readonly="isReadOnly" 
+        :autofocus="true" 
+        id="barcode-inputbox" 
+        v-model="barcodeText"
+        />
     </ion-col>
   </ion-row>
 </template>
 <script>
 import { defineComponent } from 'vue';
-import {IonCol,IonRow} from "@ionic/vue";
+import {IonCol,IonRow, isPlatform} from "@ionic/vue";
 import { toastWarning } from "@/utils/Alerts"
 import ApiClient from "@/services/api_client"
-
 export default defineComponent({
   name: 'BarcodeScan',
   components: {
@@ -21,10 +26,14 @@ export default defineComponent({
     IonCol,
   },
   data: () => ({
-    barcodeText: ''
+    barcodeText: '',
+    isReadOnly: true
   }),
   mounted() {
-    setTimeout(() => this.$refs.barcode.focus(), 500)
+    if (isPlatform('desktop')) {
+      this.isReadOnly = false
+      setTimeout(() => this.$refs.barcode.focus(), 500)
+    }
   },
   methods: {
       checkForbarcode(){

@@ -1,7 +1,7 @@
 <template>
   <his-standard-form
     :fields="fields"
-    @onFinish="onFinish"
+    :onFinishAction="onFinish"
     :skipSummary="true"
   />
 </template> 
@@ -10,33 +10,67 @@ import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
-import {
-  CHARACTERS_AND_NUMBERS_LO, NUMBER_PAD_LO
-} from "@/components/Keyboard/KbLayouts";
+import { NUMBER_PAD_LO } from "@/components/Keyboard/KbLayouts";
 import ApiClient from "@/services/api_client";
 import { infoActionSheet } from "@/utils/ActionSheets";
+import { toastWarning } from "@/utils/Alerts"
+import { loadingController } from "@ionic/vue"
+
 export default defineComponent({
   components: { HisStandardForm },
   methods: {
-    onFinish(formData: any) {
+    async onFinish(formData: any) {
+      const protocol = formData.protocol.value;
       const ipAddress = formData.ip_address.value;
       const port = formData.port.value;
-      ApiClient.setLocalStorage(ipAddress, port);
-      this.$router.back();
+
+      ApiClient.setLocalStorage(protocol, ipAddress, port);
+      
+      const loading = await loadingController
+        .create({
+          message: 'Please wait...',
+          backdropDismiss: false
+        })
+
+      await loading.present()
+
+      const res = await ApiClient.healthCheck()
+
+      loadingController.dismiss()
+
+      if (!(res && res.status === 200) || !res) {
+        toastWarning(`
+          Unable to connect to: ${protocol}://${ipAddress}: ${port}
+        `)
+        this.clearLocalStorage()
+      } else {
+        this.$router.back();
+      }
     },
     getFields() {
       this.fields = [
         {
+          id: "protocol",
+          helpText: "Select Protocol",
+          type: FieldType.TT_SELECT,
+          requireNext: false,
+          validation: (val: any) => Validation.required(val),
+          options: () => [
+            {
+              label: 'HTTP',
+              value: 'http'
+            },
+            {
+              label: 'HTTPS',
+              value: 'https'
+            }
+          ]
+        },
+        {
           id: "ip_address",
           helpText: "Enter IP Address",
-          type: FieldType.TT_TEXT,
-          validation: (val: any) => Validation.required(val) || Validation.isIPAddress(val),
-          config: {
-            customKeyboard: [
-              CHARACTERS_AND_NUMBERS_LO,
-              [[ "Delete"]],
-            ],
-          },
+          type: FieldType.TT_IP_ADDRESS,
+          validation: (val: any) => Validation.required(val) || Validation.isIPAddress(val)
         },
         {
           id: "port",

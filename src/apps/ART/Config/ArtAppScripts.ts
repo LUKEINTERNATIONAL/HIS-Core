@@ -61,7 +61,8 @@ async function showArtActivities() {
  * Present a modal to show drug chart
  */
 async function showStockManagementChart() {
-    const prop = await GlobalPropertyService.isStockManagementEnabled();
+    try {
+     const prop = await GlobalPropertyService.isStockManagementEnabled();
     if(prop === "true") {
         const drugModal = await modalController.create({
         component: DrugModalVue,
@@ -71,19 +72,24 @@ async function showStockManagementChart() {
 
         drugModal.present() 
         await drugModal.onDidDismiss()
+    }   
+    } catch (error) {
+       // 
     }
+    
 }
 
-export async function init() {
+export async function init(context='') {
     await showArtActivities()
-    await showStockManagementChart()
+    if (context === 'HomePage') {
+        await showStockManagementChart()
+    }
 }
 
 export async function onRegisterPatient(patientID: number, person: any, attr: any, router: any) {
     await enrollInArtProgram(patientID, person.patient_type, person.location)
     // Assign filing number if property use_filing_numbers is enabled
-    const canFilingNumber = await GlobalPropertyService.get('use_filing_numbers')
-    if (canFilingNumber==='true') {
+    if ((await GlobalPropertyService.isProp('use.filing.numbers=true'))) {
         let nextRoute = `/art/filing_numbers/${patientID}?assign=true`
         if (person.relationship === 'Yes') {
             nextRoute += '&next_workflow_task=Guardian Registration'

@@ -5,18 +5,24 @@
     v-model="text"
     :type="type"
     :disabled="disabled"
+    :readonly="isReadOnly"
     autocapitalize="sentences"
   />
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import { IonInput } from "@ionic/vue";
+import { IonInput, isPlatform } from "@ionic/vue";
+
 export default defineComponent({
   name: "HisInput",
   components: { IonInput },
   data:() => ({
+    isReadOnly: false as boolean,
     text: '' as string | number
   }),
+  created() {
+    this.isReadOnly = !isPlatform('desktop')
+  },
   watch: {
     value(val: number | string) {
       this.text = val

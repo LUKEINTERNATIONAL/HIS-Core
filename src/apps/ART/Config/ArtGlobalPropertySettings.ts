@@ -55,11 +55,11 @@ export const PROPERTIES: FolderInterface[] = [
             ),
             globalPropConfig(
                 "Activate Filing Numbers", 
-                "use_filing_numbers"
+                "use.filing.number"
             ),
             globalPropConfig(
                 "Activate drug management", 
-                "activate_drug_management"
+                "activate.drug.management"
             ),
             globalPropConfig(
                 "Activate Hypertension screening", 
@@ -70,12 +70,12 @@ export const PROPERTIES: FolderInterface[] = [
                 "enable_fast_track"
             ),
             globalPropConfig(
-                "Activate 3HP auto select", 
+                "Activate 3HP auto select",
                 "activate_3hp_auto_select"
             ),
             globalPropConfig(
                 "Filing numbers (activate)",
-                "use_filing_numbers"
+                "use.filing.numbers"
             ),
             globalPropConfig(
                 "Is this a military site?",

@@ -4,7 +4,6 @@ import { modalController } from "@ionic/vue";
 import { find, isEmpty } from 'lodash';
 import GlobalApp from "@/apps/GLOBAL_APP/global_app"
 import { AppInterface } from "./interfaces/AppInterface";
-
 /**
 * Merge global configurations with app configurations
 */
@@ -34,11 +33,14 @@ function getActiveApp(): AppInterface | undefined {
     }
 }
 
-async function selectApplication() {
+async function selectApplication(context='', canClose=false) {
     const modal = await modalController.create({
         component: ApplicationModal,
         cssClass: "large-modal",
-        backdropDismiss: false
+        backdropDismiss: false,
+        componentProps: {
+            canClose
+        }
     });
 
     modal.present()
@@ -49,7 +51,7 @@ async function selectApplication() {
 
     const app: AppInterface = applyGlobalConfig(data)
     
-    if (app.init) await app.init()
+    if (app.init) await app.init(context)
     
     sessionStorage.setItem('applicationName', app.applicationName)
 
