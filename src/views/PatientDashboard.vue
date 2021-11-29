@@ -381,9 +381,13 @@ export default defineComponent({
     methods: {
         async init() {
             this.patient = await this.fetchPatient(this.patientId)
-            this.patientProgram = await ProgramService.getProgramInformation(this.patientId)
+            try {
+                this.patientProgram = await ProgramService.getProgramInformation(this.patientId)
+                this.programCardInfo = await this.getProgramCardInfo(this.patientProgram) || []
+            } catch (e) {
+                console.warn(e)
+            }
             this.patientCardInfo = this.getPatientCardInfo(this.patient)
-            this.programCardInfo = await this.getProgramCardInfo(this.patientProgram) || []
             this.currentDate = HisDate.currentDisplayDate()
             this.sessionDate = this.toDate(ProgramService.getSessionDate())
             this.isBDE = ProgramService.isBDE() || false
