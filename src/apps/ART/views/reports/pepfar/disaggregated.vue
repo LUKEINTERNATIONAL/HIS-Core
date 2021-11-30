@@ -7,6 +7,7 @@
         :columns="columns"
         :isLoading="isLoading"
         :reportReady="reportReady"
+        :headerInfoList="headerList"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>
@@ -20,6 +21,7 @@ import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { Option } from '@/components/Forms/FieldInterface'
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -29,6 +31,7 @@ export default defineComponent({
         rows: [] as Array<any>,
         reportReady: false as boolean,
         isLoading: false as boolean,
+        headerList: [] as Option[],
         columns: [
             [
                 table.thTxt('Age group'),
@@ -66,6 +69,13 @@ export default defineComponent({
                 return toastWarning('Unable to initialise report')
             }
             await this.setTableRows()
+            this.setHeaderInfoList()
+        },
+        setHeaderInfoList() {
+            const totalAlive = this.totalCurF.concat(this.totalCurM)
+            this.headerList = [
+                { label: 'Total Alive and on ART', value: totalAlive.length }
+            ]
         },
         async setTableRows() {
             await this.setFemaleRows()
