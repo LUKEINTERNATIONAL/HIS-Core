@@ -34,6 +34,10 @@ export const REPORTS: FolderInterface[] = [
         defaultFilesIcon: 'reports.png',
         files: [
             {
+                name: 'Active clients with adverse outcomes',
+                pathName: 'clinic_archiving_candidates'
+            },
+            {
                 name: 'Defaulter list',
                 pathName: 'clinic_defaulters_report'
             },

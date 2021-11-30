@@ -8,16 +8,19 @@
   <ion-page v-if="canShowReport">
     <ion-header>
       <ion-toolbar>
-        <ion-row> 
-          <ion-col size="2">
-            <img class="logo" :src="logo" />
+        <ion-title v-if="showtitleOnly"> 
+          {{title}} 
+        </ion-title>
+        <ion-row v-if="!showtitleOnly">
+          <ion-col size="2" v-if="reportLogo">
+            <img class="logo" :src="reportLogo"/>
           </ion-col>
           <ion-col>
             <ion-row>
               <ion-col size="2">Title</ion-col> 
               <ion-col> <b>{{ title }}</b> </ion-col>
             </ion-row>
-            <ion-row> 
+            <ion-row v-if="period">
               <ion-col size="2">Period</ion-col> 
               <ion-col> <b>{{ period }}</b> </ion-col>
             </ion-row>
@@ -55,6 +58,7 @@ import {
   loadingController
 } from "@ionic/vue"
 import { toastDanger } from "@/utils/Alerts";
+import Img from "@/utils/Img"
 
 export default defineComponent({
   components: { 
@@ -69,13 +73,20 @@ export default defineComponent({
     IonCol
   },
   props: {
+    reportLogo: {
+      type: String,
+      default: Img('login-logos/Malawi-Coat_of_arms_of_arms.png')
+    },
+    showtitleOnly: {
+      type: Boolean,
+      default: false
+    },
     title: {
       type: String,
       required: true,
     },
     period: {
-      type: String,
-      required: true,
+      type: String
     },
     fields: {
       type: Object as PropType<Field[]>,
@@ -112,7 +123,6 @@ export default defineComponent({
     btns: [] as Array<any>,
     isLoadingData: false as boolean,
     canShowReport: false as boolean,
-    logo: "/assets/images/login-logos/Malawi-Coat_of_arms_of_arms.png" as string
   }),
   methods: {
     getFileName() {
