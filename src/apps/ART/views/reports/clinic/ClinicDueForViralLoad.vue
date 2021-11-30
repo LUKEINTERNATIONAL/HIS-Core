@@ -55,9 +55,6 @@ export default defineComponent({
             const data = await this.report.getClientsDueForVl()
             this.setRows(data)
         },
-        confirmPatient(patient: number) {
-            return this.$router.push(`/patients/confirm?person_id=${patient}`)
-        },
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {
                 this.rows.push([
