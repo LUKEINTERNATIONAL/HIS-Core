@@ -56,4 +56,10 @@ export class PatientReportService extends ArtReportService {
     getPregnantWomen() {
         return this.getReport(`/programs/${this.programID}/reports/pregnant_patients`)
     }
+
+    getArchivingCandidates() {
+        return ArtReportService.getJson(`programs/${this.programID}/reports/archiving_candidates`, { 
+            'start_date': this.date
+        })
+    }
 }

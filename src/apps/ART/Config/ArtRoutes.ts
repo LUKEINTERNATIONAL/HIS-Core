@@ -32,6 +32,7 @@ import ClinicViralLoadReport from "@/apps/ART/views/reports/clinic/ClinicViralLo
 import ClinicOtherOutcomeReport from "@/apps/ART/views/reports/clinic/ClinicOtherOutcomeReport.vue"
 import ClinicRegimenFormulationReport from "@/apps/ART/views/reports/clinic/ClinicRegimenFormulationReport.vue"
 import ClinicLabResultsReport from "@/apps/ART/views/reports/clinic/ClinicLabResultsReport.vue"
+import ClinicArchivingCandidates from "@/apps/ART/views/reports/clinic/ClinicArchivingCandidates.vue"
 import MohDisaggregatedReport from "@/apps/ART/views/reports/moh/MohDisaggregatedReport.vue"
 import MohSurvivalAnalysisReport from "@/apps/ART/views/reports/moh/MohSurvivalAnalysisReport.vue"
 import MohTptInitiationsReport from "@/apps/ART/views/reports/moh/MohTptInitiationsReport.vue"
@@ -232,6 +233,11 @@ export default [
         path: '/art/report/clinic',
         component: ReportTemplate,
         children: [
+            {
+                name: 'clinic_archiving_candidates',
+                path: 'clinic_archiving_candidates',
+                component: ClinicArchivingCandidates
+            },
             {
                 name: 'clinic_retention_report',
                 path: "clinic_retention_report",
