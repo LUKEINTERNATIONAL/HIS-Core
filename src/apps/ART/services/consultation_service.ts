@@ -16,6 +16,10 @@ export class ConsultationService extends AppEncounterService {
       "NONE",
     ];
   }
+  getDrugSideEffects() {
+    const sessionDate = AppEncounterService.getSessionDate();
+    return AppEncounterService.getJson(`/programs/1/patients/${this.patientID}/medication_side_effects`, {date: sessionDate});
+  }
   async getPreviousDrugs() {
 
         const drugs = await AppEncounterService.getJson(

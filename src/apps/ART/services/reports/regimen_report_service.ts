@@ -1,7 +1,8 @@
-import { ArtReportService } from "./art_report_service";
+import { ArtReportService } from './art_report_service';
 
 export const REGIMENS = [
-    '0A', '2A', '4A', '5A', '6A', '7A', '8A', '9A', '10A', '11A', '12A', '13A', '14A', '15A', '16A', '17A'
+    '0A', '2A', '4A', '5A', '6A', '7A', '8A', '9A', '10A', '11A', '12A', '13A', '14A', '15A', '16A', '17A',
+    '0P', '2P', '4P', '9P', '11P', '14P', '14PP', '15P', '15PP', '16P', '17P'
 ]
 export const FORMULATIONS = [
     'pellets',
