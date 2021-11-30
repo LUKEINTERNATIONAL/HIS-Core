@@ -65,12 +65,16 @@ export default defineComponent({
                 columns
             }
         },
+        async runTableDrill(data: any) {
+            const tableData = await this.patientTableColumns(data)
+            await this.tableDrill(tableData)
+        },
         drill(values: Array<number>) {
             if (values.length > 0) {
-                return table.tdLink(values.length, async () => {
-                    const tableData = await this.patientTableColumns(values)
-                    await this.tableDrill(tableData)
-                })
+                return table.tdLink(
+                    values.length, 
+                    () => this.runTableDrill(values)
+                )
             }
             return table.td(values.length)
         },
