@@ -9,7 +9,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title v-if="showtitleOnly"> 
-          {{title}} 
+          <span v-html="title"></span> 
         </ion-title>
         <ion-row v-if="!showtitleOnly">
           <ion-col size="2" v-if="reportLogo">
