@@ -60,7 +60,7 @@ export default defineComponent({
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {
                 this.rows.push([
-                    table.td(d.arv_number),
+                    table.tdLink(d.arv_number, () => this.$router.push(`/patients/confirm?person_id=${d.patient_id}`)),
                     table.tdDate(d.appointment_date),
                     table.tdDate(d.start_date),
                     table.td(d.months_on_art),
