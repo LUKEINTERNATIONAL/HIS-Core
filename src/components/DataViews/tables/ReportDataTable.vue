@@ -49,7 +49,7 @@
     </tbody>
   </table>
   <div v-if="!rows || rows.length <= 0" class="no-data-section his-card"> 
-    No data to available in table 
+    No data available in table 
   </div>
 </template>
 

@@ -213,10 +213,10 @@ export default defineComponent({
       onClick: () => this.canShowReport = false
     })
     this.btns.push({
-      name: "Rebuild",
+      name: "Refresh",
       size: "large",
       slot: "end",
-      color: "danger",
+      color: "warning",
       visible: true,
       onClick: async () => this.reloadReport()
     })
