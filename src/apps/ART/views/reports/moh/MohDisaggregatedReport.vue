@@ -59,7 +59,9 @@ export default defineComponent({
                 table.thNum('9P'),
                 table.thNum('11P'),
                 table.thNum('14P'),
+                table.thNum('14PP'),
                 table.thNum('15P'),
+                table.thNum('15PP'),
                 table.thNum('16P'),
                 table.thNum('17P'),
                 table.thNum('Unknown'),
@@ -115,7 +117,7 @@ export default defineComponent({
         },
         buildDefaultRegimenValues() {
             const values = []
-            for (let i=0; i < 26; ++i ) {
+            for (let i=0; i < 28; ++i ) {
                 values.push(table.td(0))
             }
             return values
