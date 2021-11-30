@@ -74,7 +74,13 @@ export default defineComponent({
         setHeaderInfoList() {
             const totalAlive = this.totalCurF.concat(this.totalCurM)
             this.headerList = [
-                { label: 'Total Alive and on ART', value: totalAlive.length }
+                { 
+                    label: 'Total Alive and on ART', 
+                    value: totalAlive.length,
+                    other: {
+                        onclick: () => this.runTableDrill(totalAlive)
+                    }
+                }
             ]
         },
         async setTableRows() {
