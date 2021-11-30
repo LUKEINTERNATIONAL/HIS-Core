@@ -83,8 +83,8 @@ export default defineComponent({
                     table.tdDate(data.birthdate),
                     table.td(
                        `District: ${data.district}
-                        table.td( Village: ${data.village}
-                        table.td( Land-mark: ${data.land_mark}`
+                        Village: ${data.village}
+                        Land-mark: ${data.land_mark}`
                     ),
                     table.tdBtn('Select', () => this.confirmPatient(data.person_id))
                 ])
