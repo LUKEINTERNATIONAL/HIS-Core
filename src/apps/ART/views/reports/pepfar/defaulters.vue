@@ -3,11 +3,12 @@
         <report-template
             :title="title"
             :period="period"
-            :rows="rows" 
+            :rows="rows"
             :fields="fields"
             :columns="columns"
             :canExportCsv="false"
             :canExportPDf="false"
+            :showtitleOnly="true"
             :onReportConfiguration="onPeriod"
             >
         </report-template>
@@ -54,6 +55,7 @@ export default defineComponent({
             this.period = this.report.getDateIntervalPeriod()
             const data = await this.report.getDefaulters()
             this.setRows(data)
+            this.title = `PEPFAR Defaulters report <b>(${data.length} Defaulters)</b>`
         },
         async setRows(data: Array<any>) {
             data.forEach((data: any) => {
