@@ -1,15 +1,16 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :isLoading="isLoading"
-        :reportReady="reportReady"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page>
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            :headerInfoList="headerInfoList"
+            :onReportConfiguration="onPeriod"
+            > 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -18,16 +19,18 @@ import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { TxReportService, OTHER_AGE_GROUPS } from '@/apps/ART/services/reports/tx_report_service'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { Option } from "@/components/Forms/FieldInterface"
+import { IonPage } from "@ionic/vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
         title: 'Moh TX CURR MMD Report',
         cohort: {} as any,
         rows: [] as Array<any>,
-        reportReady: false as boolean,
-        isLoading: false as boolean,
+        headerInfoList: [] as Option[],
+        totals: new Set(),
         columns:  [
             [
                 table.thTxt('Age group'),
@@ -43,8 +46,6 @@ export default defineComponent({
     },
     methods: {
         async onPeriod(_: any, config: any) {
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
             this.report = new TxReportService()
             this.report.setOrg('moh')
@@ -52,7 +53,18 @@ export default defineComponent({
             this.report.setEndDate(config.end_date)
             this.period = this.report.getDateIntervalPeriod()
             await this.setRows()
-            this.isLoading = false
+            this.setHeaderInfoList()
+        },
+        setHeaderInfoList() {
+            this.headerInfoList = [
+                { 
+                    label: 'Total clients', 
+                    value: this.totals.size,
+                    other: {
+                        onclick: () => this.runTableDrill(Array.from(this.totals))
+                    }
+                }
+            ]
         },
         getValues(patients: Record<string, Array<any>>) {
             const underThreeMonths: Array<any> = []
@@ -62,6 +74,7 @@ export default defineComponent({
             for (const patientId in patients) {
                 const data: any = patients[patientId]
                 const pDays = data.prescribed_days
+                this.totals.add(patientId)
 
                 if(pDays < 90) {
                     underThreeMonths.push(patientId)
