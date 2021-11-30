@@ -6,6 +6,8 @@
             :rows="rows" 
             :fields="fields"
             :columns="columns"
+            :showtitleOnly="true"
+            :canExportPDf="false"
             :onReportConfiguration="onPeriod"
             > 
         </report-template>
@@ -25,7 +27,7 @@ export default defineComponent({
     mixins: [ReportMixin],
     components: { ReportTemplate, IonPage },
     data: () => ({
-        title: 'Clinic Clients due for VL',
+        title: 'Clinic Clients due for VL <small>(clients with appointments in specified period)</small>',
         rows: [] as Array<any>,
         columns: [] as Array<any>
     }),
