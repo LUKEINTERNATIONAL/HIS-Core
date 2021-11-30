@@ -33,7 +33,11 @@
                 </ion-label>
               </ion-col>
               <ion-col>
-                <ion-label>
+                <a href="#" v-if="info.other.onclick"
+                  @click.prevent="info.other.onclick()">
+                  {{ info.value }}
+                </a>
+                <ion-label v-if="!info.other.onclick">
                   <b><span v-html="info.value"></span></b> 
                 </ion-label>
               </ion-col>
@@ -236,5 +240,10 @@ export default defineComponent({
   width: 99.9%;
   height: 99%;
   overflow: auto;
+}
+a {
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1em;
 }
 </style>
