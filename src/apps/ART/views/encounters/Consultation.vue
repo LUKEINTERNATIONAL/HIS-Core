@@ -734,10 +734,15 @@ export default defineComponent({
           id: 'previous_side_effects',
           helpText: 'Side effects / Contraindications history',
           type: FieldType.TT_TABLE_VIEWER,
-          condition: () => this.sideEffectsHistory.length > 0,
           options: () => {
-            const columns = ['Date', 'Condition'];
-            const rows = this.sideEffectsHistory;
+            let columns = ['Date', 'Condition'] as any;
+            let rows = [];
+            if(this.sideEffectsHistory.length === 0) {
+              columns = [''];
+              rows = [['No Past', 'side effects / contraindications']];
+            }else {
+              rows = this.sideEffectsHistory;
+            }
             return [{
               label: 'Side effects / Contraindications history',
               value: 'trail',
