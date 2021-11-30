@@ -41,7 +41,8 @@ export default defineComponent({
                 table.thTxt('Last name'),
                 table.thTxt('Gender'),
                 table.thTxt('birthdate'),
-                table.thTxt('Current Address')
+                table.thTxt('Current Address'),
+                table.thTxt('Actions')
             ]
         ]
     }),
@@ -84,7 +85,8 @@ export default defineComponent({
                        `District: ${data.district}
                         table.td( Village: ${data.village}
                         table.td( Land-mark: ${data.land_mark}`
-                    )
+                    ),
+                    table.tdBtn('Select', () => this.confirmPatient(data.person_id))
                 ])
             })
         }
