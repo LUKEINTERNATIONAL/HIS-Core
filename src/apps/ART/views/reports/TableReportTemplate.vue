@@ -16,13 +16,27 @@
             <img class="logo" :src="reportLogo"/>
           </ion-col>
           <ion-col>
+            <!-- DEFAULT HEADER ROWS -->
             <ion-row>
               <ion-col size="2">Title</ion-col> 
               <ion-col> <b>{{ title }}</b> </ion-col>
             </ion-row>
             <ion-row v-if="period">
               <ion-col size="2">Period</ion-col> 
-              <ion-col> <b>{{ period }}</b> </ion-col>
+              <ion-col><b>{{ period }}</b> </ion-col>
+            </ion-row>
+            <!-- DYNAMIC HEADER ROWS -->
+            <ion-row v-for="(info, index) in headerInfoList" :key="index"> 
+              <ion-col size="2">
+                <ion-label>
+                  <span>{{ info.label }}</span> 
+                </ion-label>
+              </ion-col>
+              <ion-col>
+                <ion-label>
+                  <b><span v-html="info.value"></span></b> 
+                </ion-label>
+              </ion-col>
             </ion-row>
           </ion-col>
         </ion-row>
@@ -73,6 +87,10 @@ export default defineComponent({
     IonCol
   },
   props: {
+    headerInfoList: {
+      type: Array,
+      default: () => []
+    },
     reportLogo: {
       type: String,
       default: Img('login-logos/Malawi-Coat_of_arms_of_arms.png')
@@ -137,8 +155,8 @@ export default defineComponent({
         await this.onReportConfiguration(this.formData, this.computeFormData)
         loadingController.dismiss ()
       }catch(e) {
-        console.error(e)
         toastDanger(e)
+        console.error(e)
         loadingController.dismiss()
       }
     },
