@@ -26,6 +26,9 @@ export default defineComponent({
         toDate(date: string) {
             return HisDate.toStandardHisDisplayFormat(date)
         },
+        confirmPatient(patient: number) {
+            return this.$router.push(`/patients/confirm?person_id=${patient}`)
+        },
         async tableDrill(tableData: any){
             const modal = await modalController.create({
                 component: DrillTable,
