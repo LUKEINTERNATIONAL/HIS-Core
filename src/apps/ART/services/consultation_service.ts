@@ -1,3 +1,4 @@
+import { DrugInterface } from "@/interfaces/Drug";
 import { AppEncounterService } from "@/services/app_encounter_service";
 export class ConsultationService extends AppEncounterService {
   constructor(patientID: number, providerID: number) {
@@ -15,7 +16,20 @@ export class ConsultationService extends AppEncounterService {
       "NONE",
     ];
   }
-  
+  async getPreviousDrugs() {
+
+        const drugs = await AppEncounterService.getJson(
+            `patients/${this.patientID}/drugs_received`
+        )
+
+        if (!drugs) return
+
+        const uniqueDrugs = {} as any 
+        drugs.forEach((drug: DrugInterface) => {
+          uniqueDrugs[drug.drug_inventory_id] = drug;
+        })
+        return uniqueDrugs;
+    }
   familyPlanningMethods(label: string, values: any[]) {
     const familyPlanningLogic: any = {
       "ORAL CONTRACEPTIVE PILLS": {

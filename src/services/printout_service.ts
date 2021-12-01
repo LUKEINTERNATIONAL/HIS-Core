@@ -1,8 +1,8 @@
 import { Service } from "./service";
-import { modalController } from "@ionic/vue";
+import { getPlatforms, modalController } from "@ionic/vue";
 import ZebraPrinterComponent from "@/components/ZebraPrinterImage.vue"
-import { toastWarning } from "@/utils/Alerts";
 import { delayPromise } from "@/utils/Timers";
+import ApiClient from "./api_client";
 
 export class PrintoutService extends Service {
     constructor() {
@@ -17,25 +17,14 @@ export class PrintoutService extends Service {
         modal.present()
     }
 
-    async printLbl(url: string, name=`printout-${Service.getSessionDate()}`) {
+    async printLbl(url: any) {
         PrintoutService.showPrinterImage()
-        const file = await Service.getText(url)
-
-        if (!file) {
-            toastWarning('Unable to print barcode')
-            return await modalController.dismiss({})
-        } 
-
-        const fileUrl = window.URL.createObjectURL(new Blob([file]))
-
-        const link = document.createElement('a')
-        link.href = fileUrl
-        link.style.display = 'none'
-        link.setAttribute('download', `${name}.lbl`)
-        document.body.appendChild(link)
-
-        link.click()
-        document.body.removeChild(link);
+        const isNative = getPlatforms().filter(p => [
+            'android', 
+            ].includes(p)).length >= 1
+            if(!isNative) {
+                document.location = (await ApiClient.expandPath(url)) as any
+            } 
         await delayPromise(3000)
         await modalController.dismiss({})
     }

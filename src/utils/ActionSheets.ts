@@ -10,7 +10,8 @@ export async function tableActionSheet(
     columns: Array<string>,
     rows: Array<string>,
     actionButtons: Array<any>,
-    color = '')
+    color = '',
+    rowColors:  Array<any>=[])
     {
         const modal = await modalController.create({
         component: TableSheet,
@@ -21,6 +22,7 @@ export async function tableActionSheet(
             subtitle,
             columns,
             rows,
+            rowColors,
             actionButtons,
             color
         }

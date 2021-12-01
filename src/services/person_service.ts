@@ -31,7 +31,9 @@ export class PersonService extends Service{
 
     create() { return Service.postJson('/people', this.person) }
 
-    update(id: number) { return Service.putJson(`people/${id}`, this.person) }
+    update(id: number) { return Service.putJson(`people/${id}`, {
+        ...this.person, 'program_id': Service.getProgramID()
+    })}
 
     static searchFamilyName(name: string) {
         return super.getJson('/search/family_name', {'search_string': name})

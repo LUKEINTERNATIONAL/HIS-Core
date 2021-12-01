@@ -1,7 +1,7 @@
 <template>
   <ion-grid>
     <ion-row>
-      <ion-col>
+      <ion-col size-lg="6" size-sm="12">
         <p>Complete / incomplete visits: last 5 days</p>
         <apexchart
           width="100%"
@@ -10,7 +10,7 @@
           :series="series"
         ></apexchart>
       </ion-col>
-      <ion-col>
+      <ion-col size-lg="6" size-sm="12">
         <p>Encounters created today</p>
         <table>
           <tr>

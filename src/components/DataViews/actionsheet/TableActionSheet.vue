@@ -1,7 +1,7 @@
 <template>
     <action-header :title="title" :subtitle="subtitle" :color="color"> </action-header>
         <ion-content>
-            <his-table :columns="columns" :rows="rows"/>
+            <his-table :columns="columns" :rowColors="rowColors" :rows="rows"/>
         </ion-content>
     <action-footer :buttons="actionButtons"> </action-footer>
 </template>
@@ -14,6 +14,9 @@ export default defineComponent({
     mixins: [ActionSheetMixin],
     components: { HisTable },
     props: {
+        rowColors: {
+            type: Object as PropType<Array<{indexes: number[];class: string}>>
+        },
         columns: {
             type: Object as PropType<Array<string>>,
             required: true

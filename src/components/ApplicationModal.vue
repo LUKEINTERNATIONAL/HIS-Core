@@ -21,23 +21,49 @@
        </ion-col>
      </ion-row>
   </ion-content>
+  <ion-footer> 
+    <ion-toolbar> 
+      <ion-button 
+        color="danger" 
+        size="large"
+        @click="closeModal"
+        v-if="canClose"> 
+        Close 
+      </ion-button>
+    </ion-toolbar>
+  </ion-footer>
 </template>
-
 <script>
 import HisApps from "@/apps/his_apps"
-import { IonContent, IonHeader, IonTitle, IonToolbar, IonCol, IonRow, modalController } from '@ionic/vue';
 import { defineComponent } from 'vue';
 import ApplicationCard from '@/components/ApplicationCard'
 import {toastDanger} from "@/utils/Alerts"
 import { find } from "lodash"
 import Img from "@/utils/Img"
-
+import { 
+  IonContent, 
+  IonFooter,
+  IonHeader, 
+  IonButton,
+  IonTitle, 
+  IonToolbar, 
+  IonCol, 
+  IonRow, 
+  modalController 
+} from '@ionic/vue';
 export default defineComponent({
   name: 'Modal',
   props: {
     title: { type: String, default: '' },
+    canClose: {
+      type: Boolean,
+      default: () => false
+    }
   },
   methods: {
+    closeModal() {
+      modalController.dismiss()
+    },
     img: (name) => Img(name),
     async setApplication(app) { await modalController.dismiss(app) },
   },
@@ -60,6 +86,16 @@ export default defineComponent({
       apps: []
     }
   },
-  components: { IonContent, IonHeader, IonTitle, IonToolbar, ApplicationCard, IonCol, IonRow}
+  components: { 
+    IonFooter, 
+    IonContent, 
+    IonHeader, 
+    IonTitle,
+    IonToolbar, 
+    ApplicationCard, 
+    IonButton,
+    IonCol, 
+    IonRow
+  }
 });
 </script>
