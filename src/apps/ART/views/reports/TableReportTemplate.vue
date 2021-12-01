@@ -52,6 +52,8 @@
           :rows="rows"
           :columns="columns">
         </report-table>
+        <ion-chip color="secondary">Date Generated: <b>{{ date }}</b></ion-chip>
+        <ion-chip color="secondary">API version: <b>{{ apiVersion }}</b></ion-chip>
       </div>
     </ion-content>
     <his-footer :btns="btns"></his-footer>
@@ -73,10 +75,13 @@ import {
   IonToolbar, 
   IonRow,
   IonCol,
+  IonChip,
   loadingController
 } from "@ionic/vue"
 import { toastDanger } from "@/utils/Alerts";
 import Img from "@/utils/Img"
+import HisDate from "@/utils/Date"
+import { Service } from "@/services/service"
 
 export default defineComponent({
   components: { 
@@ -88,7 +93,8 @@ export default defineComponent({
     IonContent, 
     IonToolbar, 
     IonRow, 
-    IonCol
+    IonCol,
+    IonChip
   },
   props: {
     headerInfoList: {
@@ -145,6 +151,8 @@ export default defineComponent({
     btns: [] as Array<any>,
     isLoadingData: false as boolean,
     canShowReport: false as boolean,
+    date: HisDate.toStandardHisDisplayFormat(Service.getSessionDate()),
+    apiVersion: Service.getApiVersion()
   }),
   methods: {
     getFileName() {

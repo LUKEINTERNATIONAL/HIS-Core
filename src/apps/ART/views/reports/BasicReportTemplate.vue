@@ -15,6 +15,8 @@
           :rows="rows"
           :columns="columns">
         </report-table>
+        <ion-chip color="secondary">Date Generated: <b>{{ date }}</b></ion-chip>
+        <ion-chip color="secondary">API version: <b>{{ apiVersion }}</b></ion-chip>
       </div>
     </ion-content>
     <his-footer :btns="btns"></his-footer>
@@ -26,11 +28,13 @@ import { defineComponent, PropType } from "vue";
 import HisFooter from "@/components/HisDynamicNavFooter.vue";
 import { toExportableFormat, ColumnInterface, RowInterface} from "@/components/DataViews/tables/ReportDataTable" 
 import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
-import { IonPage, IonContent, IonToolbar} from "@ionic/vue"
+import { IonPage, IonContent, IonToolbar, IonChip } from "@ionic/vue"
 import { toCsv, toTablePDF } from "@/utils/Export"
+import { Service } from "@/services/service"
+import HisDate from "@/utils/Date"
 
 export default defineComponent({
-  components: { ReportTable, HisFooter, IonPage, IonContent, IonToolbar },
+  components: { ReportTable, HisFooter, IonPage, IonContent, IonToolbar, IonChip },
   props: {
     title: {
       type: String,
@@ -50,7 +54,9 @@ export default defineComponent({
     }
   },
   data: () => ({
-    btns: [] as Array<any>
+    btns: [] as Array<any>,
+    date: HisDate.toStandardHisDisplayFormat(Service.getSessionDate()),
+    apiVersion: Service.getApiVersion()
   }),
   created() {
     this.btns = [
