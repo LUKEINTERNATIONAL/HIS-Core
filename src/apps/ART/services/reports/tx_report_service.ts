@@ -1,4 +1,5 @@
 import { ArtReportService } from "./art_report_service";
+import Url from "@/utils/Url";
 
 export const OTHER_AGE_GROUPS = [
     '<1 year', '1-4 years',
@@ -29,6 +30,18 @@ export class TxReportService extends ArtReportService {
 
     setOrg(org: string) {
         this.org = org
+    }
+
+    getTxMMDClientLevelData(patients: Array<number>) {
+        const params = Url.parameterizeObjToString({
+            'start_date': this.startDate,
+            'end_date': this.endDate,
+            'program_id': this.programID,
+            'date': this.date,
+            'org': this.org
+        })
+        const url = `tx_mmd_client_level_data?${params}`
+        return ArtReportService.postJson(url, { 'patient_ids': patients })
     }
 
     getTxCurrMMDReport(minAge: number, maxAge: number) {
