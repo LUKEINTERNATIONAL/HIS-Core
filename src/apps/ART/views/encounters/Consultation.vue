@@ -13,7 +13,6 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import { Option } from "@/components/Forms/FieldInterface";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
-import EncounterMixinVue from "./EncounterMixin.vue";
 import { alertAction, toastSuccess, toastWarning } from "@/utils/Alerts";
 import HisDate from "@/utils/Date";
 import { findIndex, isEmpty, find } from "lodash";
@@ -21,14 +20,16 @@ import { ConsultationService } from "@/apps/ART/services/consultation_service";
 import { UserService } from "@/services/user_service";
 import { OrderService } from "@/services/order_service";
 import { ConceptService } from "@/services/concept_service";
+import AdherenceMixinVue from "./AdherenceMixin.vue";
 import { modalController } from "@ionic/vue";
 import VLReminderModal from "@/components/DataViews/VLReminderModal.vue";
 import { ProgramService } from "@/services/program_service";
 import { ARTLabService } from "../../services/lab_service";
 import { infoActionSheet } from "@/utils/ActionSheets";
+import SideEffectsModalVue from "@/components/DataViews/SideEffectsModal.vue";
 
 export default defineComponent({
-  mixins: [EncounterMixinVue],
+  mixins: [AdherenceMixinVue],
   components: { HisStandardForm },
   data: () => ({
     fields: [] as any,
@@ -54,17 +55,23 @@ export default defineComponent({
     sulphurObs: {} as any,
     referObs: {} as any,
     medicationObs: [] as any,
+    relatedObs: [] as any,
+    askAdherence: false as boolean,
+    lastDrugsReceived: [] as any
   }),
   watch: {
     ready: {
       async handler(value: boolean) {
         if (value) {
-          this.fields = this.getFields();
           this.consultation = new ConsultationService(
             this.patientID,
             this.providerID
           );
-          await this.checkVLReminder();
+          await this.initAdherence(this.patient, this.providerID);
+          this.askAdherence = this.adherence.receivedDrugsBefore();
+          this.fields = this.getFields();
+          this.lastDrugsReceived = await this.consultation.getPreviousDrugs();
+
           this.completedTBTherapy();
         }
       },
@@ -95,9 +102,14 @@ export default defineComponent({
         this.sulphurObs,
         this.referObs,
         ...this.medicationObs,
+        ...this.relatedObs,
       ]);
+
       const filtered = data.filter((d) => !isEmpty(d));
+
       const obs = await this.consultation.saveObservationList(filtered);
+
+      if (this.askAdherence) await this.saveAdherence();
 
       if (!obs) return toastWarning("Unable to save patient observations");
 
@@ -137,7 +149,7 @@ export default defineComponent({
       const orderService = new ARTLabService(this.patientID, this.providerID);
 
       const encounter = await orderService.createEncounter();
-       const observations = await orderService.buildDefferedOrder(milestone);
+      const observations = await orderService.buildDefferedOrder(milestone);
       if (!encounter) return toastWarning("Unable to create encounter");
       await orderService.saveObservationList(observations);
     },
@@ -324,6 +336,24 @@ export default defineComponent({
         },
       ];
     },
+    async getSideEffectsReasons(sideEffects: Option[]) {
+      const lastDrugs: any = this.lastDrugsReceived
+      const allYes = sideEffects.filter(
+        (sideEffect) => sideEffect.value === "Yes" && sideEffect.label  !== "Other"
+      );
+      if (allYes.length >= 1) {
+        const modal = await modalController.create({
+          component: SideEffectsModalVue,
+          backdropDismiss: false,
+          cssClass: "large-modal",
+          componentProps: { sideEffects: allYes, drugs: lastDrugs },
+        });
+        modal.present();
+        const { data } = await modal.onDidDismiss();
+        return data;
+      }
+      return -1
+    },
     getFPMethods(exclusionList: string[] = [], preChecked: Array<Option>) {
       const methods = this.consultation.getFamilyPlanningMethods();
       const filtered = methods.filter(
@@ -427,22 +457,23 @@ export default defineComponent({
     },
     getFields(): any {
       return [
-        {
-          id: "prescription",
-          helpText: "Medication to prescribe during this visit",
-          type: FieldType.TT_MULTIPLE_SELECT,
-          validation: (data: any) => Validation.required(data),
-          onValueUpdate: (listData: Array<Option>, value: Option) => {
-            return this.disablePrescriptions(listData, value);
-          },
-          options: (_: any, checked: Array<Option>) =>
-            this.getPrescriptionFields(checked),
-          condition: () => false, // show if guardian only visit
-        },
+        // {
+        //   id: "prescription",
+        //   helpText: "Medication to prescribe during this visit",
+        //   type: FieldType.TT_MULTIPLE_SELECT,
+        //   validation: (data: any) => Validation.required(data),
+        //   onValueUpdate: (listData: Array<Option>, value: Option) => {
+        //     return this.disablePrescriptions(listData, value);
+        //   },
+        //   options: (_: any, checked: Array<Option>) =>
+        //     this.getPrescriptionFields(checked),
+        //   condition: () => false, // show if guardian only visit
+        // },
         {
           id: "patient_lab_orders",
           helpText: "Lab orders",
           type: FieldType.TT_LAB_ORDERS,
+          unload: () => this.checkVLReminder(),
           onload: (fieldContext: any) => {
             this.labOrderFieldContext = fieldContext;
           },
@@ -491,12 +522,14 @@ export default defineComponent({
               () => Validation.anyEmpty(data),
             ]),
           unload: (data: any) => {
-            this.pregnancy = data.map((data: Option) => {
-              return this.consultation.buildValueCoded(
-                data.other.concept,
-                data.value
-              );
-            });
+            if (data) {
+              this.pregnancy = data.map((data: Option) => {
+                return this.consultation.buildValueCoded(
+                  data.other.concept,
+                  data.value
+                );
+              });
+            }
           },
           options: () => [
             {
@@ -689,7 +722,30 @@ export default defineComponent({
               () => Validation.required(data),
               () => Validation.anyEmpty(data),
             ]),
-          unload: async (data: any) => {
+          beforeNext: async (data: any) => {
+            const reasons = await this.getSideEffectsReasons(data);
+            if (reasons === -1) 
+              return true
+            if (isEmpty(reasons)) 
+              return false
+            const concept = ConceptService.getCachedConceptID("Drug induced");
+            const sides = reasons.map((r: any) => {
+              const c = ConceptService.getCachedConceptID(r.label);
+              if (r.reason === "other" || r.reason === "drug") {
+                return {
+                  'concept_id': concept,
+                  'value_coded': c,
+                  'value_text': "Past medication history",
+                };
+              } else {
+                return {
+                  'concept_id': concept,
+                  'value_coded': c,
+                  'value_drug': r.reason,
+                };
+              }
+            });
+            this.relatedObs = [...this.relatedObs, ...sides];
             this.sideEffects = await data.map(async (data: Option) => {
               const host = await this.consultation.buildValueCoded(
                 "Malawi ART side effects",
@@ -706,6 +762,7 @@ export default defineComponent({
                 },
               };
             });
+            return true
           },
           options: (_: any, checked: Array<Option>) =>
             this.getContraindications(checked),
@@ -722,6 +779,25 @@ export default defineComponent({
             "Other Contraindications / Side effects (select either 'Yes' or 'No')",
           type: FieldType.TT_MULTIPLE_YES_NO,
           unload: async (data: any) => {
+            const reasons = await this.getSideEffectsReasons(data);
+            const concept = ConceptService.getCachedConceptID("Drug induced");
+            const sides = reasons.map((r: any) => {
+              const c = ConceptService.getCachedConceptID(r.label);
+              if (r.reason === "other" || r.reason === "drug") {
+                return {
+                  'concept_id': concept,
+                  'value_coded': c,
+                  'value_text': "Past medication history",
+                };
+              } else {
+                return {
+                  'concept_id': concept,
+                  'value_coded': c,
+                  'value_drug': r.reason,
+                };
+              }
+            });
+            this.relatedObs = [...this.relatedObs, ...sides];
             const filtered = data.filter((d: any) => {
               return d.label !== "Other (Specify)";
             });
@@ -843,9 +919,21 @@ export default defineComponent({
           },
           type: FieldType.TT_SELECT,
           options: () => {
+            const hasDrug = (drugName: string) => 
+              Object.values(this.lastDrugsReceived)
+                .map((d: any) => d.drug.name.match(new RegExp(drugName, 'i')))
+                .some(Boolean)
+            const prescribedInh = hasDrug('inh')
+            const prescribed3hp = hasDrug('Rifapentine')
             return [
-              { label: "Currently on IPT", value: "Currently on IPT" },
-              { label: "Currently on 3HP", value: "Currently on 3HP" },
+              { 
+                label: "Currently on IPT", 
+                value: "Currently on IPT"
+              },
+              { 
+                label: "Currently on 3HP", 
+                value: "Currently on 3HP"
+              },
               {
                 label: "Complete course of 3HP in the past (3 months RFP+INH)",
                 value: "Complete course of 3HP in the past (3 months RFP+INH)",
@@ -863,6 +951,7 @@ export default defineComponent({
               {
                 label: "Never taken IPT or 3HP",
                 value: "Never taken IPT or 3HP",
+                disabled: (prescribedInh || prescribed3hp)
               },
             ];
           },
@@ -883,6 +972,7 @@ export default defineComponent({
             return [...this.getYesNo(), { label: "Unknown", value: "Unknown" }];
           },
         },
+        ...this.getAdherenceFields(this.askAdherence),
         {
           id: "refer_to_clinician",
           helpText: "Refer to clinician",
@@ -902,15 +992,17 @@ export default defineComponent({
           helpText: "Medication to prescribe during this visit",
           type: FieldType.TT_MULTIPLE_SELECT,
           validation: (data: any) => Validation.required(data),
-          onload: (context: any) => {this.prescriptionContext = context},
+          onload: (context: any) => {
+            this.prescriptionContext = context;
+          },
           onValueUpdate: (listData: Array<Option>, value: Option) => {
             return this.disablePrescriptions(listData, value);
           },
           config: {
-          footerBtns: [
-            {
-              name: 'Update allergic to CPT',
-              onClick: async () => {
+            footerBtns: [
+              {
+                name: "Update allergic to CPT",
+                onClick: async () => {
                   const action = await infoActionSheet(
                     "Allergic to Cotrimoxazole update",
                     `Is the patient allergic to cotrimoxazole.`,
@@ -923,13 +1015,15 @@ export default defineComponent({
 
                   if (action === "Allergic") {
                     this.allergicToSulphur = true;
-                    this.prescriptionContext.listData = this.getPrescriptionFields([]);
-                  }else {
+                    this.prescriptionContext.listData =
+                      this.getPrescriptionFields([]);
+                  } else {
                     this.allergicToSulphur = false;
-                    this.prescriptionContext.listData = this.getPrescriptionFields([]);
+                    this.prescriptionContext.listData =
+                      this.getPrescriptionFields([]);
                   }
-                }
-              }
+                },
+              },
             ],
           },
           options: (_: any, checked: Array<Option>) =>

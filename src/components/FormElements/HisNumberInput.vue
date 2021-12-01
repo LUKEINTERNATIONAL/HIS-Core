@@ -17,7 +17,7 @@ import FieldMixinVue from './FieldMixin.vue'
 export default defineComponent({
     components: { BaseInput, HisKeyboard, ViewPort },
     mixins: [FieldMixinVue],
-    data: ()=>({ 
+    data: ()=>({
         value: '',
         keyboard: NUMBERS_ONLY,
     }),

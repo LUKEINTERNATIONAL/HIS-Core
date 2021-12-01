@@ -27,6 +27,11 @@ export default [
     component: () => import('@/apps/OPD/views/encounters/SocialHistory.vue')
   },
   {
+    name: "presenting complaints",
+    path: "/opd/encounters/complaints/:patient_id",
+    component: () => import('@/apps/OPD/views/encounters/Complaints.vue')
+  },
+  {
     path: '/opd/reports/clinic',
     component: BaseReport,
     children: [

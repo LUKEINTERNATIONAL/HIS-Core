@@ -5,6 +5,61 @@ export default [
       "name": "Art clinic location"
    },
    {
+      "categories": [],
+      "concept_id": 8677,
+      "name": 'Specific presenting complaint'
+   },
+   {
+      "categories": [],
+      "concept_id": 8578,
+      "name": 'Presenting complaint'
+   },
+   {
+      "categories": [],
+      "concept_id": 10319,
+      "name": 'Presenting complaint group'
+   },
+   {
+      "categories": [],
+      "concept_id": 6266,
+      "name": 'Trauma'
+   },
+   {
+      "categories": [],
+      "concept_id": 7027,
+      "name": 'General'
+   },
+   {
+      "categories": [],
+      "concept_id": 7411,
+      "name": 'ILI'
+   },
+   {
+      "categories": [],
+      "concept_id": 7644,
+      "name": 'Respiratory'
+   },
+   {
+      "categories": [],
+      "concept_id": 7661,
+      "name": 'Gastrointestinal'
+   },
+   {
+      "categories": [],
+      "concept_id": 9546,
+      "name": 'Haema'
+   },
+   {
+      "categories": [],
+      "concept_id": 9551,
+      "name": 'Nephro'
+   },
+   {
+      "categories": [],
+      "concept_id": 9560,
+      "name": 'Cardiovascular'
+   },
+   {
       "categories": [
          'art_patient_type'
       ],

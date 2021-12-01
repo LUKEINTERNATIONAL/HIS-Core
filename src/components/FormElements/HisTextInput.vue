@@ -3,7 +3,7 @@
         <ion-grid>
             <ion-row>
                 <ion-col v-if="prependValue" size-md="4">
-                    <ion-input :value="prependValue" class="input_display" :disabled="true"/>
+                    <ion-input :readonly="isReadOnly" :value="prependValue" class="input_display" :disabled="true"/>
                 </ion-col>
                 <ion-col size-md="">
                     <base-input :type="inputType" :value="value" @onValue="onKbValue"/>
@@ -35,7 +35,7 @@ import {
     IonGrid,
     IonList, 
     IonItem, 
-    IonLabel
+    IonLabel,
 } from "@ionic/vue"
 
 export default defineComponent({

@@ -58,15 +58,15 @@ export default defineComponent({
       this.nextTask()
     },
     async init() {
-    const appointments = await this.appointment.getNextAppointment();
-    if (isEmpty(appointments)) {
-      toastWarning('Can not do appointment right now!')
-      return nextTask(this.patientID, this.$router)
-    }
-    this.appointmentDate = appointments.appointment_date;
-    this.medicationRunOutDate = appointments.drugs_run_out_date;
-
+      try {
+        const appointments = await this.appointment.getNextAppointment();
+        this.appointmentDate = appointments.appointment_date;
+        this.medicationRunOutDate = appointments.drugs_run_out_date; 
         this.fields = this.getFields();
+      } catch(e) {
+        toastWarning('Next appointment is not available')
+        this.gotoPatientDashboard()
+      }
     },
     getFields(): Array<Field> {
       return [

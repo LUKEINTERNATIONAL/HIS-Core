@@ -104,7 +104,7 @@ export interface AppInterface {
     /**
      * Onload event when the program is selected
     */
-    readonly init?: () => void;
+    readonly init?: (context: string) => void;
     /**
      * Parse summary data object based on program specific definition and
      * return generic object to be displayed on patient dashboard

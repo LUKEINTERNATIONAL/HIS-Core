@@ -1,7 +1,11 @@
 <template>
   <view-port>
     <div class="view-port-content">
-      <ion-grid style="width: 100%">
+      <ion-grid>
+        <ion-row class="mobile-component-view" :style="{width: '100%', 'background-color': BMI.color, color: 'white', padding:'10px', textAlign: 'center'}"> 
+          {{BMI.result}}
+        </ion-row>
+        <p/>
         <ion-row>
           <ion-col size="2">
             <option-button
@@ -15,7 +19,7 @@
             >
             </option-button>
           </ion-col>
-          <ion-col size="6">
+          <ion-col size-lg="6" size-sm="10">
             <div class="centered his-card">
               <ion-input
                 type="text"
@@ -34,7 +38,7 @@
               </table>
             </div>
           </ion-col>
-          <ion-col size="4">
+          <ion-col class="full-component-view" size="4">
             <ion-list> 
               <ion-item
                 v-for="(key, rIndex) in keys" 
@@ -171,6 +175,21 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.full-component-view {
+  display: block;
+}
+.mobile-component-view {
+  display: none;
+}
+
+@media (max-width:990px) {
+  .full-component-view {
+      display: none;
+  }
+  .mobile-component-view {
+      display: block;
+  }
+}
 .view-port-content {
   height: 100%;
   background: white;
