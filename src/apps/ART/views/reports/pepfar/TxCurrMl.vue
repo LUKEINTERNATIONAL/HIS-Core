@@ -1,15 +1,15 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :reportReady="reportReady"
-        :isLoading="isLoading"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page> 
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            :onReportConfiguration="onPeriod"
+            > 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -18,15 +18,14 @@ import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { TxReportService, AGE_GROUPS } from '@/apps/ART/services/reports/tx_report_service'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { IonPage } from "@ionic/vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
         title: 'PEPFAR Curr Ml Report',
         rows: [] as Array<any>,
-        reportReady: false as boolean,
-        isLoading: false as boolean,
         columns: [
             [
                 table.thTxt('Age group'),
@@ -46,8 +45,6 @@ export default defineComponent({
     },
     methods: {
         async onPeriod(_: any, config: any) {
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
             this.report = new TxReportService()
             this.report.setStartDate(config.start_date)
@@ -56,14 +53,34 @@ export default defineComponent({
             this.cohort = await this.report.getTxMlReport()
             await this.setRows('F')
             await this.setRows('M')
-            this.isLoading = false
+        },
+        drilldown(patients: Array<number>) {
+            const columns = ['ARV#', 'DOB', 'Dispensed', 'ARVs']
+            const onRows = async () => {
+                const data = await this.report.getTxMMDClientLevelData(patients)
+                return data.map((d: any) => {
+                    const drugs: any = d.drugs.map((drug: any) => `
+                        <table style='width: 100%;'> 
+                            <td style='width: 65%;'>${drug.name}</td>
+                            <td style='width: 30%;'>(${drug.quantity}, ${drug.dose} a day)</td>
+                        </table>`)
+                    return [
+                        d.id || 'N/A',
+                        this.toDate(d.dob),
+                        this.toDate(d.dispenseDate),
+                        drugs.join('<p/>')
+                    ]    
+                })
+            }
+            if (patients.length <= 0) return table.td(0)
+            return table.tdLink(patients.length, () => this.tableDrill({columns, onRows}))
         },
         async setRows(gender: string) {
             for(const i in AGE_GROUPS) {
                 const group = AGE_GROUPS[i]
                 try {
                     const cohortData = this.cohort[group][gender]
-                    const drillable = cohortData.map((d: Array<number>) => this.drill(d))
+                    const drillable = cohortData.map((d: Array<number>) => this.drilldown(d))
                     this.rows.push([
                         table.td(group),
                         table.td(gender),
