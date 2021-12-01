@@ -58,7 +58,8 @@ export default defineComponent({
     relatedObs: [] as any,
     askAdherence: false as boolean,
     lastDrugsReceived: [] as any,
-    sideEffectsHistory: [] as any
+    sideEffectsHistory: [] as any,
+    onPermanentFPMethods: false
   }),
   watch: {
     ready: {
@@ -72,6 +73,7 @@ export default defineComponent({
           await this.getSideEffectsHistory();
           this.askAdherence = this.adherence.receivedDrugsBefore();
           this.fields = this.getFields();
+          this.onPermanentFPMethods = await this.consultation.getTLObs();
           this.lastDrugsReceived = await this.consultation.getPreviousDrugs();
 
           this.completedTBTherapy();
@@ -180,7 +182,7 @@ export default defineComponent({
       return age >= 9 && age <= 55;
     },
     ontubalLigation() {
-      return true;
+      return !this.onPermanentFPMethods;
     },
     showPregnancyQuestions() {
       return (
@@ -595,6 +597,22 @@ export default defineComponent({
           },
         },
         {
+          id: "has_fp_methods",
+          helpText: "",
+          condition: (formData: any) =>
+            this.onPermanentFPMethods,
+          type: FieldType.TT_TEXT_BANNER,
+          options: () =>
+            {
+              return [
+                {
+                  label: "Patient is on Tubal ligation method",
+                  value: "Patient is on Tubal ligation method"
+                }
+              ]
+            },
+        },
+        {
           id: "current_fp_methods",
           helpText: "What method are you currently on?",
           onValueUpdate: (listData: Array<Option>, value: Option) => {
@@ -602,7 +620,7 @@ export default defineComponent({
           },
           unload: (data: any) => {
             this.currentFPM = data.map((data: Option) => {
-              return this.consultation.buildValueCoded(data.label, data.value);
+              return this.consultation.buildValueCoded('Family planning method', data.value);
             });
           },
           validation: (data: any) => Validation.required(data),
@@ -623,7 +641,7 @@ export default defineComponent({
           },
           unload: (data: any) => {
             this.newFPM = data.map((data: Option) => {
-              return this.consultation.buildValueCoded(data.label, data.value);
+              return this.consultation.buildValueCoded('Family planning, action to take', data.value);
             });
           },
           type: FieldType.TT_MULTIPLE_SELECT,
