@@ -52,10 +52,14 @@
           :rows="rows"
           :columns="columns">
         </report-table>
-        <ion-chip color="secondary">Date Generated: <b>{{ date }}</b></ion-chip>
-        <ion-chip color="secondary">API version: <b>{{ apiVersion }}</b></ion-chip>
       </div>
     </ion-content>
+    <ion-footer> 
+      <ion-toolbar> 
+        <ion-chip color="primary">Date Generated: <b>{{ date }}</b></ion-chip>
+        <ion-chip color="primary">API version: <b>{{ apiVersion }}</b></ion-chip>
+      </ion-toolbar>
+    </ion-footer>
     <his-footer :btns="btns"></his-footer>
   </ion-page>
 </template>
@@ -72,6 +76,7 @@ import {
   IonPage,
   IonHeader,
   IonContent,
+  IonFooter,
   IonToolbar, 
   IonRow,
   IonCol,
@@ -94,7 +99,8 @@ export default defineComponent({
     IonToolbar, 
     IonRow, 
     IonCol,
-    IonChip
+    IonChip,
+    IonFooter
   },
   props: {
     headerInfoList: {
