@@ -29,8 +29,6 @@ export default defineComponent({
         title: 'MoH TPT new initiations report',
         rows: [] as Array<any>,
         cohort: {} as any,
-        reportReady: false as boolean,
-        isLoading: false as boolean,
         columns: [
             [
                 table.thTxt('Age group'),
