@@ -152,6 +152,7 @@ export default defineComponent({
         text-align: center;
         font-weight: bold;
         font-size: 1em;
+        color: rgb(133, 133, 133);
     }
     a {
         text-decoration: none;
