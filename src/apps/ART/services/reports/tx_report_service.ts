@@ -32,7 +32,7 @@ export class TxReportService extends ArtReportService {
         this.org = org
     }
 
-    async getTxMMDClientLevelData(patients: Array<number>) {
+    getTxMMDClientLevelData(patients: Array<number>) {
         const params = Url.parameterizeObjToString({
             'start_date': this.startDate,
             'end_date': this.endDate,
@@ -41,12 +41,11 @@ export class TxReportService extends ArtReportService {
             'org': this.org
         })
         const url = `tx_mmd_client_level_data?${params}`
-        const res = await ArtReportService.postJson(url, { 'patient_ids': patients })
+        return ArtReportService.postJson(url, { 'patient_ids': patients })
+    }
 
-        if (!res) return
-
-        // simplify the data structure
-        return res.map((d: any) => {
+    remapTxClientLevelData(clientData: Array<any>) {
+        return clientData.map((d: any) => {
             let patient: any = null
             const drugs: Array<any> = []
             for(const regimenID in d) {

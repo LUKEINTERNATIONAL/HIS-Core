@@ -58,19 +58,24 @@ export default defineComponent({
             const columns = ['ARV#', 'DOB', 'Dispensed', 'ARVs']
             const onRows = async () => {
                 const data = await this.report.getTxMMDClientLevelData(patients)
-                return data.map((d: any) => {
-                    const drugs: any = d.drugs.map((drug: any) => `
-                        <table style='width: 100%;'> 
-                            <td style='width: 65%;'>${drug.name}</td>
-                            <td style='width: 30%;'>(${drug.quantity}, ${drug.dose} a day)</td>
-                        </table>`)
-                    return [
-                        d.id || 'N/A',
-                        this.toDate(d.dob),
-                        this.toDate(d.dispenseDate),
-                        drugs.join('<p/>')
-                    ]    
-                })
+                if (!data) { 
+                    return []
+                }
+                return this.report
+                    .remapTxClientLevelData(data)
+                    .map((d: any) => {
+                        const drugs: any = d.drugs.map((drug: any) => `
+                            <table style='width: 100%;'> 
+                                <td style='width: 65%;'>${drug.name}</td>
+                                <td style='width: 30%;'>(${drug.quantity}, ${drug.dose} a day)</td>
+                            </table>`)
+                        return [
+                            d.id || 'N/A',
+                            this.toDate(d.dob),
+                            this.toDate(d.dispenseDate),
+                            drugs.join('<p/>')
+                        ]    
+                    })
             }
             if (patients.length <= 0) return table.td(0)
             return table.tdLink(patients.length, () => this.tableDrill({columns, onRows}))
