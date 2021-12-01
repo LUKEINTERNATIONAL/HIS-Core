@@ -108,6 +108,10 @@ export class OpdReportService extends Service {
         return this.getReport('diagnosis')
     }
 
+    getDiagnosisByAddress(){
+        return this.getReport('diagnosis_by_address')
+    }
+
     getLaPrescriptions(){
         const url = `programs/${this.programID}/reports/la_prescriptions`
         return Service.getJson(url, {

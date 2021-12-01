@@ -69,6 +69,11 @@ export default [
         name: 'clinic_diagnosis',
         path: 'clinic_diagnosis',
         component: () => import('@/apps/OPD/views/reports/clinic/Diagnosis.vue')
+      },
+      {
+        name: 'clinic_diagnosis_by_address',
+        path: 'clinic_diagnosis_by_address',
+        component: () => import('@/apps/OPD/views/reports/clinic/DiagnosisByAddress.vue')
       }
     ]
   },
