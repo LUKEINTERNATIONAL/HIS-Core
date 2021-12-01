@@ -16,7 +16,7 @@
         />
 
         <ion-toolbar class="mobile-component-view"> 
-            <ion-segment :value="activeTab" mode="ios" class="ion-justify-content-center">
+            <ion-segment :value="activeTab" class="ion-justify-content-center">
                 <ion-segment-button value="1" @click="activeTab=1"> 
                     <ion-icon :icon="calendar"> </ion-icon>
                     <ion-label>Visits</ion-label>
