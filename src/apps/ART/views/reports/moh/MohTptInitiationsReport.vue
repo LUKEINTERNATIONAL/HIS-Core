@@ -1,15 +1,15 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :reportReady="reportReady"
-        :isLoading="isLoading"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page> 
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            :onReportConfiguration="onPeriod"
+            > 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -20,10 +20,11 @@ import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { isEmpty } from 'lodash'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { IonPage } from "@ionic/vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
         title: 'MoH TPT new initiations report',
         rows: [] as Array<any>,
@@ -44,8 +45,6 @@ export default defineComponent({
     },
     methods: {
         async onPeriod(_: any, config: any) {
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
             this.report = new RegimenReportService()
             this.report.setStartDate(config.start_date)
@@ -54,7 +53,24 @@ export default defineComponent({
             this.cohort = await this.report.getTptNewInitiations()
             this.setRows('F')
             this.setRows('M')
-            this.isLoading = false
+        },
+        drilldown(patients: Array<any>) {
+            const columns = ['ARV #', 'DOB', 'Dispensed date']
+            const onRows = () => patients.map((p: any) => [
+                p.arv_number,
+                this.toDate(p.birthdate),
+                this.toDate(p.prescription_date)
+            ])
+            if (patients.length <= 0) {
+                return table.td(0)
+            }
+            return table.tdLink(
+                patients.length, 
+                () => this.tableDrill({
+                    columns, 
+                    onRows 
+                })
+            )
         },
         setRows(gender: 'M' | 'F') {
             for(const ageIndex in AGE_GROUPS) {
@@ -64,8 +80,8 @@ export default defineComponent({
                     this.rows.push([
                         table.td(group),
                         table.td(gender),
-                        this.drill(data['3HP'][gender]),
-                        this.drill(data['6H'][gender])
+                        this.drilldown(data['3HP'][gender]),
+                        this.drilldown(data['6H'][gender])
                     ])
                 } else {
                     this.rows.push([
