@@ -20,6 +20,9 @@ export class ConsultationService extends AppEncounterService {
     const sessionDate = AppEncounterService.getSessionDate();
     return AppEncounterService.getJson(`/programs/1/patients/${this.patientID}/medication_side_effects`, { date: sessionDate });
   }
+  getClient() {
+    return AppEncounterService.getFirstValueCoded(this.patientID, 'Patient Present');
+  }
   async getTLObs() {
     const TLConcept = await AppEncounterService.getConceptID('Tubal ligation');
     const FPConcept = await AppEncounterService.getConceptID('Family planning method');

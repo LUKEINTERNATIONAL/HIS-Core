@@ -59,7 +59,8 @@ export default defineComponent({
     askAdherence: false as boolean,
     lastDrugsReceived: [] as any,
     sideEffectsHistory: [] as any,
-    onPermanentFPMethods: false
+    onPermanentFPMethods: false,
+    guardianVisit: false
   }),
   watch: {
     ready: {
@@ -71,6 +72,7 @@ export default defineComponent({
           );
           await this.initAdherence(this.patient, this.providerID);
           await this.getSideEffectsHistory();
+          await this.guardianOnlyVisit();
           this.askAdherence = this.adherence.receivedDrugsBefore();
           this.fields = this.getFields();
           this.onPermanentFPMethods = await this.consultation.getTLObs();
@@ -113,7 +115,7 @@ export default defineComponent({
 
       const obs = await this.consultation.saveObservationList(filtered);
 
-      if (this.askAdherence) await this.saveAdherence();
+      if (this.askAdherence && !this.guardianVisit) await this.saveAdherence();
 
       if (!obs) return toastWarning("Unable to save patient observations");
 
@@ -123,6 +125,10 @@ export default defineComponent({
     },
     isGender(gender: string) {
       return this.patient.getGender() === gender;
+    },
+    async guardianOnlyVisit() {
+      const val = await this.consultation.getClient();
+      this.guardianVisit = val === "No";
     },
     async checkVLReminder() {
       const vals = await ProgramService.getPatientVLInfo(this.patientID);
@@ -477,18 +483,19 @@ export default defineComponent({
     },
     getFields(): any {
       return [
-        // {
-        //   id: "prescription",
-        //   helpText: "Medication to prescribe during this visit",
-        //   type: FieldType.TT_MULTIPLE_SELECT,
-        //   validation: (data: any) => Validation.required(data),
-        //   onValueUpdate: (listData: Array<Option>, value: Option) => {
-        //     return this.disablePrescriptions(listData, value);
-        //   },
-        //   options: (_: any, checked: Array<Option>) =>
-        //     this.getPrescriptionFields(checked),
-        //   condition: () => false, // show if guardian only visit
-        // },
+        {
+          id: "prescription",
+          helpText: "Medication to prescribe during this visit",
+          type: FieldType.TT_MULTIPLE_SELECT,
+          validation: (data: any) => Validation.required(data),
+          onValueUpdate: (listData: Array<Option>, value: Option) => {
+            return this.disablePrescriptions(listData, value);
+          },
+          options: (_: any, checked: Array<Option>) =>
+            this.getPrescriptionFields(checked),
+          unload: (data: any, state: any, formData: any) => this.onFinish(formData),
+          condition: () => this.guardianVisit, 
+        },
         {
           id: "patient_lab_orders",
           helpText: "Lab orders",
