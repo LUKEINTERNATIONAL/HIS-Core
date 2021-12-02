@@ -131,6 +131,10 @@ export const REPORTS: FolderInterface[] = [
             {
                 name: 'TX RTT',
                 pathName: 'pepfar_tx_rtt'
+            },
+            {
+                name: 'Viral Load Coverage',
+                pathName: 'pepfar_vl_coverage'
             }
         ]
     }

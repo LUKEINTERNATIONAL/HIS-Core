@@ -16,6 +16,7 @@ import PepFarDiaggregatedReport from "@/apps/ART/views/reports/pepfar/disaggrega
 import PepFarDefaultersReport from "@/apps/ART/views/reports/pepfar/defaulters.vue"
 import PepFarRegimenReport from "@/apps/ART/views/reports/pepfar/regimen.vue"
 import PepFarRegimenSwitchReport from "@/apps/ART/views/reports/pepfar/RegimenSwitch.vue"
+import PepFarVlCoverage from "@/apps/ART/views/reports/pepfar/ViralLoadCoverage.vue"
 import TBPrevReport from "@/apps/ART/views/reports/pepfar/TBPrev.vue"
 import TXCurrMMD from "@/apps/ART/views/reports/pepfar/TxCurrMMD.vue"
 import TXCurrMl from "@/apps/ART/views/reports/pepfar/TxCurrMl.vue"
@@ -353,6 +354,11 @@ export default [
                 name: "pepfar_tx_rtt",
                 path: "tx_rtt",
                 component: TXRtt
+            },
+            {
+                name: 'pepfar_vl_coverage',
+                path: 'pepfar_vl_coverage',
+                component: PepFarVlCoverage
             }
         ]
     }
