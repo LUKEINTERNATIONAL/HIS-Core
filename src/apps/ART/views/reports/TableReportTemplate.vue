@@ -1,6 +1,6 @@
 <template>
   <his-standard-form
-    v-if="!canShowReport"
+    v-show="!canShowReport"
     @onFinish="onFinish"
     :skipSummary="true" 
     :fields="fields">
