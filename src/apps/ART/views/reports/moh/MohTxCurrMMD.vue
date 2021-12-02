@@ -6,6 +6,7 @@
             :rows="rows" 
             :fields="fields"
             :columns="columns"
+            reportPrefix="MoH"
             :headerInfoList="headerInfoList"
             :onReportConfiguration="onPeriod"
             > 

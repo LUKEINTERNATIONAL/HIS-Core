@@ -6,6 +6,7 @@
             :rows="rows" 
             :fields="fields"
             :columns="columns"
+            reportPrefix="MoH"
             :onReportConfiguration="onPeriod"
             > 
         </report-template>
@@ -26,7 +27,7 @@ export default defineComponent({
     mixins: [ReportMixin],
     components: { ReportTemplate, IonPage },
     data: () => ({
-        title: 'MoH TPT new initiations report',
+        title: 'TPT new initiations report',
         rows: [] as Array<any>,
         cohort: {} as any,
         columns: [
