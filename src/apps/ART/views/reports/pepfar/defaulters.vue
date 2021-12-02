@@ -9,6 +9,7 @@
             :canExportCsv="false"
             :canExportPDf="false"
             :showtitleOnly="true"
+            reportPrefix="PEPFAR"
             :onReportConfiguration="onPeriod"
             >
         </report-template>
@@ -27,7 +28,7 @@ export default defineComponent({
     mixins: [ReportMixin],
     components: { ReportTemplate, IonPage },
     data: () => ({
-        title: 'PEPFAR Defaulters report',
+        title: 'Defaulters report',
         rows: [] as Array<any>,
         reportReady: false as boolean,
         isLoading: false as boolean,

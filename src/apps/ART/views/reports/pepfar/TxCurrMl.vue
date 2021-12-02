@@ -6,6 +6,7 @@
             :rows="rows" 
             :fields="fields"
             :columns="columns"
+            reportPrefix="PEPFAR"
             :onReportConfiguration="onPeriod"
             > 
         </report-template>
