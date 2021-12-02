@@ -69,7 +69,14 @@ export default defineComponent({
             const columns = ['ARV #', 'DOB', 'Gender']
             const onRows = () => 
                 filtered.map((p: any) => ([
-                    p.arv_number, this.toDate(p.birthdate), p.gender
+                    p.arv_number, 
+                    this.toDate(p.birthdate), 
+                    p.gender,
+                    {
+                       type: 'button',
+                       name: 'Show',
+                       action: () => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`})
+                    }
                 ]))
             return table.tdLink(patients.length, () => this.tableDrill({columns, onRows}))
         }
