@@ -18,22 +18,48 @@ export class ConsultationService extends AppEncounterService {
   }
   getDrugSideEffects() {
     const sessionDate = AppEncounterService.getSessionDate();
-    return AppEncounterService.getJson(`/programs/1/patients/${this.patientID}/medication_side_effects`, {date: sessionDate});
+    return AppEncounterService.getJson(`/programs/1/patients/${this.patientID}/medication_side_effects`, { date: sessionDate });
+  }
+  getClient() {
+    return AppEncounterService.getFirstValueCoded(this.patientID, 'Patient Present');
+  }
+  async getTLObs() {
+    const TLConcept = await AppEncounterService.getConceptID('Tubal ligation');
+    const FPConcept = await AppEncounterService.getConceptID('Family planning method');
+    const obs = await AppEncounterService.getObs({
+      'person_id': this.patientID,
+      'concept_id': FPConcept,
+      'value_coded': TLConcept
+    })
+    if (obs.length > 0) {
+      return true
+    } else {
+      const FPBackupConcept = await AppEncounterService.getConceptID('Family planning, action to take');
+      const backupObs = await AppEncounterService.getObs({
+        'person_id': this.patientID,
+        'concept_id': FPBackupConcept,
+        'value_coded': TLConcept
+      })
+      if (backupObs.length > 0) {
+        return true
+      }
+    }
+    return false
   }
   async getPreviousDrugs() {
 
-        const drugs = await AppEncounterService.getJson(
-            `patients/${this.patientID}/drugs_received`
-        )
+    const drugs = await AppEncounterService.getJson(
+      `patients/${this.patientID}/drugs_received`
+    )
 
-        if (!drugs) return
+    if (!drugs) return
 
-        const uniqueDrugs = {} as any 
-        drugs.forEach((drug: DrugInterface) => {
-          uniqueDrugs[drug.drug_inventory_id] = drug;
-        })
-        return uniqueDrugs;
-    }
+    const uniqueDrugs = {} as any
+    drugs.forEach((drug: DrugInterface) => {
+      uniqueDrugs[drug.drug_inventory_id] = drug;
+    })
+    return uniqueDrugs;
+  }
   familyPlanningMethods(label: string, values: any[]) {
     const familyPlanningLogic: any = {
       "ORAL CONTRACEPTIVE PILLS": {
