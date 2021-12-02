@@ -56,8 +56,10 @@
     </ion-content>
     <ion-footer> 
       <ion-toolbar> 
-        <ion-chip color="primary">Date Generated: <b>{{ date }}</b></ion-chip>
-        <ion-chip color="primary">API version: <b>{{ apiVersion }}</b></ion-chip>
+        <ion-chip color="primary">Date Created: <b>{{ date }}</b></ion-chip>
+        <ion-chip color="primary">His-Core Version: <b>{{ coreVersion }}</b></ion-chip>
+        <ion-chip color="primary">Art Version: <b>{{ artVersion }}</b></ion-chip>
+        <ion-chip color="primary">API Version: <b>{{ apiVersion }}</b></ion-chip>
       </ion-toolbar>
     </ion-footer>
     <his-footer :btns="btns"></his-footer>
@@ -162,7 +164,9 @@ export default defineComponent({
     computeFormData: {} as any,
     isLoadingData: false as boolean,
     canShowReport: false as boolean,
-    apiVersion: Service.getApiVersion()
+    apiVersion: Service.getApiVersion(),
+    coreVersion: '1.0.0',
+    artVersion: '1.0.0'
   }),
   methods: {
     getFileName() {
@@ -211,11 +215,11 @@ export default defineComponent({
             [
               ...rows,
               [],
-              [`Date: ${this.date}`],
+              [`Date Created: ${this.date}`],
               // TODO: Get actual HIS-CORE version from a file
-              [`HIS-Core Version: 1.0.0`],
+              [`HIS-Core Version: ${this.coreVersion}`],
               // TODO: Get actial ART Version from a file
-              [`ART Version: 1.0.0`],
+              [`ART Version: ${this.artVersion}`],
               [`API Version: ${this.apiVersion}`]
             ],
             this.getFileName()
