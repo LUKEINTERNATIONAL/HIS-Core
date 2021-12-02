@@ -85,7 +85,6 @@ import {
 } from "@ionic/vue"
 import { toastDanger } from "@/utils/Alerts";
 import Img from "@/utils/Img"
-import HisDate from "@/utils/Date"
 import { Service } from "@/services/service"
 import dayjs from "dayjs";
 
@@ -158,7 +157,7 @@ export default defineComponent({
     btns: [] as Array<any>,
     isLoadingData: false as boolean,
     canShowReport: false as boolean,
-    date: dayjs().format('YYYY-MM-DD:h:m:s'),
+    date: '',
     apiVersion: Service.getApiVersion()
   }),
   methods: {
@@ -171,6 +170,7 @@ export default defineComponent({
       this.canShowReport = true
       await this.presentLoading()
       try {
+        this.date = dayjs().format('YYYY-MM-DD:h:m:s')
         await this.onReportConfiguration(this.formData, this.computeFormData)
         loadingController.dismiss()
       }catch(e) {
