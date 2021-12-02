@@ -107,6 +107,10 @@ export default defineComponent({
       type: Array,
       default: () => []
     },
+    reportPrefix: {
+      type: String,
+      default: 'HIS-Core'
+    },
     reportLogo: {
       type: String,
       default: Img('login-logos/Malawi-Coat_of_arms_of_arms.png')
@@ -152,17 +156,17 @@ export default defineComponent({
     }
   },
   data: () => ({
+    date: '',
     formData: {} as any,
-    computeFormData: {} as any,
     btns: [] as Array<any>,
+    computeFormData: {} as any,
     isLoadingData: false as boolean,
     canShowReport: false as boolean,
-    date: '',
     apiVersion: Service.getApiVersion()
   }),
   methods: {
     getFileName() {
-      return `${this.title}-${this.period}`
+      return `${this.reportPrefix} ${Service.getLocationName()} ${this.title} ${this.period}`
     },
     async onFinish(formData: any, computedData: any) {
       this.formData = formData
