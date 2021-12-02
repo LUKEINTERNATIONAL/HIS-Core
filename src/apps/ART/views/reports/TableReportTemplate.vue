@@ -202,7 +202,20 @@ export default defineComponent({
         visible: true,
         onClick: async () => {
           const {columns, rows} = toExportableFormat(this.columns, this.rows)
-          toCsv(columns, rows, this.getFileName())
+          toCsv(
+            columns, 
+            [
+              ...rows,
+              [],
+              [`Date: ${this.date}`],
+              // TODO: Get actual HIS-CORE version from a file
+              [`HIS-Core Version: 1.0.0`],
+              // TODO: Get actial ART Version from a file
+              [`ART Version: 1.0.0`],
+              [`API Version: ${this.apiVersion}`]
+            ],
+            this.getFileName()
+          )
         }
       })
     }
