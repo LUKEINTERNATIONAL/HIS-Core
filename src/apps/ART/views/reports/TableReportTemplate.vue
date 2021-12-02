@@ -87,6 +87,7 @@ import { toastDanger } from "@/utils/Alerts";
 import Img from "@/utils/Img"
 import HisDate from "@/utils/Date"
 import { Service } from "@/services/service"
+import dayjs from "dayjs";
 
 export default defineComponent({
   components: { 
@@ -157,7 +158,7 @@ export default defineComponent({
     btns: [] as Array<any>,
     isLoadingData: false as boolean,
     canShowReport: false as boolean,
-    date: HisDate.toStandardHisDisplayFormat(Service.getSessionDate()),
+    date: dayjs().format('YYYY-MM-DD:h:m:s'),
     apiVersion: Service.getApiVersion()
   }),
   methods: {
