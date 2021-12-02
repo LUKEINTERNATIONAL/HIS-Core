@@ -9,20 +9,38 @@
     <ion-header>
       <ion-toolbar>
         <ion-title v-if="showtitleOnly"> 
-          {{title}} 
+          <span v-html="title"></span> 
         </ion-title>
         <ion-row v-if="!showtitleOnly">
           <ion-col size="2" v-if="reportLogo">
             <img class="logo" :src="reportLogo"/>
           </ion-col>
           <ion-col>
+            <!-- DEFAULT HEADER ROWS -->
             <ion-row>
               <ion-col size="2">Title</ion-col> 
               <ion-col> <b>{{ title }}</b> </ion-col>
             </ion-row>
             <ion-row v-if="period">
               <ion-col size="2">Period</ion-col> 
-              <ion-col> <b>{{ period }}</b> </ion-col>
+              <ion-col><b>{{ period }}</b> </ion-col>
+            </ion-row>
+            <!-- DYNAMIC HEADER ROWS -->
+            <ion-row v-for="(info, index) in headerInfoList" :key="index"> 
+              <ion-col size="2">
+                <ion-label>
+                  <span>{{ info.label }}</span> 
+                </ion-label>
+              </ion-col>
+              <ion-col>
+                <a href="#" v-if="info.other.onclick"
+                  @click.prevent="info.other.onclick()">
+                  {{ info.value }}
+                </a>
+                <ion-label v-if="!info.other.onclick">
+                  <b><span v-html="info.value"></span></b> 
+                </ion-label>
+              </ion-col>
             </ion-row>
           </ion-col>
         </ion-row>
@@ -36,6 +54,14 @@
         </report-table>
       </div>
     </ion-content>
+    <ion-footer> 
+      <ion-toolbar> 
+        <ion-chip color="primary">Date Created: <b>{{ date }}</b></ion-chip>
+        <ion-chip color="primary">His-Core Version: <b>{{ coreVersion }}</b></ion-chip>
+        <ion-chip color="primary">Art Version: <b>{{ artVersion }}</b></ion-chip>
+        <ion-chip color="primary">API Version: <b>{{ apiVersion }}</b></ion-chip>
+      </ion-toolbar>
+    </ion-footer>
     <his-footer :btns="btns"></his-footer>
   </ion-page>
 </template>
@@ -52,13 +78,17 @@ import {
   IonPage,
   IonHeader,
   IonContent,
+  IonFooter,
   IonToolbar, 
   IonRow,
   IonCol,
+  IonChip,
   loadingController
 } from "@ionic/vue"
 import { toastDanger } from "@/utils/Alerts";
 import Img from "@/utils/Img"
+import { Service } from "@/services/service"
+import dayjs from "dayjs";
 
 export default defineComponent({
   components: { 
@@ -70,9 +100,19 @@ export default defineComponent({
     IonContent, 
     IonToolbar, 
     IonRow, 
-    IonCol
+    IonCol,
+    IonChip,
+    IonFooter
   },
   props: {
+    headerInfoList: {
+      type: Array,
+      default: () => []
+    },
+    reportPrefix: {
+      type: String,
+      default: 'HIS-Core'
+    },
     reportLogo: {
       type: String,
       default: Img('login-logos/Malawi-Coat_of_arms_of_arms.png')
@@ -118,15 +158,19 @@ export default defineComponent({
     }
   },
   data: () => ({
+    date: '',
     formData: {} as any,
-    computeFormData: {} as any,
     btns: [] as Array<any>,
+    computeFormData: {} as any,
     isLoadingData: false as boolean,
     canShowReport: false as boolean,
+    apiVersion: Service.getApiVersion(),
+    coreVersion: '1.0.0',
+    artVersion: '1.0.0'
   }),
   methods: {
     getFileName() {
-      return `${this.title}-${this.period}`
+      return `${this.reportPrefix} ${Service.getLocationName()} ${this.title} ${this.period}`
     },
     async onFinish(formData: any, computedData: any) {
       this.formData = formData
@@ -134,11 +178,12 @@ export default defineComponent({
       this.canShowReport = true
       await this.presentLoading()
       try {
+        this.date = dayjs().format('YYYY-MM-DD:h:m:s')
         await this.onReportConfiguration(this.formData, this.computeFormData)
-        loadingController.dismiss ()
+        loadingController.dismiss()
       }catch(e) {
-        console.error(e)
         toastDanger(e)
+        console.error(e)
         loadingController.dismiss()
       }
     },
@@ -165,7 +210,20 @@ export default defineComponent({
         visible: true,
         onClick: async () => {
           const {columns, rows} = toExportableFormat(this.columns, this.rows)
-          toCsv(columns, rows, this.getFileName())
+          toCsv(
+            columns, 
+            [
+              ...rows,
+              [],
+              [`Date Created: ${this.date}`],
+              // TODO: Get actual HIS-CORE version from a file
+              [`HIS-Core Version: ${this.coreVersion}`],
+              // TODO: Get actial ART Version from a file
+              [`ART Version: ${this.artVersion}`],
+              [`API Version: ${this.apiVersion}`]
+            ],
+            this.getFileName()
+          )
         }
       })
     }
@@ -191,10 +249,10 @@ export default defineComponent({
       onClick: () => this.canShowReport = false
     })
     this.btns.push({
-      name: "Rebuild",
+      name: "Refresh",
       size: "large",
       slot: "end",
-      color: "danger",
+      color: "warning",
       visible: true,
       onClick: async () => this.reloadReport()
     })
@@ -218,5 +276,10 @@ export default defineComponent({
   width: 99.9%;
   height: 99%;
   overflow: auto;
+}
+a {
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1em;
 }
 </style>

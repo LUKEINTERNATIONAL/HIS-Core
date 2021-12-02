@@ -42,12 +42,15 @@
                     </ion-button>
                 </div>
                 <div v-else> 
-                    {{ item.td }}
+                    <span v-html="item.td"></span>
                 </div>
             </td>
         </tr>
     </tbody>
   </table>
+  <div v-if="!rows || rows.length <= 0" class="no-data-section his-card"> 
+    No data available in table 
+  </div>
 </template>
 
 <script lang="ts">
@@ -144,7 +147,13 @@ export default defineComponent({
 })
 </script>
 
-<style scoped> 
+<style scoped>
+    .no-data-section {
+        text-align: center;
+        font-weight: bold;
+        font-size: 1em;
+        color: rgb(133, 133, 133);
+    }
     a {
         text-decoration: none;
         font-weight: 600;

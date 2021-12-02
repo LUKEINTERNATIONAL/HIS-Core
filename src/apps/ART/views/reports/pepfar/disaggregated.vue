@@ -1,15 +1,16 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :isLoading="isLoading"
-        :reportReady="reportReady"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page>
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            :headerInfoList="headerList"
+            reportPrefix="PEPFAR"
+            :onReportConfiguration="onPeriod">
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -20,15 +21,16 @@ import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { Option } from '@/components/Forms/FieldInterface'
+import {IonPage} from "@ionic/vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
         title: 'PEPFAR Diseggregated Report',
         rows: [] as Array<any>,
-        reportReady: false as boolean,
-        isLoading: false as boolean,
+        headerList: [] as Option[],
         columns: [
             [
                 table.thTxt('Age group'),
@@ -66,6 +68,19 @@ export default defineComponent({
                 return toastWarning('Unable to initialise report')
             }
             await this.setTableRows()
+            this.setHeaderInfoList()
+        },
+        setHeaderInfoList() {
+            const totalAlive = this.totalCurF.concat(this.totalCurM)
+            this.headerList = [
+                { 
+                    label: 'Total Alive and on ART', 
+                    value: totalAlive.length,
+                    other: {
+                        onclick: () => this.runTableDrill(totalAlive)
+                    }
+                }
+            ]
         },
         async setTableRows() {
             await this.setFemaleRows()

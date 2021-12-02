@@ -1,15 +1,17 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :reportReady="reportReady"
-        :isLoading="isLoading"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page>
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            :showtitleOnly="true"
+            :canExportPDf="false"
+            :onReportConfiguration="onPeriod"
+            > 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -18,36 +20,33 @@ import { PatientReportService } from "@/apps/ART/services/reports/patient_report
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { IonPage } from "@ionic/vue"
+import { GlobalPropertyService } from "@/services/global_property_service"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
-        title: 'Clinic Clients due for VL',
-        totalClients: [],
-        reportReady: false,
+        title: 'Clinic Clients due for VL <small>(clients with appointments in specified period)</small>',
         rows: [] as Array<any>,
-        isLoading: false as boolean,
-        columns: [
-            [
-                table.thTxt('ARV#'),
-                table.thTxt('App.'),
-                table.thTxt('ART started'),
-                table.thTxt('Months on ART'), 
-                table.thTxt('Milestone'), 
-                table.thTxt("Ordered"),
-                table.thTxt("Result"), 
-                table.thTxt("Released")
-            ]
-        ]
+        columns: [] as Array<any>
     }),
-    created() {
+    async created() {
+        const isFn = await GlobalPropertyService.isProp('use.filing.numbers=true')
+        this.columns.push([
+            table.thTxt(isFn ? 'Filing #' : 'ARV#'),
+            table.thTxt('App.'),
+            table.thTxt('ART started'),
+            table.thTxt('Months on ART'), 
+            table.thTxt('Milestone'), 
+            table.thTxt("Ordered"),
+            table.thTxt("Result"), 
+            table.thTxt("Released")
+        ])
         this.fields = this.getDateDurationFields()
     },
     methods: {
         async onPeriod(_: any, config: any) {
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
@@ -55,12 +54,11 @@ export default defineComponent({
             this.period = this.report.getDateIntervalPeriod()
             const data = await this.report.getClientsDueForVl()
             this.setRows(data)
-            this.isLoading = false
         },
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {
                 this.rows.push([
-                    table.td(d.arv_number),
+                    table.tdLink(d.arv_number, () => this.confirmPatient(d.patient_id)),
                     table.tdDate(d.appointment_date),
                     table.tdDate(d.start_date),
                     table.td(d.months_on_art),

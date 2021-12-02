@@ -1,15 +1,16 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :reportReady="reportReady"
-        :isLoading="isLoading"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page>
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            reportPrefix="PEPFAR"
+            :onReportConfiguration="onPeriod"
+            > 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -23,11 +24,9 @@ export default defineComponent({
     mixins: [ReportMixin],
     components: { ReportTemplate },
     data: () => ({
-        title: 'PEPFAR TX Curr MMD Report',
+        title: 'TX Curr MMD Report',
         cohort: {} as any,
         rows: [] as Array<any>,
-        reportReady: false as boolean,
-        isLoading: false as boolean,
         columns:  [
             [
                 table.thTxt('Age group'),
@@ -43,15 +42,12 @@ export default defineComponent({
     },
     methods: {
         async onPeriod(_: any, config: any) {
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
             this.report = new TxReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
             this.period = this.report.getDateIntervalPeriod()
             await this.setRows()
-            this.isLoading = false
         },
         getValues(patients: Record<string, Array<any>>) {
             const underThreeMonths: Array<any> = []

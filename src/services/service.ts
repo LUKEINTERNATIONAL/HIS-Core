@@ -102,6 +102,10 @@ export class Service {
         }
     }
 
+    static getApiVersion() {
+        return sessionStorage.getItem('APIVersion')
+    }
+
     static getActiveApp(): AppInterface | {} { 
         return HisApp.getActiveApp() || {}
     }

@@ -1,17 +1,17 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :canExportCsv="false"
-        :canExportPDf="false"
-        :isLoading="isLoading"
-        :reportReady="reportReady"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page>
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            :canExportCsv="false"
+            :canExportPDf="false"
+            :onReportConfiguration="onPeriod"
+            > 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -20,16 +20,15 @@ import { PatientReportService } from "@/apps/ART/services/reports/patient_report
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { IonPage } from "@ionic/vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
         title: 'Clinic Missed Appointments',
         totalClients: [],
-        isLoading: false as boolean,
         rows: [] as Array<any>,
-        reportReady: false as boolean,
         columns: [
             [
                 table.thTxt('ARV#'),
@@ -49,15 +48,12 @@ export default defineComponent({
     },
     methods: {
         async onPeriod(_: any, config: any) {
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
             this.period = this.report.getDateIntervalPeriod()
             this.setRows((await this.report.getMissedAppointments()))
-            this.isLoading = false
         },
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {
@@ -71,9 +67,9 @@ export default defineComponent({
                     table.td(d.days_missed),
                     table.td(d.current_outcome),
                     table.td(
-                        `CELL: ${d.cell_number} \
-                        District: ${d.district} \
-                        Village: ${d.village} \
+                        `CELL: ${d.cell_number} <br/>
+                        District: ${d.district} <br/>
+                        Village: ${d.village} <br/>
                         TA: ${d.ta}
                     `)
                ])

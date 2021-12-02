@@ -1,15 +1,16 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :reportReady="reportReady"
-        :isLoading="isLoading"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page>
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            reportPrefix="MoH"
+            :onReportConfiguration="onPeriod"
+            > 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -20,15 +21,15 @@ import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { IonPage } from "@ionic/vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
         reportReady: false as boolean,
         rows: [] as Array<any>,
-        title: 'ART disaggregated report',
-        isLoading: false as boolean,
+        title: 'Disaggregated report',
         columns: [
             [
                 table.thTxt('Age group'),
@@ -84,8 +85,6 @@ export default defineComponent({
     },
     methods: {
         async onPeriod(form: any, config: any) {
-            this.reportReady = true
-            this.isLoading=true
             this.rows = []
             this.report = new DisaggregatedReportService()
             this.report.setOutcomeTable(TEMP_OUTCOME_TABLE.PATIENT_OUTCOME_TEMP)
@@ -101,11 +100,9 @@ export default defineComponent({
             }
             const isInit = await this.report.init()
             if (!isInit) {
-                this.isLoading = false
                 return toastWarning('Unable to initialise report')
             }
             await this.setTableRows()
-            this.isLoading = false
         },
         async setTableRows() {
             await this.setFemaleRows()
