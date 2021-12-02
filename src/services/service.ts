@@ -90,8 +90,7 @@ export class Service {
                 throw new ApiServiceError(errors || 'Getway Error')
             }
             if (response.status === 500) {
-                const {errors} = await response?.json()
-                throw new ApiError(errors)
+                throw new ApiError('An internal server errror has occured')
             }
         }
     }
