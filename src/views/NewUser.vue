@@ -150,7 +150,6 @@ export default defineComponent({
                 id: 'user_info',
                 helpText: 'User information',
                 type: FieldType.TT_TABLE_VIEWER,
-                requireNext: false,
                 condition: () => this.activity === 'edit' && UserService.isAdmin(),
                 options: async (f: any, c: any, table: any) => {
                     const statusRowIndex = 4
@@ -201,8 +200,14 @@ export default defineComponent({
                 },
                 config: {
                     hiddenFooterBtns: [
-                        'Clear'
-                    ]
+                        'Clear',
+                    ],
+                    overrideDefaultFooterBtns: {
+                        nextBtn: {
+                            name: 'Finish',
+                            onClick: () => this.$router.back()
+                        }
+                    }
                 }
             },
             {
