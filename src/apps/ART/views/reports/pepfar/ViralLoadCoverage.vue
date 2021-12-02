@@ -64,11 +64,11 @@ export default defineComponent({
       await this.setRows("M");
     },
     drillDown(patients: Array<any>, filter: 'M' | 'F') {
-        const filtered = patients.filter((p: any) => p.gender === filter)
-        if (filtered.length >= 1) {
+        const filteredP = patients.filter((p: any) => p.gender === filter)
+        if (filteredP.length >= 1) {
             const columns = ['ARV #', 'DOB', 'Gender']
-            const onRows = () => 
-                filtered.map((p: any) => ([
+            const onRows = () =>
+                filteredP.map((p: any) => ([
                     p.arv_number, 
                     this.toDate(p.birthdate), 
                     p.gender,
@@ -78,7 +78,7 @@ export default defineComponent({
                        action: () => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`})
                     }
                 ]))
-            return table.tdLink(patients.length, () => this.tableDrill({columns, onRows}))
+            return table.tdLink(filteredP.length, () => this.tableDrill({columns, onRows}))
         }
         return table.td(0)
     },
