@@ -107,6 +107,16 @@ export default defineComponent({
                     ]
                     this.rows.push(maleRow)
                     this.rows.push(femaleRow)
+                    if (!isEmpty(w.unknown_gender)) {
+                        const uRegimens = mapRegimenRow(w.unknown_gender)
+                        const tCount = rowTotals(uRegimens)
+                        this.rows.push([
+                            table.td(weightBand),
+                            table.td('Unknown Gender'),
+                            ...uRegimens,
+                            table.td(tCount)
+                        ]) 
+                    }
                 })
             })
         }
