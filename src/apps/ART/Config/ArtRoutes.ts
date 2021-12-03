@@ -38,6 +38,7 @@ import MohDisaggregatedReport from "@/apps/ART/views/reports/moh/MohDisaggregate
 import MohSurvivalAnalysisReport from "@/apps/ART/views/reports/moh/MohSurvivalAnalysisReport.vue"
 import MohTptInitiationsReport from "@/apps/ART/views/reports/moh/MohTptInitiationsReport.vue"
 import MohTxCurrMMD from "@/apps/ART/views/reports/moh/MohTxCurrMMD.vue"
+import MohRegimenWeightDistribution from "@/apps/ART/views/reports/moh/MohRegimenWeightDistribution.vue"
 import MohCohort from "@/apps/ART/views/reports/moh/CohortReport/MohCohort.vue"
 import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
 import StockCardReport from "@/apps/ART/views/reports/clinic/ClinicStockCardReport.vue"
@@ -227,6 +228,11 @@ export default [
                 name: 'moh_tx_curr_mmd',
                 path: 'moh_tx_curr_mmd',
                 component: MohTxCurrMMD
+            },
+            {
+                name: 'moh_regimen_weight_distribution',
+                path: 'moh_regimen_weight_distribution',
+                component: MohRegimenWeightDistribution
             }
         ]
     },
