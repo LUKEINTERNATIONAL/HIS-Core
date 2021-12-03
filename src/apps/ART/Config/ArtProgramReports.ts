@@ -15,6 +15,10 @@ export const REPORTS: FolderInterface[] = [
                 pathName: 'moh_disaggregated'
             },
             {
+                name: 'Regimen Distribution (Weight)',
+                pathName: 'moh_regimen_weight_distribution'
+            },
+            {
                 name: 'Survival analysis',
                 pathName: 'moh_survial_analysis' 
             },
