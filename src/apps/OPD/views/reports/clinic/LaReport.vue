@@ -1,16 +1,12 @@
 <template>
-  <report-template v-if="rows"
+  <report-template
     :title="title"
     :rows="rows"
     :fields="fields"
     :columns="columns"
-    :itemsPerPage="12"
     :period="period"
-    :reportReady="reportReady"
-    :isLoading="isLoading"
     :onReportConfiguration="init"
     :customBtns="customBtns"
-    paginated
   ></report-template>
 </template>
 
@@ -21,16 +17,13 @@ import ReportTemplate from "@/views/reports/BaseTableReport.vue"
 import table, { ColumnInterface, RowInterface } from "@/components/DataViews/tables/ReportDataTable"
 import ReportMixin from '@/apps/ART/views/reports/ReportMixin.vue'
 import { isEmpty } from 'lodash'
-// import { PrintoutService } from '@/services/printout_service'
 
 export default defineComponent({
   components: { ReportTemplate },
   mixins: [ReportMixin],
   data: () => ({
     title: 'Lumefantrine + Arthemether Report',
-    rows: [] as RowInterface[][], 
-    isLoading: false,
-    reportReady: false,
+    rows: [] as RowInterface[][],
     reportService: {} as any,
     prescriptions: {} as any,
     columns: [[
@@ -53,8 +46,6 @@ export default defineComponent({
   },
   methods: {
     async init(_: any, config: any){
-      this.reportReady = true
-      this.isLoading = true
       this.reportService = new OpdReportService()
       this.reportService.setStartDate(config.start_date)
       this.reportService.setEndDate(config.end_date)

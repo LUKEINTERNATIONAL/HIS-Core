@@ -5,8 +5,6 @@
     :fields="fields"
     :columns="columns"
     :period="period"
-    :reportReady="reportReady"
-    :isLoading="isLoading"
     :onReportConfiguration="init"
   ></report-template>
 </template>
@@ -18,39 +16,38 @@ import ReportTemplate from "@/views/reports/BaseTableReport.vue"
 import table, { ColumnInterface, RowInterface } from "@/components/DataViews/tables/ReportDataTable"
 import ReportMixin from '@/apps/ART/views/reports/ReportMixin.vue'
 import { isEmpty } from 'lodash'
+import { border } from '@/apps/OPD/utils/table'
 
 export default defineComponent({
   components: { ReportTemplate },
   mixins: [ReportMixin],
   data: () => ({
     title: 'OPD Diagnosis',
-    rows: [] as RowInterface[][], 
-    isLoading: false,
-    reportReady: false,
+    rows: [] as RowInterface[][],
     reportService: {} as any,
     columns: [
       [
-        table.thTxt('', {colspan: 2, style: {border: '.1rem solid white'}}),
-        table.thTxt('<6 months', {colspan: 2, style: {border: '.1rem solid white'}}),
-        table.thTxt('6 months < 5 yrs', {colspan: 2, style: {border: '.1rem solid white'}}),
-        table.thTxt('5 months < 14 yrs', {colspan: 2, style: {border: '.1rem solid white'}}),
-        table.thTxt('> 14 yrs', {colspan: 2, style: {border: '.1rem solid white'}}),
-        table.thTxt('Unknown', {colspan: 2, style: {border: '.1rem solid white'}}),
+        table.thTxt('', {colspan: 2, ...border}),
+        table.thTxt('<6 months', {colspan: 2, ...border}),
+        table.thTxt('6 months < 5 yrs', {colspan: 2, ...border}),
+        table.thTxt('5 months < 14 yrs', {colspan: 2, ...border}),
+        table.thTxt('> 14 yrs', {colspan: 2, ...border}),
+        table.thTxt('Unknown', {colspan: 2, ...border}),
         table.thTxt(''),
       ],
       [
-        table.thTxt('Diagnosis', {style: {textAlign: 'left', border: '.1rem solid white'}}),
-        table.thTxt('F', {style: {border: '.1rem solid white'}}),
-        table.thTxt('M', {style: {border: '.1rem solid white'}}),
-        table.thTxt('F', {style: {border: '.1rem solid white'}}),
-        table.thTxt('M', {style: {border: '.1rem solid white'}}),
-        table.thTxt('F', {style: {border: '.1rem solid white'}}),
-        table.thTxt('M', {style: {border: '.1rem solid white'}}),
-        table.thTxt('F', {style: {border: '.1rem solid white'}}),
-        table.thTxt('M', {style: {border: '.1rem solid white'}}),
-        table.thTxt('F', {style: {border: '.1rem solid white'}}),
-        table.thTxt('M', {style: {border: '.1rem solid white'}}),
-        table.thTxt('Total', {style: {border: '.1rem solid white'}}),
+        table.thTxt('Diagnosis', border),
+        table.thTxt('F', border),
+        table.thTxt('M', border),
+        table.thTxt('F', border),
+        table.thTxt('M', border),
+        table.thTxt('F', border),
+        table.thTxt('M', border),
+        table.thTxt('F', border),
+        table.thTxt('M', border),
+        table.thTxt('F', border),
+        table.thTxt('M', border),
+        table.thTxt('Total', border),
       ]
     ] as ColumnInterface[][],
   }),
@@ -59,8 +56,6 @@ export default defineComponent({
   },
   methods: {
     async init(_: any, config: any){
-      this.reportReady = true
-      this.isLoading = true
       this.reportService = new OpdReportService()
       this.reportService.setStartDate(config.start_date)
       this.reportService.setEndDate(config.end_date)

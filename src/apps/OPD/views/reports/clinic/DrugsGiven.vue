@@ -1,13 +1,11 @@
 <template>
-  <report-template v-if="rows"
+  <report-template
     :title="title"
     :rows="rows"
     :fields="fields"
     :columns="columns"
     :itemsPerPage="12"
     :period="period"
-    :reportReady="reportReady"
-    :isLoading="isLoading"
     :onReportConfiguration="init"
     paginated
   ></report-template>
@@ -26,9 +24,7 @@ export default defineComponent({
   mixins: [ReportMixin],
   data: () => ({
     title: 'OPD medication given (without prescription)',
-    rows: [] as RowInterface[][], 
-    isLoading: false,
-    reportReady: false,
+    rows: [] as RowInterface[][],
     columns: [[
       table.thTxt('First Name'),
       table.thTxt('Last Name'),
@@ -44,8 +40,6 @@ export default defineComponent({
   },
   methods: {
     async init(_: any, config: any){
-      this.reportReady = true
-      this.isLoading = true
       const reportService = new OpdReportService()
       reportService.setStartDate(config.start_date)
       reportService.setEndDate(config.end_date)
