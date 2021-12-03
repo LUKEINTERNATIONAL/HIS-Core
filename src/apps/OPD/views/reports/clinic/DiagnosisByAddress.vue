@@ -1,12 +1,10 @@
 <template>
-  <report-template v-if="rows"
+  <report-template
     :title="title"
     :rows="rows"
     :fields="fields"
     :columns="columns"
     :period="period"
-    :reportReady="reportReady"
-    :isLoading="isLoading"
     :onReportConfiguration="init"
   ></report-template>
 </template>
@@ -24,9 +22,7 @@ export default defineComponent({
   mixins: [ReportMixin],
   data: () => ({
     title: 'OPD diagnosis by address report',
-    rows: [] as RowInterface[][], 
-    isLoading: false,
-    reportReady: false,
+    rows: [] as RowInterface[][],
     reportService: {} as any,
     columns: [
       [
@@ -41,8 +37,6 @@ export default defineComponent({
   },
   methods: {
     async init(_: any, config: any){
-      this.reportReady = true
-      this.isLoading = true
       this.reportService = new OpdReportService()
       this.reportService.setStartDate(config.start_date)
       this.reportService.setEndDate(config.end_date)

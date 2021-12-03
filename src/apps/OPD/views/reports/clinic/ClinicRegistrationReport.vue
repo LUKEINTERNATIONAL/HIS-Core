@@ -1,13 +1,11 @@
 <template>
-  <report-template v-if="rows"
+  <report-template
     :title="title"
     :rows="rows"
     :fields="fields"
     :columns="columns"
     :itemsPerPage="10"
     :period="period"
-    :reportReady="reportReady"
-    :isLoading="isLoading"
     :onReportConfiguration="init"
     :customBtns="customBtns"
     paginated
@@ -30,8 +28,6 @@ export default defineComponent({
   data: () => ({
     title: 'Clinic Registration',
     rows: [] as RowInterface[][], 
-    isLoading: false,
-    reportReady: false,
     reportData: [] as any,
     columns: [[
       table.thTxt('Reg'),
@@ -40,7 +36,6 @@ export default defineComponent({
       table.thTxt('Gender'),
       table.thTxt('DOB'),
       table.thTxt('Date reg.'),
-      // table.thTxt('Address'),
     ]] as ColumnInterface[][],
     customBtns: [] as any
   }),
@@ -58,8 +53,6 @@ export default defineComponent({
   },
   methods: {
     async init(_: any, config: any){
-      this.reportReady = true
-      this.isLoading = true
       const reportService = new OpdReportService()
       reportService.setStartDate(config.start_date)
       reportService.setEndDate(config.end_date)
@@ -79,7 +72,6 @@ export default defineComponent({
         table.td(record.gender),
         table.td(HisDate.toStandardHisDisplayFormat(record.birthdate)),
         table.td(HisDate.toStandardHisDisplayFormat(record.visit_date)),
-        // table.td(''),
       ])
     },
     async showModal() {
