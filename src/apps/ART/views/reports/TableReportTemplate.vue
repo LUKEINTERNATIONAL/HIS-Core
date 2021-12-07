@@ -33,11 +33,11 @@
                 </ion-label>
               </ion-col>
               <ion-col>
-                <a href="#" v-if="info.other.onclick"
+                <a href="#" v-if="info && info?.other?.onclick"
                   @click.prevent="info.other.onclick()">
                   {{ info.value }}
                 </a>
-                <ion-label v-if="!info.other.onclick">
+                <ion-label v-if="info && !info?.other?.onclick">
                   <b><span v-html="info.value"></span></b> 
                 </ion-label>
               </ion-col>
