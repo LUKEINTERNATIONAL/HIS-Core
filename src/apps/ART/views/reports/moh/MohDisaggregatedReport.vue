@@ -18,6 +18,7 @@
 import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { DisaggregatedReportService, AGE_GROUPS, TEMP_OUTCOME_TABLE } from "@/apps/ART/services/reports/disaggregated_service"
+import { REGIMENS } from "@/apps/ART/services/reports/regimen_report_service"
 import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
@@ -113,13 +114,6 @@ export default defineComponent({
             await this.setTotalMalesRow()
             this.setFemaleNotPregnantRows()
         },
-        buildDefaultRegimenValues() {
-            const values = []
-            for (let i=0; i < 28; ++i ) {
-                values.push(table.td(0))
-            }
-            return values
-        },
         async appendRegimensToRow(curRow: Array<any>) {
             switch(this.report.getGender()) {
                 case 'breastfeeding':
@@ -131,19 +125,18 @@ export default defineComponent({
                     this.report.setGender('FP')
                     break;
             }
-            const regimens = await this.report.getRegimenDistribution()
-            const row: Array<any> = [...curRow, ...this.buildDefaultRegimenValues()]
+            const data = await this.report.getRegimenDistribution()
+            const regimens = [...REGIMENS, 'N/A']
+            const row = curRow
             let totals: any = []
-            for(const regimenIndex in regimens) {
-                const colIndex = this.columns.map((d: any) => d.th).indexOf(regimenIndex)
-                const data: any = regimens[regimenIndex]
-                if (colIndex > 0) {
-                    row[colIndex] = this.drill(data)
+            regimens.forEach((i: any) => {
+                if (data[i]) {
+                    totals = totals.concat(data[i])
+                    row.push(this.drill(data[i]))
                 } else {
-                    row[row.length - 1] = this.drill(data)  // Mark as unknown.. see this.columns
+                    row.push(table.td(0))
                 }
-                totals = totals.concat(data)
-            }
+            })
             return [...row, this.drill(totals)]
         },
         async getValue(prop: string, gender: string, data: any) {
