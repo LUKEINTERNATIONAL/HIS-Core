@@ -152,6 +152,10 @@ export default defineComponent({
       type: Boolean,
       default: true
     },
+    enabledPDFHorizontalPageBreak: {
+      type: Boolean,
+      default: false
+    },
     onReportConfiguration: {
       type: Function,
       required: true
@@ -236,7 +240,7 @@ export default defineComponent({
         visible: true,
         onClick: async () => {
           const {columns, rows} = toExportableFormat(this.columns, this.rows)
-          toTablePDF(columns, rows, this.getFileName())
+          toTablePDF(columns, rows, this.getFileName(), this.enabledPDFHorizontalPageBreak)
         }
       })
     }
