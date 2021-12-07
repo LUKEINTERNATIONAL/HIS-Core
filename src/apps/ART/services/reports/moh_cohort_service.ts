@@ -1,5 +1,11 @@
 import { ArtReportService } from "./art_report_service";
 
+export interface CohortValidationInterface {
+    param: number | string;
+    error: (indicator: number, param: number) => string;
+    check: (indicator: number, param: number) => boolean;
+}
+
 export class MohCohortReportService extends ArtReportService {
     regenerate: boolean;
     constructor() {
@@ -43,5 +49,37 @@ export class MohCohortReportService extends ArtReportService {
             'end_date': this.endDate,
             regenerate: this.regenerate
         }
+    }
+
+    getCohortIndicatorValue(indicator: string, cohort: Array<any>) {
+        return cohort.filter((c: any) => c.name === indicator)
+            .map((c: any) => parseInt(c.contents))[0]
+    }
+
+    getCachedCohortValues() {
+        const cache = sessionStorage.getItem('mohCohort')
+        if (cache) {
+            const data = JSON.parse(sessionStorage.mohCohort)
+            if (data.quarter === this.quarter) {
+                return data.values
+            }
+            if (data.start_date === this.startDate 
+                && data.end_date === this.endDate) {
+                    return data.values
+            }
+        }
+    }
+
+    validateCohortIndicators(
+        validations: Record<string, CohortValidationInterface>, 
+        cohortValues: any) {
+        const errors = []
+        for (const v in validations) {
+            const indicator = this.getCohortIndicatorValue(v, cohortValues)
+            const param = validations[v].param as number
+            const condition = validations[v].check(indicator, param)
+            if (condition) errors.push(validations[v].error(indicator, param))
+        }
+        return errors
     }
 }
