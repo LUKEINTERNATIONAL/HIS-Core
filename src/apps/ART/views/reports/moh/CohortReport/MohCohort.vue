@@ -90,6 +90,12 @@ export default defineComponent({
             this.vCohort = data.values
             this.cohort = data.values
             this.isLoading = false
+            sessionStorage.mohCohort = JSON.stringify({
+              'quarter': form.quarter.label,
+              'start_date': config.start_date || form.quarter.other.start,
+              'end_date': config.end_date || form.quarter.other.end,
+              'values': data.values
+            })
             clearInterval(interval)
           }
         }, 3000)
