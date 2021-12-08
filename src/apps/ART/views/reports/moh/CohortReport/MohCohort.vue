@@ -157,7 +157,7 @@ export default defineComponent({
           slot: "end",
           color: "primary",
           visible: true,
-          onClick: async () => this.$router.push({ name:'moh_disaggregated' })
+          onClick: () => document.location = '/art/report/moh/moh_disaggregated' as any
         },
         {
           name: "Finish",
@@ -165,7 +165,7 @@ export default defineComponent({
           slot: "end",
           color: "success",
           visible: true,
-          onClick: async () => this.$router.push({ path:'/' })
+          onClick: () => this.$router.push({ path:'/' })
         }
       ]   
     }
