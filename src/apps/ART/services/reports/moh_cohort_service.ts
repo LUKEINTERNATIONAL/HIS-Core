@@ -113,11 +113,11 @@ export class MohCohortReportService extends ArtReportService {
         validations: Record<string, CohortValidationInterface>, 
         cohortValues: any) {
         const errors = []
-        for (const v in validations) {
-            const indicator = this.getCohortIndicatorValue(v, cohortValues)
-            const param = validations[v].param as number
-            const condition = validations[v].check(indicator, param)
-            if (condition) errors.push(validations[v].error(indicator, param))
+        for (const i in validations) {
+            const indicator = this.getCohortIndicatorValue(i, cohortValues)
+            const param = validations[i].param as number
+            const condition = validations[i].check(indicator, param)
+            if (condition) errors.push(validations[i].error(indicator, param))
         }
         return errors
     }
