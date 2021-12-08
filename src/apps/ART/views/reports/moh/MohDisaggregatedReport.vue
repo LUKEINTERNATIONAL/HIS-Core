@@ -91,7 +91,7 @@ export default defineComponent({
     },
     watch: {
         async canValidate(doIt: boolean) {
-            if (doIt) await this.initValidation()
+            if (doIt) await this.validateReport()
         }
     },
     methods: {
@@ -293,24 +293,7 @@ export default defineComponent({
                 }
             ]
         },
-        async initValidation() {
-            const cachedCohort = this.mohCohort.getCachedCohortValues()
-
-            if (cachedCohort) return this.validateReport(cachedCohort)
-            
-            toastWarning('Running Moh cohort report for same period for validation')
-            
-            const params = this.mohCohort.datePeriodRequestParams()
-            const interval = setInterval(async () => {
-                const res = await this.mohCohort.requestCohort(params)
-                if (res.status === 200) {
-                    const data = await res.json()
-                    this.validateReport(data.values)
-                    clearInterval(interval)
-                }
-            }, 3000)
-        },
-        async validateReport(cohort: any) {
+        async validateReport() {
             const totalAlive = uniq([
                 ...this.totalNewF, 
                 ...this.totalCurF, 
@@ -332,12 +315,14 @@ export default defineComponent({
                     `
                 }
             }
-            const errors = this.mohCohort.validateCohortIndicators(validations, cohort)
-            if (!isEmpty(errors)) {
-                this.setHeaderInfoList(totalAlive,`<span style='color:red'>${errors.join(',')}</span>`)
-            } else {
-                this.setHeaderInfoList(totalAlive,`<span style='color:green'>Report is consistent</span>`)
-            }
+            const s = this.mohCohort.validateIndicators(validations, (errors: string[]) => {
+                if (!isEmpty(errors)) {
+                    this.setHeaderInfoList(totalAlive,`<span style='color:red'>${errors.join(',')}</span>`)
+                } else {
+                    this.setHeaderInfoList(totalAlive,`<span style='color:green'>Report is consistent</span>`)
+                }
+            })
+            if (s === -1) toastWarning('Running cohort report to check consistency. This may take a while...')
         }
     }
 })

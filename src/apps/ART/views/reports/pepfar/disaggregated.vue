@@ -60,7 +60,7 @@ export default defineComponent({
     },
     watch: {
         async canValidate(doIt: boolean) {
-            if (doIt) await this.initValidation()
+            if (doIt) await this.validateReport()
         }
     },
     methods: {
@@ -211,24 +211,7 @@ export default defineComponent({
                 this.rows.push(onFormat(group, txNew, txCurr, txGivenIpt, txScreenTB))
             }
         },
-        async initValidation() {
-            const cachedCohort = this.mohCohort.getCachedCohortValues()
-
-            if (cachedCohort) return this.validateReport(cachedCohort)
-            
-            toastWarning('Running Moh cohort report for same period for validation')
-            
-            const params = this.mohCohort.datePeriodRequestParams()
-            const interval = setInterval(async () => {
-                const res = await this.mohCohort.requestCohort(params)
-                if (res.status === 200) {
-                    const data = await res.json()
-                    this.validateReport(data.values)
-                    clearInterval(interval)
-                }
-            }, 3000)
-        },
-        validateReport(cohort: any) {
+        validateReport() {
             const validations: any = {
                 'initiated_on_art_first_time': {
                     param: this.totalNewF.concat(this.totalNewM).length,
@@ -254,12 +237,14 @@ export default defineComponent({
                     `
                 }
             }
-            const errors = this.mohCohort.validateCohortIndicators(validations, cohort)
-            if (!isEmpty(errors)) {
-                this.setHeaderInfoList(`<span style='color:red'>${errors.join(',')}</span>`)
-            } else {
-                this.setHeaderInfoList(`<span style='color:green'>Report is consistent</span>`)
-            }
+            const s = this.mohCohort.validateIndicators(validations, (errors: string[]) => {
+                if (!isEmpty(errors)) {
+                    this.setHeaderInfoList(`<span style='color:red'>${errors.join(',')}</span>`)
+                } else {
+                    this.setHeaderInfoList(`<span style='color:green'>Report is consistent</span>`)
+                }
+            })
+            if (s === -1) toastWarning('Running cohort report to check consistency. This may take a while')
         }
     }
 })
