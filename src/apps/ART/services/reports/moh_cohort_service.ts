@@ -102,7 +102,7 @@ export class MohCohortReportService extends ArtReportService {
                 this.cacheCohort(data.values)
                 callback(validate(data.values))
                 clearInterval(interval)
-            } else {
+            } else if (res && ![200, 204].includes(res.status)) {
                 callback(['Unable to validate report'])
             }
         }, 3000)
