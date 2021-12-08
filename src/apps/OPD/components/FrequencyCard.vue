@@ -1,5 +1,5 @@
 <template>
-  <ion-card>
+  <ion-card class="his-card clickable" :class="{ active: status }">
     <img :src="icon" :alt="title" height="65">
     <ion-card-content>
       <ion-card-subtitle :color="status ? 'primary': ''">
@@ -37,3 +37,10 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+.active {
+  background: rgb(240, 255, 251);
+  /* background: lightgreen; */
+}
+</style>
