@@ -1211,6 +1211,8 @@
 <script>
 /* eslint-disable @typescript-eslint/camelcase */
 import moment from "dayjs";
+import { Service } from "@/services/service"
+
 export default {
   data: function(){
     return {
@@ -1452,15 +1454,16 @@ export default {
       newly_initiated_on_ipt,${this.newly_initiated_on_ipt},
       newly_initiated_on_3hp,${this.newly_initiated_on_3hp},
       `;
-      y += `Date Created:  ${moment().format("YYYY-MM-DD:h:m:s")} 
-                          e-Mastercard Version : ${sessionStorage.EMCVersion} 
-                          API Version ${sessionStorage.APIVersion} UUID: ${sessionStorage.siteUUID}`;
-      for (let index = 0; index < 34; index++) {
-        y += ",";
-      }
+      y += `
+          His-Core Version: ${Service.getCoreVersion()}
+          ART Version : ${Service.getAppVersion()}
+          API Version: ${Service.getApiVersion()}
+          Report Period: ${this.quarter}
+          Site: ${Service.getLocationName()}`;
+      // }
       const csvData = new Blob([y], { type: "text/csv;charset=utf-8;" });
       //IE11 & Edge
-      const reportTitle = `MoH ${sessionStorage.location_name} Cohort report ${this.quarter}`;
+      const reportTitle = `${Service.getLocationName()} cohort report ${this.quarter}`;
       if (navigator.msSaveBlob) {
         navigator.msSaveBlob(csvData, 'exportFilename');
       } else {

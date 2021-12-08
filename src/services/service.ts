@@ -103,7 +103,7 @@ export class Service {
     }
 
     static getApiVersion() {
-        return sessionStorage.getItem('APIVersion')
+        return sessionStorage.getItem('APIVersion') || 'N/A'
     }
 
     static getActiveApp(): AppInterface | {} { 
@@ -170,7 +170,16 @@ export class Service {
        
        return roles ? JSON.parse(roles) : []
     }
+
     static getUserName() {
        return sessionStorage.username;
+    }
+
+    static getCoreVersion() {
+        return sessionStorage.coreVersion || 'N/A';
+    }
+
+    static getAppVersion() {
+        return sessionStorage.appVersion || 'N/A';
     }
 }

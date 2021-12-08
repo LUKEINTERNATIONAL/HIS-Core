@@ -169,8 +169,8 @@ export default defineComponent({
     isLoadingData: false as boolean,
     canShowReport: false as boolean,
     apiVersion: Service.getApiVersion(),
-    coreVersion: '1.0.0',
-    artVersion: '1.0.0'
+    coreVersion: Service.getCoreVersion(),
+    artVersion: Service.getAppVersion()
   }),
   methods: {
     getFileName() {
