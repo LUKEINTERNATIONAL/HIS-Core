@@ -96,8 +96,8 @@ export default defineComponent({
                 const group = AGE_GROUPS[ageIndex]
                 if (!isEmpty(this.cohort) && group in this.cohort) {
                     const data = this.cohort[group]
-                    this.total3hp = uniq([...this.totalIpt, ...data['3HP'][gender]])
-                    this.totalIpt = uniq([...this.total3hp, ...data['6H'][gender]])
+                    this.total3hp = uniq([...this.total3hp, ...data['3HP'][gender]])
+                    this.totalIpt = uniq([...this.totalIpt, ...data['6H'][gender]])
                     this.rows.push([
                         table.td(group),
                         table.td(gender),
