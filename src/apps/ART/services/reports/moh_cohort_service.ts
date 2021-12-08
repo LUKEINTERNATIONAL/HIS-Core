@@ -63,7 +63,7 @@ export class MohCohortReportService extends ArtReportService {
     getCachedCohortValues() {
         const cache = sessionStorage.getItem(CohortVar.MOH_CACHE)
         if (cache) {
-            const data = JSON.parse(sessionStorage.mohCohort)
+            const data = JSON.parse(cache)
             if (data.quarter === this.quarter) {
                 return data.values
             }
