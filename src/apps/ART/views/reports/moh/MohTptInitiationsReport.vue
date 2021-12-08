@@ -70,6 +70,7 @@ export default defineComponent({
             this.cohort = await this.report.getTptNewInitiations()
             this.setRows('F')
             this.setRows('M')
+            this.setHeaderInfoList()
             this.canValidate = true
         },
         drilldown(patients: Array<any>) {
@@ -95,8 +96,8 @@ export default defineComponent({
                 const group = AGE_GROUPS[ageIndex]
                 if (!isEmpty(this.cohort) && group in this.cohort) {
                     const data = this.cohort[group]
-                    this.totalIpt = uniq([...this.totalIpt, ...data['3HP'][gender]])
-                    this.total3hp = uniq([...this.total3hp, ...data['6H'][gender]])
+                    this.total3hp = uniq([...this.totalIpt, ...data['3HP'][gender]])
+                    this.totalIpt = uniq([...this.total3hp, ...data['6H'][gender]])
                     this.rows.push([
                         table.td(group),
                         table.td(gender),
@@ -127,8 +128,10 @@ export default defineComponent({
                     param: this.total3hp.length,
                     check: (i: number, p: number) => i != p,
                     error: (i: number, p: number) => `
-                        <b style="color:red;">Validation error: Total newly initiated on 3HP 
-                        (${p}) is not matching newly initiated on 3HP in Cohort report (${i}).</b>
+                        <b style="color:red;">
+                            Total newly initiated on 3HP(${p}) is not matching newly 
+                            initiated on 3HP in Cohort report (${i}).
+                        </b>
                     `
                 },
                 'newly_initiated_on_ipt': {
@@ -136,11 +139,11 @@ export default defineComponent({
                     check: (i: number, p: number) => i != p,
                     error: (i: number, p: number) => `
                         <b style="color:red;">
-                            Validation error: Total newly initiated on IPT 
-                            (${p}) is not matching newly initiated on IPT in Cohort report(${i}).
+                            Total newly initiated on IPT (${p}) is not matching 
+                            newly initiated on IPT in Cohort report(${i}).
                         </b>
                     `
-                } 
+                }
             }
             const s = this.mohCohort.validateIndicators(validations, (errors: string[]) => {
                 if (!isEmpty(errors)) {
