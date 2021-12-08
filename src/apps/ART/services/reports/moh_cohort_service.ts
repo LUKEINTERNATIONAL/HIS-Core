@@ -1,5 +1,9 @@
 import { ArtReportService } from "./art_report_service";
 
+export enum CohortVar {
+    MOH_CACHE = 'mohCache'
+}
+
 export interface CohortValidationInterface {
     param: number | string;
     error: (indicator: number, param: number) => string;
@@ -57,7 +61,7 @@ export class MohCohortReportService extends ArtReportService {
     }
 
     getCachedCohortValues() {
-        const cache = sessionStorage.getItem('mohCohort')
+        const cache = sessionStorage.getItem(CohortVar.MOH_CACHE)
         if (cache) {
             const data = JSON.parse(sessionStorage.mohCohort)
             if (data.quarter === this.quarter) {
@@ -70,7 +74,42 @@ export class MohCohortReportService extends ArtReportService {
         }
     }
 
-    validateCohortIndicators(
+    cacheCohort(values: any) {
+        sessionStorage.setItem(
+            CohortVar.MOH_CACHE, 
+            JSON.stringify({
+                'start_date': this.startDate,
+                'end_date': this.endDate,
+                'quarter': this.quarter,
+                'data': values
+        }))
+    }
+
+    validateIndicators(validations: Record<string, CohortValidationInterface>, callback: Function) {
+        const validate = (values: any) => this.runValidations(validations, values)
+        const cachedValues = this.getCachedCohortValues()
+
+        if (cachedValues) return callback(validate(cachedValues))
+
+        const params = this.quarter
+            ? this.qaurterRequestParams()
+            : this.datePeriodRequestParams()
+
+        const interval = setInterval(async () => {
+            const res = await this.requestCohort(params)
+            if (res && res.status === 200) {
+                const data = await res.json()
+                this.cacheCohort(data.values)
+                callback(validate(data.values))
+                clearInterval(interval)
+            } else {
+                callback(['Unable to validate report'])
+            }
+        }, 3000)
+        return -1
+    }
+
+    runValidations(
         validations: Record<string, CohortValidationInterface>, 
         cohortValues: any) {
         const errors = []
