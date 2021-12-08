@@ -90,6 +90,7 @@ export default defineComponent({
             this.vCohort = data.values
             this.cohort = data.values
             this.isLoading = false
+            this.report.cacheCohort(data.values)
             clearInterval(interval)
           }
         }, 3000)

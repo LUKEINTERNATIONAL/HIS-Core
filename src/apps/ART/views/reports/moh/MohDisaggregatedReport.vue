@@ -6,6 +6,7 @@
             :rows="rows" 
             :fields="fields"
             :columns="columns"
+            :headerInfoList="headerList"
             reportPrefix="MoH"
             :enabledPDFHorizontalPageBreak="true"
             :onReportConfiguration="onPeriod"
@@ -24,6 +25,8 @@ import { isEmpty, uniq } from "lodash"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { IonPage } from "@ionic/vue"
+import { MohCohortReportService } from "@/apps/ART/services/reports/moh_cohort_service"
+import { Option } from '@/components/Forms/FieldInterface'
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -71,6 +74,7 @@ export default defineComponent({
                 table.thNum('Total (regimen)')
             ]
         ],
+        mohCohort: {} as any,
         ageGroupCohort: {} as any,
         totalNewF: [] as Array<any>,
         totalCurF: [] as Array<any>,
@@ -80,22 +84,36 @@ export default defineComponent({
         totalCurM: [] as Array<any>,
         totalIptM: [] as Array<any>,
         totalTbM:  [] as Array<any>,
-        pregnantF: [] as Array<any>
+        pregnantF: [] as Array<any>,
+        headerList: [] as Array<Option>,
+        canValidate: false as boolean
     }),
     created() {
         this.fields = this.getDateDurationFields(true, false)
     },
+    watch: {
+        async canValidate(doIt: boolean) {
+            if (doIt) await this.validateReport()
+        }
+    },
     methods: {
         async onPeriod(form: any, config: any) {
+            this.canValidate = false
             this.rows = []
             this.report = new DisaggregatedReportService()
+            this.mohCohort = new MohCohortReportService()
             this.report.setOutcomeTable(TEMP_OUTCOME_TABLE.PATIENT_OUTCOME_TEMP)
             if (form.quarter) {
+                this.mohCohort.setQuarter(form.quarter.label)
+                this.mohCohort.setStartDate(form.quarter.other.start)
+                this.mohCohort.setEndDate(form.quarter.other.end)
                 this.report.setQuarter(form.quarter.label)
                 this.report.setStartDate(form.quarter.other.start)
                 this.report.setEndDate(form.quarter.other.end)
                 this.period = form.quarter.label
             } else {
+                this.mohCohort.setStartDate(config.start_date)
+                this.mohCohort.setEndDate(config.end_date)
                 this.report.setStartDate(config.start_date)
                 this.report.setEndDate(config.end_date)
                 this.period = this.report.getDateIntervalPeriod()
@@ -105,6 +123,8 @@ export default defineComponent({
                 return toastWarning('Unable to initialise report')
             }
             await this.setTableRows()
+            this.setHeaderInfoList([])
+            this.canValidate = true
         },
         async setTableRows() {
             await this.setFemaleRows()
@@ -251,6 +271,52 @@ export default defineComponent({
                 ) 
                 this.rows.push(row)
             }
+        },
+        setHeaderInfoList(totalAlive: Array<any>, validationStatus='<span style="color: orange;font-weight:bold">Validating report....please wait...</span>') {
+            this.headerList = [
+                { 
+                    label: 'Total Alive and on ART', 
+                    value: totalAlive.length,
+                    other: {
+                        onclick: () => this.runTableDrill(totalAlive)
+                    }
+                },
+                {
+                    label: 'Validation status',
+                    value: validationStatus
+                }
+            ]
+        },
+        async validateReport() {
+            const totalAlive = uniq([
+                ...this.totalNewF, 
+                ...this.totalCurF, 
+                ...this.totalIptF,
+                ...this.totalTbF,
+                ...this.totalNewM, 
+                ...this.totalCurM, 
+                ...this.totalIptM,
+                ...this.totalTbM,
+                ...this.pregnantF
+            ])
+            const validations: any = {
+                'total_alive_and_on_art' : {
+                    param: totalAlive.length,
+                    check: (i: number, p: number) => i != p,
+                    error: (i: number, p: number) => `
+                        Total alive of <b>${p}</b>
+                        Does not match total alive of <b>${i}</b> on MOH report
+                    `
+                }
+            }
+            const s = this.mohCohort.validateIndicators(validations, (errors: string[]) => {
+                if (!isEmpty(errors)) {
+                    this.setHeaderInfoList(totalAlive,`<span style='color:red'>${errors.join(',')}</span>`)
+                } else {
+                    this.setHeaderInfoList(totalAlive,`<span style='color:green'>Report is consistent</span>`)
+                }
+            })
+            if (s === -1) toastWarning('Running cohort report to check consistency. This may take a while...')
         }
     }
 })

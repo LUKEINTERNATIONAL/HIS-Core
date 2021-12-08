@@ -20,8 +20,11 @@ import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { TxReportService, OTHER_AGE_GROUPS } from '@/apps/ART/services/reports/tx_report_service'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
-import { Option } from "@/components/Forms/FieldInterface"
+import { Option } from '@/components/Forms/FieldInterface'
 import { IonPage } from "@ionic/vue"
+import { MohCohortReportService } from "@/apps/ART/services/reports/moh_cohort_service"
+import { toastWarning } from '@/utils/Alerts'
+import { isEmpty, uniq } from "lodash"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -32,6 +35,7 @@ export default defineComponent({
         rows: [] as Array<any>,
         headerInfoList: [] as Option[],
         totals: new Set(),
+        mohCohort: {} as any,
         columns:  [
             [
                 table.thTxt('Age group'),
@@ -40,23 +44,34 @@ export default defineComponent({
                 table.thNum('# of clients on 3 - 5 months of ARVs'),
                 table.thNum('# of clients on  >= 6 months of ARVs')
             ]
-        ]
+        ],
+        canValidate: false as boolean
     }),
     created() {
         this.fields = this.getDateDurationFields()
     },
+    watch: {
+        async canValidate(doIt: boolean) {
+            if (doIt) await this.validateReport()
+        }
+    },
     methods: {
         async onPeriod(_: any, config: any) {
+            this.canValidate = false
             this.rows = []
             this.report = new TxReportService()
+            this.mohCohort = new MohCohortReportService()
+            this.mohCohort.setStartDate(config.start_date)
+            this.mohCohort.setEndDate(config.end_date)
             this.report.setOrg('moh')
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
             this.period = this.report.getDateIntervalPeriod()
             await this.setRows()
             this.setHeaderInfoList()
+            this.canValidate = true
         },
-        setHeaderInfoList() {
+        setHeaderInfoList(validationStatus='<span style="color: orange;font-weight:bold">Validating report....please wait...</span>') {
             this.headerInfoList = [
                 { 
                     label: 'Total clients', 
@@ -64,6 +79,10 @@ export default defineComponent({
                     other: {
                         onclick: () => this.runTableDrill(Array.from(this.totals))
                     }
+                },
+                {
+                    label: 'Validation status',
+                    value: validationStatus
                 }
             ]
         },
@@ -144,6 +163,26 @@ export default defineComponent({
                 }
                 this.rows = [...females, ...males]
             }
+        },
+        validateReport() {
+            const validations: any = {
+                'total_alive_and_on_art': {
+                    param: this.totals.size,
+                    check: (i: number, p: number) => i != p,
+                    error: (i: number, p: number) => `
+                        <b>MoH cohort Alive and on ART clients (${i}) is not
+                        not matching with total TX MMD clients (${p}).</b>
+                    `
+                }
+            }
+            const s = this.mohCohort.validateIndicators(validations, (errors: string[]) => {
+                if (!isEmpty(errors)) {
+                    this.setHeaderInfoList(`<span style='color:red'>${errors.join(',')}</span>`)
+                } else {
+                    this.setHeaderInfoList(`<span style='color:green'>Report is consistent</span>`)
+                }
+            })
+            if (s === -1) toastWarning('Running cohort report to check consistency. This may take a while')
         }
     }
 })
