@@ -239,45 +239,41 @@ export default defineComponent({
       this.onLoadDefault()
     } 
     this.btns = this.customBtns
-    if (this.canExportCsv) {
-      this.btns.push({
-        name: "CSV",
-        size: "large",
-        slot: "start",
-        color: "primary",
-        visible: true,
-        onClick: async () => {
-          const {columns, rows} = toExportableFormat(this.columns, this.rows)
-          toCsv(
-            columns, 
-            [
-              ...rows,
-              [],
-              [`Date Created: ${this.date}`],
-              // TODO: Get actual HIS-CORE version from a file
-              [`HIS-Core Version: ${this.coreVersion}`],
-              // TODO: Get actial ART Version from a file
-              [`ART Version: ${this.artVersion}`],
-              [`API Version: ${this.apiVersion}`]
-            ],
-            this.getFileName()
-          )
-        }
-      })
-    }
-    if (this.canExportPDf) {
-      this.btns.push({
-        name: "PDF",
-        size: "large",
-        slot: "start",
-        color: "primary",
-        visible: true,
-        onClick: async () => {
-          const {columns, rows} = toExportableFormat(this.columns, this.rows)
-          toTablePDF(columns, rows, this.getFileName(), this.enabledPDFHorizontalPageBreak)
-        }
-      })
-    }
+    this.btns.push({
+      name: "CSV",
+      size: "large",
+      slot: "start",
+      color: "primary",
+      visible: this.canExportCsv,
+      onClick: async () => {
+        const {columns, rows} = toExportableFormat(this.columns, this.rows)
+        toCsv(
+          columns, 
+          [
+            ...rows,
+            [],
+            [`Date Created: ${this.date}`],
+            // TODO: Get actual HIS-CORE version from a file
+            [`HIS-Core Version: ${this.coreVersion}`],
+            // TODO: Get actial ART Version from a file
+            [`ART Version: ${this.artVersion}`],
+            [`API Version: ${this.apiVersion}`]
+          ],
+          this.getFileName()
+        )
+      }
+    })
+    this.btns.push({
+      name: "PDF",
+      size: "large",
+      slot: "start",
+      color: "primary",
+      visible: this.canExportPDf,
+      onClick: async () => {
+        const {columns, rows} = toExportableFormat(this.columns, this.rows)
+        toTablePDF(columns, rows, this.getFileName(), this.enabledPDFHorizontalPageBreak)
+      }
+    })
     this.btns.push({
       name: "Back",
       size: "large",
