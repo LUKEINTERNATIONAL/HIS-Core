@@ -51,8 +51,7 @@ export default defineComponent({
     })
   
     EventBus.on(
-      ApiBusEvents.BEFORE_API_REQUEST, 
-      () => nprogress.start()
+      ApiBusEvents.BEFORE_API_REQUEST, () => nprogress.start()
     )
 
     EventBus.on(
@@ -83,7 +82,7 @@ export default defineComponent({
             if (route.name != 'API host settings') {
               ApiClient.healthCheck()
             }
-          }, 1000)
+          }, 2500)
           toastWarning('Unable to reach api. You can fix the error below')
         }
         nprogress.done() 
