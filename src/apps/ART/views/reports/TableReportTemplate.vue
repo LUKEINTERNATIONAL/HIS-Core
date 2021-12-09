@@ -157,6 +157,9 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    onFinishBtnAction: {
+      type: Function
+    },
     onReportConfiguration: {
       type: Function,
       required: true
@@ -296,7 +299,13 @@ export default defineComponent({
       slot: "end",
       color: "success",
       visible: true,
-      onClick: async () => this.$router.push({ path:'/' })
+      onClick: () => {
+        if (this.onFinishBtnAction) {
+          this.onFinishBtnAction()
+        } else {
+          this.$router.push({ path:'/' })   
+        }
+      }
     })
   }
 })

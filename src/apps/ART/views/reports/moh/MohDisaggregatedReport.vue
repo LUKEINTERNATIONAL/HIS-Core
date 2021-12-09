@@ -11,6 +11,7 @@
             :enabledPDFHorizontalPageBreak="true"
             :onReportConfiguration="onPeriod"
             :onDefaultConfiguration="onLoadDefault"
+            :onFinishBtnAction="onFinishBtnAction"
             >
         </report-template>
     </ion-page>
@@ -89,12 +90,14 @@ export default defineComponent({
         headerList: [] as Array<Option>,
         canValidate: false as boolean,
         onLoadDefault: null as any,
+        onFinishBtnAction: null as any
     }),
     async created() {
         const { query }  = this.$route
         /** Check for default url params for this report */
         if (query.start_date && query.end_date && query.quarter) {
-            this.onLoadDefault = () => 
+            this.onFinishBtnAction = () => this.$router.back()
+            this.onLoadDefault = () =>
                 this.onPeriod({
                     quarter: {
                         label: query.quarter,
