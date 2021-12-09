@@ -1,5 +1,5 @@
 <template>
-  <table>
+  <table class="my-table">
     <tr class="section-description">
       <td class="numbers">&nbsp;</td>
       <td style="font-weight: bold;" colspan="2">ART Clinic</td>
@@ -119,7 +119,7 @@
       <td style="font-weight: normal;">&nbsp;</td>
       <td style="font-weight: normal;">&nbsp;</td>
     </tr>
-
+  
     <tr>
       <td class="numbers">31.</td>
       <td style="text-align: left;border-bottom-style: none;
@@ -949,7 +949,7 @@
       <td colspan="9" style="text-align: left;">&nbsp;</td>
     </tr>
 
-    <tr>
+    <tr  style="page-break-before: always; ">
       <td class="numbers">81.</td>
       <td style="text-align: left; padding-left: 10px; border-bottom-width:0px;
         border-right-width:0px;">Pregnant / Breastfeeding</td>
