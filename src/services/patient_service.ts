@@ -61,6 +61,10 @@ export class Patientservice extends Service {
         })
     }
 
+    getGuardian() {
+        return Patientservice.getJson(`people/${this.getID()}/relationships`)
+    }
+
     assignNpid() {
        return Patientservice.assignNHID(this.getID()) 
     }
