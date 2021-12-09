@@ -28,5 +28,10 @@ export default [
     name: "presenting complaints",
     path: "/opd/encounters/complaints/:patient_id",
     component: () => import('@/apps/OPD/views/encounters/Complaints.vue')
-  }
+  },
+  {
+    name: "prescription",
+    path: "/opd/encounters/prescription/:patient_id",
+    component: () => import('@/apps/OPD/views/encounters/Prescription.vue')
+  },
 ]
