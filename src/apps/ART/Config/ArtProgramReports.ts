@@ -7,11 +7,11 @@ export const REPORTS: FolderInterface[] = [
         defaultFilesIcon: 'reports.png',
         files: [
             {
-                name: 'Cohort',
+                name: 'Cohort / disaggregated',
                 pathName: 'moh_cohort'
             },
             {
-                name: 'Cohort / disaggregated',
+                name: 'Disaggregated',
                 pathName: 'moh_disaggregated'
             },
             {

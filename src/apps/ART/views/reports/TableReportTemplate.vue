@@ -89,6 +89,7 @@ import { toastDanger } from "@/utils/Alerts";
 import Img from "@/utils/Img"
 import { Service } from "@/services/service"
 import dayjs from "dayjs";
+import { isEmpty } from "lodash";
 
 export default defineComponent({
   components: { 
@@ -156,9 +157,15 @@ export default defineComponent({
       type: Boolean,
       default: false
     },
+    onFinishBtnAction: {
+      type: Function
+    },
     onReportConfiguration: {
       type: Function,
       required: true
+    },
+    onDefaultConfiguration: {
+      type: Function
     }
   },
   data: () => ({
@@ -170,12 +177,33 @@ export default defineComponent({
     canShowReport: false as boolean,
     apiVersion: Service.getApiVersion(),
     coreVersion: Service.getCoreVersion(),
-    artVersion: Service.getAppVersion()
+    artVersion: Service.getAppVersion(),
   }),
   methods: {
     getFileName() {
       return `${this.reportPrefix} ${Service.getLocationName()} ${this.title} ${this.period}`
     },
+    /**
+     * Loads report without depending on Field configurations
+     */
+    async onLoadDefault() {
+      this.canShowReport = true
+      await this.presentLoading()
+      try {
+        this.date = dayjs().format('YYYY-MM-DD:h:m:s')
+        if (this.onDefaultConfiguration) {
+          await this.onDefaultConfiguration()
+        }
+        loadingController.dismiss()
+      }catch(e) {
+        toastDanger(e)
+        console.error(e)
+        loadingController.dismiss()
+      }
+    },
+    /**
+     * Callback is used when a form has been submitted with report configurations
+     */
     async onFinish(formData: any, computedData: any) {
       this.formData = formData
       this.computeFormData = computedData
@@ -191,8 +219,14 @@ export default defineComponent({
         loadingController.dismiss()
       }
     },
+    /**Reinitiate the report with default configurations */
     async reloadReport() {
-      await this.onFinish(this.formData, this.computeFormData)
+      if (!isEmpty(this.formData) || !isEmpty(this.computeFormData)) {
+        await this.onFinish(this.formData, this.computeFormData)
+      }
+      if (this.onDefaultConfiguration) {
+        await this.onLoadDefault()
+      }
     },
     async presentLoading() {
       const loading = await loadingController
@@ -204,52 +238,51 @@ export default defineComponent({
     }
   },
   created() {
+    if (this.onDefaultConfiguration) {
+      this.onLoadDefault()
+    } 
     this.btns = this.customBtns
-    if (this.canExportCsv) {
-      this.btns.push({
-        name: "CSV",
-        size: "large",
-        slot: "start",
-        color: "primary",
-        visible: true,
-        onClick: async () => {
-          const {columns, rows} = toExportableFormat(this.columns, this.rows)
-          toCsv(
-            columns, 
-            [
-              ...rows,
-              [],
-              [`Date Created: ${this.date}`],
-              // TODO: Get actual HIS-CORE version from a file
-              [`HIS-Core Version: ${this.coreVersion}`],
-              // TODO: Get actial ART Version from a file
-              [`ART Version: ${this.artVersion}`],
-              [`API Version: ${this.apiVersion}`]
-            ],
-            this.getFileName()
-          )
-        }
-      })
-    }
-    if (this.canExportPDf) {
-      this.btns.push({
-        name: "PDF",
-        size: "large",
-        slot: "start",
-        color: "primary",
-        visible: true,
-        onClick: async () => {
-          const {columns, rows} = toExportableFormat(this.columns, this.rows)
-          toTablePDF(columns, rows, this.getFileName(), this.enabledPDFHorizontalPageBreak)
-        }
-      })
-    }
+    this.btns.push({
+      name: "CSV",
+      size: "large",
+      slot: "start",
+      color: "primary",
+      visible: this.canExportCsv,
+      onClick: async () => {
+        const {columns, rows} = toExportableFormat(this.columns, this.rows)
+        toCsv(
+          columns, 
+          [
+            ...rows,
+            [],
+            [`Date Created: ${this.date}`],
+            // TODO: Get actual HIS-CORE version from a file
+            [`HIS-Core Version: ${this.coreVersion}`],
+            // TODO: Get actial ART Version from a file
+            [`ART Version: ${this.artVersion}`],
+            [`API Version: ${this.apiVersion}`]
+          ],
+          this.getFileName()
+        )
+      }
+    })
+    this.btns.push({
+      name: "PDF",
+      size: "large",
+      slot: "start",
+      color: "primary",
+      visible: this.canExportPDf,
+      onClick: async () => {
+        const {columns, rows} = toExportableFormat(this.columns, this.rows)
+        toTablePDF(columns, rows, this.getFileName(), this.enabledPDFHorizontalPageBreak)
+      }
+    })
     this.btns.push({
       name: "Back",
       size: "large",
       slot: "end",
       color: "warning",
-      visible: true,
+      visible: !isEmpty(this.fields),
       onClick: () => this.canShowReport = false
     })
     this.btns.push({
@@ -266,7 +299,13 @@ export default defineComponent({
       slot: "end",
       color: "success",
       visible: true,
-      onClick: async () => this.$router.push({ path:'/' })
+      onClick: () => {
+        if (this.onFinishBtnAction) {
+          this.onFinishBtnAction()
+        } else {
+          this.$router.push({ path:'/' })   
+        }
+      }
     })
   }
 })
