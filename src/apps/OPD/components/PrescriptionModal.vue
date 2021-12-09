@@ -106,7 +106,7 @@ export default defineComponent({
       drugs.value[activeIndex.value].frequency[index] = !drugs.value[activeIndex.value].frequency[index]
     }
     const setDuration = (text: string) => {
-      drugs.value[activeIndex.value].duration = text
+      drugs.value[activeIndex.value].duration = parseInt(text)
     }
     const isComplete = () => {
       for (const drug of drugs.value) {
