@@ -1,11 +1,11 @@
 <template>
   <his-standard-form
-    v-if="showForm"
+    v-show="showForm"
     @onFinish="onFinish"
     :skipSummary="true" 
     :fields="fields">
   </his-standard-form>
-  <ion-page v-else>
+  <ion-page v-if="!showForm">
     <ion-header>
       <ion-toolbar>
         <ion-row> 
@@ -192,10 +192,10 @@ export default defineComponent({
       onClick: () => this.showForm = true
     })
     this.btns.push({
-      name: "Rebuild",
+      name: "Refresh",
       size: "large",
       slot: "end",
-      color: "danger",
+      color: "warning",
       visible: true,
       onClick: async () => this.reloadReport()
     })

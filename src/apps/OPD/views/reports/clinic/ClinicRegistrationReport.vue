@@ -1,15 +1,17 @@
 <template>
-  <report-template
-    :title="title"
-    :rows="rows"
-    :fields="fields"
-    :columns="columns"
-    :itemsPerPage="10"
-    :period="period"
-    :onReportConfiguration="init"
-    :customBtns="customBtns"
-    paginated
-  ></report-template>
+  <ion-page>
+    <report-template
+      :title="title"
+      :rows="rows"
+      :fields="fields"
+      :columns="columns"
+      :itemsPerPage="10"
+      :period="period"
+      :onReportConfiguration="init"
+      :customBtns="customBtns"
+      paginated
+    ></report-template>
+  </ion-page>
 </template>
 
 <script lang='ts'>
@@ -21,9 +23,10 @@ import HisDate from '@/utils/Date'
 import ReportMixin from '@/apps/ART/views/reports/ReportMixin.vue'
 import { modalController } from '@ionic/core'
 import SummaryModal from "@/apps/OPD/components/RegistrationSummaryModal.vue";
+import { IonPage } from "@ionic/vue";
 
 export default defineComponent({
-  components: { ReportTemplate },
+  components: { ReportTemplate, IonPage },
   mixins: [ReportMixin],
   data: () => ({
     title: 'Clinic Registration',

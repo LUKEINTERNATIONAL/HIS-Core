@@ -1,14 +1,16 @@
 <template>
-  <report-template
-    :title="title"
-    :rows="rows"
-    :fields="fields"
-    :columns="columns"
-    :itemsPerPage="12"
-    :period="period"
-    :onReportConfiguration="init"
-    paginated
-  ></report-template>
+  <ion-page>
+    <report-template
+      :title="title"
+      :rows="rows"
+      :fields="fields"
+      :columns="columns"
+      :itemsPerPage="12"
+      :period="period"
+      :onReportConfiguration="init"
+      paginated
+    ></report-template>
+  </ion-page>
 </template>
 
 <script lang='ts'>
@@ -18,9 +20,10 @@ import ReportTemplate from "@/views/reports/BaseTableReport.vue"
 import table, { ColumnInterface, RowInterface } from "@/components/DataViews/tables/ReportDataTable"
 import HisDate from '@/utils/Date'
 import ReportMixin from '@/apps/ART/views/reports/ReportMixin.vue'
+import { IonPage } from "@ionic/vue";
 
 export default defineComponent({
-  components: { ReportTemplate },
+  components: { ReportTemplate, IonPage },
   mixins: [ReportMixin],
   data: () => ({
     title: 'OPD medication given (without prescription)',

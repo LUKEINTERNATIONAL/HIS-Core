@@ -1,12 +1,14 @@
 <template>
-  <report-template
-    :title="title"
-    :rows="rows"
-    :fields="fields"
-    :columns="columns"
-    :period="period"
-    :onReportConfiguration="init"
-  ></report-template>
+  <ion-page>
+    <report-template
+      :title="title"
+      :rows="rows"
+      :fields="fields"
+      :columns="columns"
+      :period="period"
+      :onReportConfiguration="init"
+    ></report-template>
+  </ion-page>
 </template>
 
 <script lang='ts'>
@@ -16,8 +18,10 @@ import ReportTemplate from "@/views/reports/BaseTableReport.vue"
 import table, { ColumnInterface, RowInterface } from "@/components/DataViews/tables/ReportDataTable"
 import ReportMixin from '@/apps/ART/views/reports/ReportMixin.vue'
 import { border } from '@/apps/OPD/utils/table'
+import { IonPage } from "@ionic/vue";
+
 export default defineComponent({
-  components: { ReportTemplate },
+  components: { ReportTemplate, IonPage },
   mixins: [ReportMixin],
   data: () => ({
     title: 'Mental health report',
