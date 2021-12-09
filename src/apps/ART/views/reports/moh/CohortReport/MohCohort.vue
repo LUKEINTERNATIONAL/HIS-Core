@@ -52,7 +52,7 @@ export default defineComponent({
     reportID: -1 as any,
     clinicName: MohCohortReportService.getUserLocation(),
     reportReady: false as boolean,
-    reportParams: {} as any
+    reportUrlParams: '' as string
   }),
   created() {
     this.btns = this.getBtns()
@@ -78,11 +78,11 @@ export default defineComponent({
         this.report.setQuarter(form.quarter.label)
         data = this.report.qaurterRequestParams()
         this.period = form.quarter.label
-        this.reportParams = { 
+        this.reportUrlParams = Url.parameterizeObjToString({ 
           'start_date': form.quarter.other.start,
           'end_date': form.quarter.other.end,
           'quarter': form.quarter.label
-        }
+        })
       }
       const request = await this.report.requestCohort(data)
       if (request.ok) {
@@ -164,7 +164,7 @@ export default defineComponent({
           slot: "end",
           color: "primary",
           visible: true,
-          onClick: () => document.location = `/art/report/moh/moh_disaggregated?${Url.parameterizeObjToString(this.reportParams)}` as any
+          onClick: () => document.location = `/art/report/moh/moh_disaggregated?${this.reportUrlParams}` as any
         },
         {
           name: "Finish",
