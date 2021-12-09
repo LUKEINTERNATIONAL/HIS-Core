@@ -10,7 +10,6 @@ import Validation from '@/components/Forms/validations/StandardValidations';
 import { Field, Option } from '@/components/Forms/FieldInterface';
 import { FieldType } from '@/components/Forms/BaseFormElements';
 import { isEmpty } from 'lodash';
-import { ConceptName } from '@/interfaces/conceptName';
 import { DrugPrescriptionService, DRUG_DOSE_FREQUENCIES } from '../../services/drug_prescription_service';
 import { modalController } from '@ionic/core';
 import PrescriptionModalVue from '@/apps/OPD/components/PrescriptionModal.vue';
@@ -46,13 +45,6 @@ export default defineComponent({
       toastSuccess('Drug order has been created')
       this.nextTask()       
     },
-    async getDrugs(filter: string) {
-      const data = await DrugPrescriptionService.getJson('drugs?page_size=200', {
-        name: filter
-      })
-
-      return this.mapListToOptions(data)
-    },
     async getPrescriptionDetails(prescribedDrugs: Option[]) {
       const modal = await modalController.create({
         component: PrescriptionModalVue,
@@ -65,12 +57,6 @@ export default defineComponent({
       modal.present();
       const { data } = await modal.onDidDismiss();
       return data
-    },
-    mapListToOptions(list: ConceptName[]){
-      if(isEmpty(list)) return []
-      return list.map(item => ({
-        label: item.name, value: item.name, other: item
-      }))
     },
     getFrequencyCount(frequency: Record<string, boolean>) {
       return Object.values(frequency).filter(value => value).length
@@ -104,7 +90,7 @@ export default defineComponent({
           helpText: 'Select drugs',
           type: FieldType.TT_MULTIPLE_SELECT,
           validation: (data: any) => Validation.required(data),
-          options: (_: any, filter='') => this.getDrugs(filter),
+          options: (_: any, filter='') => this.prescriptionService.getDrugs(filter),
           beforeNext: async (data: Option[]) => {
             const prescriptions = await this.getPrescriptionDetails(data)
             if(isEmpty(prescriptions)) return false
