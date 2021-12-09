@@ -12,14 +12,15 @@
   </his-standard-form>
   <ion-page v-if="reportReady">
     <ion-content>
-      <div class="report-content" ref="cohort">
-        <cohort-v :key="componentKey" :dataparams="vCohort" ref="validation"> </cohort-v>
+      <cohort-v :key="componentKey" :dataparams="vCohort" ref="validation"> </cohort-v>
+      <div id="report-content">
         <cohort-h :key="componentKey" :reportparams="period" ref="header" :clinicName="clinicName"></cohort-h>
         <cohort-ft :key="componentKey" :onDrillDown="onDrillDown" :params="cohort" :reportid="reportID" :quarter="period" ref="rep"> </cohort-ft>
       </div>
     </ion-content>
     <his-footer :btns="btns"></his-footer>
   </ion-page>
+  <div id='print'> </div>
 </template>
 
 <script lang="ts">
@@ -33,9 +34,9 @@ import { MohCohortReportService } from "@/apps/ART/services/reports/moh_cohort_s
 import CohortH from "@/apps/ART/views/reports/moh/CohortReport/CohortHeader.vue"
 import CohortV from "@/apps/ART/views/reports/moh/CohortReport/CohortValidation.vue"
 import CohortFt from "@/apps/ART/views/reports/moh/CohortReport/CohortFT.vue"
-import { toastWarning } from '@/utils/Alerts'
 import HisDate from "@/utils/Date"
 import { modalController } from "@ionic/vue";
+import { delayPromise } from "@/utils/Timers";
 
 export default defineComponent({
   mixins: [ReportMixinVue],
@@ -95,6 +96,24 @@ export default defineComponent({
         }, 3000)
       }
     },
+    async printSpec() {
+      const printW = open('', '', 'width:1024px, height:768px')
+      const content = document.getElementById('report-content')
+      if (content && printW) {
+        printW.document.write(`
+          <html>
+            <head>
+              <title>Print Cohort</title>
+              <link rel="stylesheet" href="/assets/css/cohort.css" />
+            </head>
+            <body>
+              ${content.innerHTML}
+            </body>
+          </html>
+        `)
+        setTimeout(() => { printW.print();printW.close();}, 100)
+      }
+    },
     async regenerate() {
       await this.onPeriod(this.formData, this.computedFormData, true)
     },
@@ -141,7 +160,7 @@ export default defineComponent({
           slot: "start",
           color: "primary",
           visible: true,
-          onClick: async () => print(),
+          onClick: () => this.printSpec()
         },
         {
           name: "Regenerate",
@@ -172,17 +191,3 @@ export default defineComponent({
   }
 })
 </script>
-<style scoped>
-.report-content {
-  padding: 2em;
-  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-  font-size: 14px;
-  line-height: 1.42857143;
-  color: #333;
-}
-@media print {
-  ion-footer {
-    display: none;
-  }
-}
-</style>
