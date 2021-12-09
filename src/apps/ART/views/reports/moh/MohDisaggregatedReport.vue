@@ -10,7 +10,8 @@
             reportPrefix="MoH"
             :enabledPDFHorizontalPageBreak="true"
             :onReportConfiguration="onPeriod"
-            > 
+            :onDefaultConfiguration="onLoadDefault"
+            >
         </report-template>
     </ion-page>
 </template>
@@ -86,9 +87,24 @@ export default defineComponent({
         totalTbM:  [] as Array<any>,
         pregnantF: [] as Array<any>,
         headerList: [] as Array<Option>,
-        canValidate: false as boolean
+        canValidate: false as boolean,
+        onLoadDefault: null as any,
     }),
-    created() {
+    async created() {
+        const { query }  = this.$route
+        /** Check for default url params for this report */
+        if (query.start_date && query.end_date && query.quarter) {
+            this.onLoadDefault = () => 
+                this.onPeriod({
+                    quarter: {
+                        label: query.quarter,
+                        other: {
+                            start: query.start_date,
+                            end: query.end_date
+                        }
+                    }
+                },{})
+        }
         this.fields = this.getDateDurationFields(true, false)
     },
     watch: {

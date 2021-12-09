@@ -33,8 +33,8 @@ import { MohCohortReportService } from "@/apps/ART/services/reports/moh_cohort_s
 import CohortH from "@/apps/ART/views/reports/moh/CohortReport/CohortHeader.vue"
 import CohortV from "@/apps/ART/views/reports/moh/CohortReport/CohortValidation.vue"
 import CohortFt from "@/apps/ART/views/reports/moh/CohortReport/CohortFT.vue"
-import { toastWarning } from '@/utils/Alerts'
 import HisDate from "@/utils/Date"
+import Url from "@/utils/Url"
 import { modalController } from "@ionic/vue";
 
 export default defineComponent({
@@ -52,6 +52,7 @@ export default defineComponent({
     reportID: -1 as any,
     clinicName: MohCohortReportService.getUserLocation(),
     reportReady: false as boolean,
+    reportParams: {} as any
   }),
   created() {
     this.btns = this.getBtns()
@@ -77,6 +78,11 @@ export default defineComponent({
         this.report.setQuarter(form.quarter.label)
         data = this.report.qaurterRequestParams()
         this.period = form.quarter.label
+        this.reportParams = { 
+          'start_date': form.quarter.other.start,
+          'end_date': form.quarter.other.end,
+          'quarter': form.quarter.label
+        }
       }
       const request = await this.report.requestCohort(data)
       if (request.ok) {
@@ -158,7 +164,7 @@ export default defineComponent({
           slot: "end",
           color: "primary",
           visible: true,
-          onClick: () => document.location = '/art/report/moh/moh_disaggregated' as any
+          onClick: () => document.location = `/art/report/moh/moh_disaggregated?${Url.parameterizeObjToString(this.reportParams)}` as any
         },
         {
           name: "Finish",
