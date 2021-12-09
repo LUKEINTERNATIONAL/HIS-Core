@@ -283,7 +283,7 @@ export default defineComponent({
       size: "large",
       slot: "end",
       color: "warning",
-      visible: true,
+      visible: !isEmpty(this.fields),
       onClick: () => this.canShowReport = false
     })
     this.btns.push({
