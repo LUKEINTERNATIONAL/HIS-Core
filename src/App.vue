@@ -35,6 +35,7 @@ import { useRoute } from 'vue-router';
 import 'nprogress/nprogress.css'
 import nprogress from 'nprogress'
 import router from '@/router/index';
+import { loadingController } from "@ionic/vue"
 
 export default defineComponent({
   name: 'App',
@@ -47,7 +48,8 @@ export default defineComponent({
     const apiOk = ref(true)
     const route = useRoute()
     const notConfigPage = ref(true)
-    
+    const healthCheckInterval = ref(null) as any
+
     nprogress.configure({ 
       easing: 'ease', 
       speed: 870, 
@@ -58,13 +60,6 @@ export default defineComponent({
       location.reload()
     }
 
-    // Check if the API is back ONLINE if its down
-    setInterval(() => {
-      if (!apiOk.value && route.name != 'API host settings') {
-        ApiClient.healthCheck()
-      }
-    }, 8000)
-
     watch(route, (route) => 
       notConfigPage.value = route.name != 'API host settings',
       {
@@ -72,16 +67,21 @@ export default defineComponent({
       }
     )
 
+    watch(healthCheckInterval, (interval: any) => {
+      apiOk.value = !interval
+    })
+  
     EventBus.on(
       ApiBusEvents.BEFORE_API_REQUEST, 
       () => nprogress.start()
     )
 
     EventBus.on(
-      ApiBusEvents.AFTER_API_REQUEST, 
+      ApiBusEvents.AFTER_API_REQUEST,
       async (res: any) => {
-        if (!apiOk.value) {
-          apiOk.value = true
+        if (healthCheckInterval.value) {
+          clearInterval(healthCheckInterval.value)
+          healthCheckInterval.value = null
           const confirm = await alertConfirmation(
             'Do you want to refresh the page?',
             'API connection is back'
@@ -90,9 +90,6 @@ export default defineComponent({
         }
         if (res && res.status === 401 && route.name != 'Login') {
           router.push('/login')
-        } else if (res.status >= 500) {
-          const { error, exception } = await res.json();
-          toastDanger(`${error} - ${exception}`);
         }
         nprogress.done()
       }
@@ -101,9 +98,14 @@ export default defineComponent({
     EventBus.on(
       ApiBusEvents.ON_API_CRASH, 
       () => {
-        if (apiOk.value) {
+        if (!healthCheckInterval.value) {
+          loadingController.dismiss() // Cancel any loading controller behaviour
+          healthCheckInterval.value = setInterval(() => {
+            if (route.name != 'API host settings') {
+              ApiClient.healthCheck()
+            }
+          }, 1000)
           toastWarning('Unable to reach api. You can fix the error below')
-          apiOk.value = false
         }
         nprogress.done()
       }
