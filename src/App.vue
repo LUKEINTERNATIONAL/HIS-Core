@@ -104,7 +104,7 @@ export default defineComponent({
             if (route.name != 'API host settings') {
               ApiClient.healthCheck()
             }
-          }, 8000)
+          }, 1000)
           toastWarning('Unable to reach api. You can fix the error below')
         }
         nprogress.done()
