@@ -104,7 +104,7 @@ export default defineComponent({
           <html>
             <head>
               <title>Print Cohort</title>
-              <link rel="stylesheet" href="/assets/css/cohort.css" />
+              <link rel="stylesheet" media="print" href="/assets/css/cohort.css" />
             </head>
             <body>
               ${content.innerHTML}
