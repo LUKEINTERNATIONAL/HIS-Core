@@ -108,7 +108,7 @@ export default defineComponent({
       const printW = open('', '', 'width:1024px, height:768px')
       const content = document.getElementById('report-content')
       if (content && printW) {
-        printW.onload = () => printW.document.write(`
+        printW.document.write(`
             <html>
               <head>
                 <title>Print Cohort</title>
@@ -119,7 +119,7 @@ export default defineComponent({
               </body>
             </html>
           `)
-          setTimeout(() => { printW.print();printW.close() }, 1100)
+          setTimeout(() => { printW.print(); printW.close() }, 3500)
       }
     },
     async regenerate() {
