@@ -100,18 +100,18 @@ export default defineComponent({
       const printW = open('', '', 'width:1024px, height:768px')
       const content = document.getElementById('report-content')
       if (content && printW) {
-        printW.document.write(`
-          <html>
-            <head>
-              <title>Print Cohort</title>
-              <link rel="stylesheet" media="print" href="/assets/css/cohort.css" />
-            </head>
-            <body>
-              ${content.innerHTML}
-            </body>
-          </html>
-        `)
-        setTimeout(() => { printW.print();printW.close();}, 100)
+        printW.onload = () => printW.document.write(`
+            <html>
+              <head>
+                <title>Print Cohort</title>
+                <link rel="stylesheet" media="print" href="/assets/css/cohort.css" />
+              </head>
+              <body>
+                ${content.innerHTML}
+              </body>
+            </html>
+          `)
+          setTimeout(() => { printW.print();printW.close() }, 1100)
       }
     },
     async regenerate() {
