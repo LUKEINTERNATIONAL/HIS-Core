@@ -109,13 +109,14 @@ export default defineComponent({
       drugs.value[activeIndex.value].other.duration = text
     }
     const isComplete = () => {
-      for (const drug of drugs.value) {
+      for (const [index, drug] of drugs.value.entries()) {
         const freq = getFrequencyCount(drug.other.frequency)
         const duration: number = drug.other.duration
         if(!freq && !duration){
           toastDanger(`complete prescription details for ${drug.value}`)
           return false
         }
+        drugs.value[index].isChecked = true
       }
       return true
     }
