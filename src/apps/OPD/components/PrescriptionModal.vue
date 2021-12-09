@@ -15,7 +15,7 @@
               @click="() => activeIndex = index"
               :color="activeIndex === index ? 'light' : ''"
             > 
-              <ion-label> {{ drug.label }} </ion-label>
+              <ion-label> {{ drug.name }} </ion-label>
             </ion-item>
           </ion-list>
         </ion-col>
@@ -77,10 +77,10 @@ export default defineComponent({
   },
   setup (props) {
     const activeIndex = ref(-1)  
-    const drugs = computed(() => props.prescribedDrugs.map(drug => {
-      drug.isChecked = false
-      drug.other.duration = 0
-      drug.other.frequency = {
+    const drugs = computed(() => props.prescribedDrugs.map(d => {
+      const drug = d.other
+      drug.duration = 0
+      drug.frequency = {
         morning: false,
         noon: false,
         evening: false,
@@ -93,35 +93,37 @@ export default defineComponent({
     }
     const instructions = computed(() => {
       if(activeIndex.value < 0) return ''
-      const drugname = drugs.value[activeIndex.value].label
-      const freq = getFrequencyCount(drugs.value[activeIndex.value].other.frequency)
-      const duration = drugs.value[activeIndex.value].other.duration
+      const drugname = drugs.value[activeIndex.value].name
+      const freq = getFrequencyCount(drugs.value[activeIndex.value].frequency)
+      const duration = drugs.value[activeIndex.value].duration
       return `${drugname}, ${freq} time(s) a day, for ${duration} day(s)` 
     })
     const frequencies = computed(() => {
       if(activeIndex.value < 0) return {}
-      return drugs.value[activeIndex.value].other.frequency
+      return drugs.value[activeIndex.value].frequency
     })
     const setFrequency = (index: string) => {
-      drugs.value[activeIndex.value].other.frequency[index] = !drugs.value[activeIndex.value].other.frequency[index]
+      drugs.value[activeIndex.value].frequency[index] = !drugs.value[activeIndex.value].frequency[index]
     }
     const setDuration = (text: string) => {
-      drugs.value[activeIndex.value].other.duration = text
+      drugs.value[activeIndex.value].duration = text
     }
     const isComplete = () => {
-      for (const [index, drug] of drugs.value.entries()) {
-        const freq = getFrequencyCount(drug.other.frequency)
-        const duration: number = drug.other.duration
+      for (const drug of drugs.value) {
+        const freq = getFrequencyCount(drug.frequency)
+        const duration: number = drug.duration
         if(!freq && !duration){
-          toastDanger(`complete prescription details for ${drug.value}`)
+          toastDanger(`complete prescription details for ${drug.name}`)
           return false
         }
-        drugs.value[index].isChecked = true
       }
       return true
     }
     const savePrescriptions = () => {
-      if(isComplete()) modalController.dismiss(drugs.value)
+      if(isComplete()) {
+
+        modalController.dismiss(drugs.value)
+      }
     }
     const closeModal = () => modalController.dismiss()
     return {
