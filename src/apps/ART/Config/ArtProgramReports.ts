@@ -7,12 +7,16 @@ export const REPORTS: FolderInterface[] = [
         defaultFilesIcon: 'reports.png',
         files: [
             {
-                name: 'Cohort',
+                name: 'Cohort / disaggregated',
                 pathName: 'moh_cohort'
             },
             {
-                name: 'Cohort / disaggregated',
+                name: 'Disaggregated',
                 pathName: 'moh_disaggregated'
+            },
+            {
+                name: 'Regimen Distribution (Weight)',
+                pathName: 'moh_regimen_weight_distribution'
             },
             {
                 name: 'Survival analysis',
@@ -33,6 +37,10 @@ export const REPORTS: FolderInterface[] = [
         icon: 'reports.png',
         defaultFilesIcon: 'reports.png',
         files: [
+            {
+                name: 'Active clients with adverse outcomes',
+                pathName: 'clinic_archiving_candidates'
+            },
             {
                 name: 'Defaulter list',
                 pathName: 'clinic_defaulters_report'
@@ -127,6 +135,10 @@ export const REPORTS: FolderInterface[] = [
             {
                 name: 'TX RTT',
                 pathName: 'pepfar_tx_rtt'
+            },
+            {
+                name: 'Viral Load Coverage',
+                pathName: 'pepfar_vl_coverage'
             }
         ]
     }

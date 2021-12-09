@@ -1,15 +1,16 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :reportReady="reportReady"
-        :isLoading="isLoading"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page>
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            reportPrefix="MoH"
+            :onReportConfiguration="onPeriod"
+            > 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -22,16 +23,15 @@ import Validation from "@/components/Forms/validations/StandardValidations"
 import { Option } from '@/components/Forms/FieldInterface'
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { IonPage } from "@ionic/vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
-        title: 'ART survival analysis report',
+        title: 'Survival analysis report',
         totalClients: [],
         rows: [] as Array<any>,
-        reportReady: false as boolean,
-        isLoading: false as boolean,
         columns:[ 
             [
                 table.thTxt('Reg cohort'),
@@ -79,15 +79,12 @@ export default defineComponent({
     },
     methods: {
         async onPeriod({ quarter, group }: any) {
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
             this.period = quarter.label
             this.report = new SurvivalAnalysisReportService()
             this.report.setQuarter(quarter.label)
             this.report.setAgeGroup(group.value)
             this.setRows((await this.report.getSurvivalAnalysis()))
-            this.isLoading = false
         },
         setRows(quarterList: any) {
             for(const quarterIndex in quarterList) {

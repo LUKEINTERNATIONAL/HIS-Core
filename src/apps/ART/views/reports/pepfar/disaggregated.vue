@@ -1,15 +1,16 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :isLoading="isLoading"
-        :reportReady="reportReady"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page>
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            :headerInfoList="headerList"
+            reportPrefix="PEPFAR"
+            :onReportConfiguration="onPeriod">
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -20,15 +21,17 @@ import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { Option } from '@/components/Forms/FieldInterface'
+import { IonPage } from "@ionic/vue"
+import { MohCohortReportService } from "@/apps/ART/services/reports/moh_cohort_service"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
         title: 'PEPFAR Diseggregated Report',
         rows: [] as Array<any>,
-        reportReady: false as boolean,
-        isLoading: false as boolean,
+        headerList: [] as Option[],
         columns: [
             [
                 table.thTxt('Age group'),
@@ -39,6 +42,7 @@ export default defineComponent({
                 table.thNum('TX curr (screened for TB)')
             ]
         ],
+        mohCohort: {} as any,
         ageGroupCohort: {} as any,
         totalNewF: [] as Array<any>,
         totalCurF: [] as Array<any>,
@@ -48,24 +52,52 @@ export default defineComponent({
         totalCurM: [] as Array<any>,
         totalIptM: [] as Array<any>,
         totalTbM:  [] as Array<any>,
-        pregnantF: [] as Array<any>
+        pregnantF: [] as Array<any>,
+        canValidate: false as boolean
     }),
     created() {
         this.fields = this.getDateDurationFields()
     },
+    watch: {
+        async canValidate(doIt: boolean) {
+            if (doIt) await this.validateReport()
+        }
+    },
     methods: {
         async onPeriod(_: any, config: any) {
+            this.canValidate = false
             this.rows = []
             this.report = new DisaggregatedReportService()
+            this.mohCohort = new MohCohortReportService()
             this.report.setQuarter('pepfar')
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
+            this.mohCohort.setStartDate(config.start_date)
+            this.mohCohort.setEndDate(config.end_date)
             this.period = this.report.getDateIntervalPeriod()
             const isInit = await this.report.init()
             if (!isInit) {
                 return toastWarning('Unable to initialise report')
             }
             await this.setTableRows()
+            this.setHeaderInfoList()
+            this.canValidate = true
+        },
+        setHeaderInfoList(validationStatus='<span style="color: orange;font-weight:bold">Validating report....please wait...</span>') {
+            const totalAlive = this.totalCurF.concat(this.totalCurM)
+            this.headerList = [
+                { 
+                    label: 'Total Alive and on ART', 
+                    value: totalAlive.length,
+                    other: {
+                        onclick: () => this.runTableDrill(totalAlive)
+                    }
+                },
+                {
+                    label: 'Validation status',
+                    value: validationStatus
+                }
+            ]
         },
         async setTableRows() {
             await this.setFemaleRows()
@@ -178,6 +210,41 @@ export default defineComponent({
                 }
                 this.rows.push(onFormat(group, txNew, txCurr, txGivenIpt, txScreenTB))
             }
+        },
+        validateReport() {
+            const validations: any = {
+                'initiated_on_art_first_time': {
+                    param: this.totalNewF.concat(this.totalNewM).length,
+                    check: (i: number, p: number) => i != p,
+                    error: (i: number, p: number) => `
+                        MOH cohort initiated on ART first time (${i}) is not matching Tx New (${p})
+                    `
+                },
+                'initial_pregnant_females_all_ages': {
+                    param: this.pregnantF.length,
+                    check: (i: number, p: number) => i != p,
+                    error: (i: number, p: number) => `
+                        MOH cohort initial pregnant females all ages 
+                        (${i}) is not matching with TX new Pregnant women ${p}
+                    `
+                },
+                'males_initiated_on_art_first_time': {
+                    param: this.totalNewM.length,
+                    check: (i: number, p: number) => i != p,
+                    error: (i: number, p: number) => `
+                        MoH Cohort males initiated on ART first time (${i})
+                        is not matching with TX new All male (${p})
+                    `
+                }
+            }
+            const s = this.mohCohort.validateIndicators(validations, (errors: string[]) => {
+                if (!isEmpty(errors)) {
+                    this.setHeaderInfoList(`<span style='color:red'>${errors.join(',')}</span>`)
+                } else {
+                    this.setHeaderInfoList(`<span style='color:green'>Report is consistent</span>`)
+                }
+            })
+            if (s === -1) toastWarning('Running cohort report to check consistency. This may take a while')
         }
     }
 })

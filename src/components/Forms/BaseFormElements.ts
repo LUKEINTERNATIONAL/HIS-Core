@@ -31,6 +31,7 @@ import BatchEntry from "@/components/FormElements/HisBatchEntry.vue"
 import BatchVerification from "@/components/FormElements/HisBatchVerification.vue"
 import BatchMovement from "@/components/FormElements/HisBatchMovement.vue"
 import IPAddressInput from "@/components/FormElements/HisIPAddress.vue"
+import TextBanner from "@/components/FormElements/HisTextBanner.vue"
 
 // Reference names for BaseFormComponents
 export enum FieldType {
@@ -67,7 +68,8 @@ export enum FieldType {
     TT_BATCH_VERIFICATION = 'batch-verification',
     TT_BATCH_MOVEMENT = 'batch-movement',
     TT_COMPLAINTS_PICKER = 'complaints-picker',
-    TT_IP_ADDRESS = 'IPAddressInput'
+    TT_IP_ADDRESS = 'IPAddressInput',
+    TT_TEXT_BANNER = 'text-banner'
 }
 
 // Components to be rendered
@@ -104,5 +106,6 @@ export const BaseFormComponents = {
     BatchVerification,
     BatchMovement,
     ComplaintsPicker,
-    IPAddressInput
+    IPAddressInput,
+    TextBanner
 }

@@ -19,6 +19,8 @@ import { ProgramService } from "@/services/program_service";
 import { toastWarning, toastSuccess } from "@/utils/Alerts"
 import EncounterMixinVue from './EncounterMixin.vue'
 import HisApp from "@/apps/app_lib"
+import { Patientservice } from "@/services/patient_service"
+import { isEmpty } from "lodash";
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -27,11 +29,14 @@ export default defineComponent({
     reception: {} as any,
     activeField: "",
     hasARVNumber: true,
+    hasGuardian: false,
     suggestedNumber: "" as any,
   }),
   watch: {
     patient: {
       async handler(patient: any) {
+        const guardian = await patient.getGuardian()
+        this.hasGuardian = !isEmpty(guardian)
         this.reception = new ReceptionService(patient.getID(), this.providerID)
 
         await this.reception.loadSitePrefix()
@@ -69,7 +74,15 @@ export default defineComponent({
 
       toastSuccess('Encounter created')
 
-      this.nextTask()
+      const guardianPresent = formData.who_is_present.filter(
+        (p: any) => p.value === 'Yes' && p.label === 'Guardian Present?'
+      )
+
+      if (!this.hasGuardian && !isEmpty(guardianPresent)) {
+        this.$router.push(`/guardian/registration/${this.patient.getID()}`)
+      } else {
+        this.nextTask()
+      }
     },
     getFields(): Array<Field> {
       return [

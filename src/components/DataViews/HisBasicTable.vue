@@ -27,7 +27,7 @@
           }}</ion-button>
         </div>
         <div v-else>
-          {{ item }}
+          <span v-html="item"></span>
         </div>
       </td>
     </tr>
