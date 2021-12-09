@@ -162,12 +162,7 @@ export default defineComponent({
             if (exit) return
         }
         if (person.relationship === 'Yes') {
-            return this.$router.push({
-                path: '/guardian/registration',
-                query: {
-                    patient: patientID
-                }
-            })
+            return this.$router.push(`/guardian/registration/${patientID}`)
         }
         await nextTask(patientID, this.$router)
     },

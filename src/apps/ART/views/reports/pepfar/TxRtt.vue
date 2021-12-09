@@ -1,15 +1,16 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :reportReady="reportReady"
-        :isLoading="isLoading"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page>
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            reportPrefix="PEPFAR"
+            :onReportConfiguration="onPeriod"
+            > 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -23,11 +24,9 @@ export default defineComponent({
     mixins: [ReportMixin],
     components: { ReportTemplate },
     data: () => ({
-        title: 'PEPFAR TX RTT Report',
+        title: 'TX RTT Report',
         cohort: {} as any,
         rows: [] as Array<any>,
-        reportReady: false as boolean,
-        isLoading: false as boolean,
         columns: [
             [       
                 table.thTxt('Age group'),
@@ -41,8 +40,6 @@ export default defineComponent({
     },
     methods: {
         async onPeriod(_: any, config: any) {
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
             this.report = new TxReportService()
             this.report.setStartDate(config.start_date)
@@ -51,7 +48,6 @@ export default defineComponent({
             this.cohort = await this.report.getTxRttReport()
             await this.setRows('F')
             await this.setRows('M')
-            this.isLoading = false
         },
         async setRows(gender: string) {
             for(const i in AGE_GROUPS) {

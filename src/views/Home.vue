@@ -54,7 +54,7 @@
     </ion-header>
 
     <ion-toolbar> 
-      <ion-segment mode="ios" scrollable :value="activeTab" class="ion-justify-content-center">
+      <ion-segment scrollable :value="activeTab" class="ion-justify-content-center">
         <ion-segment-button :value="1" @click="activeTab = 1">
           <ion-icon :icon="statsChart"> </ion-icon>
           <ion-label>Overview</ion-label>

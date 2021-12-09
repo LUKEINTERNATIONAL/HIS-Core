@@ -1,15 +1,17 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :reportReady="reportReady"
-        :isLoading="isLoading"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page> 
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            :canExportPDf="false"
+            :showtitleOnly="true"
+            :onReportConfiguration="onPeriod"
+            > 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -21,10 +23,11 @@ import { FieldType } from '@/components/Forms/BaseFormElements'
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { Option } from '@/components/Forms/FieldInterface'
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { IonPage } from "@ionic/vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
         title: '',
         totalClients: [],
@@ -71,16 +74,13 @@ export default defineComponent({
     methods: {
         async onPeriod(form: any, config: any) {
             const resultType = form.result_type
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
-            this.title = `${resultType.label} Report`
             this.period = this.report.getDateIntervalPeriod()
+            this.title = `${resultType.label} Report <small><b>(between the period of (${this.period})</b></small>`
             this.setRows((await this.report.getViralLoadResults(resultType.value.toLowerCase())))
-            this.isLoading = false
         },
         async setRows(data: Array<any>) {
             data.forEach((d: any) => {

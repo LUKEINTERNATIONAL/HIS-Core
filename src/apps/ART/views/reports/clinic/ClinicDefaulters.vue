@@ -1,17 +1,18 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :canExportCsv="false"
-        :canExportPDf="false"
-        :isLoading="isLoading"
-        :reportReady="reportReady"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page>
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            :canExportCsv="false"
+            :canExportPDf="false"
+            :showtitleOnly="true"
+            :onReportConfiguration="onPeriod"
+            > 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -20,15 +21,14 @@ import { DefaulterReportService } from "@/apps/ART/services/reports/defaulters_r
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { IonPage } from "@ionic/vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
         title: 'Clinic Defaulters report',
         rows: [] as Array<any>,
-        reportReady: false as boolean,
-        isLoading: false as boolean,
         columns: [
             [
                 table.thTxt('ARV#'),
@@ -46,8 +46,6 @@ export default defineComponent({
     },
     methods: {
         async onPeriod(_: any, config: any) {
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
             this.report = new DefaulterReportService()
             this.report.setIsPepfar(false)
@@ -56,7 +54,7 @@ export default defineComponent({
             this.period = this.report.getDateIntervalPeriod()
             const data = await this.report.getDefaulters()
             this.setRows(data)
-            this.isLoading = false
+            this.title = `Clinic Defaulters report <b>(${data.length} Defaulters)</b>`
         },
         async setRows(data: Array<any>) {
             data.forEach((data: any) => {
@@ -67,7 +65,12 @@ export default defineComponent({
                     table.td(data.gender),
                     table.tdDate(data.birthdate),
                     table.tdDate(data.defaulter_date),
-                    table.td(`${data.village} ${data.district} ${data.ta}`)
+                    table.td(
+                        (data.cell_number ? `CELL: ${data.cell_number} <br/>`: '') +
+                        (data.village ? `VILLAGE: ${data.village} <br/>` : '') +
+                        (data.district ? `DISTRICT: ${data.district} <br/>`: '') +
+                        (data.ta ? `TA: ${data.ta}`: '')
+                    )
                 ])
             })
         }

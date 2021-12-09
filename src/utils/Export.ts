@@ -19,13 +19,23 @@ export function toCsv(header: Array<any>, rows: Array<any>, fileName='document')
     link.remove()
 }
 
-export function toTablePDF(tableColumns: Array<any>, tableRows: Array<any>, fileName='document') {
+export function toTablePDF(
+  tableColumns: Array<any>, 
+  tableRows: Array<any>, 
+  fileName='document',
+  canHorizontalPageBreak=false) {
     const doc = new jsPDF()
     // Important note: only rendering the last array of headers. was experiencing bugs 
     // rendering multiple headers... maybe this can be improved later
-    autoTable(doc, {
+    const config: any = {
       head: [tableColumns[tableColumns.length-1]],
       body: tableRows
-    })
+    }
+    if (canHorizontalPageBreak) {
+      config.tableWidth = 'wrap'
+      config.horizontalPageBreak = true
+      config.horizontalPageBreakRepeat = 0
+    }
+    autoTable(doc, config)
     doc.save(`${fileName}.pdf`)
 }
