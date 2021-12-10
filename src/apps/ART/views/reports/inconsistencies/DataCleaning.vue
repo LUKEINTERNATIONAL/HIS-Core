@@ -14,7 +14,7 @@
 
 <script lang='ts'>
 import { defineComponent } from 'vue'
-import { DataCleaningReportService, INDICATORS } from "@/apps/ART/services/reports/data_cleaning_report_service"
+import { DataCleaningReportService, CtIndicator } from "@/apps/ART/services/reports/data_cleaning_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
@@ -47,7 +47,46 @@ export default defineComponent({
             helpText: 'Select indicator',
             type: FieldType.TT_SELECT,
             validation: (val: Option) => Validation.required(val),
-            options: () => INDICATORS.map((i: string) => ({ label: i, value: i}))
+            options: () => {
+                return [
+                    {
+                        label: 'DOB > Date enrolled',
+                        value: CtIndicator.DobMoreThanEnrolledDate
+                    },
+                    {
+                        label: 'Date enrolled < Earliest start date',
+                        value: CtIndicator.DateEnrolledLessThanEarliestStartDate
+                    },
+                    {
+                        label: 'Encounters after Death',
+                        value: CtIndicator.ClientsWithEncountersAfterDeath
+                    },
+                    {
+                        label: 'Enrolled on ART before birth',
+                        value: CtIndicator.DobMoreThanDateEnrolled
+                    }, 
+                    {
+                        label: 'Male patients with female observations',
+                        value: CtIndicator.MalesWithFemaleObs
+                    },
+                    {
+                        label: 'Missing important demographics elements',
+                        value: CtIndicator.MissingDemographics
+                    },
+                    {
+                        label: 'Missing start reason',
+                        value: CtIndicator.MissingStartReasons
+                    },
+                    {
+                        label: 'Multiple start reasons',
+                        value: CtIndicator.MultipleStartReasons
+                    },
+                    {
+                        label: 'Patients with Pre-ART / Unknown outcome',
+                        value: CtIndicator.PreArtOrUnknownOutcomes
+                    }
+                ]
+            }
         })
         this.fields = this.fields.concat(this.getDateDurationFields())
     },
