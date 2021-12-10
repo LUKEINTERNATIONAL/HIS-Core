@@ -3,7 +3,6 @@ import { ArtReportService } from "./art_report_service";
 export enum CtIndicator {
     DobMoreThanEnrolledDate = 'DOB MORE THAN DATE ENROLLED',
     ClientsWithEncountersAfterDeath = 'CLIENTS WITH ENCOUNTERS AFTER DECLARED DEAD',
-    DobMoreThanDateEnrolled = 'DOB MORE THAN DATE ENROLLED',
     DateEnrolledLessThanEarliestStartDate = 'DATE ENROLLED LESS THAN EARLIEST START DATE',
     MalesWithFemaleObs = 'MALE CLIENTS WITH FEMALE OBS',
     PrescriptionWithoutDispensation = 'PRESCRIPTION WITHOUT DISPENSATION',
