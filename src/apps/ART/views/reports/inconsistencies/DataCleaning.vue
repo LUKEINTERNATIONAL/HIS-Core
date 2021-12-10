@@ -1,118 +1,275 @@
 <template>
-    <ion-page>
-        <report-template
-            :title="title"
-            :period="period"
-            :rows="rows" 
-            :fields="fields"
-            :columns="columns"
-            :onReportConfiguration="onPeriod"
-            > 
-        </report-template>
-    </ion-page>
+  <ion-page>
+    <report-template
+      :title="title"
+      :period="period"
+      :rows="rows"
+      :fields="fields"
+      :columns="columns"
+      :onReportConfiguration="onPeriod"
+    >
+    </report-template>
+  </ion-page>
 </template>
 
 <script lang='ts'>
-import { defineComponent } from 'vue'
-import { DataCleaningReportService, CtIndicator } from "@/apps/ART/services/reports/data_cleaning_report_service"
-import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
-import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
-import table from "@/components/DataViews/tables/ReportDataTable"
-import Validation from "@/components/Forms/validations/StandardValidations"
-import { Option } from "@/components/Forms/FieldInterface"
-import { FieldType } from "@/components/Forms/BaseFormElements"
-import { IonPage } from "@ionic/vue"
+import { defineComponent } from "vue";
+import {
+  DataCleaningReportService,
+  CtIndicator,
+} from "@/apps/ART/services/reports/data_cleaning_report_service";
+import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue";
+import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue";
+import table from "@/components/DataViews/tables/ReportDataTable";
+import Validation from "@/components/Forms/validations/StandardValidations";
+import { Option } from "@/components/Forms/FieldInterface";
+import { FieldType } from "@/components/Forms/BaseFormElements";
+import { IonPage } from "@ionic/vue";
+import { NotFoundError, Service } from "@/services/service";
+import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
+import { isEmpty } from "lodash"
 
 export default defineComponent({
-    mixins: [ReportMixin],
-    components: { ReportTemplate, IonPage },
-    data: () => ({
-        title: 'Data cleaning report',
-        rows: [] as Array<any>,
-        cohort: {} as any,
-        columns: [
-            [
-                table.thTxt('ARV Number'),
-                table.thTxt('First Name'),
-                table.thTxt('Last Name'),
-                table.thTxt('Gender'),
-                table.thTxt('Date of birth'),
-                table.thTxt('Action')
-            ]
-        ]
-    }),
-    created() {
-        this.fields.push({
-            id: 'indicator',
-            helpText: 'Select indicator',
+  mixins: [ReportMixin],
+  components: { ReportTemplate, IonPage },
+  data: () => ({
+    title: "Data cleaning report",
+    rows: [] as Array<any>,
+    columns: [] as Array<any>
+  }),
+  created() {
+    this.fields = [
+        {
+            id: "indicator",
+            helpText: "Select indicator",
             type: FieldType.TT_SELECT,
             validation: (val: Option) => Validation.required(val),
-            options: () => {
-                return [
-                    {
-                        label: 'DOB > Date enrolled',
-                        value: CtIndicator.DobMoreThanEnrolledDate
-                    },
-                    {
-                        label: 'Date enrolled < Earliest start date',
-                        value: CtIndicator.DateEnrolledLessThanEarliestStartDate
-                    },
-                    {
-                        label: 'Encounters after Death',
-                        value: CtIndicator.ClientsWithEncountersAfterDeath
-                    },
-                    {
-                        label: 'Enrolled on ART before birth',
-                        value: CtIndicator.DobMoreThanDateEnrolled
-                    }, 
-                    {
-                        label: 'Male patients with female observations',
-                        value: CtIndicator.MalesWithFemaleObs
-                    },
-                    {
-                        label: 'Missing important demographics elements',
-                        value: CtIndicator.MissingDemographics
-                    },
-                    {
-                        label: 'Missing start reason',
-                        value: CtIndicator.MissingStartReasons
-                    },
-                    {
-                        label: 'Multiple start reasons',
-                        value: CtIndicator.MultipleStartReasons
-                    },
-                    {
-                        label: 'Patients with Pre-ART / Unknown outcome',
-                        value: CtIndicator.PreArtOrUnknownOutcomes
-                    }
-                ]
-            }
-        })
-        this.fields = this.fields.concat(this.getDateDurationFields())
-    },
-    methods: {
-        async onPeriod(form: any, config: any) {
-            this.rows = []
-            this.title = form.indicator.value
-            this.report = new DataCleaningReportService()
-            this.report.setStartDate(config.start_date)
-            this.report.setEndDate(config.end_date)
-            this.period = this.report.getDateIntervalPeriod()
-            const data = await this.report.getCleaningToolReport(form.indicator.value)
-            this.setRows(data)
+            options: () => this.getIndicatorOptions()
         },
-        async setRows(data: Array<any>) {
-            data.forEach((data: any) => {
+        ...generateDateFields({
+            id: 'start_date',
+            helpText: 'Start',
+            required: true,
+            condition: (f: any) => !f.indicator.other.skipDateSelection,
+            minDate: () => '2001-01-01',
+            maxDate: () => Service.getSessionDate(),
+            estimation: {
+                allowUnknown: false
+            },
+            computeValue: (date: string) => date 
+        }),
+        ...generateDateFields({
+            id: 'end_date',
+            helpText: 'End',
+            required: true,
+            condition: (f: any) => !f.indicator.other.skipDateSelection,
+            minDate: (_: any, c: any) => c.start_date,
+            maxDate: () => Service.getSessionDate(),
+            estimation: {
+                allowUnknown: false
+            },
+            computeValue: (date: string) => date
+        })
+    ]
+  },
+  methods: {
+    async onPeriod(form: any, config: any) {
+      this.rows = []
+      this.title = form.indicator.value
+      const indicator = form.indicator
+      this.columns = indicator.other.columns
+      await indicator.other.setRows(form, config)
+    },
+    masterCardBtn(patientId: number) {
+        return table.tdBtn("View", () =>
+            this.$router.push(`/patient/dashboard/${patientId}`)
+        )
+    },
+    getDefaultIndicatorColumns(){
+        return [
+            [
+                table.thTxt("ARV Number"),
+                table.thTxt("First Name"),
+                table.thTxt("Last Name"),
+                table.thTxt("Gender"),
+                table.thTxt("Date of birth"),
+                table.thTxt("Action")
+            ]
+        ]
+    },
+    async setDefaultIndicatorRows(indicator: CtIndicator, startDate: string, endDate: string) {
+        this.report = new DataCleaningReportService()
+        this.report.setStartDate(startDate)
+        this.report.setEndDate(endDate)
+        this.period = this.report.getDateIntervalPeriod()
+        const data = await this.report.getCleaningToolReport(indicator)
+        if (!isEmpty(data)) {
+            data.forEach((d: any) => {
                 this.rows.push([
-                    table.td(data.arv_number),
-                    table.td(data.given_name),
-                    table.td(data.family_name),
-                    table.td(data.gender),
-                    table.tdDate(data.birthdate),
-                    table.tdBtn('View', () => this.$router.push(`/patient/dashboard/${data.patient_id}`))
+                    table.td(d.arv_number),
+                    table.td(d.given_name),
+                    table.td(d.family_name),
+                    table.td(d.gender),
+                    table.tdDate(d.birthdate),
+                    this.masterCardBtn(d.patient_id)
                 ])
             })
         }
+    },
+    getIndicatorOptions() {
+        return [
+            {
+                label: "DOB > Date enrolled",
+                value: CtIndicator.DobMoreThanEnrolledDate,
+                other: {
+                    skipDateSelection: false,
+                    columns: this.getDefaultIndicatorColumns(),
+                    setRows: (_: any, cf: any) => 
+                        this.setDefaultIndicatorRows(
+                            CtIndicator.DobMoreThanEnrolledDate, 
+                            cf.start_date, 
+                            cf.end_date
+                        )
+                }
+            },
+            {
+                label: "Date enrolled < Earliest start date",
+                value: CtIndicator.DateEnrolledLessThanEarliestStartDate,
+                other: {
+                    skipDateSelection: false,
+                    columns: this.getDefaultIndicatorColumns(),
+                    setRows: (_: any, cf: any) => 
+                        this.setDefaultIndicatorRows(
+                            CtIndicator.DateEnrolledLessThanEarliestStartDate, 
+                            cf.start_date, 
+                            cf.end_date
+                        )
+                }
+            },
+            {
+                label: "Encounters after Death",
+                value: CtIndicator.ClientsWithEncountersAfterDeath,
+                other: {
+                    skipDateSelection: false,
+                    columns: this.getDefaultIndicatorColumns(),
+                    setRows: (_: any, cf: any) => 
+                        this.setDefaultIndicatorRows(
+                            CtIndicator.ClientsWithEncountersAfterDeath, 
+                            cf.start_date, cf.end_date
+                        )
+                }
+            },
+            {
+                label: "Enrolled on ART before birth",
+                value: "Enrolled on ART before birth",
+                other: {
+                    skipDateSelection: true,
+                    columns: [
+                        [
+                            table.thTxt('ARV number'),
+                            table.thTxt('Name'),
+                            table.thTxt('Earliest start date'),
+                            table.thTxt('Date enrolled'),
+                            table.thTxt('Gender'),
+                            table.thTxt('Birth Date'),
+                            table.thTxt('Action')
+                        ]
+                    ],
+                    setRows: async () => {
+                        try {
+                            this.report = new DataCleaningReportService()
+                            const data = await this.report.getEnrolledOnArtBeforeBirth()
+                            data.forEach((d: any) => {
+                                this.rows.push([
+                                    table.td(d.identifier),
+                                    table.td(d.name),
+                                    table.tdDate(d.earliest_start_date),
+                                    table.tdDate(d.date_enrolled),
+                                    table.td(d.gender),
+                                    table.tdDate(d.birthdate),
+                                    this.masterCardBtn(d.patient_id)
+                                ])
+                            })
+                        } catch (e) {
+                            if (!(e instanceof NotFoundError)) {
+                                throw e
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                label: "Male patients with female observations",
+                value: CtIndicator.MalesWithFemaleObs,
+                other: {
+                    skipDateSelection: false,
+                    columns: this.getDefaultIndicatorColumns(),
+                    setRows: (_: any, cf: any) => 
+                        this.setDefaultIndicatorRows(
+                            CtIndicator.MalesWithFemaleObs, 
+                            cf.start_date,
+                            cf.end_date
+                        )
+                }
+            },
+            {
+                label: "Missing important demographics elements",
+                value: CtIndicator.MissingDemographics,
+                other: {
+                    skipDateSelection: false,
+                    columns: this.getDefaultIndicatorColumns(),
+                    setRows: (_: any, cf: any) => 
+                        this.setDefaultIndicatorRows(
+                            CtIndicator.MissingDemographics, 
+                            cf.start_date, 
+                            cf.end_date
+                        )
+                }
+            },
+            {
+                label: "Missing start reason",
+                value: CtIndicator.MissingStartReasons,
+                other: {
+                    skipDateSelection: false,
+                    columns: this.getDefaultIndicatorColumns(),
+                    setRows: (_: string, cf: any) => 
+                        this.setDefaultIndicatorRows(
+                            CtIndicator.MissingStartReasons, 
+                            cf.start_date, 
+                            cf.end_date
+                        )
+                }
+            },
+            {
+                label: "Multiple start reasons",
+                value: CtIndicator.MultipleStartReasons,
+                other: {
+                    skipDateSelection: false,
+                    columns: this.getDefaultIndicatorColumns(),
+                    setRows: (_: string, cf: any) => 
+                        this.setDefaultIndicatorRows(
+                            CtIndicator.MultipleStartReasons, 
+                            cf.start_date, 
+                            cf.end_date
+                        )
+                }
+            },
+            {
+                label: "Patients with Pre-ART / Unknown outcome",
+                value: CtIndicator.PreArtOrUnknownOutcomes,
+                other: {
+                    skipDateSelection: false,
+                    columns: this.getDefaultIndicatorColumns(),
+                    setRows: (_: string, cf: any) =>
+                        this.setDefaultIndicatorRows(
+                            CtIndicator.PreArtOrUnknownOutcomes, 
+                            cf.start_date, 
+                            cf.end_date
+                        )
+                }
+            }
+        ]
     }
+  }
 })
 </script>
