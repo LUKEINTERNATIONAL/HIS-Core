@@ -83,7 +83,7 @@ export default defineComponent({
     },
     masterCardBtn(patientId: number) {
         return table.tdBtn("View", () =>
-            this.$router.push(`/patient/dashboard/${patientId}`)
+            this.$router.push(`/art/mastercard/${patientId}`)
         )
     },
     getDefaultIndicatorColumns(customHeaders=[] as Array<any>){
