@@ -85,7 +85,7 @@ export default defineComponent({
             this.$router.push(`/patient/dashboard/${patientId}`)
         )
     },
-    getDefaultIndicatorColumns(){
+    getDefaultIndicatorColumns(customHeaders=[] as Array<any>){
         return [
             [
                 table.thTxt("ARV Number"),
@@ -93,11 +93,12 @@ export default defineComponent({
                 table.thTxt("Last Name"),
                 table.thTxt("Gender"),
                 table.thTxt("Date of birth"),
+                ...customHeaders,
                 table.thTxt("Action")
             ]
         ]
     },
-    async setDefaultIndicatorRows(indicator: CtIndicator, startDate: string, endDate: string) {
+    async setDefaultIndicatorRows(indicator: CtIndicator, startDate: string, endDate: string, getData=null as any) {
         this.report = new DataCleaningReportService()
         this.report.setStartDate(startDate)
         this.report.setEndDate(endDate)
@@ -105,12 +106,16 @@ export default defineComponent({
         const data = await this.report.getCleaningToolReport(indicator)
         if (!isEmpty(data)) {
             data.forEach((d: any) => {
+                const additionalData = typeof getData === 'function'
+                    ? getData(d)
+                    : []
                 this.rows.push([
                     table.td(d.arv_number),
                     table.td(d.given_name),
                     table.td(d.family_name),
                     table.td(d.gender),
                     table.tdDate(d.birthdate),
+                    ...additionalData,
                     this.masterCardBtn(d.patient_id)
                 ])
             })
@@ -304,6 +309,22 @@ export default defineComponent({
                             CtIndicator.PreArtOrUnknownOutcomes, 
                             cf.start_date, 
                             cf.end_date
+                        )
+                }
+            },
+            {
+                label: "Prescriptions without dispensations",
+                value: CtIndicator.PrescriptionWithoutDispensation,
+                other: {
+                    skipDateSelection: false,
+                    columns: this.getDefaultIndicatorColumns([table.thTxt('Visit Date')]) ,
+                    setRows: (_: string, cf: any) =>
+                        this.setDefaultIndicatorRows(
+                            CtIndicator.PrescriptionWithoutDispensation, 
+                            cf.start_date, 
+                            cf.end_date,
+                            (patient: any) => [table.tdDate(patient.visit_date)]
+
                         )
                 }
             }

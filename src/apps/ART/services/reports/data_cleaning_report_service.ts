@@ -10,7 +10,7 @@ export enum CtIndicator {
     MissingDemographics = 'MISSING DEMOGRAPHICS',
     MissingStartReasons = 'MISSING START REASONS',
     MultipleStartReasons = 'MULTIPLE START REASONS',
-    PreArtOrUnknownOutcomes ='PRE ART OR UNKNOWN OUTCOMES'
+    PreArtOrUnknownOutcomes ='PRE ART OR UNKNOWN OUTCOMES',
 }
 
 export class DataCleaningReportService extends ArtReportService {
