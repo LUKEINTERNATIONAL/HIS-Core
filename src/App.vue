@@ -1,36 +1,19 @@
 <template>
   <ion-app>
     <ion-router-outlet :key="$route.fullPath"/>
-    <div id="api-error" class="his-card" v-if="!apiOk && notConfigPage">
-      <p>
-        Unable to connect to BHT-API. 
-        Please check: 
-        <ul :style="{listStyle:'none'}"> 
-          <li> Check the HIS-Core configuration file </li>
-          <li> Your configuration </li>
-          <li> The service is running </li>
-          <li> Your network cable is ok </li>
-        </ul> 
-      </p>
-      <ion-button 
-        router-link='/settings/host' 
-        color="warning"> 
-        New Config
-      </ion-button>
-      <ion-button @click="refresh" color="warning"> 
-        Refresh
-      </ion-button>
-    </div>
+    <connection-error v-if="!apiOk && notConfigPage"/>
   </ion-app>
 </template>
 
 <script lang="ts">
-import { IonApp, IonRouterOutlet, IonButton } from '@ionic/vue';
+import { IonApp, IonRouterOutlet } from '@ionic/vue';
 import { defineComponent, ref, watch } from 'vue';
 import ApiClient, { ApiBusEvents } from "@/services/api_client"
 import EventBus from "@/utils/EventBus"
-import { toastWarning, toastDanger, alertConfirmation } from './utils/Alerts';
+import { toastWarning, alertConfirmation } from './utils/Alerts';
 import { useRoute } from 'vue-router';
+import ConnectionError from "@/components/ConnectionError.vue"
+
 /** Nprogress */
 import 'nprogress/nprogress.css'
 import nprogress from 'nprogress'
@@ -41,8 +24,8 @@ export default defineComponent({
   name: 'App',
   components: {
     IonApp,
-    IonButton,
-    IonRouterOutlet
+    IonRouterOutlet,
+    ConnectionError
   },
   setup() {
     const apiOk = ref(true)
@@ -53,12 +36,8 @@ export default defineComponent({
     nprogress.configure({ 
       easing: 'ease', 
       speed: 870, 
-      trickleSpeed:1 
+      trickleSpeed:5
     })
-
-    function refresh() {
-      location.reload()
-    }
 
     watch(route, (route) => 
       notConfigPage.value = route.name != 'API host settings',
@@ -72,8 +51,7 @@ export default defineComponent({
     })
   
     EventBus.on(
-      ApiBusEvents.BEFORE_API_REQUEST, 
-      () => nprogress.start()
+      ApiBusEvents.BEFORE_API_REQUEST, () => nprogress.start()
     )
 
     EventBus.on(
@@ -86,7 +64,7 @@ export default defineComponent({
             'Do you want to refresh the page?',
             'API connection is back'
           )
-          if (confirm) refresh()
+          if (confirm) location.reload()
         }
         if (res && res.status === 401 && route.name != 'Login') {
           router.push('/login')
@@ -104,32 +82,16 @@ export default defineComponent({
             if (route.name != 'API host settings') {
               ApiClient.healthCheck()
             }
-          }, 1000)
+          }, 2500)
           toastWarning('Unable to reach api. You can fix the error below')
         }
-        nprogress.done()
+        nprogress.done() 
       }
     )
     return {
       apiOk,
-      refresh,
       notConfigPage
     }
   },
 });
 </script>
-<style scoped>
-  #api-error {
-    bottom: 0;
-    position: absolute;
-    background: red;
-    color: white;
-    font-weight: bold;
-    width: 50vw;
-    bottom: 30px; /* Position Y halfway in */
-    left: 50%; /* Position X halfway in */
-    transform: translate(-50%,-50%); /* Move it halfway back(x,y) */
-    text-align: center;
-    z-index: 40;
-  }
-</style>
