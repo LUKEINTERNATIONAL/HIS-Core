@@ -75,7 +75,7 @@ export default defineComponent({
   methods: {
     async onPeriod(form: any, config: any) {
       this.rows = []
-      this.title = form.indicator.value
+      this.title = form.indicator.label
       const indicator = form.indicator
       this.columns = indicator.other.columns
       await indicator.other.setRows(form, config)
