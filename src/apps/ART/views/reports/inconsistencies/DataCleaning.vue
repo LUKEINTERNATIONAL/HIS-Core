@@ -90,6 +90,7 @@ export default defineComponent({
         return [
             [
                 table.thTxt("ARV Number"),
+                table.thTxt("Patient Id"),
                 table.thTxt("First Name"),
                 table.thTxt("Last Name"),
                 table.thTxt("Gender"),
@@ -112,6 +113,7 @@ export default defineComponent({
                     : []
                 this.rows.push([
                     table.td(d.arv_number),
+                    table.td(d.patient_id),
                     table.td(d.given_name),
                     table.td(d.family_name),
                     table.td(d.gender),
@@ -255,12 +257,17 @@ export default defineComponent({
                 value: CtIndicator.MalesWithFemaleObs,
                 other: {
                     skipDateSelection: false,
-                    columns: this.getDefaultIndicatorColumns(),
+                    columns: this.getDefaultIndicatorColumns([
+                        table.thTxt('Visit date')
+                    ]),
                     setRows: (_: any, cf: any) => 
                         this.setDefaultIndicatorRows(
                             CtIndicator.MalesWithFemaleObs, 
                             cf.start_date,
-                            cf.end_date
+                            cf.end_date,
+                            (p: any) => [
+                                table.tdDate(p.visit_date)
+                            ]
                         )
                 }
             },
