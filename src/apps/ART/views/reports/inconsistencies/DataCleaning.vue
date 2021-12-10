@@ -160,6 +160,45 @@ export default defineComponent({
                 }
             },
             {
+                label: 'Incomplete visits',
+                value: 'Incomplete visits',
+                other: {
+                    skipDateSelection: false,
+                    columns: [
+                        [
+                            table.thTxt('ARV#'),
+                            table.thTxt('NHID'),
+                            table.thTxt('First name'),
+                            table.thTxt('Last name'),
+                            table.thTxt('Gender'),
+                            table.thTxt('Birthdate'),
+                            table.thTxt('Date(s)'),
+                            table.thTxt('Action')
+                        ]
+                    ],
+                    setRows: async (_: any, cf: any) => {
+                        this.report = new DataCleaningReportService()
+                        this.report.setStartDate(cf.start_date)
+                        this.report.setEndDate(cf.end_date)
+                        this.period = this.report.getDateIntervalPeriod()
+                        const data = await this.report.getIncompleteVisits()
+                        for(const pID in data) {
+                            const d = data[pID] as any
+                            this.rows.push([
+                                table.td(d.arv_number),
+                                table.td(d.national_id),
+                                table.td(d.given_name),
+                                table.td(d.family_name),
+                                table.td(d.gender),
+                                table.tdDate(d.birthdate),
+                                table.td(d.dates.map((dt: any) => this.toDate(dt)).join('<br/>')),
+                                this.masterCardBtn(parseInt(pID.toString()))
+                            ])
+                        }
+                    }
+                }
+            },
+            {
                 label: "Enrolled on ART before birth",
                 value: "Enrolled on ART before birth",
                 other: {

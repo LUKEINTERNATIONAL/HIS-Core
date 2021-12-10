@@ -27,4 +27,10 @@ export class DataCleaningReportService extends ArtReportService {
     getEnrolledOnArtBeforeBirth() {
         return ArtReportService.getJson('enrolled_on_art_before_birth')
     }
+
+    getIncompleteVisits() {
+        return this.getReport('incomplete_visits', {
+            'tool_name': 'INCOMPLETE VISITS'
+        })
+    }
 }
