@@ -43,6 +43,7 @@ export default defineComponent({
             id: "indicator",
             helpText: "Select indicator",
             type: FieldType.TT_SELECT,
+            requireNext: false,
             validation: (val: Option) => Validation.required(val),
             options: () => this.getIndicatorOptions()
         },
