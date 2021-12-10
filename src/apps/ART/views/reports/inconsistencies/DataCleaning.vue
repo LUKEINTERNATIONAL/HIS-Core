@@ -142,12 +142,19 @@ export default defineComponent({
                 value: CtIndicator.DateEnrolledLessThanEarliestStartDate,
                 other: {
                     skipDateSelection: false,
-                    columns: this.getDefaultIndicatorColumns(),
+                    columns: this.getDefaultIndicatorColumns([
+                        table.thTxt('Earliest start date'),
+                        table.thTxt('Date enrolled')
+                    ]),
                     setRows: (_: any, cf: any) => 
                         this.setDefaultIndicatorRows(
                             CtIndicator.DateEnrolledLessThanEarliestStartDate, 
                             cf.start_date, 
-                            cf.end_date
+                            cf.end_date,
+                            (d: any) => [ 
+                                table.tdDate(d.earliest_start_date),
+                                table.tdDate(d.date_enrolled)
+                            ] 
                         )
                 }
             },
