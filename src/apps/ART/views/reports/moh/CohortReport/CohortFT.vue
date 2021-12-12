@@ -1,5 +1,5 @@
 <template>
-  <table>
+  <table class="my-table">
     <tr class="section-description">
       <td class="numbers">&nbsp;</td>
       <td style="font-weight: bold;" colspan="2">ART Clinic</td>
@@ -119,7 +119,7 @@
       <td style="font-weight: normal;">&nbsp;</td>
       <td style="font-weight: normal;">&nbsp;</td>
     </tr>
-
+  
     <tr>
       <td class="numbers">31.</td>
       <td style="text-align: left;border-bottom-style: none;
@@ -851,7 +851,23 @@
       <td style="border-right-width:0px; border-bottom-width: 0px;
         border-left-width:0px; border-top-width:0px; text-align:right; padding-right: 5px;
         font-weight:bold;">14</td>
-      <td><a href="#" @click.prevent="drillDown('fourteen_p');">{{fourteen_p}}</a></td>
+        <td>
+        <div class="granules">
+          <div class="granules-row">
+
+            <div class="granules-cell granules-right-td"><span>PP</span></div>
+            <div class="granules-cell"><span>P&nbsp;</span></div>
+          </div>
+          <div class="granules-row">
+            <div class="granules-cell granules-right-td">
+              <a href="#" @click="drillDown('fourteen_pp');" id="fourteen_pp">{{fourteen_pp}}</a>
+            </div>
+            <div class="granules-cell">
+              <a href="#" @click="drillDown('fourteen_p');" id="fourteen_p">{{fourteen_p}}</a>
+            </div>
+          </div>
+        </div>
+      </td>
       <td><a href="#" @click.prevent="drillDown('fourteen_a');">{{fourteen_a}}</a></td>
     </tr>
     
@@ -866,7 +882,22 @@
       <td style="border-right-width:0px; border-bottom-width: 0px;
         border-left-width:0px; border-top-width:0px; text-align:right; padding-right: 5px;
         font-weight:bold;">15</td>
-      <td><a href="#" @click.prevent="drillDown('fifteen_p');">{{fifteen_p}}</a></td>
+          <td>
+        <div class="granules">
+          <div class="granules-row">
+            <div class="granules-cell granules-right-td"><span>PP</span></div>
+            <div class="granules-cell"><span>P&nbsp;</span></div>
+          </div>
+          <div class="granules-row">
+            <div class="granules-cell granules-right-td">
+              <a href="#" @click="drillDown('fifteen_pp');" id="fifteen_pp">{{fifteen_pp}}</a>
+            </div>
+            <div class="granules-cell">
+              <a href="#" @click="drillDown('fifteen_p');" id="fifteen_p">{{fifteen_p}}</a>
+            </div>
+          </div>
+        </div>
+      </td>
       <td><a href="#" @click.prevent="drillDown('fifteen_a');">{{fifteen_a}}</a></td>
     </tr>
     
@@ -918,7 +949,7 @@
       <td colspan="9" style="text-align: left;">&nbsp;</td>
     </tr>
 
-    <tr>
+    <tr  style="page-break-before: always; ">
       <td class="numbers">81.</td>
       <td style="text-align: left; padding-left: 10px; border-bottom-width:0px;
         border-right-width:0px;">Pregnant / Breastfeeding</td>
@@ -1180,6 +1211,8 @@
 <script>
 /* eslint-disable @typescript-eslint/camelcase */
 import moment from "dayjs";
+import { Service } from "@/services/service"
+
 export default {
   data: function(){
     return {
@@ -1390,8 +1423,10 @@ export default {
       twelve_a,${this.twelve_a},
       thirteen_a,${this.thirteen_a},
       fourteen_p,${this.fourteen_p},
+      fourteen_p,${this.fourteen_pp},
       fourteen_a,${this.fourteen_a},
       fifteen_p,${this.fifteen_p},
+      fifteen_p,${this.fifteen_pp},
       fifteen_a,${this.fifteen_a},
       sixteen_p,${this.sixteen_p},
       sixteen_a,${this.sixteen_a},
@@ -1419,15 +1454,16 @@ export default {
       newly_initiated_on_ipt,${this.newly_initiated_on_ipt},
       newly_initiated_on_3hp,${this.newly_initiated_on_3hp},
       `;
-      y += `Date Created:  ${moment().format("YYYY-MM-DD:h:m:s")} 
-                          e-Mastercard Version : ${sessionStorage.EMCVersion} 
-                          API Version ${sessionStorage.APIVersion} UUID: ${sessionStorage.siteUUID}`;
-      for (let index = 0; index < 34; index++) {
-        y += ",";
-      }
+      y += `
+          His-Core Version: ${Service.getCoreVersion()}
+          ART Version : ${Service.getAppVersion()}
+          API Version: ${Service.getApiVersion()}
+          Report Period: ${this.quarter}
+          Site: ${Service.getLocationName()}`;
+      // }
       const csvData = new Blob([y], { type: "text/csv;charset=utf-8;" });
       //IE11 & Edge
-      const reportTitle = `MoH ${sessionStorage.location_name} Cohort report ${this.quarter}`;
+      const reportTitle = `${Service.getLocationName()} cohort report ${this.quarter}`;
       if (navigator.msSaveBlob) {
         navigator.msSaveBlob(csvData, 'exportFilename');
       } else {
@@ -1616,10 +1652,14 @@ export default {
         this.thirteen_a = this.params[i].contents;
       if(this.params[i].name == 'fourteen_p')
         this.fourteen_p = this.params[i].contents;
+      if(this.params[i].name == 'fourteen_pp')
+        this.fourteen_pp = this.params[i].contents;
       if(this.params[i].name == 'fourteen_a')
         this.fourteen_a = this.params[i].contents;
       if(this.params[i].name == 'fifteen_p')
         this.fifteen_p = this.params[i].contents;
+      if(this.params[i].name == 'fifteen_pp')
+        this.fifteen_pp = this.params[i].contents;
       if(this.params[i].name == 'fifteen_a')
         this.fifteen_a = this.params[i].contents;
       if(this.params[i].name == 'sixteen_a')

@@ -57,7 +57,10 @@ export default defineComponent({
     medicationObs: [] as any,
     relatedObs: [] as any,
     askAdherence: false as boolean,
-    lastDrugsReceived: [] as any
+    lastDrugsReceived: [] as any,
+    sideEffectsHistory: [] as any,
+    onPermanentFPMethods: false,
+    guardianVisit: false
   }),
   watch: {
     ready: {
@@ -68,8 +71,11 @@ export default defineComponent({
             this.providerID
           );
           await this.initAdherence(this.patient, this.providerID);
+          await this.getSideEffectsHistory();
+          await this.guardianOnlyVisit();
           this.askAdherence = this.adherence.receivedDrugsBefore();
           this.fields = this.getFields();
+          this.onPermanentFPMethods = await this.consultation.getTLObs();
           this.lastDrugsReceived = await this.consultation.getPreviousDrugs();
 
           this.completedTBTherapy();
@@ -109,7 +115,7 @@ export default defineComponent({
 
       const obs = await this.consultation.saveObservationList(filtered);
 
-      if (this.askAdherence) await this.saveAdherence();
+      if (this.askAdherence && !this.guardianVisit) await this.saveAdherence();
 
       if (!obs) return toastWarning("Unable to save patient observations");
 
@@ -119,6 +125,10 @@ export default defineComponent({
     },
     isGender(gender: string) {
       return this.patient.getGender() === gender;
+    },
+    async guardianOnlyVisit() {
+      const val = await this.consultation.getClient();
+      this.guardianVisit = val === "No";
     },
     async checkVLReminder() {
       const vals = await ProgramService.getPatientVLInfo(this.patientID);
@@ -153,6 +163,22 @@ export default defineComponent({
       if (!encounter) return toastWarning("Unable to create encounter");
       await orderService.saveObservationList(observations);
     },
+    async getSideEffectsHistory() {
+      const rows = [];
+      const sides = await this.consultation.getDrugSideEffects();
+      for (const key in sides) {
+        const item = sides[key];
+        const  date = HisDate.toStandardHisDisplayFormat(key);
+        const rowData = [];
+        for (const innerKey in item) {
+          const innerItem = item[innerKey];
+          const drug = innerItem.drug_induced ? `(Drug induced) ${innerItem.drug}` : `(Not drug induced)`; 
+          rowData.push(innerItem.name, drug)
+        }
+        rows.push([date, rowData.join('\n')]);
+      }
+      this.sideEffectsHistory = rows;
+    },
     async completedTBTherapy() {
       const obs = await this.patient.getCompleteTBTherapyHistory();
       this.hasTBTherapyObs = obs.length > 0;
@@ -162,7 +188,7 @@ export default defineComponent({
       return age >= 9 && age <= 55;
     },
     ontubalLigation() {
-      return true;
+      return !this.onPermanentFPMethods;
     },
     showPregnancyQuestions() {
       return (
@@ -457,18 +483,19 @@ export default defineComponent({
     },
     getFields(): any {
       return [
-        // {
-        //   id: "prescription",
-        //   helpText: "Medication to prescribe during this visit",
-        //   type: FieldType.TT_MULTIPLE_SELECT,
-        //   validation: (data: any) => Validation.required(data),
-        //   onValueUpdate: (listData: Array<Option>, value: Option) => {
-        //     return this.disablePrescriptions(listData, value);
-        //   },
-        //   options: (_: any, checked: Array<Option>) =>
-        //     this.getPrescriptionFields(checked),
-        //   condition: () => false, // show if guardian only visit
-        // },
+        {
+          id: "prescription",
+          helpText: "Medication to prescribe during this visit",
+          type: FieldType.TT_MULTIPLE_SELECT,
+          validation: (data: any) => Validation.required(data),
+          onValueUpdate: (listData: Array<Option>, value: Option) => {
+            return this.disablePrescriptions(listData, value);
+          },
+          options: (_: any, checked: Array<Option>) =>
+            this.getPrescriptionFields(checked),
+          unload: (data: any, state: any, formData: any) => this.onFinish(formData),
+          condition: () => this.guardianVisit, 
+        },
         {
           id: "patient_lab_orders",
           helpText: "Lab orders",
@@ -577,6 +604,22 @@ export default defineComponent({
           },
         },
         {
+          id: "has_fp_methods",
+          helpText: "",
+          condition: (formData: any) =>
+            this.onPermanentFPMethods,
+          type: FieldType.TT_TEXT_BANNER,
+          options: () =>
+            {
+              return [
+                {
+                  label: "Patient is on Tubal ligation method",
+                  value: "Patient is on Tubal ligation method"
+                }
+              ]
+            },
+        },
+        {
           id: "current_fp_methods",
           helpText: "What method are you currently on?",
           onValueUpdate: (listData: Array<Option>, value: Option) => {
@@ -584,7 +627,7 @@ export default defineComponent({
           },
           unload: (data: any) => {
             this.currentFPM = data.map((data: Option) => {
-              return this.consultation.buildValueCoded(data.label, data.value);
+              return this.consultation.buildValueCoded('Family planning method', data.value);
             });
           },
           validation: (data: any) => Validation.required(data),
@@ -605,7 +648,7 @@ export default defineComponent({
           },
           unload: (data: any) => {
             this.newFPM = data.map((data: Option) => {
-              return this.consultation.buildValueCoded(data.label, data.value);
+              return this.consultation.buildValueCoded('Family planning, action to take', data.value);
             });
           },
           type: FieldType.TT_MULTIPLE_SELECT,
@@ -711,6 +754,28 @@ export default defineComponent({
           },
           options: (_: any, checked: Array<Option>) =>
             this.getFPMethods(["NONE"], checked),
+        },
+        {
+          id: 'previous_side_effects',
+          helpText: 'Side effects / Contraindications history',
+          type: FieldType.TT_TABLE_VIEWER,
+          options: () => {
+            let columns = ['Date', 'Condition'] as any;
+            let rows = [];
+            if(this.sideEffectsHistory.length === 0) {
+              columns = [''];
+              rows = [['No Past', 'side effects / contraindications']];
+            }else {
+              rows = this.sideEffectsHistory;
+            }
+            return [{
+              label: 'Side effects / Contraindications history',
+              value: 'trail',
+              other: {
+                columns, rows
+              }
+            }]
+          },
         },
         {
           id: "side_effects",

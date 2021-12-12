@@ -16,6 +16,7 @@ import PepFarDiaggregatedReport from "@/apps/ART/views/reports/pepfar/disaggrega
 import PepFarDefaultersReport from "@/apps/ART/views/reports/pepfar/defaulters.vue"
 import PepFarRegimenReport from "@/apps/ART/views/reports/pepfar/regimen.vue"
 import PepFarRegimenSwitchReport from "@/apps/ART/views/reports/pepfar/RegimenSwitch.vue"
+import PepFarVlCoverage from "@/apps/ART/views/reports/pepfar/ViralLoadCoverage.vue"
 import TBPrevReport from "@/apps/ART/views/reports/pepfar/TBPrev.vue"
 import TXCurrMMD from "@/apps/ART/views/reports/pepfar/TxCurrMMD.vue"
 import TXCurrMl from "@/apps/ART/views/reports/pepfar/TxCurrMl.vue"
@@ -32,10 +33,12 @@ import ClinicViralLoadReport from "@/apps/ART/views/reports/clinic/ClinicViralLo
 import ClinicOtherOutcomeReport from "@/apps/ART/views/reports/clinic/ClinicOtherOutcomeReport.vue"
 import ClinicRegimenFormulationReport from "@/apps/ART/views/reports/clinic/ClinicRegimenFormulationReport.vue"
 import ClinicLabResultsReport from "@/apps/ART/views/reports/clinic/ClinicLabResultsReport.vue"
+import ClinicArchivingCandidates from "@/apps/ART/views/reports/clinic/ClinicArchivingCandidates.vue"
 import MohDisaggregatedReport from "@/apps/ART/views/reports/moh/MohDisaggregatedReport.vue"
 import MohSurvivalAnalysisReport from "@/apps/ART/views/reports/moh/MohSurvivalAnalysisReport.vue"
 import MohTptInitiationsReport from "@/apps/ART/views/reports/moh/MohTptInitiationsReport.vue"
 import MohTxCurrMMD from "@/apps/ART/views/reports/moh/MohTxCurrMMD.vue"
+import MohRegimenWeightDistribution from "@/apps/ART/views/reports/moh/MohRegimenWeightDistribution.vue"
 import MohCohort from "@/apps/ART/views/reports/moh/CohortReport/MohCohort.vue"
 import ReportTemplate from "@/apps/ART/views/reports/pepfar/PepfarIndex.vue"
 import StockCardReport from "@/apps/ART/views/reports/clinic/ClinicStockCardReport.vue"
@@ -225,6 +228,11 @@ export default [
                 name: 'moh_tx_curr_mmd',
                 path: 'moh_tx_curr_mmd',
                 component: MohTxCurrMMD
+            },
+            {
+                name: 'moh_regimen_weight_distribution',
+                path: 'moh_regimen_weight_distribution',
+                component: MohRegimenWeightDistribution
             }
         ]
     },
@@ -232,6 +240,11 @@ export default [
         path: '/art/report/clinic',
         component: ReportTemplate,
         children: [
+            {
+                name: 'clinic_archiving_candidates',
+                path: 'clinic_archiving_candidates',
+                component: ClinicArchivingCandidates
+            },
             {
                 name: 'clinic_retention_report',
                 path: "clinic_retention_report",
@@ -347,6 +360,11 @@ export default [
                 name: "pepfar_tx_rtt",
                 path: "tx_rtt",
                 component: TXRtt
+            },
+            {
+                name: 'pepfar_vl_coverage',
+                path: 'pepfar_vl_coverage',
+                component: PepFarVlCoverage
             }
         ]
     }

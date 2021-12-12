@@ -1,15 +1,15 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :reportReady="reportReady"
-        :isLoading="isLoading"
-        :onReportConfiguration="onPeriod"
-        > 
-    </report-template>
+    <ion-page>
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            :onReportConfiguration="onPeriod"
+            > 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -21,16 +21,15 @@ import table from "@/components/DataViews/tables/ReportDataTable"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { Option } from "@/components/Forms/FieldInterface"
 import { FieldType } from "@/components/Forms/BaseFormElements"
+import { IonPage } from "@ionic/vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
         title: 'Data cleaning report',
         rows: [] as Array<any>,
         cohort: {} as any,
-        reportReady: false as boolean,
-        isLoading: false as boolean,
         columns: [
             [
                 table.thTxt('ARV Number'),
@@ -54,8 +53,6 @@ export default defineComponent({
     },
     methods: {
         async onPeriod(form: any, config: any) {
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
             this.title = form.indicator.value
             this.report = new DataCleaningReportService()
@@ -64,7 +61,6 @@ export default defineComponent({
             this.period = this.report.getDateIntervalPeriod()
             const data = await this.report.getCleaningToolReport(form.indicator.value)
             this.setRows(data)
-            this.isLoading = false
         },
         async setRows(data: Array<any>) {
             data.forEach((data: any) => {
