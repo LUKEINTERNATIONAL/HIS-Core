@@ -6,8 +6,7 @@ import { defineComponent } from 'vue'
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Field, Option } from "@/components/Forms/FieldInterface"
 import { toastWarning, alertConfirmation } from "@/utils/Alerts"
-import { DispensationService } from "@/apps/ART/services/dispensation_service"
-import { isEmpty } from 'lodash'
+import { DispensationService } from "@/apps/OPD/services/dispensation_service"
 import EncounterMixinVue from '@/apps/ART/views/encounters/EncounterMixin.vue'
 import HisDate from "@/utils/Date"
 
@@ -33,17 +32,6 @@ export default defineComponent({
       return this.dispensation.saveDispensations(dispensations)    
     },
     buildDispensations(item: Option) {
-      if (!isEmpty(item.other?.dispenses)) {
-        console.log(item.other.dispenses)
-        let dispenses: any = []
-        item.other.dispenses.forEach(([tabs, packs]: Array<number>)=> {
-          dispenses = [...dispenses, 
-          ...this.dispensation.buildDispensations(
-              item.other.order_id, tabs, packs
-          )]
-        })
-        return dispenses
-      }
       return this.dispensation.buildDispensations(
         item.other.order_id, item.value
       )
@@ -107,7 +95,6 @@ export default defineComponent({
           helpText: 'Dispensation',
           type: FieldType.TT_DRUG_DISPENSER,
           onValueUpdate: async(i: Option, l: Option[]) => {
-            console.log({i, l})
             if(i.value != -1 && this.isDoneDispensing(l)) {
               return this.gotoPatientDashboard()
             }
@@ -118,7 +105,7 @@ export default defineComponent({
           onValue: async (i: Option, isBarcodeScanned: boolean) => {
             if (i.value  === -1) {
               const voided = await this.dispensation.voidOrder(i.other.order_id)
-              return voided ? true : false
+              return voided? true : false
             }
             if (!isBarcodeScanned) {
               const isValidDispensation = await this.isValidDispensation(i)

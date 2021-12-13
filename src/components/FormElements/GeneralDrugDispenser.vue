@@ -174,41 +174,41 @@ export default defineComponent({
 })
 </script>
 <style scoped>
-    .view-port-content {
-        height: 100%;
-    }
-    .prescription-tab {
-        position: relative;
-        height: 75vh;
-    }
-    .prescription-table-section {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 76%;
-        overflow-x: auto;
-    }
-    .barcode-section {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: -20px;
-    }
-    .dosage-input {
-        text-align: center;
-        font-weight: bold;
-        border: solid 1px #ccc;
-        height: 50px;
-        width: 80%;
-        margin: auto;
-        background-color: rgb(255, 248, 221);
-    }
-    table {
-        width: 100%;
-    }
-    td, th {
-        border: 1px solid #ccc;
-        padding: 0.6em !important;
-    }
+  .view-port-content {
+    height: 100%;
+  }
+  .prescription-tab {
+    position: relative;
+    height: 75vh;
+  }
+  .prescription-table-section {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 76%;
+    overflow-x: auto;
+  }
+  .barcode-section {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -20px;
+  }
+  .dosage-input {
+    text-align: center;
+    font-weight: bold;
+    border: solid 1px #ccc;
+    height: 50px;
+    width: 80%;
+    margin: auto;
+    background-color: rgb(255, 248, 221);
+  }
+  table {
+    width: 100%;
+  }
+  td, th {
+    border: 1px solid #ccc;
+    padding: 0.6em !important;
+  }
 </style>
