@@ -17,7 +17,7 @@
         </tr>
     </thead>
     <tbody v-if="rows">
-        <tr v-for="(row, rowIndex) in tableRows" :key="rowIndex">
+        <tr v-for="(row, rowIndex) in paginatedItems" :key="rowIndex">
             <td v-for="(item, itemIndex) in row" :key="itemIndex"
                 :colspan="item.colspan || 0"
                 :class="item.cssClass" 
@@ -48,6 +48,24 @@
         </tr>
     </tbody>
   </table>
+  <div class="pagination" v-if="showPagination">
+        <div class="btn-group">
+            <ion-button color="light" @click="prevPage">
+                <ion-icon :icon="caretBack"></ion-icon>
+            </ion-button>
+            <ion-button
+                v-for="page in pages"
+                @click="currentPage = page"
+                :color="currentPage === page ? 'primary' : 'light'"
+                :key="page" >
+                {{ page + 1 }}
+            </ion-button>
+            <ion-button color="light" @click="nextPage">
+                <ion-icon :icon="caretForward"></ion-icon>
+            </ion-button>
+        </div>
+        <h6>Page {{ currentPage + 1 }} of {{ totalPages }}</h6>
+    </div>
   <div v-if="!rows || rows.length <= 0" class="no-data-section his-card"> 
     No data available in table 
   </div>
@@ -55,7 +73,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { arrowUp, arrowDown } from "ionicons/icons";
+import { arrowUp, arrowDown, caretBack, caretForward } from "ionicons/icons";
 import { 
     ColumnInterface, 
     RowInterface, 
@@ -82,15 +100,26 @@ export default defineComponent({
     rows: {
       type: Object as PropType<Array<RowInterface[]>>,
       required: true
+    },
+    paginated: {
+        type: Boolean,
+        default: false
+    },
+    itemsPerPage: {
+        type: Number,
+        default: 5
     }
   },
   data: () => ({
     arrowUp: arrowUp,
     arrowDown: arrowDown,
+    caretBack, 
+    caretForward,
     sortedIndex: -1 as number,
     sortOrder: 'descSort' as 'ascSort' | 'descSort',
     tableColumns: [] as Array<ColumnInterface[]>,
-    tableRows: [] as Array<RowInterface[]>
+    tableRows: [] as Array<RowInterface[]>,
+    currentPage: 0,
   }),
   watch: {
     columns: {
@@ -142,6 +171,30 @@ export default defineComponent({
         if (this.sortOrder in column) {
             this.tableRows = column[this.sortOrder](index, this.tableRows)
         }
+    },
+    prevPage(){
+        if(this.currentPage) this.currentPage--
+    },
+    nextPage(){
+        if((this.currentPage + 1) !== this.totalPages) this.currentPage++
+    }
+  },
+  computed: {
+    paginatedItems(): RowInterface[][] {
+        if (!this.paginated) return this.tableRows
+        return this.tableRows.slice(
+            this.itemsPerPage * this.currentPage,
+            this.itemsPerPage * (this.currentPage + 1)
+        )
+    },
+    totalPages(): number {
+        return Math.ceil(this.tableRows.length / this.itemsPerPage)
+    },
+    pages(): number[] {
+        return Array.from(Array(this.totalPages).keys())
+    },
+    showPagination(): boolean {
+       return this.paginated && !!this.paginatedItems.length && this.totalPages > 1
     }
   }
 })
@@ -192,5 +245,29 @@ export default defineComponent({
     }
     tr:nth-child(even) {
         background-color: #f0f0f0;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: space-between;
+        justify-items: center;
+    }
+    .pagination .btn-group {
+        margin: .5rem;
+        display: flex;
+        justify-content: start;
+    }
+
+    .pagination ion-button {
+        margin: .1rem;
+    }
+
+    h6 {
+        margin-right: .5rem;
+    }
+
+    .pagination .active {
+        background-color: blue;
+        color: white;
     }
 </style>

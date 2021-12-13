@@ -4,6 +4,7 @@ export const REPORTS: FolderInterface[] = [
     {
         name: 'MoH',
         icon: 'login-logos/Malawi-Coat_of_arms_of_arms.png',
+        defaultFilesIcon: 'reports.png',
         files: [
             {
                 name: 'LA report',
@@ -24,8 +25,24 @@ export const REPORTS: FolderInterface[] = [
         ]
     },
     {
+        name: 'PEPFAR',
+        icon: 'login-logos/PEPFAR.png',
+        defaultFilesIcon: 'reports.png',
+        files: [
+            {
+                name: 'IDSR report',
+                pathName: 'pepfar_idsr'
+            },
+            {
+                name: 'DHIS 2',
+                pathName: 'pepfar_dhis_2'
+            },
+        ]
+    },
+    {
         name: 'Clinic',
         icon: 'reports.png',
+        defaultFilesIcon: 'reports.png',
         files: [
             {
                 name: 'Diagnosis by address',
@@ -62,20 +79,6 @@ export const REPORTS: FolderInterface[] = [
             {
                 name: 'With NIDs',
                 pathName: 'clinic_with_nids'
-            },
-        ]
-    },
-    {
-        name: 'PEPFAR',
-        icon: 'login-logos/PEPFAR.png',
-        files: [
-            {
-                name: 'IDSR report',
-                pathName: 'pepfar_idsr'
-            },
-            {
-                name: 'DHIS 2',
-                pathName: 'pepfar_dhis_2'
             },
         ]
     }
