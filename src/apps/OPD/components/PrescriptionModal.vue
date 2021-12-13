@@ -65,7 +65,7 @@ import { computed, defineComponent, PropType, ref} from "vue";
 import { Option } from "@/components/Forms/FieldInterface";
 import FrequencyCard from "./FrequencyCard.vue";
 import IntervalKeyboard from "@/components/Keyboard/HisIntervalKeyboard.vue";
-import { toastDanger } from "@/utils/Alerts";
+import { toastWarning } from "@/utils/Alerts";
 
 export default defineComponent({
   name: "PrescriptionModal",
@@ -113,7 +113,7 @@ export default defineComponent({
         const freq = getFrequencyCount(drug.frequency)
         const duration: number = drug.duration
         if(!freq && !duration){
-          toastDanger(`complete prescription details for ${drug.name}`)
+          toastWarning(`complete prescription details for ${drug.name}`)
           return false
         }
       }

@@ -1,5 +1,5 @@
 <template>
-  <his-standard-form :cancelDestinationPath="cancelDestination" :fields="fields" :onFinishAction="onSubmit"/>
+  <his-standard-form :cancelDestinationPath="cancelDestination" :fields="fields" :activeField="activeField" :onFinishAction="onSubmit"/>
 </template>
 
 <script lang="ts">
@@ -10,11 +10,11 @@ import Validation from '@/components/Forms/validations/StandardValidations';
 import { Field, Option } from '@/components/Forms/FieldInterface';
 import { FieldType } from '@/components/Forms/BaseFormElements';
 import { isEmpty } from 'lodash';
-import { DrugPrescriptionService, DRUG_DOSE_FREQUENCIES } from '../../services/drug_prescription_service';
+import { ANTI_MALARIA_DRUGS, DrugPrescriptionService, DRUG_DOSE_FREQUENCIES } from '../../services/drug_prescription_service';
 import { modalController } from '@ionic/core';
 import PrescriptionModalVue from '@/apps/OPD/components/PrescriptionModal.vue';
 import HisDate from "@/utils/Date"
-import { toastSuccess, toastWarning } from '@/utils/Alerts';
+import { alertConfirmation, toastSuccess, toastWarning } from '@/utils/Alerts';
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -22,13 +22,16 @@ export default defineComponent({
   data: () => ({
     activeField: '',
     prescriptionService: {} as any,
+    hasMalaria: false,
     drugOrders: [] as any
   }),
   watch: {
     ready: {
       async handler(isReady: boolean) {
         if(isReady){
-          this.prescriptionService = new DrugPrescriptionService(this.patientID, this.providerID)       
+          this.prescriptionService = new DrugPrescriptionService(this.patientID, this.providerID)
+          await this.prescriptionService.loadDrugs()    
+          this.hasMalaria = await this.prescriptionService.hasMalaria()
           this.fields = this.getFields()
         }
       },
@@ -69,7 +72,7 @@ export default defineComponent({
     mapToOrders(prescriptions: any[]): any[] {
       return prescriptions.map(drug => {
         const startDate = DrugPrescriptionService.getSessionDate()
-        const frequencyCount = this.getFrequencyCount(drug.frequency)
+        const frequencyCount = (typeof drug.frequency === 'number') ? drug.frequency :  this.getFrequencyCount(drug.frequency)
         const frequency = DRUG_DOSE_FREQUENCIES[frequencyCount]
         return {
           'drug_inventory_id': drug.drug_id,
@@ -90,7 +93,8 @@ export default defineComponent({
           helpText: 'Select drugs',
           type: FieldType.TT_MULTIPLE_SELECT,
           validation: (data: any) => Validation.required(data),
-          options: (_: any, filter='') => this.prescriptionService.getDrugs(filter),
+          options: () => this.prescriptionService.getDrugOptions(),
+          onload: () => this.activeField = '',
           beforeNext: async (data: Option[]) => {
             const prescriptions = await this.getPrescriptionDetails(data)
             if(isEmpty(prescriptions)) return false
@@ -99,8 +103,39 @@ export default defineComponent({
           },
           config: {
             showKeyboard: true,
+            footerBtns: [
+              {
+                name: 'Predefined Malaria Drugs',
+                color: 'primary',
+                size: 'large',
+                visible: false,
+                slot: 'end',
+                onClick: async () => {
+                  if(this.hasMalaria) this.activeField = 'malaria_drugs'
+                  const ok = await alertConfirmation('Patient has no malaria. Do you still want to prescribe anti malaria drugs?')
+                  if(ok) this.activeField = 'malaria_drugs'
+                }
+              },
+            ]
           }
         },
+        {
+          id: 'malaria_drugs',
+          helpText: "select Malaria Drugs",
+          validation: (data: any) => Validation.required(data),
+          type: FieldType.TT_SELECT,
+          condition: () => this.activeField === 'malaria_drugs',
+          onValue: (data: Option) => {
+            if(isEmpty(data)) return false
+            this.drugOrders = this.mapToOrders([data.other])
+            return true
+          },
+          options: () => ANTI_MALARIA_DRUGS.map(drug => ({
+            label: `${drug.name}, ${drug.frequency} time(s) a day, for ${drug.duration} days`,
+            value: drug.name,
+            other: drug
+          }))
+        }
       ]
     }
   }
