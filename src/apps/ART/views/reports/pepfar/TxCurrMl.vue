@@ -31,12 +31,12 @@ export default defineComponent({
             [
                 table.thTxt('Age group'),
                 table.thTxt('Gender'),
-                table.thTxt('Defaulted (new registration)'),
-                table.thTxt('Defaulted (old registration)'),
                 table.thTxt('Died'),
-                table.thTxt('Stopped'),
+                table.thTxt('IIT <3 mo'),
+                table.thTxt('IIT 3-5 mo'),
+                table.thTxt('IIT 6+ mo'),
                 table.thTxt('Tranferred out'),
-                table.thTxt('Unknown')
+                table.thTxt('Refused (Stopped)')
             ]
         ],
         cohort: {} as any
@@ -78,8 +78,9 @@ export default defineComponent({
                         ]    
                     })
             }
-            if (patients.length <= 0) return table.td(0)
-            return table.tdLink(patients.length, () => this.tableDrill({columns, onRows}))
+            return patients.length <= 0 
+                ? table.td(0)
+                : table.tdLink(patients.length, () => this.tableDrill({columns, onRows}))
         },
         async setRows(gender: string) {
             for(const i in AGE_GROUPS) {
