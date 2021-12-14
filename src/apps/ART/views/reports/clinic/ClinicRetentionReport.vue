@@ -14,11 +14,12 @@
 
 <script lang='ts'>
 import { defineComponent } from 'vue'
-import { PatientReportService, OTHER_AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
+import { PatientReportService } from "@/apps/ART/services/reports/patient_report_service"
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import { isEmpty } from 'lodash'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -72,7 +73,7 @@ export default defineComponent({
             }
         },
         setRows(gender: 'M' | 'F') {
-            const ageGroups = [...OTHER_AGE_GROUPS, 'Unknown']
+            const ageGroups = [...AGE_GROUPS, 'Unknown']
             for(const ageIndex in ageGroups) {
                 const group = ageGroups[ageIndex]
                 const row: any = [table.td(group), table.td(gender)]
