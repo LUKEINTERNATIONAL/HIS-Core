@@ -158,7 +158,6 @@ export default defineComponent({
         }
     },
     onChangePage(page: number) {
-        console.log(page)
         this.currentPage = page
     }
   },
@@ -166,12 +165,12 @@ export default defineComponent({
     paginatedItems(): RowInterface[][] {
         if (!this.paginated) return this.tableRows
         return this.tableRows.slice(
-            this.itemsPerPage * this.currentPage,
-            this.itemsPerPage * (this.currentPage + 1)
+            this.itemsPerPage * (this.currentPage - 1),
+            this.itemsPerPage * this.currentPage
         )
     },
     totalPages(): number {
-        return Math.floor(this.tableRows.length / this.itemsPerPage)
+        return Math.ceil(this.tableRows.length / this.itemsPerPage)
     },
     showPagination(): boolean {
        return this.paginated && this.totalPages > 1
