@@ -11,7 +11,7 @@ export class IncompleteEntityError extends Error {
     }
 }
 
-class NotFoundError extends Error {
+export class NotFoundError extends Error {
     constructor(message: string) {
         super(`RECORD NOT FOUND: ${message}`)
     }

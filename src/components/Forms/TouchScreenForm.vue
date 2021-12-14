@@ -547,16 +547,20 @@ export default defineComponent({
      * Callback before the active field is replaced
      */
     async onUnload(state = "") {
-      this.state = "unload";
-      if (!isEmpty(this.currentField) && this.currentField.unload) {
-        const data = this.formData[this.currentField.id];
-        await this.currentField.unload(
-          data,
-          state,
-          this.formData,
-          this.computedFormData,
-          this
-        );
+      try {
+        this.state = "unload";
+        if (!isEmpty(this.currentField) && this.currentField.unload) {
+          const data = this.formData[this.currentField.id];
+          await this.currentField.unload(
+            data,
+            state,
+            this.formData,
+            this.computedFormData,
+            this
+          );
+        }
+      } catch (e) {
+        console.error(e)
       }
     },
     buildFormData(fields: Array<Field>): void {

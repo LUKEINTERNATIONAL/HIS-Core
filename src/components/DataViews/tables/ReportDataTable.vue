@@ -1,5 +1,5 @@
 <template>
-  <table class="report-table">
+<table class="report-table">
     <thead class='stick-report-header' v-if="tableColumns">
         <tr v-for="(columns, colIndex) in tableColumns" :key="colIndex">
             <th v-for="(column, columnIndex) in columns" 
@@ -17,7 +17,7 @@
         </tr>
     </thead>
     <tbody v-if="rows">
-        <tr v-for="(row, rowIndex) in tableRows" :key="rowIndex">
+        <tr v-for="(row, rowIndex) in paginatedItems" :key="rowIndex">
             <td v-for="(item, itemIndex) in row" :key="itemIndex"
                 :colspan="item.colspan || 0"
                 :class="item.cssClass" 
@@ -47,29 +47,32 @@
             </td>
         </tr>
     </tbody>
-  </table>
-  <div v-if="!rows || rows.length <= 0" class="no-data-section his-card"> 
+</table>
+<div v-if="!rows || rows.length <= 0" class="no-data-section his-card"> 
     No data available in table 
-  </div>
+</div>
+<pagination 
+    v-show="showPagination"
+    :perPage="itemsPerPage"
+    :maxVisibleButtons="10"
+    :currentPage="currentPage"
+    :totalPages="totalPages"
+    @onChangePage="onChangePage"
+/>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { arrowUp, arrowDown } from "ionicons/icons";
-import { 
-    ColumnInterface, 
-    RowInterface, 
-    TableInterface
-} 
+import { arrowUp, arrowDown, caretBack, caretForward } from "ionicons/icons";
+import { ColumnInterface, RowInterface, TableInterface } 
 from "@/components/DataViews/tables/ReportDataTable"
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { isEmpty } from "lodash";
-import {
-    IonButton,
-    IonIcon
-} from "@ionic/vue"
+import { IonButton, IonIcon } from "@ionic/vue"
+import Pagination from "@/components/Pagination.vue";
+
 export default defineComponent({
-  components: { IonButton, IonIcon},
+  components: { IonButton, IonIcon, Pagination },
   props: {
     config: {
         type: Object as PropType<TableInterface>,
@@ -82,15 +85,26 @@ export default defineComponent({
     rows: {
       type: Object as PropType<Array<RowInterface[]>>,
       required: true
+    },
+    paginated: {
+        type: Boolean,
+        default: false
+    },
+    itemsPerPage: {
+        type: Number,
+        default: 5
     }
   },
   data: () => ({
     arrowUp: arrowUp,
     arrowDown: arrowDown,
+    caretBack, 
+    caretForward,
     sortedIndex: -1 as number,
     sortOrder: 'descSort' as 'ascSort' | 'descSort',
     tableColumns: [] as Array<ColumnInterface[]>,
-    tableRows: [] as Array<RowInterface[]>
+    tableRows: [] as Array<RowInterface[]>,
+    currentPage: 1,
   }),
   watch: {
     columns: {
@@ -142,6 +156,25 @@ export default defineComponent({
         if (this.sortOrder in column) {
             this.tableRows = column[this.sortOrder](index, this.tableRows)
         }
+    },
+    onChangePage(page: number) {
+        console.log(page)
+        this.currentPage = page
+    }
+  },
+  computed: {
+    paginatedItems(): RowInterface[][] {
+        if (!this.paginated) return this.tableRows
+        return this.tableRows.slice(
+            this.itemsPerPage * this.currentPage,
+            this.itemsPerPage * (this.currentPage + 1)
+        )
+    },
+    totalPages(): number {
+        return Math.floor(this.tableRows.length / this.itemsPerPage)
+    },
+    showPagination(): boolean {
+       return this.paginated && this.totalPages > 1
     }
   }
 })
@@ -192,5 +225,29 @@ export default defineComponent({
     }
     tr:nth-child(even) {
         background-color: #f0f0f0;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: space-between;
+        justify-items: center;
+    }
+    .pagination .btn-group {
+        margin: .5rem;
+        display: flex;
+        justify-content: start;
+    }
+
+    .pagination ion-button {
+        margin: .1rem;
+    }
+
+    h6 {
+        margin-right: .5rem;
+    }
+
+    .pagination .active {
+        background-color: blue;
+        color: white;
     }
 </style>

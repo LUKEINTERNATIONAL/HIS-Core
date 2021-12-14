@@ -1,26 +1,36 @@
 import { ArtReportService } from "./art_report_service";
 
-export const INDICATORS = [
-    'DOB MORE THAN DATE ENROLLED',
-    'CLIENTS WITH ENCOUNTERS AFTER DECLARED DEAD',
-    'DOB MORE THAN DATE ENROLLED',
-    'DATE ENROLLED LESS THAN EARLIEST START DATE',
-    'MALE CLIENTS WITH FEMALE OBS',
-    'PRESCRIPTION WITHOUT DISPENSATION',
-    'MISSING DEMOGRAPHICS',
-    'MISSING START REASONS',
-    'MULTIPLE START REASONS',
-    'PRE ART OR UNKNOWN OUTCOMES'
-]
+export enum CtIndicator {
+    DobMoreThanEnrolledDate = 'DOB MORE THAN DATE ENROLLED',
+    ClientsWithEncountersAfterDeath = 'CLIENTS WITH ENCOUNTERS AFTER DECLARED DEAD',
+    DobMoreThanDateEnrolled = 'DOB MORE THAN DATE ENROLLED',
+    DateEnrolledLessThanEarliestStartDate = 'DATE ENROLLED LESS THAN EARLIEST START DATE',
+    MalesWithFemaleObs = 'MALE CLIENTS WITH FEMALE OBS',
+    PrescriptionWithoutDispensation = 'PRESCRIPTION WITHOUT DISPENSATION',
+    MissingDemographics = 'MISSING DEMOGRAPHICS',
+    MissingStartReasons = 'MISSING START REASONS',
+    MultipleStartReasons = 'MULTIPLE START REASONS',
+    PreArtOrUnknownOutcomes ='PRE ART OR UNKNOWN OUTCOMES',
+}
 
 export class DataCleaningReportService extends ArtReportService {
     constructor() {
         super()
     }
 
-    getCleaningToolReport(reportName: string) {
+    getCleaningToolReport(indicator: CtIndicator) {
         return this.getReport('art_data_cleaning_tools', { 
-            'report_name' : reportName 
+            'report_name' : indicator 
+        })
+    }
+
+    getEnrolledOnArtBeforeBirth() {
+        return ArtReportService.getJson('enrolled_on_art_before_birth')
+    }
+
+    getIncompleteVisits() {
+        return this.getReport('incomplete_visits', {
+            'tool_name': 'INCOMPLETE VISITS'
         })
     }
 }
