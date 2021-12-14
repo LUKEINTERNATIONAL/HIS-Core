@@ -96,6 +96,10 @@ export default {
         {
           name: "Merge patients",
           pathUrl: "/patients/merge",
+        },
+        {
+          name: "Patient visit stats",
+          pathUrl: "/art/patient_visits"
         }
       ]
     },
