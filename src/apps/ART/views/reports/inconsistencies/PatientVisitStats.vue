@@ -27,7 +27,7 @@
         </ion-content>
         <ion-footer> 
             <ion-toolbar color="dark">
-                <ion-button slot="end" router-link="/" color="success">
+                <ion-button slot="end" size="large" router-link="/" color="success">
                     Finish
                 </ion-button>
             </ion-toolbar>
@@ -35,7 +35,7 @@
     </ion-page>
 </template>
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue'
+import { defineComponent } from 'vue'
 import {
     IonPage,
     IonHeader,
@@ -43,7 +43,8 @@ import {
     IonToolbar,
     IonContent,
     IonFooter,
-    IonButton
+    IonButton,
+    loadingController
 } from "@ionic/vue"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import { PatientReportService } from "@/apps/ART/services/reports/patient_report_service"
@@ -79,7 +80,7 @@ export default defineComponent({
                 title: { 
                     text: "Number of clients"
                 },
-                plotAreaHeight: 900,
+                plotAreaHeight: 800,
             },
             xaxis: {
                 type: 'datetime'
@@ -91,12 +92,22 @@ export default defineComponent({
     },
     methods: {
         async onPeriod(_: any, conf: any) {
+            await this.presentLoading()
             this.canShowReport = true
             this.report = new PatientReportService()
             this.report.setStartDate(conf.start_date)
             this.report.setEndDate(conf.end_date)
             const res = await this.report.getPatientVisitTypes()
             this.series = this.buildSeries(res)
+            loadingController.dismiss()
+        },
+        async presentLoading() {
+            const loading = await loadingController
+                .create({
+                    message: 'Please wait...',
+                    backdropDismiss: false
+                })
+            await loading.present()
         },
         buildSeries(data: any) {
             const visitDates: string[] = uniq(Object.keys(data))
