@@ -9,10 +9,9 @@
       </ion-button>
       <ion-button
         v-for="page in pages"
-        @click="setPage"
-        :color="page.isDisabled ? 'primary' : 'light'"
+        @click="setPage(page.name)"
+        :color="page.isActive ? 'primary' : 'light'"
         :key="page"
-        :disabled="page.isDisabled"
       >
         {{ page.name }}
       </ion-button>
@@ -23,12 +22,12 @@
         Last
       </ion-button>
     </div>
-    <h6>Page {{ currentPage + 1 }} of {{ totalPages }}</h6>
+    <h6>Page {{ currentPage }} of {{ totalPages }}</h6>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { caretBack, caretForward } from "ionicons/icons";
 
 export default defineComponent({
@@ -57,7 +56,7 @@ export default defineComponent({
     const isInLastPage = computed(() => props.currentPage === props.totalPages)
     const startPage = computed(() => {
       if(props.currentPage === 1) return 1
-      if(props.currentPage === props.totalPages) return props.totalPages - props.maxVisibleButtons
+      if(props.currentPage === props.totalPages) return props.totalPages - props.maxVisibleButtons + 1
       return props.currentPage - 1
     })
     const pages = computed(() => {
@@ -69,7 +68,7 @@ export default defineComponent({
       ) {
         range.push({
           name: i,
-          isDisabled: i === props.currentPage
+          isActive: i === props.currentPage
         })
       }
       return range
@@ -78,12 +77,12 @@ export default defineComponent({
     const setFirstPage = () => emit('onChangePage', 1)
     const setLastPage = () => emit('onChangePage', props.totalPages)
     const prevPage = () => {
-      if(props.currentPage > 0) 
+      if(props.currentPage  > 1) 
         emit('onChangePage', props.currentPage - 1)
     }
     const nextPage = () => {
-      if((props.currentPage + 1) !== props.totalPages) 
-        emit('onChangePage', props.currentPage + 11)
+      if((props.currentPage + 1) <= props.totalPages) 
+        emit('onChangePage', props.currentPage + 1)
     }
     return {
       caretBack,

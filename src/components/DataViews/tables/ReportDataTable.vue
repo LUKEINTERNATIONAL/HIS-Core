@@ -1,5 +1,5 @@
 <template>
-  <table class="report-table">
+<table class="report-table">
     <thead class='stick-report-header' v-if="tableColumns">
         <tr v-for="(columns, colIndex) in tableColumns" :key="colIndex">
             <th v-for="(column, columnIndex) in columns" 
@@ -47,47 +47,32 @@
             </td>
         </tr>
     </tbody>
-  </table>
-  <div class="pagination" v-if="showPagination">
-        <div class="btn-group">
-            <ion-button color="light" @click="prevPage">
-                <ion-icon :icon="caretBack"></ion-icon>
-            </ion-button>
-            <ion-button
-                v-for="page in pages"
-                @click="currentPage = page"
-                :color="currentPage === page ? 'primary' : 'light'"
-                :key="page" >
-                {{ page + 1 }}
-            </ion-button>
-            <ion-button color="light" @click="nextPage">
-                <ion-icon :icon="caretForward"></ion-icon>
-            </ion-button>
-        </div>
-        <h6>Page {{ currentPage + 1 }} of {{ totalPages }}</h6>
-    </div>
-  <div v-if="!rows || rows.length <= 0" class="no-data-section his-card"> 
+</table>
+<div v-if="!rows || rows.length <= 0" class="no-data-section his-card"> 
     No data available in table 
-  </div>
+</div>
+<pagination 
+    v-show="showPagination"
+    :perPage="itemsPerPage"
+    :maxVisibleButtons="10"
+    :currentPage="currentPage"
+    :totalPages="totalPages"
+    @onChangePage="onChangePage"
+/>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { arrowUp, arrowDown, caretBack, caretForward } from "ionicons/icons";
-import { 
-    ColumnInterface, 
-    RowInterface, 
-    TableInterface
-} 
+import { ColumnInterface, RowInterface, TableInterface } 
 from "@/components/DataViews/tables/ReportDataTable"
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { isEmpty } from "lodash";
-import {
-    IonButton,
-    IonIcon
-} from "@ionic/vue"
+import { IonButton, IonIcon } from "@ionic/vue"
+import Pagination from "@/components/Pagination.vue";
+
 export default defineComponent({
-  components: { IonButton, IonIcon},
+  components: { IonButton, IonIcon, Pagination },
   props: {
     config: {
         type: Object as PropType<TableInterface>,
@@ -119,7 +104,7 @@ export default defineComponent({
     sortOrder: 'descSort' as 'ascSort' | 'descSort',
     tableColumns: [] as Array<ColumnInterface[]>,
     tableRows: [] as Array<RowInterface[]>,
-    currentPage: 0,
+    currentPage: 1,
   }),
   watch: {
     columns: {
@@ -172,11 +157,9 @@ export default defineComponent({
             this.tableRows = column[this.sortOrder](index, this.tableRows)
         }
     },
-    prevPage(){
-        if(this.currentPage) this.currentPage--
-    },
-    nextPage(){
-        if((this.currentPage + 1) !== this.totalPages) this.currentPage++
+    onChangePage(page: number) {
+        console.log(page)
+        this.currentPage = page
     }
   },
   computed: {
@@ -188,13 +171,10 @@ export default defineComponent({
         )
     },
     totalPages(): number {
-        return Math.ceil(this.tableRows.length / this.itemsPerPage)
-    },
-    pages(): number[] {
-        return Array.from(Array(this.totalPages).keys())
+        return Math.floor(this.tableRows.length / this.itemsPerPage)
     },
     showPagination(): boolean {
-       return this.paginated && !!this.paginatedItems.length && this.totalPages > 1
+       return this.paginated && this.totalPages > 1
     }
   }
 })
