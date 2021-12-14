@@ -1,0 +1,162 @@
+<template>
+    <his-standard-form
+        v-show="!canShowReport"
+        @onFinish="onPeriod"
+        :skipSummary="true" 
+        :fields="fields">
+    </his-standard-form>
+    <ion-page v-if="canShowReport"> 
+        <ion-header> 
+            <ion-toolbar> 
+                <ion-title> Patient visit report </ion-title>
+            </ion-toolbar>
+        </ion-header>
+        <ion-content> 
+            <view-port> 
+                <div class="view-port-content"> 
+                    <apexchart
+                        :width="width"
+                        :height="height"
+                        :type="chartType"
+                        :options="chartOptions"
+                        :series="series"
+                    >
+                    </apexchart>
+                </div>
+            </view-port>
+        </ion-content>
+        <ion-footer> 
+            <ion-toolbar color="dark">
+                <ion-button slot="end" router-link="/" color="success">
+                    Finish
+                </ion-button>
+            </ion-toolbar>
+        </ion-footer>
+    </ion-page>
+</template>
+<script lang="ts">
+import { defineComponent, reactive, ref } from 'vue'
+import {
+    IonPage,
+    IonHeader,
+    IonTitle,
+    IonToolbar,
+    IonContent,
+    IonFooter,
+    IonButton
+} from "@ionic/vue"
+import ViewPort from "@/components/DataViews/ViewPort.vue"
+import { PatientReportService } from "@/apps/ART/services/reports/patient_report_service"
+import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
+import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
+import { uniq } from 'lodash';
+
+export default defineComponent({
+    components: {
+        IonPage,
+        IonHeader,
+        IonTitle,
+        IonToolbar,
+        IonContent,
+        IonFooter,
+        IonButton,
+        ViewPort,
+        HisStandardForm
+    },
+    mixins: [ReportMixin],
+    data: () => ({
+        chartType: 'area',
+        height: '100%',
+        width: '100%',
+        canShowReport: false,
+        report: {} as any,
+        series: [] as any,
+        chartOptions: {
+            title : {
+                text: "HIV Reception encounters"
+            },
+            yaxis: {
+                title: { 
+                    text: "Number of clients"
+                },
+                plotAreaHeight: 900,
+            },
+            xaxis: {
+                type: 'datetime'
+            }
+        } as any
+    }),
+    created() {
+        this.fields = this.getDateDurationFields()
+    },
+    methods: {
+        async onPeriod(_: any, conf: any) {
+            this.canShowReport = true
+            this.report = new PatientReportService()
+            this.report.setStartDate(conf.start_date)
+            this.report.setEndDate(conf.end_date)
+            const res = await this.report.getPatientVisitTypes()
+            this.series = this.buildSeries(res)
+        },
+        buildSeries(data: any) {
+            const visitDates: string[] = uniq(Object.keys(data))
+            const patientPresent: any = {}
+            const guardianPresent: any = {}
+            const bothPresent: any = {}
+
+            const setValueGroup = (
+                date: string,
+                group: Record<string, any>,
+                comparator: any) => {
+
+                if (!(date in group)) group[date] = []
+
+                const values = Object.entries(data[date])
+                    .filter(([_, v]: any) => comparator(
+                        v.patient_present,
+                        v.guardian_present
+                    ))
+                    .map(([patient]) => patient)
+
+                group[date] = [...group[date], ...values]
+                return group
+            }
+
+            const sortGroup = (valueGroup: any) => {
+                return visitDates.map((date: string) => [
+                    new Date(date).getTime(), 
+                    valueGroup[date].length
+                ])
+            }
+
+
+            for(const date in data) {
+                setValueGroup(date, patientPresent, (patient: any, guardian: any) => {
+                    return patient && !guardian
+                })
+                setValueGroup(date, guardianPresent, (patient: any, guardian: any) => {
+                    return !patient && guardian
+                })
+                setValueGroup(date, bothPresent, (patient: any, guardian: any) => {
+                    return patient && guardian
+                })
+            }
+
+            return [
+                {
+                    name: 'Patient present',
+                    data: sortGroup(patientPresent)
+                },
+                {
+                    name: 'Guardian present',
+                    data: sortGroup(guardianPresent)
+                },
+                {
+                    name: 'Both patient and guardian present',
+                    data: sortGroup(bothPresent)
+                }
+            ]
+        }
+    }
+})
+</script>
