@@ -77,14 +77,6 @@ export default defineComponent({
         guardianPresent: {} as any,
         bothPresent: {} as any,
         chartOptions: {
-            chart: {
-                events: {
-                    dataPointSelection() {
-                        console.log('Ariba!')
-                        alert('Ariba!')
-                    }
-                }
-            },
             title : {
                 text: "HIV Reception encounters"
             },
