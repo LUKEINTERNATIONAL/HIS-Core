@@ -201,11 +201,15 @@ export default defineComponent({
     /**
      * Redirects to a specified route or defaults to the previous view
      */
-    getCancelBtn(): FormFooterBtns {
+    getCancelBtn(conf={} as any): FormFooterBtns {
+      const override = conf || {}
       return {
-        name: "Cancel",
-        color: "danger",
+        name: override.name || "Cancel",
+        color: override.color || "danger",
         onClick: async () => {
+          if (override.onClick) {
+            return override.onClick()
+          }
           const confirmation = await alertConfirmation(
             "Are you sure you want to cancel?"
           );
@@ -221,12 +225,16 @@ export default defineComponent({
      * Clear the current's field value. However this depends if 
      * the field supports this feature
      */
-    getClearBtn(): FormFooterBtns {
+    getClearBtn(conf={} as any): FormFooterBtns {
+      const override = conf || {}
       return {
-        name: "Clear",
-        color: "warning",
+        name: override.name || "Clear",
+        color: override.color || "warning",
         slot: "end",
         onClick: async () => {
+          if (override.onClick) {
+            return override.onClick()
+          }
           const confirmation = await alertConfirmation(
             "Are you sure you want to clear field data?"
           );
@@ -237,7 +245,8 @@ export default defineComponent({
     /**
      * Go to the previous page on the form
      */
-    getBackBtn(): FormFooterBtns {
+    getBackBtn(conf={} as any): FormFooterBtns {
+      const override = conf || {}
       const visibleCondition = () => {
         if (this.currentFields.length === 1 
           || this.currentIndex <= 0) {
@@ -246,7 +255,7 @@ export default defineComponent({
         return true;
       }
       return {
-        name: "Back",
+        name: override?.name || "Back",
         slot: "end",
         state: {
           disabled: {
@@ -258,13 +267,14 @@ export default defineComponent({
             default: () => visibleCondition()
           }
         },
-        onClick: () => this.goBack()
+        onClick: () => override.onClick ? override.onClick() : this.goBack()
       };
     },
     /**
      * Go to the next index in the array of fields
      */
-    getNextBtn(): FormFooterBtns {
+    getNextBtn(conf={} as any): FormFooterBtns {
+      const override = conf || {}
       const visibleCondition = () => {
         if (this.currentIndex + 1 >= this.currentFields.length 
           || this.currentFields.length <= 1) {
@@ -273,8 +283,8 @@ export default defineComponent({
         return true;
       }
       return {
-        name: "Next",
-        color: "success",
+        name: override?.name || "Next",
+        color: override?.color || "success",
         slot: "end",
         state: {
           disabled: {
@@ -293,19 +303,20 @@ export default defineComponent({
             onload: () => visibleCondition()
           }
         },
-        onClick: () => this.goNext(),
+        onClick: () => override.onClick ? override.onClick() : this.goNext(),
       };
     },
     /**
      * When clicked it notifies the parent that form has been submitted
      */
-    getFinishBtn(): FormFooterBtns {
+    getFinishBtn(conf={} as any): FormFooterBtns {
+      const override = conf || {}
       const visibilityCondition = () => {
         return this.currentIndex+1 >= this.currentFields.length
       }
       return {
-        name: "Finish",
-        color: "success",
+        name: override?.name || "Finish",
+        color: override?.color || "success",
         slot: "end",
         state: {
           disabled: {
@@ -317,10 +328,10 @@ export default defineComponent({
             onsubmit: () => true,
             default:() => visibilityCondition(),
             onload: () => visibilityCondition()
-          },
+          }
         },
-        onClick: () => this.goNext(),
-      };
+        onClick: () => override.onClick ? override.onClick() : this.goNext()
+      }
     },
     /**
      * Shows or hides a footer button based on it's defined states
@@ -536,16 +547,20 @@ export default defineComponent({
      * Callback before the active field is replaced
      */
     async onUnload(state = "") {
-      this.state = "unload";
-      if (!isEmpty(this.currentField) && this.currentField.unload) {
-        const data = this.formData[this.currentField.id];
-        await this.currentField.unload(
-          data,
-          state,
-          this.formData,
-          this.computedFormData,
-          this
-        );
+      try {
+        this.state = "unload";
+        if (!isEmpty(this.currentField) && this.currentField.unload) {
+          const data = this.formData[this.currentField.id];
+          await this.currentField.unload(
+            data,
+            state,
+            this.formData,
+            this.computedFormData,
+            this
+          );
+        }
+      } catch (e) {
+        console.error(e)
       }
     },
     buildFormData(fields: Array<Field>): void {
@@ -626,10 +641,12 @@ export default defineComponent({
           this.currentField.config.footerBtns
         )
       }
-      this.footerBtns.push(this.getClearBtn());
-      this.footerBtns.push(this.getBackBtn());
-      this.footerBtns.push(this.getNextBtn());
-      this.footerBtns.push(this.getFinishBtn());
+      // Retrieve button override configuration.
+      const ftBtns = this.currentField.config?.overrideDefaultFooterBtns 
+      this.footerBtns.push(this.getClearBtn(ftBtns?.clearBtn));
+      this.footerBtns.push(this.getBackBtn(ftBtns?.backBtn));
+      this.footerBtns.push(this.getNextBtn(ftBtns?.nextBtn));
+      this.footerBtns.push(this.getFinishBtn(ftBtns?.finishBtn));
     },
     onFieldValue(value: Option | Array<Option>) {
       this.setActiveFieldValue(value);

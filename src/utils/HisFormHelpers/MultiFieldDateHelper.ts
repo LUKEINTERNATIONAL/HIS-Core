@@ -33,7 +33,7 @@ export interface DateFieldInterface {
 }
 
 export function getYearField(id: string, name: string, showUnknown=true): Field {
-    const primaryFunctions = ['TODAY']
+    const primaryFunctions = []
     if (showUnknown) primaryFunctions.push('UNKNOWN')
     return {
         id,
@@ -158,7 +158,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
 
     const datePartCondition = (f: any) => {
         if (f[yearID] && f[yearID].value) {
-            if (['Unknown', 'TODAY'].includes(f[yearID].value)) {
+            if (['Unknown'].includes(f[yearID].value)) {
                 return false
             }
         }
@@ -187,7 +187,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             && year.toString().match(/unknown/i)) {
             return ['Value unknown is not permitted']
         }
-        if (year && !['Unknown', 'TODAY'].includes(year.toString())
+        if (year && !['Unknown'].includes(year.toString())
             && isNaN(parseInt(year.toString()))
             || year < 1900) {
             return ['Invalid Year']
@@ -218,9 +218,6 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             const [_, month, day] = fullDate.split('-')
             fullDate = `${val.value}-${month}-${day}`
             return field.computeValue(fullDate, false)
-        }
-        if (val && val.value === 'TODAY') {
-            return field.computeValue(Service.getSessionDate(), false)
         }
         if (val && val.value === 'Unknown') {
             return field.computeValue('Unknown', false)

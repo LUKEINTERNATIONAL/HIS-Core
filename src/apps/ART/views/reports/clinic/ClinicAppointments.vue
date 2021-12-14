@@ -1,15 +1,17 @@
 <template>
-    <report-template
-        :title="title"
-        :period="period"
-        :rows="rows" 
-        :fields="fields"
-        :columns="columns"
-        :reportReady="reportReady"
-        :canExportCsv="false"
-        :canExportPDf="false"
-        :onReportConfiguration="onPeriod"> 
-    </report-template>
+    <ion-page>
+        <report-template
+            :title="title"
+            :period="period"
+            :rows="rows" 
+            :fields="fields"
+            :columns="columns"
+            :canExportCsv="false"
+            :canExportPDf="false"
+            :showtitleOnly="true"
+            :onReportConfiguration="onPeriod"> 
+        </report-template>
+    </ion-page>
 </template>
 
 <script lang='ts'>
@@ -21,12 +23,13 @@ import { FieldType } from '@/components/Forms/BaseFormElements'
 import Validation from "@/components/Forms/validations/StandardValidations"
 import HisDate from "@/utils/Date"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { IonPage } from "@ionic/vue"
 
 export default defineComponent({
     mixins: [ReportMixin],
-    components: { ReportTemplate },
+    components: { ReportTemplate, IonPage },
     data: () => ({
-        title: 'Appointments',
+        title: 'Booked clients',
         date: '' as string,
         rows: [] as Array<any>,
         appointments: [] as any,
@@ -38,7 +41,8 @@ export default defineComponent({
                 table.thTxt('Last name'),
                 table.thTxt('Gender'),
                 table.thTxt('birthdate'),
-                table.thTxt('Current Address')
+                table.thTxt('Current Address'),
+                table.thTxt('Actions')
             ]
         ]
     }),
@@ -79,9 +83,10 @@ export default defineComponent({
                     table.tdDate(data.birthdate),
                     table.td(
                        `District: ${data.district}
-                        table.td( Village: ${data.village}
-                        table.td( Land-mark: ${data.land_mark}`
-                    )
+                        Village: ${data.village}
+                        Land-mark: ${data.land_mark}`
+                    ),
+                    table.tdBtn('Select', () => this.confirmPatient(data.person_id))
                 ])
             })
         }

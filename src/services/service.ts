@@ -11,7 +11,7 @@ export class IncompleteEntityError extends Error {
     }
 }
 
-class NotFoundError extends Error {
+export class NotFoundError extends Error {
     constructor(message: string) {
         super(`RECORD NOT FOUND: ${message}`)
     }
@@ -90,8 +90,7 @@ export class Service {
                 throw new ApiServiceError(errors || 'Getway Error')
             }
             if (response.status === 500) {
-                const {errors} = await response?.json()
-                throw new ApiError(errors)
+                throw new ApiError('An internal server errror has occured')
             }
         }
     }
@@ -101,6 +100,10 @@ export class Service {
         if (req) {
             return req.date
         }
+    }
+
+    static getApiVersion() {
+        return sessionStorage.getItem('APIVersion') || 'N/A'
     }
 
     static getActiveApp(): AppInterface | {} { 
@@ -167,7 +170,16 @@ export class Service {
        
        return roles ? JSON.parse(roles) : []
     }
+
     static getUserName() {
        return sessionStorage.username;
+    }
+
+    static getCoreVersion() {
+        return sessionStorage.coreVersion || 'N/A';
+    }
+
+    static getAppVersion() {
+        return sessionStorage.appVersion || 'N/A';
     }
 }
