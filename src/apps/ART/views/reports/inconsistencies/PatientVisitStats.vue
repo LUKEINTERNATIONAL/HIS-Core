@@ -20,6 +20,7 @@
                         :type="chartType"
                         :options="chartOptions"
                         :series="series"
+                        @click="pointSelection"
                     >
                     </apexchart>
                 </div>
@@ -72,7 +73,18 @@ export default defineComponent({
         canShowReport: false,
         report: {} as any,
         series: [] as any,
+        patientPresent: {} as any,
+        guardianPresent: {} as any,
+        bothPresent: {} as any,
         chartOptions: {
+            chart: {
+                events: {
+                    dataPointSelection() {
+                        console.log('Ariba!')
+                        alert('Ariba!')
+                    }
+                }
+            },
             title : {
                 text: "HIV Reception encounters"
             },
@@ -109,12 +121,17 @@ export default defineComponent({
                 })
             await loading.present()
         },
+        pointSelection(e: any, c: any, config: any) {
+            try {
+                const { dataPointIndex, seriesIndex } = config
+                const sIndex = seriesIndex <= 0 ? 0 : seriesIndex
+                this.runTableDrill(this.series[sIndex].raw[dataPointIndex])
+            } catch (e) {
+                //TODO
+            }
+        },
         buildSeries(data: any) {
             const visitDates: string[] = uniq(Object.keys(data))
-            const patientPresent: any = {}
-            const guardianPresent: any = {}
-            const bothPresent: any = {}
-
             const setValueGroup = (
                 date: string,
                 group: Record<string, any>,
@@ -133,22 +150,23 @@ export default defineComponent({
                 return group
             }
 
-            const sortGroup = (valueGroup: any) => {
+            const sortSeries = (valueGroup: any) => {
                 return visitDates.map((date: string) => [
                     new Date(date).getTime(), 
                     valueGroup[date].length
                 ])
             }
 
-
+            const sortData = (valueGroup: any) => visitDates.map((date: string) => valueGroup[date])
+    
             for(const date in data) {
-                setValueGroup(date, patientPresent, (patient: any, guardian: any) => {
+                setValueGroup(date, this.patientPresent, (patient: any, guardian: any) => {
                     return patient && !guardian
                 })
-                setValueGroup(date, guardianPresent, (patient: any, guardian: any) => {
+                setValueGroup(date, this.guardianPresent, (patient: any, guardian: any) => {
                     return !patient && guardian
                 })
-                setValueGroup(date, bothPresent, (patient: any, guardian: any) => {
+                setValueGroup(date, this.bothPresent, (patient: any, guardian: any) => {
                     return patient && guardian
                 })
             }
@@ -156,15 +174,18 @@ export default defineComponent({
             return [
                 {
                     name: 'Patient present',
-                    data: sortGroup(patientPresent)
+                    raw: sortData(this.patientPresent),
+                    data: sortSeries(this.patientPresent)
                 },
                 {
                     name: 'Guardian present',
-                    data: sortGroup(guardianPresent)
+                    raw: sortData(this.guardianPresent),
+                    data: sortSeries(this.guardianPresent)
                 },
                 {
                     name: 'Both patient and guardian present',
-                    data: sortGroup(bothPresent)
+                    raw: sortData(this.bothPresent),
+                    data: sortSeries(this.bothPresent)
                 }
             ]
         }
