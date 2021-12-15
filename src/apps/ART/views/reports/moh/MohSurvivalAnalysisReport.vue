@@ -7,6 +7,7 @@
             :fields="fields"
             :columns="columns"
             reportPrefix="MoH"
+            :hasServerSideCaching="true"
             :onReportConfiguration="onPeriod"
             > 
         </report-template>
@@ -80,10 +81,11 @@ export default defineComponent({
         ]
     },
     methods: {
-        async onPeriod({ quarter, group }: any) {
+        async onPeriod({ quarter, group }: any, _: any, shouldRebuildCache=false) {
             this.rows = []
             this.period = quarter.label
             this.report = new SurvivalAnalysisReportService()
+            this.report.setRegenerate(shouldRebuildCache)
             this.report.setQuarter(quarter.label)
             this.report.setAgeGroup(group.value)
             this.setRows((await this.report.getSurvivalAnalysis()))
