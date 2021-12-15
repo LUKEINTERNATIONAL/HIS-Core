@@ -5,13 +5,13 @@ function convertArrayToTurples(items: Array<any>, size=2) {
     }, [])
 }
 
-function orderObj(unordered: any) {
-  return Object.keys(unordered).sort().reduce(
-    (obj: any, key: any) => { 
+function orderObj(unordered: any, sorter: Function) {
+  return Object.keys(unordered)
+    .sort((a: any, b: any) => sorter(a, b))
+    .reduce((obj: any, key: any) => { 
         obj[key] = unordered[key]; 
         return obj;
-    }, 
-    {}
+      }, {}
   )
 }
 
