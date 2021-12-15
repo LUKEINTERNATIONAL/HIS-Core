@@ -99,7 +99,6 @@ export default defineComponent({
         },
         setRows(quarterList: any) {
             const ordered = this.sortReportData(quarterList)
-            console.log(ordered)
             for(const quarterIndex in ordered) {
                 const quarterOutcomes = ordered[quarterIndex]
                 let qInterval = 0
@@ -108,8 +107,8 @@ export default defineComponent({
                     'On antiretrovirals': 0,
                     'Defaulted': 0,
                     'Patient died': 0,
-                    'Patient transferred out': 0,
                     'Treatment stopped': 0,
+                    'Patient transferred out': 0,
                     'unknown': 0
                 }
                 if (isEmpty(quarterOutcomes)) {
@@ -118,14 +117,14 @@ export default defineComponent({
                 for(const outcome in quarterOutcomes) {
                     const outcomeIntervals =  quarterOutcomes[outcome]
                     for (const interval in outcomeIntervals) {
-                        qInterval = parseInt(interval)
                         const count = outcomeIntervals[interval]
-                        totalRegInQuarter += count
+                        qInterval = parseInt(interval)
                         if (outcome in outcomeRef) {
                             outcomeRef[outcome] = count
                         } else {
                             outcomeRef['unknown'] = count
                         }
+                        totalRegInQuarter += count
                     }
                 }
                 this.rows.push([
