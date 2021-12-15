@@ -4,6 +4,18 @@ function convertArrayToTurples(items: Array<any>, size=2) {
       return acc
     }, [])
 }
+
+function orderObj(unordered: any) {
+  return Object.keys(unordered).sort().reduce(
+    (obj: any, key: any) => { 
+        obj[key] = unordered[key]; 
+        return obj;
+    }, 
+    {}
+  )
+}
+
 export default {
-    convertArrayToTurples
+  convertArrayToTurples,
+  orderObj
 }

@@ -24,6 +24,7 @@ import { Option } from '@/components/Forms/FieldInterface'
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { IonPage } from "@ionic/vue"
+import Transformer from "@/utils/Transformers"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -87,8 +88,9 @@ export default defineComponent({
             this.setRows((await this.report.getSurvivalAnalysis()))
         },
         setRows(quarterList: any) {
-            for(const quarterIndex in quarterList) {
-                const quarterOutcomes = quarterList[quarterIndex]
+            const ordered = Transformer.orderObj(quarterList);
+            for(const quarterIndex in ordered) {
+                const quarterOutcomes = ordered[quarterIndex]
                 let qInterval = 0
                 let totalRegInQuarter = 0
                 const outcomeRef: any = {
@@ -99,8 +101,9 @@ export default defineComponent({
                     'Treatment stopped': 0,
                     'unknown': 0
                 }
-
-                if (isEmpty(quarterOutcomes)) continue
+                if (isEmpty(quarterOutcomes)) {
+                    continue
+                }
                 for(const outcome in quarterOutcomes) {
                     const outcomeIntervals =  quarterOutcomes[outcome]
                     for (const interval in outcomeIntervals) {
