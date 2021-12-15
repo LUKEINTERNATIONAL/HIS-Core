@@ -61,18 +61,10 @@ export default defineComponent({
                 const group = AGE_GROUPS[i]
                 if (group in this.cohort) {
                     const cohortData = this.cohort[group][gender]
-                    const lessThanThreeMonths = sortData(
-                        cohortData, (months: number) => {
-                        return months < 3
-                    })
-                    const threeToFiveMonths = sortData(
-                        cohortData, (months: number) => {
-                        return months >= 3 && months <= 5
-                    })
-                    const sixPlusMonths = sortData(
-                        cohortData, (months: number) => {
-                        return months >= 6
-                    })
+                    const s = (comparator: Function) => sortData(cohortData, comparator)
+                    const lessThanThreeMonths = s((months: number) => months < 3)
+                    const threeToFiveMonths = s((months: number) => months >= 3 && months <= 5)
+                    const sixPlusMonths = s((months: number) => months >= 6)
                     this.rows.push([
                         table.td(group),
                         table.td(gender),
@@ -82,8 +74,8 @@ export default defineComponent({
                     ])
                 } else {
                     this.rows.push([
-                        table.td(group), 
-                        table.td(gender), 
+                        table.td(group),
+                        table.td(gender),
                         table.td(0),
                         table.td(0),
                         table.td(0)
