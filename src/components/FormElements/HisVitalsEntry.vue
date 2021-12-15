@@ -14,7 +14,7 @@
               :label="key.label"
               :isActive="activeField === bIndex"
               :image="'vitals/'+key.other.icon"
-              @click="activeField = bIndex"
+              @click="setActiveField(bIndex)"
               v-show="key.other.visible !== false"
             >
             </option-button>
@@ -26,6 +26,7 @@
                 class='keypad-input'
                 v-if="keys.length > 0"
                 :value="keys[activeField].value"
+                :readonly="!(isPlatform('desktop'))"
               />
               <table class="keypad">
                 <tr v-for="(row, rowIndex) in keyboard" :key="rowIndex">
@@ -80,12 +81,16 @@ import ViewPort from "../DataViews/ViewPort.vue";
 import {
   IonGrid,
   IonCol,
-  IonRow
+  IonRow,
+  isPlatform
 } from "@ionic/vue";
 import { VITALS_KEYPAD } from "../Keyboard/KbLayouts";
 import { BMIService } from "@/services/bmi_service";
 import OptionButton from "@/components/Buttons/ActionSideButton.vue"
 import FieldMixinVue from "./FieldMixin.vue";
+import { VitalsService } from "@/apps/ART/services/vitals_service";
+import { toastWarning } from "@/utils/Alerts";
+import { Option } from "../Forms/FieldInterface";
 
 export default defineComponent({
   components: {
@@ -97,9 +102,10 @@ export default defineComponent({
   },
   mixins: [FieldMixinVue],
   data: () => ({
-    keys: [] as any,
+    keys: [] as Option[],
     patientID: "" as any,
     activeField: 0,
+    vitalService: {} as any,
     age: null as any,
     gender: null as any,
     keyboard: VITALS_KEYPAD,
@@ -108,6 +114,7 @@ export default defineComponent({
       result: "Normal",
       color: "",
     },
+    isPlatform,
   }),
   activated(){
     this.$emit('onFieldActivated', this)
@@ -152,19 +159,30 @@ export default defineComponent({
     },
     getWeight(): number {
       const weight = this.keys.filter((key: any) => key.label === "Weight");
-      return weight[0].value === "" ? 0 : parseFloat(weight[0].value);
+      return weight[0].value === "" ? 0 : parseFloat(`${weight[0].value}`);
     },
     getHeight(): number {
       const height = this.keys.filter((key: any) => key.label === "Height");
-      return height[0].value === "" ? 0 : parseFloat(height[0].value);
+      return height[0].value === "" ? 0 : parseFloat(`${height[0].value}`);
     },
     getAge(): number {
       const age = this.keys.filter((key: any) => key.label === "Age");
-      return age[0].value === "" ? 0 : parseFloat(age[0].value);
+      return age[0].value === "" ? 0 : parseFloat(`${age[0].value}`);
     },
     async init() {
       this.keys = await this.options(this.fdata);
+      this.vitalService = new VitalsService(this.config.patientId, this.config.providerID)
     },
+    async setActiveField(index: number) {
+      const vital = this.keys[this.activeField]
+      if(!vital.value && !vital.other.required) {
+        this.activeField = index
+      } else {
+        const errs = this.vitalService.validator(vital)
+        if(errs && errs.length) toastWarning(errs)
+        else this.activeField = index
+      }
+    }
   },
   mounted() {
     this.init();
