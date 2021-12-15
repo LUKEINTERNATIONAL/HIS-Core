@@ -17,6 +17,10 @@ export class SurvivalAnalysisReportService extends ArtReportService {
         this.ageGroup = AGE_GROUP.GENERAL
     }
 
+    setRegenerate(ok: boolean) {
+        this.regenerate = ok
+    }
+
     getAgeGroup() {
         return this.ageGroup
     }
