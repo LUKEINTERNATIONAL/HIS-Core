@@ -26,6 +26,11 @@ import table from "@/components/DataViews/tables/ReportDataTable"
 import { IonPage } from "@ionic/vue"
 import Transformer from "@/utils/Transformers"
 
+const borderSplitStyle = {
+    style: {
+        borderRight: '5px solid black !important'
+    }
+}
 export default defineComponent({
     mixins: [ReportMixin],
     components: { ReportTemplate, IonPage },
@@ -39,11 +44,7 @@ export default defineComponent({
                 table.thTxt('Interval (months)'),
                 table.thTxt('Sub group'),
                 table.thTxt('Total Reg (database)'),
-                table.thTxt('Total Reg (Confirmed)', {
-                    style: {
-                        borderRight: '5px solid black !important'
-                    }
-                }),
+                table.thTxt('Total Reg (Confirmed)', borderSplitStyle),
                 table.thTxt('Alive'),
                 table.thTxt('Died'),
                 table.thTxt('Defaulted'),
@@ -122,11 +123,7 @@ export default defineComponent({
                     table.td(qInterval),
                     table.td(this.report.getAgeGroup()),
                     table.td(totalRegInQuarter),
-                    table.td(0, {
-                        style: {
-                            'border-right': '5px solid black'
-                        }
-                    }), // This column is there for show according to Mwatha
+                    table.td('', borderSplitStyle), // Must remain blank according to guidelines
                     table.td(outcomeRef['On antiretrovirals']),
                     table.td(outcomeRef['Patient died']),
                     table.td(outcomeRef['Defaulted']),
