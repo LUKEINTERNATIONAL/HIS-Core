@@ -85,7 +85,7 @@ import {
   IonChip,
   loadingController
 } from "@ionic/vue"
-import { toastDanger } from "@/utils/Alerts";
+import { alertConfirmation, toastDanger } from "@/utils/Alerts";
 import Img from "@/utils/Img"
 import { Service } from "@/services/service"
 import dayjs from "dayjs";
@@ -144,6 +144,10 @@ export default defineComponent({
     customBtns: {
       type: Array,
       default: () => []
+    },
+    hasServerSideCaching: {
+      type: Boolean,
+      default: false
     },
     canExportPDf: {
       type: Boolean,
@@ -204,14 +208,18 @@ export default defineComponent({
     /**
      * Callback is used when a form has been submitted with report configurations
      */
-    async onFinish(formData: any, computedData: any) {
+    async onFinish(formData: any, computedData: any, shouldRebuildCache=false) {
       this.formData = formData
       this.computeFormData = computedData
       this.canShowReport = true
       await this.presentLoading()
       try {
         this.date = dayjs().format('YYYY-MM-DD:h:m:s')
-        await this.onReportConfiguration(this.formData, this.computeFormData)
+        await this.onReportConfiguration(
+          this.formData, 
+          this.computeFormData, 
+          shouldRebuildCache
+        )
         loadingController.dismiss()
       }catch(e) {
         toastDanger(e)
@@ -220,9 +228,9 @@ export default defineComponent({
       }
     },
     /**Reinitiate the report with default configurations */
-    async reloadReport() {
+    async reloadReport(shouldRebuildCache=false) {
       if (!isEmpty(this.formData) || !isEmpty(this.computeFormData)) {
-        await this.onFinish(this.formData, this.computeFormData)
+        await this.onFinish(this.formData, this.computeFormData, shouldRebuildCache)
       }
       if (this.onDefaultConfiguration) {
         await this.onLoadDefault()
@@ -291,7 +299,14 @@ export default defineComponent({
       slot: "end",
       color: "warning",
       visible: true,
-      onClick: async () => this.reloadReport()
+      onClick: async () => {
+        let shouldRebuildCache = false
+        if (this.hasServerSideCaching) {
+          const ok = await alertConfirmation('Do you want to rebuild report cache?', "Rebuild Report")
+          shouldRebuildCache = ok ? true : false
+        }
+        this.reloadReport(shouldRebuildCache)
+      } 
     })
     this.btns.push({
       name: "Finish",
