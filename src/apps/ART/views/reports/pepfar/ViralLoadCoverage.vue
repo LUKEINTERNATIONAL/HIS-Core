@@ -95,42 +95,62 @@ export default defineComponent({
       return table.td(0)
     },
     async setFemaleTotalsRow() {
-      const t = this.totals.F
-      const allFemale = uniq(Object.values(t).reduce(
-        (all: Array<any>, curr: any) => all.concat(curr), []
+      const totals = this.totals.F
+
+      const allF = uniq(Object.values(totals).reduce(
+        (all: Array<any>, curr: any) => all.concat(
+          curr.map((f: any) => f.patient_id)
+        ), []
       ))
-      const maternalStatuses = await this.report.getMaternalStatus(
-        allFemale.map((f: any) => f.patient_id)
-      )
-      const femailFilter = (status: 'FBf' | 'FP', femaleList: Array<any>) => {
-        const statuses = maternalStatuses[status]
-        return femaleList.filter((f: any) => statuses.includes(f.patient_id))
+
+      const fStatus = await this.report.getMaternalStatus(allF)
+
+      const allFp = fStatus.FBf.concat(fStatus.FP)
+
+      const fp = (status: 'FBf' | 'FP', fl: Array<any>) => {
+        const statuses = fStatus[status]
+        return fl.filter((f: any) => statuses.includes(f.patient_id))
       }
+
+      const fnp = (fd: Array<any>) => fd.filter((f: any) => !allFp.includes(f.patient_id))
 
       this.rows.push([
         table.td('All'),
         table.td('FP'),
-        this.drillDown(femailFilter('FP', t.tx_curr)),
-        this.drillDown(femailFilter('FP', t.due_for_vl)),
-        this.drillDown(femailFilter('FP', t.drawn_routine)),
-        this.drillDown(femailFilter('FP', t.drawn_targeted)),
-        this.drillDown(femailFilter('FP', t.high_vl_routine)),
-        this.drillDown(femailFilter('FP', t.high_vl_targeted)),
-        this.drillDown(femailFilter('FP', t.low_vl_routine)),        
-        this.drillDown(femailFilter('FP', t.low_vl_targeted)),
+        this.drillDown(fp('FP', totals.tx_curr)),
+        this.drillDown(fp('FP', totals.due_for_vl)),
+        this.drillDown(fp('FP', totals.drawn_routine)),
+        this.drillDown(fp('FP', totals.drawn_targeted)),
+        this.drillDown(fp('FP', totals.high_vl_routine)),
+        this.drillDown(fp('FP', totals.high_vl_targeted)),
+        this.drillDown(fp('FP', totals.low_vl_routine)),        
+        this.drillDown(fp('FP', totals.low_vl_targeted)),
       ])
 
       this.rows.push([
         table.td('All'),
+        table.td('FNP'),
+        this.drillDown(fnp(totals.tx_curr)),
+        this.drillDown(fnp(totals.due_for_vl)),
+        this.drillDown(fnp(totals.drawn_routine)),
+        this.drillDown(fnp(totals.drawn_targeted)),
+        this.drillDown(fnp(totals.high_vl_routine)),
+        this.drillDown(fnp(totals.high_vl_targeted)),
+        this.drillDown(fnp(totals.low_vl_routine)),        
+        this.drillDown(fnp(totals.low_vl_targeted)),
+      ])
+  
+      this.rows.push([
+        table.td('All'),
         table.td('FBF'),
-        this.drillDown(femailFilter('FBf', t.tx_curr)),
-        this.drillDown(femailFilter('FBf', t.due_for_vl)),
-        this.drillDown(femailFilter('FBf', t.drawn_routine)),
-        this.drillDown(femailFilter('FBf', t.drawn_targeted)),
-        this.drillDown(femailFilter('FBf', t.high_vl_routine)),
-        this.drillDown(femailFilter('FBf', t.high_vl_targeted)),
-        this.drillDown(femailFilter('FBf', t.low_vl_routine)),        
-        this.drillDown(femailFilter('FBf', t.low_vl_targeted)),
+        this.drillDown(fp('FBf', totals.tx_curr)),
+        this.drillDown(fp('FBf', totals.due_for_vl)),
+        this.drillDown(fp('FBf', totals.drawn_routine)),
+        this.drillDown(fp('FBf', totals.drawn_targeted)),
+        this.drillDown(fp('FBf', totals.high_vl_routine)),
+        this.drillDown(fp('FBf', totals.high_vl_targeted)),
+        this.drillDown(fp('FBf', totals.low_vl_routine)),        
+        this.drillDown(fp('FBf', totals.low_vl_targeted)),
       ])
     },
     setAllMalesTotalsRow() {
