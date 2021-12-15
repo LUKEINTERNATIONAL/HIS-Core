@@ -32,7 +32,9 @@ export default defineComponent({
             [       
                 table.thTxt('Age group'),
                 table.thTxt('Gender'),
-                table.thTxt('Returned after 30+ days')
+                table.thTxt('Returned <3 mo'),
+                table.thTxt('Returned 3-5 mo'),
+                table.thTxt('Returned 6+ mo')
             ]
         ]
     }),
@@ -51,17 +53,41 @@ export default defineComponent({
             await this.setRows('M')
         },
         async setRows(gender: string) {
+            const sortData = (ls: Array<any>, comparator: Function) => {
+                return ls.filter(i => comparator(i.months))
+                    .map(i => i.patient_id)
+            }
             for(const i in AGE_GROUPS) {
                 const group = AGE_GROUPS[i]
                 if (group in this.cohort) {
                     const cohortData = this.cohort[group][gender]
+                    const lessThanThreeMonths = sortData(
+                        cohortData, (months: number) => {
+                        return months < 3
+                    })
+                    const threeToFiveMonths = sortData(
+                        cohortData, (months: number) => {
+                        return months >= 3 && months <= 5
+                    })
+                    const sixPlusMonths = sortData(
+                        cohortData, (months: number) => {
+                        return months >= 66
+                    })
                     this.rows.push([
                         table.td(group),
                         table.td(gender),
-                        this.drill(cohortData)
+                        this.drill(lessThanThreeMonths),
+                        this.drill(threeToFiveMonths),
+                        this.drill(sixPlusMonths)
                     ])
                 } else {
-                    this.rows.push([table.td(group), table.td(gender), table.td(0)])
+                    this.rows.push([
+                        table.td(group), 
+                        table.td(gender), 
+                        table.td(0),
+                        table.td(0),
+                        table.td(0)
+                    ])
                 }
             }
         }
