@@ -20,7 +20,7 @@
 <script lang='ts'>
 import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
-import { DisaggregatedReportService, AGE_GROUPS, TEMP_OUTCOME_TABLE } from "@/apps/ART/services/reports/disaggregated_service"
+import { DisaggregatedReportService, TEMP_OUTCOME_TABLE } from "@/apps/ART/services/reports/disaggregated_service"
 import { REGIMENS } from "@/apps/ART/services/reports/regimen_report_service"
 import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
@@ -29,6 +29,7 @@ import table from "@/components/DataViews/tables/ReportDataTable"
 import { IonPage } from "@ionic/vue"
 import { MohCohortReportService } from "@/apps/ART/services/reports/moh_cohort_service"
 import { Option } from '@/components/Forms/FieldInterface'
+import { AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
 
 export default defineComponent({
     mixins: [ReportMixin],

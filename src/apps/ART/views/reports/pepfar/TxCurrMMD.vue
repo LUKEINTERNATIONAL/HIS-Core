@@ -17,13 +17,14 @@
 <script lang='ts'>
 import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
-import { TxReportService, OTHER_AGE_GROUPS } from '@/apps/ART/services/reports/tx_report_service'
+import { TxReportService } from '@/apps/ART/services/reports/tx_report_service'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { MohCohortReportService } from "@/apps/ART/services/reports/moh_cohort_service"
 import { Option } from '@/components/Forms/FieldInterface'
 import { isEmpty, uniq } from "lodash"
 import { toastWarning } from '@/utils/Alerts'
+import { AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -103,13 +104,13 @@ export default defineComponent({
             const males = []
             const females = []
 
-            for(const i in OTHER_AGE_GROUPS) {
-                const group = OTHER_AGE_GROUPS[i]
+            for(const i in AGE_GROUPS) {
+                const group = AGE_GROUPS[i]
                 if (group === '<1 year') {
                     minAge = 0
                     maxAge = 0
-                } else if (group === '50 plus years') {
-                    minAge = 50
+                } else if (group === '90 plus years') {
+                    minAge = 90
                     maxAge = 120
                 } else {
                     const [min, max] = group.split('-')

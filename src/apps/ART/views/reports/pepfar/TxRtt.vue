@@ -16,9 +16,10 @@
 <script lang='ts'>
 import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
-import { TxReportService, AGE_GROUPS } from '@/apps/ART/services/reports/tx_report_service'
+import { TxReportService } from '@/apps/ART/services/reports/tx_report_service'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
 
 export default defineComponent({
     mixins: [ReportMixin],
