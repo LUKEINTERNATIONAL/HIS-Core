@@ -57,7 +57,7 @@ export default defineComponent({
     }),
     created() {
         this.fields = [
-            ...this.getDateDurationFields(true, true, 17),
+            ...this.getDateDurationFields(true, false, 17),
             {
                 id: 'group',
                 helpText: 'Select sub-group',

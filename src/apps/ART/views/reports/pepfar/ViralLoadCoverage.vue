@@ -20,6 +20,7 @@ import table from "@/components/DataViews/tables/ReportDataTable";
 import { ViralLoadReportService } from "@/apps/ART/services/reports/viral_load_report";
 import { AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
 import { IonPage } from "@ionic/vue";
+import { isEmpty } from "lodash"
 
 export default defineComponent({
   mixins: [ReportMixin],
@@ -28,6 +29,8 @@ export default defineComponent({
     title: "VL Coverage report",
     cohort: {} as any,
     rows: [] as Array<any>,
+    maleTotals: { } as any,
+    femaleTotals: { } as any,
     columns: [
       [
         table.thTxt("", { colspan: 5, exportable: false }),
@@ -48,6 +51,7 @@ export default defineComponent({
         table.thTxt("Targeted", { value:'Targeted (Low VL (<1000 copies))'}),
       ],
     ],
+
   }),
   created() {
     this.fields = this.getDateDurationFields();
@@ -62,25 +66,54 @@ export default defineComponent({
       this.cohort = await this.report.getVLCoverage();
       await this.setRows("F");
       await this.setRows("M");
+      this.setAllMalesTotalsRow()
     },
-    drillDown(patients: Array<any>, filter: 'M' | 'F') {
-        const filteredP = patients.filter((p: any) => p.gender === filter)
-        if (filteredP.length >= 1) {
-            const columns = ['ARV #', 'DOB', 'Gender']
-            const onRows = () =>
-                filteredP.map((p: any) => ([
-                    p.arv_number, 
-                    this.toDate(p.birthdate), 
-                    p.gender,
-                    {
-                       type: 'button',
-                       name: 'Show',
-                       action: () => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`})
-                    }
-                ]))
-            return table.tdLink(filteredP.length, () => this.tableDrill({columns, onRows}))
-        }
-        return table.td(0)
+    setTotals(key: string, gender: 'M' | 'F', data: Array<any>) {
+      const cat: any = gender === 'M' ? this.maleTotals : this.femaleTotals
+      if (!cat[key]) {
+        cat[key] = []
+      }
+      if (gender === 'M') {
+        this.maleTotals[key] = cat[key].concat(data)
+      } else if (gender === 'F') {
+        this.femaleTotals[key] = cat[key].concat(data) 
+      }
+    },
+    drillDown(patients: Array<any>, filter: 'M' | 'F', totalsKey = '') {
+      const filteredP = patients.filter((p: any) => p.gender === filter)
+      if (filteredP.length >= 1) {
+        const columns = ['ARV #', 'DOB', 'Gender']
+        const onRows = () =>
+          filteredP.map((p: any) => ([
+            p.arv_number, 
+            this.toDate(p.birthdate), 
+            p.gender,
+            {
+                type: 'button',
+                name: 'Show',
+                action: () => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`})
+            }
+          ]))
+        if (totalsKey) {
+          this.setTotals(totalsKey, filter, filteredP)
+        } 
+        return table.tdLink(filteredP.length, () => this.tableDrill({columns, onRows}))
+      }
+      return table.td(0)
+    },
+    setAllMalesTotalsRow() {
+      return this.rows.push([
+        table.td('All'),
+        table.td('Male'),
+        this.drillDown(this.maleTotals.tx_curr, 'M'),
+        this.drillDown(this.maleTotals.due_for_vl, 'M'),
+        this.drillDown(this.maleTotals.drawn_routine, 'M'),
+        this.drillDown(this.maleTotals.drawn_targeted, 'M'),
+        this.drillDown(this.maleTotals.high_vl_routine, 'M'),
+        this.drillDown(this.maleTotals.high_vl_targeted, 'M'),
+        this.drillDown(this.maleTotals.low_vl_routine, 'M'),
+        this.drillDown(this.maleTotals.low_vl_targeted, 'M'),
+      ])
     },
     async setRows(gender: 'M' | 'F') {
       for (const i in AGE_GROUPS) {
@@ -90,14 +123,14 @@ export default defineComponent({
           this.rows.push([
             table.td(group),
             table.td(gender),
-            this.drillDown(cohortData.tx_curr, gender),
-            this.drillDown(cohortData.due_for_vl, gender),
-            this.drillDown(cohortData.drawn.routine, gender),
-            this.drillDown(cohortData.drawn.targeted, gender),
-            this.drillDown(cohortData.high_vl.routine, gender),
-            this.drillDown(cohortData.high_vl.targeted, gender),
-            this.drillDown(cohortData.low_vl.routine, gender),
-            this.drillDown(cohortData.low_vl.targeted, gender)
+            this.drillDown(cohortData.tx_curr, gender, 'tx_curr'),
+            this.drillDown(cohortData.due_for_vl, gender, 'due_for_vl'),
+            this.drillDown(cohortData.drawn.routine, gender, 'drawn_routine'),
+            this.drillDown(cohortData.drawn.targeted, gender, 'drawn_targeted'),
+            this.drillDown(cohortData.high_vl.routine, gender, 'high_vl_routine'),
+            this.drillDown(cohortData.high_vl.targeted, gender, 'high_vl_targeted'),
+            this.drillDown(cohortData.low_vl.routine, gender, 'low_vl_routine'),
+            this.drillDown(cohortData.low_vl.targeted, gender,'low_vl_targeted')
           ]);
         } else {
             this.rows.push([
