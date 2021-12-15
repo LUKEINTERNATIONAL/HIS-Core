@@ -32,8 +32,8 @@ export default defineComponent({
       [
         table.thTxt("", { colspan: 5, exportable: false }),
         table.thTxt("Sample Drawn", { colspan: 2, exportable: false }),
-        table.thTxt("VL <1000 copies", { colspan: 2, exportable: false }),
-        table.thTxt("VL >= 1000 copies", { colspan: 2, exportable: false }),
+        table.thTxt("High VL (>=1000 copies)", { colspan: 2, exportable: false }),
+        table.thTxt("Low VL (<1000 copies)", { colspan: 2, exportable: false }),
       ],
       [
         table.thTxt("Age group"),
@@ -42,10 +42,10 @@ export default defineComponent({
         table.thTxt("Due for VL"),
         table.thTxt("Routine", { value: 'Routine (Sample Drawn)'}),
         table.thTxt("Targeted", { value:'Targeted (Sample Drawn)'}),
-        table.thTxt("Routine", { value: 'Routine (VL <1000 copies)'}),
-        table.thTxt("Targeted", { value:'Targeted (VL <1000 copies)'}),
-        table.thTxt("Routine", { value: 'Routine (VL >= 1000 copies)'}),
-        table.thTxt("Targeted", { value:'Targeted (VL >= 1000 copies)'}),
+        table.thTxt("Routine", { value: 'Routine (High VL (>=1000 copies))'}),
+        table.thTxt("Targeted", { value:'Targeted High VL (>=1000 copies)'}),
+        table.thTxt("Routine", { value: 'Routine (Low VL (<1000 copies))'}),
+        table.thTxt("Targeted", { value:'Targeted (Low VL (<1000 copies))'}),
       ],
     ],
   }),
@@ -94,10 +94,10 @@ export default defineComponent({
             this.drillDown(cohortData.due_for_vl, gender),
             this.drillDown(cohortData.drawn.routine, gender),
             this.drillDown(cohortData.drawn.targeted, gender),
-            this.drillDown(cohortData.low_vl.routine, gender),
-            this.drillDown(cohortData.low_vl.targeted, gender),
             this.drillDown(cohortData.high_vl.routine, gender),
-            this.drillDown(cohortData.high_vl.targeted, gender)
+            this.drillDown(cohortData.high_vl.targeted, gender),
+            this.drillDown(cohortData.low_vl.routine, gender),
+            this.drillDown(cohortData.low_vl.targeted, gender)
           ]);
         } else {
             this.rows.push([
