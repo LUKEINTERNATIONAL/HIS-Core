@@ -20,7 +20,6 @@ import table from "@/components/DataViews/tables/ReportDataTable";
 import { ViralLoadReportService } from "@/apps/ART/services/reports/viral_load_report";
 import { AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
 import { IonPage } from "@ionic/vue";
-import { isEmpty } from "lodash"
 
 export default defineComponent({
   mixins: [ReportMixin],
@@ -29,8 +28,10 @@ export default defineComponent({
     title: "VL Coverage report",
     cohort: {} as any,
     rows: [] as Array<any>,
-    maleTotals: { } as any,
-    femaleTotals: { } as any,
+    totals: {
+      F: {},
+      M: {}
+    } as any,
     columns: [
       [
         table.thTxt("", { colspan: 5, exportable: false }),
@@ -68,16 +69,10 @@ export default defineComponent({
       await this.setRows("M");
       this.setAllMalesTotalsRow()
     },
-    setTotals(key: string, gender: 'M' | 'F', data: Array<any>) {
-      const cat: any = gender === 'M' ? this.maleTotals : this.femaleTotals
-      if (!cat[key]) {
-        cat[key] = []
-      }
-      if (gender === 'M') {
-        this.maleTotals[key] = cat[key].concat(data)
-      } else if (gender === 'F') {
-        this.femaleTotals[key] = cat[key].concat(data) 
-      }
+    setTotals(key: string, gender: 'M' | 'F', data: Array<any>) {      
+      if (!this.totals[gender][key]) this.totals[gender][key] = []
+
+      this.totals[gender][key] = this.totals[gender][key].concat(data)
     },
     drillDown(patients: Array<any>, filter: 'M' | 'F', totalsKey = '') {
       const filteredP = patients.filter((p: any) => p.gender === filter)
@@ -89,9 +84,9 @@ export default defineComponent({
             this.toDate(p.birthdate), 
             p.gender,
             {
-                type: 'button',
-                name: 'Show',
-                action: () => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`})
+              type: 'button',
+              name: 'Show',
+              action: () => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`})
             }
           ]))
         if (totalsKey) {
@@ -102,17 +97,18 @@ export default defineComponent({
       return table.td(0)
     },
     setAllMalesTotalsRow() {
+      const totals = this.totals['M']
       return this.rows.push([
         table.td('All'),
         table.td('Male'),
-        this.drillDown(this.maleTotals.tx_curr, 'M'),
-        this.drillDown(this.maleTotals.due_for_vl, 'M'),
-        this.drillDown(this.maleTotals.drawn_routine, 'M'),
-        this.drillDown(this.maleTotals.drawn_targeted, 'M'),
-        this.drillDown(this.maleTotals.high_vl_routine, 'M'),
-        this.drillDown(this.maleTotals.high_vl_targeted, 'M'),
-        this.drillDown(this.maleTotals.low_vl_routine, 'M'),
-        this.drillDown(this.maleTotals.low_vl_targeted, 'M'),
+        this.drillDown(totals.tx_curr, 'M'),
+        this.drillDown(totals.due_for_vl, 'M'),
+        this.drillDown(totals.drawn_routine, 'M'),
+        this.drillDown(totals.drawn_targeted, 'M'),
+        this.drillDown(totals.high_vl_routine, 'M'),
+        this.drillDown(totals.high_vl_targeted, 'M'),
+        this.drillDown(totals.low_vl_routine, 'M'),
+        this.drillDown(totals.low_vl_targeted, 'M'),
       ])
     },
     async setRows(gender: 'M' | 'F') {
@@ -133,18 +129,18 @@ export default defineComponent({
             this.drillDown(cohortData.low_vl.targeted, gender,'low_vl_targeted')
           ]);
         } else {
-            this.rows.push([
-                table.td(group), 
-                table.td(gender), 
-                table.td(0),
-                table.td(0),
-                table.td(0),
-                table.td(0),
-                table.td(0),
-                table.td(0),
-                table.td(0),
-                table.td(0)
-            ]);
+          this.rows.push([
+            table.td(group), 
+            table.td(gender), 
+            table.td(0),
+            table.td(0),
+            table.td(0),
+            table.td(0),
+            table.td(0),
+            table.td(0),
+            table.td(0),
+            table.td(0)
+          ]);
         }
       }
     },
