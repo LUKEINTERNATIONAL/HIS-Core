@@ -20,6 +20,8 @@ export class ViralLoadReportService extends ArtReportService {
             'program_id': this.programID,
             'report_definition': 'pepfar'
         })
-        return ArtReportService.postJson('vl_maternal_status', patientIds)
+        return ArtReportService.postJson(`vl_maternal_status?${params}`, {
+            'patient_ids': patientIds
+        })
     }
 }
