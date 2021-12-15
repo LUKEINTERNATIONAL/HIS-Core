@@ -84,7 +84,7 @@ export default defineComponent({
                 label: q.name, value: q.start, other: q
             }))
         },
-        getDateDurationFields(useQuarter=false, setCustomQuarterPeriod=false): Array<Field> {
+        getDateDurationFields(useQuarter=false, setCustomQuarterPeriod=false, maxQuarter=5): Array<Field> {
             const minDate = '2001-01-01'
             const maxDate = Service.getSessionDate()
             return [
@@ -95,7 +95,7 @@ export default defineComponent({
                     condition: () => useQuarter,
                     validation: (val: Option) => Validation.required(val),
                     options: () => {
-                        const quarters = ArtReportService.getReportQuarters()
+                        const quarters = ArtReportService.getReportQuarters(maxQuarter)
                         let items: Array<Option> = quarters.map((q: any) => ({
                             label: q.name,
                             value: q.start,

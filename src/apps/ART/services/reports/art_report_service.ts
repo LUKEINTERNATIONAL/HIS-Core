@@ -100,7 +100,7 @@ export class ArtReportService extends Service {
         }
     }
 
-    static getReportQuarters() {
+    static getReportQuarters(maxQuarters=5) {
         const qtrs: QuarterInterface[] = [];
         let currDate = new Date();
         let currYear = currDate.getFullYear();
@@ -115,7 +115,7 @@ export class ArtReportService extends Service {
             qtrs.push(this.buildQtrObj('Q1', currYear + 1))
         }
 
-        while (i < 5) {
+        while (i < maxQuarters) {
           qtrs.push(this.buildQtrObj(`Q${qtr}`, currYear))
           qtr = qtr > 0 ? (qtr -= 1) : qtr;
           currYear = qtr == 0 ? currYear - 1 : currYear;
