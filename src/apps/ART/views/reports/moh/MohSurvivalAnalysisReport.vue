@@ -89,7 +89,11 @@ export default defineComponent({
             this.setRows((await this.report.getSurvivalAnalysis()))
         },
         setRows(quarterList: any) {
-            const ordered = Transformer.orderObj(quarterList);
+            const ordered = Transformer.orderObj(quarterList, (a: string, b: string) => {
+                const [b_, yearA] = a.split(' ')
+                const [a_, yearB] = b.split(' ')
+                return parseInt(yearA) < parseInt(yearB) ? -1 : 0
+            });
             for(const quarterIndex in ordered) {
                 const quarterOutcomes = ordered[quarterIndex]
                 let qInterval = 0
