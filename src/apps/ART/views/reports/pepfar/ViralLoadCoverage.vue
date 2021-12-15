@@ -74,12 +74,11 @@ export default defineComponent({
 
       this.totals[gender][key] = this.totals[gender][key].concat(data)
     },
-    drillDown(patients: Array<any>, filter: 'M' | 'F', totalsKey = '') {
-      const filteredP = patients.filter((p: any) => p.gender === filter)
-      if (filteredP.length >= 1) {
+    drillDown(patients: Array<any>) {
+      if (patients.length >= 1) {
         const columns = ['ARV #', 'DOB', 'Gender']
         const onRows = () =>
-          filteredP.map((p: any) => ([
+          patients.map((p: any) => ([
             p.arv_number, 
             this.toDate(p.birthdate), 
             p.gender,
@@ -89,10 +88,7 @@ export default defineComponent({
               action: () => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`})
             }
           ]))
-        if (totalsKey) {
-          this.setTotals(totalsKey, filter, filteredP)
-        } 
-        return table.tdLink(filteredP.length, () => this.tableDrill({columns, onRows}))
+        return table.tdLink(patients.length, () => this.tableDrill({columns, onRows}))
       }
       return table.td(0)
     },
@@ -101,14 +97,14 @@ export default defineComponent({
       return this.rows.push([
         table.td('All'),
         table.td('Male'),
-        this.drillDown(totals.tx_curr, 'M'),
-        this.drillDown(totals.due_for_vl, 'M'),
-        this.drillDown(totals.drawn_routine, 'M'),
-        this.drillDown(totals.drawn_targeted, 'M'),
-        this.drillDown(totals.high_vl_routine, 'M'),
-        this.drillDown(totals.high_vl_targeted, 'M'),
-        this.drillDown(totals.low_vl_routine, 'M'),
-        this.drillDown(totals.low_vl_targeted, 'M'),
+        this.drillDown(totals.tx_curr),
+        this.drillDown(totals.due_for_vl),
+        this.drillDown(totals.drawn_routine),
+        this.drillDown(totals.drawn_targeted),
+        this.drillDown(totals.high_vl_routine),
+        this.drillDown(totals.high_vl_targeted),
+        this.drillDown(totals.low_vl_routine),
+        this.drillDown(totals.low_vl_targeted)
       ])
     },
     async setRows(gender: 'M' | 'F') {
@@ -116,17 +112,22 @@ export default defineComponent({
         const group = AGE_GROUPS[i];
         if (group in this.cohort) {
           const cohortData = this.cohort[group];
+          const td = (id: string, patients: any) => {
+            const filteredPatients =  patients.filter((p: any) => p.gender === gender)
+            this.setTotals(id, gender, filteredPatients)
+            return this.drillDown(filteredPatients)
+          }
           this.rows.push([
             table.td(group),
             table.td(gender),
-            this.drillDown(cohortData.tx_curr, gender, 'tx_curr'),
-            this.drillDown(cohortData.due_for_vl, gender, 'due_for_vl'),
-            this.drillDown(cohortData.drawn.routine, gender, 'drawn_routine'),
-            this.drillDown(cohortData.drawn.targeted, gender, 'drawn_targeted'),
-            this.drillDown(cohortData.high_vl.routine, gender, 'high_vl_routine'),
-            this.drillDown(cohortData.high_vl.targeted, gender, 'high_vl_targeted'),
-            this.drillDown(cohortData.low_vl.routine, gender, 'low_vl_routine'),
-            this.drillDown(cohortData.low_vl.targeted, gender,'low_vl_targeted')
+            td('tx_curr', cohortData.tx_curr),
+            td('due_for_vl', cohortData.due_for_vl),
+            td('drawn_routine', cohortData.drawn.routine),
+            td('drawn_targeted', cohortData.drawn.targeted),
+            td('high_vl_routine', cohortData.high_vl.routine),
+            td('high_vl_targeted', cohortData.high_vl.targeted),
+            td('low_vl_routine', cohortData.low_vl.routine),
+            td('low_vl_targeted', cohortData.low_vl.targeted)
           ]);
         } else {
           this.rows.push([
