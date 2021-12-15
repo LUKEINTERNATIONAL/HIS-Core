@@ -473,7 +473,7 @@ export default defineComponent({
           value, this.formData, this.computedFormData
         )
         if (errors) {
-          return toastWarning(errors.join(", "), 3500);
+          return toastWarning(errors.join(", "));
         }
       }
       // Run callback before proceeding to next field
