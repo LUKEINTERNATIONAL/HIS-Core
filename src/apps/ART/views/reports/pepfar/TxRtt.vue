@@ -71,7 +71,7 @@ export default defineComponent({
                     })
                     const sixPlusMonths = sortData(
                         cohortData, (months: number) => {
-                        return months >= 66
+                        return months >= 6
                     })
                     this.rows.push([
                         table.td(group),
