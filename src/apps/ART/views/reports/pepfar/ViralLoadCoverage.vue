@@ -20,6 +20,7 @@ import table from "@/components/DataViews/tables/ReportDataTable";
 import { ViralLoadReportService } from "@/apps/ART/services/reports/viral_load_report";
 import { AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
 import { IonPage } from "@ionic/vue";
+import { uniq } from "lodash";
 
 export default defineComponent({
   mixins: [ReportMixin],
@@ -68,6 +69,7 @@ export default defineComponent({
       await this.setRows("F");
       await this.setRows("M");
       this.setAllMalesTotalsRow()
+      await this.setFemaleTotalsRow()
     },
     setTotals(key: string, gender: 'M' | 'F', data: Array<any>) {      
       if (!this.totals[gender][key]) this.totals[gender][key] = []
@@ -91,6 +93,45 @@ export default defineComponent({
         return table.tdLink(patients.length, () => this.tableDrill({columns, onRows}))
       }
       return table.td(0)
+    },
+    async setFemaleTotalsRow() {
+      const t = this.totals.F
+      const allFemale = uniq(Object.values(t).reduce(
+        (all: Array<any>, curr: any) => all.concat(curr), []
+      ))
+      const maternalStatuses = await this.report.getMaternalStatus(
+        allFemale.map((f: any) => f.patient_id)
+      )
+      const femailFilter = (status: 'FBf' | 'FP', femaleList: Array<any>) => {
+        const statuses = maternalStatuses[status]
+        return femaleList.filter((f: any) => statuses.includes(f.patient_id))
+      }
+
+      this.rows.push([
+        table.td('All'),
+        table.td('FP'),
+        this.drillDown(femailFilter('FP', t.tx_curr)),
+        this.drillDown(femailFilter('FP', t.due_for_vl)),
+        this.drillDown(femailFilter('FP', t.drawn_routine)),
+        this.drillDown(femailFilter('FP', t.drawn_targeted)),
+        this.drillDown(femailFilter('FP', t.high_vl_routine)),
+        this.drillDown(femailFilter('FP', t.high_vl_targeted)),
+        this.drillDown(femailFilter('FP', t.low_vl_routine)),        
+        this.drillDown(femailFilter('FP', t.low_vl_targeted)),
+      ])
+
+      this.rows.push([
+        table.td('All'),
+        table.td('FBF'),
+        this.drillDown(femailFilter('FBf', t.tx_curr)),
+        this.drillDown(femailFilter('FBf', t.due_for_vl)),
+        this.drillDown(femailFilter('FBf', t.drawn_routine)),
+        this.drillDown(femailFilter('FBf', t.drawn_targeted)),
+        this.drillDown(femailFilter('FBf', t.high_vl_routine)),
+        this.drillDown(femailFilter('FBf', t.high_vl_targeted)),
+        this.drillDown(femailFilter('FBf', t.low_vl_routine)),        
+        this.drillDown(femailFilter('FBf', t.low_vl_targeted)),
+      ])
     },
     setAllMalesTotalsRow() {
       const totals = this.totals['M']
