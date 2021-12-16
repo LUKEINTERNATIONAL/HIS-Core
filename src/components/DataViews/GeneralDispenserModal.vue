@@ -74,25 +74,6 @@ export default defineComponent({
       required: true
     }
   },
-  // computed: {
-    // dispensedValues(): Array<[number, number]> {
-    //   return this.listData
-    //     .filter((d: Array<number>) => d[this.tabsIndex] > 0) // We only want tabs with entered value amounts
-    //     .map((d: Array<number>) => [ d[this.tabsIndex], d[this.packsIndex] ]) // Just track Tabs and packs changed.. ignore the rest
-    // },
-    // amountNeededRowSpan(): number {
-    //   return this.listData.length + 1
-    // }
-  // },
-  // watch: {
-  //   items: {
-  //     handler(items: Array<any>){
-  //       if (items) this.listData = [...items]
-  //     },
-  //     deep: true,
-  //     immediate: true
-  //   }
-  // },
   methods: {
     async onKeyPress(key: any) {
       const currentValue = this.amount;

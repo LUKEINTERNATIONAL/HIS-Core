@@ -17,7 +17,6 @@
           />             
         </ion-col>
         <ion-col size="10"> 
-          <!--- HISTORY START--->
           <div class="his-card history" v-if="tab === 'history'"> 
             <table class="his-table">
               <tr>
@@ -32,8 +31,6 @@
               </tr>
             </table>
           </div>
-          <!-- HISTORY END --->
-          <!--- PRESCRIPTION START --->
           <div class="prescription-tab" v-if="tab === 'prescribe'">
             <div class='prescription-table-section his-card'> 
               <table class="his-table">
@@ -67,7 +64,6 @@
               <barcode @onScan="onScan"/>
             </div>
           </div>
-          <!-- PRESCRIPTION END -->
         </ion-col>
       </ion-row>
     </div>
@@ -152,7 +148,6 @@ export default defineComponent({
       return true
     },
     async launchDispenser(item: Option) {
-      console.log(item);
       const modal = await modalController.create({
         component: GeneralDispenserModalVue,
         backdropDismiss: false,
