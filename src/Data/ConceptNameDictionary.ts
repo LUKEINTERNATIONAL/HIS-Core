@@ -151,6 +151,11 @@ export default [
    },
    {
       "categories": [],
+      "concept_id": 123,
+      "name": "Malaria"
+   },
+   {
+      "categories": [],
       "concept_id": 9227,
       "name": "Malaria Test Result"
    },

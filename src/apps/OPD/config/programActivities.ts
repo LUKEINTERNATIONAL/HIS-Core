@@ -35,7 +35,7 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
   {
     id: 'prescription',
     name: 'Prescription',
-    icon: 'clinical-notes.png'
+    icon: 'drugs-given.png'
   },
   {
     id: 'dispensation',
@@ -56,10 +56,5 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
     id: 'social history',
     name: 'Social history',
     icon: 'medical-report.png'
-  },
-  {
-    id: 'drugs given',
-    name: 'Drugs given',
-    icon: 'drugs-given.png'
   }
 ]
