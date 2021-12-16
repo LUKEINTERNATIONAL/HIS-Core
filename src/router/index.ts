@@ -25,6 +25,12 @@ import LabResults from "@/views/LabResults.vue"
 import User from "@/views/NewUser.vue"
 import PatientMerging from "@/views/PatientMerging.vue"
 import NpidDuplicates from "@/views/NpidDuplicates.vue"
+import {
+  toastController,
+  modalController,
+  alertController,
+  loadingController
+} from "@ionic/vue"
 
 const HIS_APP_ROUTES = (() => {
   let routes: Array<RouteRecordRaw> = []
@@ -185,4 +191,10 @@ const router = createRouter({
   routes
 })
 
+router.beforeEach(() => {
+  modalController.dismiss()
+  toastController.dismiss()
+  loadingController.dismiss()
+  alertController.dismiss()
+})
 export default router
