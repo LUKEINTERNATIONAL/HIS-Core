@@ -56,13 +56,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/home',
     name: 'Home',
-    component: Home,
-    beforeEnter: (to, from, next) => {
-      if (!sessionStorage.getItem('apiKey')) {
-          next('/login');
-      }
-      next();
-    }, 
+    component: Home
   },
   {
     name: 'View Duplicates',
@@ -191,10 +185,18 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach(() => {
-  modalController.dismiss()
-  toastController.dismiss()
-  loadingController.dismiss()
-  alertController.dismiss()
+router.beforeEach((to, from, next) => {
+  try {
+    modalController.dismiss()
+    toastController.dismiss()
+    loadingController.dismiss()
+    alertController.dismiss()
+  }catch(e) {
+    //dont worry about the errors
+  }
+  if (!sessionStorage.getItem('apiKey') && to.path !== '/login') {
+    next('/login')
+  }
+  next()
 })
 export default router
