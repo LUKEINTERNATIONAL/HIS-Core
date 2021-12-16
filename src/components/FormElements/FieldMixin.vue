@@ -38,7 +38,7 @@ export default defineComponent({
             required: true
         },
         clear: {
-            type: Boolean,
+            type: Number,
             required: true
         },
         options: {
