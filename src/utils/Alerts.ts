@@ -23,7 +23,7 @@ export function toastWarning(message: string, duration=10000) {
     return toast(message, 'warning', duration)
 }
 
-export function toastSuccess(message: string, duration=10000) {
+export function toastSuccess(message: string, duration=1000) {
     return toast(message, 'success', duration)
 }
 
