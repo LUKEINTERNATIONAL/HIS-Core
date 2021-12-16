@@ -19,7 +19,6 @@ import { ProgramService } from "@/services/program_service";
 import { toastWarning, toastSuccess } from "@/utils/Alerts"
 import EncounterMixinVue from './EncounterMixin.vue'
 import HisApp from "@/apps/app_lib"
-import { Patientservice } from "@/services/patient_service"
 import { isEmpty } from "lodash";
 
 export default defineComponent({
@@ -97,26 +96,29 @@ export default defineComponent({
               obs: d.map(({ other, value }: Option) => this.reception.buildValueCoded(other.concept, value))
             }
           },
-          options: () => [
-            {
-              label: "Patient Present?",
-              value: "",
-              other: {
-                concept: "Patient Present",
-                property: "patient_present",
-                values: this.yesNoOptions(),
+          options: (form: any) => {
+            if (form.who_is_present) return form.who_is_present as Option[]
+            return [
+              {
+                label: "Patient Present?",
+                value: "",
+                other: {
+                  concept: "Patient Present",
+                  property: "patient_present",
+                  values: this.yesNoOptions(),
+                },
               },
-            },
-            {
-              label: "Guardian Present?",
-              value: "",
-              other: {
-                concept: "Guardian Present",
-                property: "guardian_present",
-                values: this.yesNoOptions(),
-              },
-            }
-          ]
+              {
+                label: "Guardian Present?",
+                value: "",
+                other: {
+                  concept: "Guardian Present",
+                  property: "guardian_present",
+                  values: this.yesNoOptions(),
+                },
+              }
+            ]
+          }
         },
         {
           id: "capture_arv",
