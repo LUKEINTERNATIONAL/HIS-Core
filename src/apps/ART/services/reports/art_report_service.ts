@@ -54,16 +54,74 @@ export class ArtReportService extends Service {
         return { ...payload, ...config }
     }
 
-    static getReportQuarters(minDuration= 4) {
-        const quarters: Array<QuarterInterface> = []
-        let year = HisDate.getCurrentYear()
-        for(let i=0; i < minDuration; ++i) {
-            quarters.push({ name: `Q4 ${year}`, start: `${year}-10-01`, end: `${year}-12-31` })
-            quarters.push({ name: `Q3 ${year}`, start: `${year}-07-01`, end: `${year}-09-30` })
-            quarters.push({ name: `Q2 ${year}`, start: `${year}-04-01`, end: `${year}-06-30` })
-            quarters.push({ name: `Q1 ${year}`, start: `${year}-01-01`, end: `${year}-03-31` })
-            --year
+    static getQuarterBounds(year: number) {
+        return {
+            'Q1': {
+                qtr: 1,
+                start: `${year}-01-01 00:00`,
+                end: `${year}-03-31 00:00`
+            },
+            'Q2': {
+                qtr: 2,
+                start: `${year}-04-01 00:00`,
+                end: `${year}-06-30 00:00`
+            },
+            'Q3': {
+                qtr: 3,
+                start: `${year}-07-01 00:00`,
+                end: `${year}-09-31 00:00`
+            },
+            'Q4': {
+                qtr: 4,
+                start: `${year}-10-01 00:00`,
+                end: `${year}-12-31 00:00`
+            }
         }
-        return quarters
+    }
+
+    static getQtrByDate(date: Date) {
+        const qtrBounds: any = this.getQuarterBounds(date.getFullYear())
+        for(const qtr in qtrBounds) {
+            const { start, end } = qtrBounds[qtr]
+            if (date >= new Date(start) && date <= new Date(end)) {
+                return qtrBounds[qtr]
+            }
+        }
+        return null
+    }
+
+    static buildQtrObj(qtrName: string, year: number): QuarterInterface {
+        const qtrBounds: any = this.getQuarterBounds(year)
+        const { start, end } = qtrBounds[qtrName]
+        return {
+            start,
+            end,
+            name: `${qtrName} ${year}`,
+        }
+    }
+
+    static getReportQuarters() {
+        const qtrs: QuarterInterface[] = [];
+        let currDate = new Date();
+        let currYear = currDate.getFullYear();
+        const curYr = currYear
+        
+        currDate = new Date(`${curYr}-${currDate.getMonth() + 1}-${currDate.getDate()} 00:00`);
+        const currentQtr = this.getQtrByDate(currDate);
+        let qtr = currentQtr.qtr;
+        let i = 0;
+
+        if (qtr === 4) {
+            qtrs.push(this.buildQtrObj('Q1', currYear + 1))
+        }
+
+        while (i < 5) {
+          qtrs.push(this.buildQtrObj(`Q${qtr}`, currYear))
+          qtr = qtr > 0 ? (qtr -= 1) : qtr;
+          currYear = qtr == 0 ? currYear - 1 : currYear;
+          qtr =  qtr == 0 ? ( qtr += 4) : qtr;
+          i++;
+        }
+        return qtrs;
     }
 }

@@ -28,7 +28,7 @@ import { ObservationService } from "@/services/observation_service";
 import InformationHeader from "@/components/InformationHeader.vue";
 import VisitInformation from "@/components/VisitInformation.vue";
 import MastercardDetails from "@/components/MastercardDetails.vue";
-import _, { isArray, reduce } from "lodash";
+import _, { isArray, isEmpty } from "lodash";
 import {
   IonPage,
   IonContent,
@@ -161,8 +161,11 @@ export default defineComponent({
         this.patientId,
         "Date ART started"
       );
-      startDate = toStandardHisDisplayFormat(startDate[0].value_datetime);
-
+      
+      startDate = !isEmpty(startDate) 
+        ? toStandardHisDisplayFormat(startDate[0].value_datetime)
+        : 'N/A'
+      
       let guardians = "";
       RelationshipService.getGuardianDetails(this.patientId).then(
         (relationship: any) => {
@@ -213,12 +216,16 @@ export default defineComponent({
     },
 
     async getInitial(concept: string) {
-      const initialObs = await ObservationService.getAll(
-        this.patientId,
-        concept
-      );
-      const lastIndex = initialObs.length - 1;
-      return initialObs[lastIndex].value_numeric;
+      try {
+        const initialObs = await ObservationService.getAll(
+          this.patientId,
+          concept
+        );
+        const lastIndex = initialObs.length - 1;
+        return initialObs[lastIndex].value_numeric;
+      } catch (e) {
+        console.error(e)
+      }
     },
     async openModal(items: any, title: string, component: any) {
       const date = HisDate.toStandardHisDisplayFormat(

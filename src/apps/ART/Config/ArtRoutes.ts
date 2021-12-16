@@ -51,6 +51,11 @@ import BPAdherence from "@/apps/ART/views/encounters/BPAdherence.vue"
 
 export default [
     {
+        name: 'art_patient_visit_stats',
+        path: '/art/patient_visits',
+        component: () => import("@/apps/ART/views/reports/inconsistencies/PatientVisitStats.vue")
+    },
+    {
         name: "filing management",
         path: '/art/filing_numbers/:patient_id',
         component: () => import("@/apps/ART/views/FilingNumberManagement.vue")
