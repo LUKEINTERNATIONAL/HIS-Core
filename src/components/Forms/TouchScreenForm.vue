@@ -27,7 +27,7 @@
           :config="currentField.config"
           :options="currentField.options"
           :preset="currentField.preset"
-          :clear="isClear"
+          :clear="valueClearIndex"
           :fdata="formData"
           :cdata="computedFormData"
           :activationState="state"
@@ -35,7 +35,6 @@
           :defaultValue="currentField.defaultValue"
           :onValueUpdate="currentField.onValueUpdate"
           @onValue="onFieldValue"
-          @onClear="isClear = false"
           @onFieldActivated="onFieldActivated"
         />
       </keep-alive>
@@ -80,6 +79,7 @@ import {
   IonButton,
   IonHeader,
   IonTitle,
+  toastController
 } from "@ionic/vue";
 import { alertConfirmation, toastWarning } from "@/utils/Alerts";
 import InfoCard from "@/components/DataViews/HisFormInfoCard.vue"
@@ -125,7 +125,7 @@ export default defineComponent({
     },
   },
   data: () => ({
-    isClear: false,
+    valueClearIndex: 0 as number,
     currentIndex: 0,
     currentField: {} as Field,
     formData: {} as any,
@@ -181,12 +181,24 @@ export default defineComponent({
       async handler(field: string) {
         if (field) this.mountField(field)
       }
+    },
+    state: {
+      handler(state: string) {
+        const toastDismissableStates = [
+          'onValue', 'onfinish', 'next', 'prev', 'init'
+        ]
+        if (toastDismissableStates.includes(state)) toastController.dismiss()
+      }
     }
   },
   mounted() {
     this.footerBtns = [this.getCancelBtn()]
   },
   methods: {
+    clearValue() {
+      this.valueClearIndex += 1
+      this.setActiveFieldValue(null)
+    },
     async mountField(name: string) {
       if (name === '_NEXT_FIELD_') {
         await this.goNext()
@@ -214,6 +226,7 @@ export default defineComponent({
             "Are you sure you want to cancel?"
           );
           if (confirmation) {
+            toastController.dismiss()
             this.cancelDestinationPath
               ? this.$router.push(this.cancelDestinationPath)
               : this.$router.back();
@@ -238,7 +251,7 @@ export default defineComponent({
           const confirmation = await alertConfirmation(
             "Are you sure you want to clear field data?"
           );
-          if (confirmation) this.isClear = true;
+          if (confirmation) this.clearValue();
         },
       };
     },
@@ -472,9 +485,7 @@ export default defineComponent({
         const errors = this.currentField.validation(
           value, this.formData, this.computedFormData
         )
-        if (errors) {
-          return toastWarning(errors.join(", "), 3500);
-        }
+        if (errors) return toastWarning(errors.join(", "), 60000);
       }
       // Run callback before proceeding to next field
       if (this.currentField.beforeNext) {
@@ -577,6 +588,7 @@ export default defineComponent({
       })
     },
     async setActiveFieldValue(value: any) {
+      toastController.dismiss()
       this.state = "onValue";
       const proxyID = this.currentField.proxyID
       const id = this.currentField.id

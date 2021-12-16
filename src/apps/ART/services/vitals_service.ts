@@ -1,26 +1,29 @@
 import { AppEncounterService } from "@/services/app_encounter_service";
 import { isArray } from "lodash";
+import { Option } from '@/components/Forms/FieldInterface';
 export class VitalsService extends AppEncounterService{
   constructor(patientID: number, providerID: number) {
     super(patientID, 6, providerID);
   }
-  isNotEmptyandNumber(vital: any) {
+  isNotEmptyandNumber(vital: Option) {
     return `${vital.value}`.match(/^-?\d+\.?\d*$/) ? null : [`Invalid entry for ${vital.label}`]
   }
-  isNotEmptyandFloat(vital: any) {
-    return `${vital.value}`.match(/^\d{1,3}\.\d{1,5}$/) ? null : [`Invalid entry for ${vital.label}`]
+  isNotEmptyandFloat(vital: Option) {
+    return `${vital.value}`.match(/^\d{1,3}\.\d{1,5}$/) 
+      ? null 
+      : [`Invalid entry for ${vital.label}. Don't forget to add a decimal. e.g. 56.2 ${vital.other.modifier}`]
   }
-  checkMinMax(val: any, min: number, max: number) {
+  checkMinMax(val: Option, min: number, max: number) {
     const p = [];
     if (parseFloat(`${val.value}`) < min) {
-      p.push([`${val.label} entered is less than minimum ${val.label}`])
+      p.push([`${val.label} entered is less than minimum ${min} ${val?.other?.modifier || ''}`])
     }
     if (parseFloat(`${val.value}`) > max) {
-      p.push([`${val.label} entered is greater than maximum ${val.label}`])
+      p.push([`${val.label} entered is greater than maximum ${max} ${val?.other?.modifier || ''}`])
     }
     return p.length > 0 ? p : null;
   }
-  validateAll(vitals: any) {
+  validateAll(vitals: Option[]) {
     const p: any = [];
     vitals.map((vital: any) => {
       const j = this.validator(vital);
@@ -58,15 +61,13 @@ export class VitalsService extends AppEncounterService{
     }
     return this.mergeErrors(p)
   }
-  
   validator(vital: any) {
-
     const values = [
       {
         name: "Weight",
         validator: (val: any) => {
           const emptyErrors = this.isNotEmptyandFloat(val);
-          const minErrors = this.checkMinMax(val, 1, 300);
+          const minErrors = this.checkMinMax(val, 2.0, 250.0);
           return this.mergeErrors([emptyErrors, minErrors]); 
         },
       },

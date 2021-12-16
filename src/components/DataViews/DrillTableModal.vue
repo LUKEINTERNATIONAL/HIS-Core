@@ -10,7 +10,7 @@
       <his-basic-table :columns="columns" :rows="rows"> </his-basic-table>
     </div>
     <div v-else>
-      <center><h1>Loading data, Please wait.....</h1></center>
+      <text-skeloton/>
     </div>
   </ion-content>
 
@@ -27,12 +27,13 @@
 import { defineComponent, PropType } from "vue";
 import HisBasicTable from "./HisBasicTable.vue";
 import { modalController } from "@ionic/vue";
+import TextSkeloton from "@/components/TextSkeleton.vue"
 import {
   IonHeader, 
   IonToolbar, 
   IonContent, 
   IonFooter, 
-  IonButton 
+  IonButton
 } from "@ionic/vue"
 export default defineComponent({
   components: { 
@@ -41,7 +42,8 @@ export default defineComponent({
     IonToolbar, 
     IonContent, 
     IonFooter, 
-    IonButton  
+    IonButton,
+    TextSkeloton
   },
   props: {
     title: {
