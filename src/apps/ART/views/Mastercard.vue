@@ -28,7 +28,7 @@ import { ObservationService } from "@/services/observation_service";
 import InformationHeader from "@/components/InformationHeader.vue";
 import VisitInformation from "@/components/VisitInformation.vue";
 import MastercardDetails from "@/components/MastercardDetails.vue";
-import _, { isArray, isEmpty, reduce } from "lodash";
+import _, { isArray, isEmpty } from "lodash";
 import {
   IonPage,
   IonContent,
