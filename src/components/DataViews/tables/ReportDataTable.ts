@@ -30,7 +30,7 @@ export interface RowInterface {
 }
 export function prepareCSVValue(value: string | number | Date) {
     if(typeof value !== 'string') return value
-    return value.replace(',', ' ')
+    return value.replace(/,/gi, ' ').trim()
 }
 export function toExportableFormat(columns: Array<ColumnInterface[]>, rows: Array<RowInterface[]>) {
     const strRows: Array<any> = []
