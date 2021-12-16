@@ -144,7 +144,7 @@ export default defineComponent({
       this.BMI.color = BMI.color;
     },
     async onKeyPress(key: any) {
-      const currentValue = this.keys[this.activeField].value;
+      const currentValue = this.keys[this.activeField].value.toString();
       if (key.match(/del/i)) {
         this.keys[this.activeField].value = currentValue.substring(
           0,
