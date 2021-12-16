@@ -16,10 +16,10 @@ export class VitalsService extends AppEncounterService{
   checkMinMax(val: Option, min: number, max: number) {
     const p = [];
     if (parseFloat(`${val.value}`) < min) {
-      p.push([`${val.label} entered is less than minimum ${min} ${val.other.modifier}`])
+      p.push([`${val.label} entered is less than minimum ${min} ${val?.other?.modifier || ''}`])
     }
     if (parseFloat(`${val.value}`) > max) {
-      p.push([`${val.label} entered is greater than maximum ${max} ${val.other.modifier}`])
+      p.push([`${val.label} entered is greater than maximum ${max} ${val?.other?.modifier || ''}`])
     }
     return p.length > 0 ? p : null;
   }
