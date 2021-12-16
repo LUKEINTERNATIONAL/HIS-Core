@@ -7,6 +7,7 @@ async function toast(message: string, color="primary", duration=10000) {
         animated: true,
         duration: duration,
         color: color,
+        keyboardClose: true,
         buttons: [
             {
                 side: 'end',
