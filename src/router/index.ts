@@ -25,6 +25,12 @@ import LabResults from "@/views/LabResults.vue"
 import User from "@/views/NewUser.vue"
 import PatientMerging from "@/views/PatientMerging.vue"
 import NpidDuplicates from "@/views/NpidDuplicates.vue"
+import {
+  toastController,
+  modalController,
+  alertController,
+  loadingController
+} from "@ionic/vue"
 
 const HIS_APP_ROUTES = (() => {
   let routes: Array<RouteRecordRaw> = []
@@ -50,13 +56,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/home',
     name: 'Home',
-    component: Home,
-    beforeEnter: (to, from, next) => {
-      if (!sessionStorage.getItem('apiKey')) {
-          next('/login');
-      }
-      next();
-    }, 
+    component: Home
   },
   {
     name: 'View Duplicates',
@@ -185,4 +185,18 @@ const router = createRouter({
   routes
 })
 
+router.beforeEach((to, from, next) => {
+  try {
+    modalController.dismiss()
+    toastController.dismiss()
+    loadingController.dismiss()
+    alertController.dismiss()
+  }catch(e) {
+    //dont worry about the errors
+  }
+  if (!sessionStorage.getItem('apiKey') && to.path !== '/login') {
+    next('/login')
+  }
+  next()
+})
 export default router

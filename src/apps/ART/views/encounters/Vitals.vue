@@ -230,6 +230,8 @@ export default defineComponent({
             value: this.gender,
           },
           config: {
+            patientId: this.patientID,
+            providerId: this.providerID,
             hiddenFooterBtns : [
               'Clear'
             ]
@@ -258,7 +260,7 @@ export default defineComponent({
             {
               label: "Temp",
               value: "",
-              other: { modifier: "C", icon: "temp" },
+              other: { modifier: "°C", icon: "temp" },
             },
             {
               label: "SP02",
