@@ -585,6 +585,7 @@ export default defineComponent({
       })
     },
     async setActiveFieldValue(value: any) {
+      toastController.dismiss()
       this.state = "onValue";
       const proxyID = this.currentField.proxyID
       const id = this.currentField.id
