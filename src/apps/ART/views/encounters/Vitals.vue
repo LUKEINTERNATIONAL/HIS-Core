@@ -252,6 +252,7 @@ export default defineComponent({
               other: {
                 modifier: "CM",
                 icon: "height",
+                recentHeight: this.recentHeight,
                 visible: showHeight,
                 required: showHeight,
               },

@@ -61,11 +61,11 @@ export class VitalsService extends AppEncounterService{
     }
     return this.mergeErrors(p)
   }
-  validator(vital: any) {
+  validator(vital: Option) {
     const values = [
       {
         name: "Weight",
-        validator: (val: any) => {
+        validator: (val: Option) => {
           const emptyErrors = this.isNotEmptyandFloat(val);
           const minErrors = this.checkMinMax(val, 2.0, 250.0);
           return this.mergeErrors([emptyErrors, minErrors]); 
@@ -73,10 +73,14 @@ export class VitalsService extends AppEncounterService{
       },
       {
         name: "Height",
-        validator: (val: any) => {
-          const emptyErrors = this.isNotEmptyandNumber(val);
-          const minErrors = this.checkMinMax(val, 40, 220);
-          return this.mergeErrors([emptyErrors, minErrors]); 
+        validator: (val: Option) => {
+          const errors = []
+          if(val.other.recentHeight && parseInt(val.value.toString()) < val.other.recentHeight) {
+            errors.push([`The entered height is less that previous height ${val.other.recentHeight}cm`])
+          }
+          errors.push(this.isNotEmptyandNumber(val))
+          errors.push(this.checkMinMax(val, 40, 220))
+          return this.mergeErrors(errors); 
         },
       }, {
         name: "BP",
