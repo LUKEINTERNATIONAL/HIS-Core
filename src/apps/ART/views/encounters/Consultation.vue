@@ -426,10 +426,10 @@ export default defineComponent({
     },
     getPrescriptionFields(preChecked: Array<Option>) {
       const vals = [
-        { label: "ARVs", value: "ARVs", isChecked: true },
-        { label: "CPT", value: "CPT", isChecked: true },
-        { label: "3HP (RFP + INH)", value: "3HP (RFP + INH)", isChecked: true },
-        { label: "IPT", value: "IPT" },
+        { label: "ARVs", value: "ARVs", isChecked: false },
+        { label: "CPT", value: "CPT", isChecked: false },
+        { label: "3HP (RFP + INH)", value: "3HP (RFP + INH)", isChecked: false },
+        { label: "IPT", value: "IPT", isChecked: false},
         { label: "NONE OF THE ABOVE", value: "NONE OF THE ABOVE" },
       ];
       const exclusions = [];
