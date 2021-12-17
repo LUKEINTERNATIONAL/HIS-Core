@@ -14,11 +14,11 @@
           <td>{{ data.accession_number }}</td>
           <td>{{ data.test_name }}</td>
           <td>{{ data.specimen }}</td>
-          <td>{{ data.ordered }}</td>
+          <td>{{ HisDate.toStandardHisDisplayFormat(data.ordered) }}</td>
           <td>
             <span v-for="(d, i) in data.result" :key="i"> {{ d }} <br /></span>
           </td>
-          <td>{{ data.released }}</td>
+          <td>{{ HisDate.toStandardHisDisplayFormat(data.released) }}</td>
         </tr>
       </table>
     </div>
@@ -31,11 +31,13 @@ import { modalController } from "@ionic/vue";
 import LabOrderModal from "@/components/DataViews/LabOrderModal.vue"
 import { isEmpty } from "lodash";
 import FieldMixinVue from "./FieldMixin.vue";
+import HisDate from "@/utils/Date"
 
 export default defineComponent({
   components: { ViewPort },
   mixins: [FieldMixinVue],
   data: () => ({
+    HisDate,
     rows: [] as Array<any>,
   }),
   methods: {
