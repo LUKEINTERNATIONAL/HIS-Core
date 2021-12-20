@@ -27,10 +27,7 @@ export default defineComponent({
         {
           id: "htn_age",
           helpText: "Enter HTN age Threshold",
-          preset: {
-            label: this.htnThreshold,
-            value: this.htnThreshold,
-          },
+          defaultValue: () => this.htnThreshold,
           type: FieldType.TT_TEXT,
           validation: (val: any) => Validation.required(val),
         },
