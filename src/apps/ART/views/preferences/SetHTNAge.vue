@@ -10,16 +10,15 @@
 import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
-import { GlobalPropertyService } from "@/services/global_property_service";
 import { toastSuccess } from "@/utils/Alerts";
 import Validation from "@/components/Forms/validations/StandardValidations"
+import ART_GLOBAL_PROP from "@/apps/ART/art_global_props"
 
 export default defineComponent({
   components: { HisStandardForm },
   methods: {
     onFinish(formData: any) {
-      const sitePrefix = `${formData.htn_age.value}`.toUpperCase();
-      GlobalPropertyService.set(this.property, sitePrefix)
+      ART_GLOBAL_PROP.setHtnAgeThreshold(`${formData.htn_age.value}`.toUpperCase())
         .then(() => toastSuccess("Property set"))
         .then(() => this.$router.push("/"));
     },
@@ -41,14 +40,13 @@ export default defineComponent({
   data() {
     return {
       fields: [] as any,
-      property: "htn.screening.age.threshold",
       htnThreshold: ''
     };
   },
   watch: {
     $route: {
       async handler() {
-        this.htnThreshold = await GlobalPropertyService.get(this.property);
+        this.htnThreshold = await ART_GLOBAL_PROP.htnAgeThreshold()
         this.getFields();
       },
       deep: true,

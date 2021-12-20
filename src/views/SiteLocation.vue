@@ -10,17 +10,18 @@
 import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
-import { GlobalPropertyService } from "@/services/global_property_service";
 import { toastSuccess } from "@/utils/Alerts";
 import { LocationService } from "@/services/location_service";
 import { Option } from "@/components/Forms/FieldInterface";
 import Validation from "@/components/Forms/validations/StandardValidations";
+import GLOBAL_PROP from "@/apps/GLOBAL_APP/global_prop";
+
 export default defineComponent({
   components: { HisStandardForm },
   methods: {
     onFinish(formData: any) {
       const siteLocation = formData.location.value;
-      GlobalPropertyService.set(this.property, siteLocation)
+      GLOBAL_PROP.setHealthCenterID(siteLocation)
         .then(() => toastSuccess("Property set"))
         .then(() => this.$router.push("/"));
     },
@@ -53,14 +54,13 @@ export default defineComponent({
   data() {
     return {
       val: '',
-      fields: [] as any,
-      property: "current_health_center_id",
+      fields: [] as any
     };
   },
   watch: {
     $route: {
       async handler() {
-        this.val = await GlobalPropertyService.get(this.property);
+        this.val = await GLOBAL_PROP.healthCenterID();
         this.getFields();
       },
       deep: true,

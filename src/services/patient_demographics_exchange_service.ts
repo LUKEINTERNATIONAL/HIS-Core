@@ -1,9 +1,9 @@
 import { Service } from '@/services/service'
 import { isEmpty } from 'lodash';
-import { GlobalPropertyService } from './global_property_service'
 import { PatientPrintoutService } from './patient_printout_service';
 import HisDate from "@/utils/Date"
 import { Patientservice } from './patient_service';
+import GLOBAL_PROP from '@/apps/GLOBAL_APP/global_prop';
 
 export interface DDESearchDemographics {
     given_name: string;
@@ -25,7 +25,7 @@ export class PatientDemographicsExchangeService extends Service {
     }
 
     async loadDDEStatus() {
-        this.enabled = await GlobalPropertyService.isProp('dde_enabled=true')
+        this.enabled = await GLOBAL_PROP.ddeEnabled()
     }
 
     isEnabled() {

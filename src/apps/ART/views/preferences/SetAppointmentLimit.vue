@@ -9,16 +9,15 @@
 import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
-import { GlobalPropertyService } from "@/services/global_property_service";
 import { toastSuccess } from "@/utils/Alerts";
 import Validation from "@/components/Forms/validations/StandardValidations"
+import ART_GLOBAL_PROP from "@/apps/ART/art_global_props"
 
 export default defineComponent({
   components: { HisStandardForm },
   methods: {
     onFinish(formData: any) {
-      const property = `${formData.property.value}`.toUpperCase();
-      GlobalPropertyService.set(this.property, property)
+      ART_GLOBAL_PROP.setAppointmentLimit(`${formData.property.value}`.toUpperCase())
         .then(() => toastSuccess("Property set"))
         .then(() => this.$router.push("/"));
     },
@@ -37,14 +36,13 @@ export default defineComponent({
   data() {
     return {
       fields: [] as any,
-      property: "clinic.appointment.limit",
       presetAppointmentLimit: '',
     };
   },
   watch: {
     $route: {
       async handler() {
-        this.presetAppointmentLimit = await GlobalPropertyService.get(this.property);
+        this.presetAppointmentLimit = await ART_GLOBAL_PROP.appointmentLimit();
         this.fields = this.getFields() 
       },
       deep: true,

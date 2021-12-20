@@ -15,6 +15,8 @@ import { GlobalPropertyService } from "@/services/global_property_service";
 import { toastSuccess, toastWarning } from "@/utils/Alerts";
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { isEmpty } from "lodash"
+import ART_APP from "@/apps/ART/art_global_props"
+import { ART_GLOBAL_PROP } from "@/apps/ART/art_global_props"
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -26,8 +28,8 @@ export default defineComponent({
       const adults = formData.adults.map((data: { label: any }) => {
         return data.label
       }).join();
-      GlobalPropertyService.set('clinic.days', adults)
-        .then(() => GlobalPropertyService.set('peads.clinic.days', children))
+      ART_APP.setAdultClinicDays(adults)
+        .then(() => ART_APP.setPeadsClinicDays(children))
         .then(() => toastSuccess('Property Set'))
         .then(() => this.$router.push("/"))
         .catch(() => toastWarning('Could not set property'))
@@ -47,14 +49,14 @@ export default defineComponent({
           helpText: "Clinic days (adults: 18 yrs and over)",
           type: FieldType.TT_MULTIPLE_SELECT,
           validation: (val: any) => Validation.required(val),
-          options:()=> this.getClinicDayOptions('clinic.days'),
+          options:() => this.getClinicDayOptions(ART_GLOBAL_PROP.ADULT_CLINIC_DAYS),
         },
         {
           id: "children",
           helpText: "Clinic days (children: Under 18 yrs)",
           type: FieldType.TT_MULTIPLE_SELECT,
           validation: (val: any) => Validation.required(val),
-          options:()=> this.getClinicDayOptions('peads.clinic.days'),
+          options:() => this.getClinicDayOptions(ART_GLOBAL_PROP.PEADS_CLINIC_DAYS)
         }
       ];
     },

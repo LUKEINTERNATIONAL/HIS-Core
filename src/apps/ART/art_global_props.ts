@@ -37,9 +37,12 @@ function askPillsRemaining() {
     return GlobalPropertyService.isProp(`${ART_GLOBAL_PROP.PILLS_REMAINING}=true`)
 }
 
-
 function appointmentLimit() {
     return GlobalPropertyService.get(ART_GLOBAL_PROP.APPOINTMENT_LIMIT)
+}
+
+function htnAgeThreshold() {
+    return GlobalPropertyService.get(ART_GLOBAL_PROP.HTN_SCREENING_AGE_THRESHOLD)
 }
 
 function filingNumberLimit() {
@@ -58,6 +61,14 @@ function peadsClinicDays() {
     return GlobalPropertyService.get(ART_GLOBAL_PROP.PEADS_CLINIC_DAYS)
 }
 
+function setHtnAgeThreshold(threshold: string) {
+    return GlobalPropertyService.set(ART_GLOBAL_PROP.HTN_SCREENING_AGE_THRESHOLD, threshold)
+}
+
+function setAppointmentLimit(limit: string) {
+    return GlobalPropertyService.set(ART_GLOBAL_PROP.APPOINTMENT_LIMIT, limit)
+}
+
 function setAdultClinicDays(days: string) {
     return GlobalPropertyService.set(ART_GLOBAL_PROP.ADULT_CLINIC_DAYS, days)
 }
@@ -66,7 +77,15 @@ function setPeadsClinicDays(days: string) {
     return GlobalPropertyService.set(ART_GLOBAL_PROP.PEADS_CLINIC_DAYS, days)
 }
 
+function setFilingNumberLimit(limit: string) {
+    return GlobalPropertyService.set(ART_GLOBAL_PROP.FILING_NUMBER_LIMIT, limit)
+}
+
 export default {
+    htnAgeThreshold,
+    setHtnAgeThreshold,
+    setFilingNumberLimit,
+    setAppointmentLimit,
     filingNumberLimit,
     filingNumberPrefix,
     adultClinicDays,

@@ -9,16 +9,15 @@
 import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
-import { GlobalPropertyService } from "@/services/global_property_service";
 import { toastSuccess } from "@/utils/Alerts";
 import Validation from "@/components/Forms/validations/StandardValidations"
+import ART_GLOBAL_PROP from "@/apps/ART/art_global_props"
 
 export default defineComponent({
   components: { HisStandardForm },
   methods: {
     onFinish(formData: any) {
-      const property = `${formData.property.value}`.toUpperCase();
-      GlobalPropertyService.set(this.property, property)
+      ART_GLOBAL_PROP.setFilingNumberLimit(`${formData.property.value}`.toUpperCase())
         .then(() => toastSuccess("Property set"))
         .then(() => this.$router.push("/"));
     },
@@ -30,25 +29,24 @@ export default defineComponent({
           defaultValue: () => this.presetFilingNumberLimit,
           type: FieldType.TT_NUMBER,
           validation: (val: any) => Validation.required(val)
-        },
-      ];
-    },
+        }
+      ]
+    }
   },
   data() {
     return {
       fields: [] as any,
-      presetFilingNumberLimit: '',
-      property: "filing.number.limit",
-    };
+      presetFilingNumberLimit: ''
+    }
   },
   watch: {
     $route: {
       async handler() {
-        this.presetFilingNumberLimit = await GlobalPropertyService.get(this.property);
-        this.fields = this.getFields() 
+        this.presetFilingNumberLimit = await ART_GLOBAL_PROP.filingNumberLimit()
+        this.fields = this.getFields()
       },
       deep: true,
-      immediate: true,
+      immediate: true
     },
   },
 });

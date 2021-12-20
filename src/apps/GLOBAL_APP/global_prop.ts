@@ -11,23 +11,39 @@ export enum GLOBAL_PROP {
 }
 
 function ddeEnabled() {
-    return GlobalPropertyService.get(GLOBAL_PROP.DDE_ENABLED)
+    return GlobalPropertyService.isProp(`${GLOBAL_PROP.DDE_ENABLED}=true`)
 }
 
 function militarySiteEnabled() {
-    return GlobalPropertyService.get(GLOBAL_PROP.MILITARY_SITE)
+    return GlobalPropertyService.get(`${GLOBAL_PROP.MILITARY_SITE}=true`)
+}
+
+function portalEnabled() {
+    return GlobalPropertyService.get(`${GLOBAL_PROP.PORTAL_ENABLED}=true`)
+}
+
+function siteUUID() {
+    return GlobalPropertyService.get(GLOBAL_PROP.SITE_UUID)
+}
+
+function sitePrefix() {
+    return GlobalPropertyService.get(GLOBAL_PROP.SITE_PREFIX)
+}
+
+function portalProperties() {
+    return GlobalPropertyService.get(GLOBAL_PROP.PORTAL_PROPERTIES)
 }
 
 function healthCenterID() {
     return GlobalPropertyService.get(GLOBAL_PROP.HEALTH_CENTER_ID)
 }
 
-function siteCode() {
-    return GlobalPropertyService.get(GLOBAL_PROP.SITE_PREFIX)
+function setHealthCenterID(centerID: string) {
+    return GlobalPropertyService.set(GLOBAL_PROP.HEALTH_CENTER_ID, centerID)
 }
 
-function portalEnabled() {
-    return GlobalPropertyService.get(GLOBAL_PROP.PORTAL_ENABLED)
+function siteCode() {
+    return GlobalPropertyService.get(GLOBAL_PROP.SITE_PREFIX)
 }
 
 function setSitePrefix(prefix: string) {
@@ -43,6 +59,10 @@ function setPortalEnabled(isTrue: boolean) {
 }
 
 export default {
+    setHealthCenterID,
+    sitePrefix,
+    siteUUID,
+    portalProperties,
     ddeEnabled,
     militarySiteEnabled,
     healthCenterID,
