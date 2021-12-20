@@ -220,6 +220,7 @@ export default defineComponent({
         const gender: Field = PersonField.getGenderField()
         gender.requireNext = this.isEditMode()
         gender.condition = () => this.editConditionCheck(['gender'])
+        gender.defaultValue = () => this.presets.gender
         gender.beforeNext = async (data: Option) => {
             /**
              * Provide warning when changing gender in edit mode
@@ -243,15 +244,6 @@ export default defineComponent({
                 return action === 'Change gender'
             }
             return true
-        }
-        gender.defaultValue = () => {
-            if (this.presets.gender) {
-                if (this.presets.gender === 'M') {
-                    return {label: 'Male', value: 'M'}
-                }
-                return {label: 'Female', value: 'F'}
-            }
-            return ''
         }
         return gender
     },
