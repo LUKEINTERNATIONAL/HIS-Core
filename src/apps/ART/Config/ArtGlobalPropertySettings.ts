@@ -1,6 +1,7 @@
 import { FolderInterface } from "@/apps/interfaces/AppInterface";
 import { UserService } from "@/services/user_service"
 import { ART_GLOBAL_PROP } from "@/apps/ART/art_global_props"
+import { GLOBAL_PROP } from "@/apps/GLOBAL_APP/global_prop";
 
 function globalPropConfig(label: string, prop: string) {
     return {
@@ -76,7 +77,7 @@ export const PROPERTIES: FolderInterface[] = [
             ),
             globalPropConfig(
                 "Is this a military site?",
-                "military_site"
+                GLOBAL_PROP.MILITARY_SITE
             ),
             {
                 name: "Set Clinic Days",
