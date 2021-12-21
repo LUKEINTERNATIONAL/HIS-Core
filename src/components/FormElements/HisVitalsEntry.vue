@@ -4,8 +4,8 @@
       <ion-grid>
         <ion-row class="mobile-component-view" :style="{width: '100%', 'background-color': BMI.color, color: 'white', padding:'10px', textAlign: 'center'}"> 
           {{BMI.result}}
+          <p/>
         </ion-row>
-        <p/>
         <ion-row>
           <ion-col size="2">
             <option-button
