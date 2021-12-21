@@ -1,6 +1,6 @@
 <template>
     <view-port :showFull="false">
-        <base-input :value="fullDate" @onValue="onKbValue"/>
+        <ion-input class="input_display" :readonly="true" :value="fullDate"/>
     </view-port>
     <ion-grid class="his-floating-keyboard">
         <ion-row> 
@@ -38,7 +38,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import BaseInput from "@/components/FormElements/BaseTextInput.vue"
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
 import { NUMBERS_ONLY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
@@ -46,10 +45,10 @@ import FieldMixinVue from './FieldMixin.vue'
 import HisDate from "@/utils/Date"
 import { Service } from '@/services/service'
 import PickerSelector from "@/components/Selectors/PickerSelector.vue"
-import { IonGrid, IonCol, IonRow, IonButton } from '@ionic/vue'
+import { IonGrid, IonInput, IonCol, IonRow, IonButton } from '@ionic/vue'
 
 export default defineComponent({
-    components: { PickerSelector, BaseInput, ViewPort, IonGrid, IonCol, IonRow, IonButton},
+    components: { PickerSelector, IonInput, ViewPort, IonGrid, IonCol, IonRow, IonButton},
     mixins: [FieldMixinVue],
     data: ()=>({ 
         value: '',
@@ -63,18 +62,12 @@ export default defineComponent({
     },
     methods: {
         async setDefaultValue() {
-            if (this.defaultValue && !this.value) {
+            if (this.defaultValue && !this.date) {
                 const defaults = await this.defaultValue(this.fdata, this.cdata)
                 if (defaults) {
-                    this.value = defaults.toString()
+                    this.date = defaults.toString()
                 }
             }
-        },
-        onKbValue(text: any) { 
-            this.value = text
-        },
-        async keypress(text: any){
-            this.value = handleVirtualInput(text, this.value)
         },
         add(unit: string) {
             this.date = HisDate.add(`${this.date}`, unit, 1)
@@ -101,11 +94,11 @@ export default defineComponent({
         }
     },
     watch: {
-        value(value){
+        date(value){
             this.$emit('onValue', { label: value, value: this.fullDate })
         },
         clear() {
-            this.value = ''
+            this.today()
         }
     }
 })
