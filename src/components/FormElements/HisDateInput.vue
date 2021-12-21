@@ -4,13 +4,6 @@
     </view-port>
     <ion-grid class="his-floating-keyboard">
         <ion-row> 
-            <ion-col> 
-                <ion-button class="ion-float-right" color="warning" @click="today"> 
-                    TODAY
-                </ion-button>
-            </ion-col>
-        </ion-row>
-        <ion-row> 
             <ion-col sm-size="12"> 
                 <picker-selector
                     :value="getYear"
@@ -31,6 +24,13 @@
                     @onIncrement="add('day')"
                     @onDecrement="subtract('day')"
                 />
+            </ion-col>
+        </ion-row>
+        <ion-row> 
+            <ion-col class="ion-text-center" > 
+                <ion-button color="light" @click="today"> 
+                    <b>TODAY</b>
+                </ion-button>
             </ion-col>
         </ion-row>
     </ion-grid>
