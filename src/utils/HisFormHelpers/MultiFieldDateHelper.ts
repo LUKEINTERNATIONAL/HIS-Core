@@ -201,7 +201,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
      */
     year.summaryMapValue = () => ({
         label: field.summaryLabel || field.helpText, 
-        value: d(fullDate)
+        value: fullDate ? d(fullDate) : 'Unknown'
     })
 
     // To avoid the year from appearing on the summary, 
@@ -220,6 +220,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             return field.computeValue(fullDate, false)
         }
         if (val && val.value === 'Unknown') {
+            fullDate = ''
             return field.computeValue('Unknown', false)
         }
     }
