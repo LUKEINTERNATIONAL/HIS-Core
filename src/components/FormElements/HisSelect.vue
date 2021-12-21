@@ -1,6 +1,6 @@
 <template>
     <view-port :showFull="!showKeyboard">
-        <his-text-input :value="selected" @onValue="(value) => onKbValue(value, showKeyboard)" /> 
+        <his-text-input :readonly="!showKeyboard" :value="selected" @onValue="(value) => onKbValue(value, showKeyboard)" /> 
         <ion-list class='view-port-content'>
             <ion-item 
                 button v-for="(item, index) in filtered" 
@@ -24,7 +24,9 @@ export default defineComponent({
     name: "HisSelect",
     mixins: [SelectMixin],
     watch: {
-        clear(val: boolean){ if (val) this.clearSelection() }
+        clear() { 
+            this.clearSelection() 
+        }
     },
     async activated() {
         this.$emit('onFieldActivated', this)

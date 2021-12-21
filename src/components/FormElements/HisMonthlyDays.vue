@@ -63,7 +63,6 @@ export default defineComponent({
     },
     methods: {
         onKbValue(value: any) {
-            this.errors = ''
             this.value = value
             this.emitValue()
         },
