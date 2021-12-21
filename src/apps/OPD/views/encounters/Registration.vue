@@ -12,7 +12,6 @@ import Validation from '@/components/Forms/validations/StandardValidations';
 import { Field, Option } from '@/components/Forms/FieldInterface';
 import { FieldType } from '@/components/Forms/BaseFormElements';
 import { getFacilities } from '@/utils/HisFormHelpers/LocationFieldOptions';
-import { generateDateFields } from '@/utils/HisFormHelpers/MultiFieldDateHelper';
 import { toastWarning } from '@/utils/Alerts';
 
 export default defineComponent({
@@ -53,17 +52,6 @@ export default defineComponent({
                 // 28 = Malawi National Identifier Type Id
                 await PatientIdentifierService.create(this.patient.getID(), 28, nid['value'])
             }
-        },
-        buildDateObs(conceptName: string, date: string, isEstimate: boolean) {
-            let obs = {}
-            if (date.match(/unknown/i)) {
-                obs = this.registrationService.buildValueText(conceptName, 'Unknown')
-            } else if (isEstimate) {
-                obs = this.registrationService.buildValueDateEstimated(conceptName, date)
-            } else {
-                obs = this.registrationService.buildValueDate(conceptName, date)
-            }
-            return obs
         },
         getFields(): Array<Field>{
             return [
@@ -113,43 +101,6 @@ export default defineComponent({
                         value,
                         label: 'National ID'
                     })
-                },
-                {
-                    id: 'hiv_status',
-                    helpText: 'HIV status',
-                    type: FieldType.TT_SELECT,
-                    validation: (value: any) => Validation.required(value),
-                    computedValue: ({ value }: Option) => ({obs: this.registrationService.buildValueText('HIV status', value)}),
-                    options: () => ([
-                        { label: 'Positive not ART', value: 'Positive not ART' },
-                        { label: 'Posititve on ART', value: 'Positive on ART' },
-                        { label: 'Previous negative', value: 'Previous negative' },
-                        { label: 'New positive', value: 'New positive' },
-                        { label: 'New negative', value: 'New negative' },
-                        { label: 'Never tested', value: 'Never tested' },
-                    ])
-                },
-                ...generateDateFields({
-                    id: 'hiv_test_date',
-                    helpText: 'HIV Test',
-                    required: true,
-                    minDate: () => this.patient.getBirthdate(),
-                    condition: (fields: any) => fields.hiv_status.value !== 'Never tested',
-                    summaryLabel: 'HIV test date',
-                    estimation: {
-                        allowUnknown: true
-                    },
-                    computeValue: (date: string, isEstimate: boolean) => this.buildDateObs('HIV test date', date, isEstimate)
-                    
-                }, this.registrationService.getDate()),
-                {
-                    id: 'test_location',
-                    helpText: 'HIV test location',
-                    type: FieldType.TT_SELECT,
-                    validation: (value: any) => Validation.required(value),
-                    computedValue: ({ label }: Option) => ({obs: this.registrationService.buildValueText('HIV test location', label)}),
-                    condition: (fields: any) => fields.hiv_status.value !== 'Never tested',
-                    options: () => getFacilities(''),
                 },
                 {
                     id: 'patient_pregnant',
