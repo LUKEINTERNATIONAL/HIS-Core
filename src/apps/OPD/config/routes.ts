@@ -7,6 +7,11 @@ export default [
     component: () => import('@/apps/OPD/views/encounters/Registration.vue')
   },
   {
+    name: "hiv status",
+    path: "/opd/encounters/hiv-status/:patient_id",
+    component: () => import('@/apps/OPD/views/encounters/HIVStatus.vue')
+  },
+  {
     name: "vitals",
     path: "/opd/encounters/vitals/:patient_id",
     component: () => import('@/apps/OPD/views/encounters/Vitals.vue')

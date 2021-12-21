@@ -2,9 +2,24 @@ import { TaskInterface } from "@/apps/interfaces/TaskInterface";
 
 export const PRIMARY_ACTIVITIES: TaskInterface[] = [
   {
+    id: 'patient registration',
+    name: 'Patient registration',
+    icon: 'attributes.png'
+  },
+  {
     id: 'vitals',
     name: 'Vitals',
     icon: 'vitals.png'
+  },
+  {
+    id: 'presenting complaints',
+    name: 'Presenting complaints',
+    icon: 'complaints.png'
+  },
+  {
+    id: 'hiv status',
+    name: 'HIV STatus',
+    icon: 'aids.png'
   },
   {
     id: 'outpatient diagnosis',
@@ -33,6 +48,11 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
     },
   },
   {
+    id: 'social history',
+    name: 'Social history',
+    icon: 'medical-report.png'
+  },
+  {
     id: 'prescription',
     name: 'Prescription',
     icon: 'drugs-given.png'
@@ -42,19 +62,4 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
     name: 'Dispensation',
     icon: 'dispensing.png'
   },
-  {
-    id: 'patient registration',
-    name: 'Patient registration',
-    icon: 'attributes.png'
-  },
-  {
-    id: 'presenting complaints',
-    name: 'Presenting complaints',
-    icon: 'complaints.png'
-  },
-  {
-    id: 'social history',
-    name: 'Social history',
-    icon: 'medical-report.png'
-  }
 ]
