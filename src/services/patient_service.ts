@@ -55,10 +55,14 @@ export class Patientservice extends Service {
         return JSON.stringify(value);
     }
 
-    public static getPatientVisits(patientId: number) {
-        return super.getJson(`patients/${patientId}/visits`, {
+    public static async getPatientVisits(patientId: number) {
+        const dates: string[] = await super.getJson(`patients/${patientId}/visits`, {
             'program_id': super.getProgramID()
         })
+        if (dates) {
+            return dates.sort((a, b) => new Date(a) < new Date(b) ? 1 : 0)
+        }
+        return []
     }
 
     getGuardian() {
