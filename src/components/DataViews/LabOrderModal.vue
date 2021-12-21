@@ -130,7 +130,11 @@ export default defineComponent({
   },
   methods: {
     async getActivities() {
-     this.testTypes = await OrderService.getTestTypes();
+     const tests = await OrderService.getTestTypes();
+     this.testTypes = tests.map((t: any, i: any) => {
+        t.index = t.name === 'HIV viral load' ? (t.index = 0) : (t.index = i + 1)
+        return t
+     }).sort((a: any, b: any) => a.index < b.index ? 0 : 1)
     },
     async getSpecimens(testName: string, index: number) {
      this.specimens = await OrderService.getSpecimens(testName);
