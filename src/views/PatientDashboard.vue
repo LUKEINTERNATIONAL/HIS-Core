@@ -271,6 +271,7 @@ import {
   modalController
 } from "@ionic/vue";
 import { EncounterService } from '@/services/encounter_service'
+import { ConceptService } from "@/services/concept_service"
 export default defineComponent({
     components: {
         IonSegment,
@@ -526,8 +527,17 @@ export default defineComponent({
                         const data = []
                         const { observations } = encounter
                         for(const index in observations) {
+                            let concept = '<UNKNOWN CONCEPT>'
                             const obs =  observations[index]
-                            const concept = obs.concept.concept_names[0].name
+                            try {
+                                if (obs?.concept?.concept_names) {
+                                    concept = obs.concept.concept_names[0].name
+                                } else {
+                                    concept = await ConceptService.getConceptName(obs.concept_id)
+                                }
+                            } catch (e) {
+                                console.error(obs, e)
+                            }
                             const value = await ObservationService.resolvePrimaryValue(obs)
                             const time = HisDate.toStandardHisTimeFormat(obs.obs_datetime)
                             data.push([concept, value, time])
