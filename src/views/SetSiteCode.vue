@@ -11,20 +11,20 @@
 import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
-import { GlobalPropertyService } from "@/services/global_property_service";
 import { toastSuccess } from "@/utils/Alerts";
+import GLOBAL_PROP from "@/apps/GLOBAL_APP/global_prop";
 
 export default defineComponent({
   components: { HisStandardForm },
   methods: {
     onFinish(formData: any) {
       const sitePrefix = `${formData.site_code.value}`.toUpperCase();
-      GlobalPropertyService.set(this.property, sitePrefix)
+      GLOBAL_PROP.setSitePrefix(sitePrefix)
         .then(() => toastSuccess("Property set"))
         .then(() => this.$router.push("/"));
     },
     async setFields() {
-      const val = await GlobalPropertyService.get("site_prefix");
+      const val = await GLOBAL_PROP.sitePrefix()
       this.fields = [
         {
           id: "site_code",
@@ -41,12 +41,11 @@ export default defineComponent({
   data() {
     return {
       fields: [] as any,
-      property: "site_prefix",
     };
   },
   watch: {
     $route: {
-      async handler({ query }: any) {
+      async handler() {
         this.setFields();
       },
       deep: true,

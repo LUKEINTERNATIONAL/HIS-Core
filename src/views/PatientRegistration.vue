@@ -19,7 +19,6 @@ import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
-import { GlobalPropertyService } from "@/services/global_property_service"
 import { WorkflowService } from "@/services/workflow_service"
 import { isPlainObject, isEmpty } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
@@ -33,6 +32,7 @@ import { toastWarning } from "@/utils/Alerts"
 import { PatientTypeService } from "@/apps/ART/services/patient_type_service";
 import { IonPage } from "@ionic/vue"
 import { infoActionSheet } from "@/utils/ActionSheets"
+import GLOBAL_PROP from "@/apps/GLOBAL_APP/global_prop";
 
 export default defineComponent({
   components: { HisStandardForm, IonPage },
@@ -77,7 +77,7 @@ export default defineComponent({
                 this.presets = query
             }
             this.fields = this.getFields()
-            this.isMilitarySite = await GlobalPropertyService.isMilitarySite()
+            this.isMilitarySite = await GLOBAL_PROP.militarySiteEnabled()
         },
         immediate: true,
         deep: true

@@ -21,7 +21,7 @@ import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { IonPage } from "@ionic/vue"
-import { GlobalPropertyService } from "@/services/global_property_service"
+import ART_GLOBAL_PROP from "@/apps/ART/art_global_props" 
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -32,7 +32,7 @@ export default defineComponent({
         columns: [] as Array<any>
     }),
     async created() {
-        const isFn = await GlobalPropertyService.isProp('use.filing.numbers=true')
+        const isFn = await ART_GLOBAL_PROP.filingNumbersEnabled()
         this.columns.push([
             table.thTxt(isFn ? 'Filing #' : 'ARV#'),
             table.thTxt('App.'),

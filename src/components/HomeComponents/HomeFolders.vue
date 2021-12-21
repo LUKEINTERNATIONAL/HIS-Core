@@ -14,7 +14,6 @@
                 :key="index"
                 size-lg="4"
                 size-sm="12"
-                v-show="canShowItem(item)"
                 >
                 <task-card
                     @click="onClick(item)"
@@ -66,9 +65,14 @@ export default defineComponent({
     }),
     watch: {
         items: {
-            handler(items: FolderInterface[]) {
+            async handler(items: FolderInterface[]) {
                 if (items) {
-                    this.viewableItems = items
+                    const verified: any = items.map(async (i) => {
+                        const d: any = {...i}
+                        d.canShow = d.condition ? await d.condition() : true
+                        return d
+                    })
+                    this.viewableItems = (await Promise.all(verified)).filter((i: any) => i.canShow)
                 }
             },
             immediate: true,
@@ -76,9 +80,6 @@ export default defineComponent({
         }
     },
     methods: {
-        canShowItem(item: FolderInterface) {
-            return item.condition ? item.condition() : true
-        },
         onClick(item: any){
             if (item.files) {
                 this.showingChildNodes = true
