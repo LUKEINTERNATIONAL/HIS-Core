@@ -1,29 +1,35 @@
 <template>
     <action-header :title="title" :subtitle="subtitle" :color="color"> </action-header>
-    <ion-content>
-        <ion-row class="vertically-align" > 
-            <ion-col v-for="(label, index) in list" :key="index" size="12"> 
-                <interval-card 
-                    @onclick="onclick(label)" 
-                    :color="activeLabel === label ? 'active-card-color' : ''"
-                    :label="label"> 
-                </interval-card>
-            </ion-col>
-        </ion-row>
+    <ion-content class="ion-text-center">
+        <ion-list> 
+            <ion-item 
+                button
+                :color="activeLabel === label ? 'secondary' : ''"
+                v-for="(label, index) in list" 
+                @click="onclick(label)"
+                detail
+                :key="index"> 
+                {{label}} 
+            </ion-item>
+        </ion-list>
     </ion-content>
     <action-footer :buttons="buttons"> </action-footer>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import IntervalCard from "@/components/DataViews/IntervalCard.vue"
 import ActionSheetMixin from "@/components/DataViews/actionsheet/ActionSheetMixin.vue"
 import { NavBtnInterface } from '@/components/HisDynamicNavFooterInterface'
 import { modalController } from '@ionic/vue';
 import { toastWarning } from "@/utils/Alerts"
+import { 
+    IonList, 
+    IonItem,
+    IonContent
+} from "@ionic/vue"
 
 export default defineComponent({
-    components: { IntervalCard },
+    components: { IonList, IonItem, IonContent },
     mixins: [ActionSheetMixin],
     data: () => ({
         activeLabel: '' as string
