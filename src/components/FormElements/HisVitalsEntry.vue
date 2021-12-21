@@ -133,12 +133,13 @@ export default defineComponent({
       return `assets/images/vitals/${name}.png`;
     },
     async getBMI(): Promise<any> {
-      const BMI: any = await BMIService.getBMI(
-        this.getWeight(),
-        this.getHeight(),
-        this.gender,
-        this.getAge()
-      );
+      const height = this.getHeight()
+      const weight = this.getWeight()
+      if(height <= 0 || weight <= 0) {
+        this.BMI.color = ''
+        return
+      }
+      const BMI = await BMIService.getBMI(weight, height, this.gender, this.getAge());
       this.BMI.index = BMI.index;
       this.BMI.result = BMI.result;
       this.BMI.color = BMI.color;
