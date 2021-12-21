@@ -8,13 +8,7 @@
         @onDetails="showMore"
       ></visit-information>
     </ion-content>
-    <ion-footer>
-      <ion-toolbar color="dark">
-        <ion-button color="danger" size="large" @click="onCancel">
-          Cancel
-        </ion-button>
-      </ion-toolbar>
-    </ion-footer>
+    <his-footer :btns="btns" />
   </ion-page>
 </template>
 <script lang="ts">
@@ -28,13 +22,11 @@ import { ObservationService } from "@/services/observation_service";
 import InformationHeader from "@/components/InformationHeader.vue";
 import VisitInformation from "@/components/VisitInformation.vue";
 import MastercardDetails from "@/components/MastercardDetails.vue";
+import HisFooter from "@/components/HisDynamicNavFooter.vue";
 import _, { isArray, isEmpty } from "lodash";
 import {
   IonPage,
   IonContent,
-  IonButton,
-  IonFooter,
-  IonToolbar,
   modalController,
 } from "@ionic/vue";
 import { EncounterService } from "@/services/encounter_service";
@@ -42,16 +34,15 @@ import { RelationshipService } from "@/services/relationship_service";
 import { alertConfirmation } from "@/utils/Alerts";
 import { ProgramService } from "@/services/program_service";
 import { PatientPrintoutService } from "@/services/patient_printout_service";
+import { NavBtnInterface } from "@/components/HisDynamicNavFooterInterface";
 export default defineComponent({
   components: {
     IonPage,
-    IonFooter,
     IonContent,
-    IonButton,
-    IonToolbar,
     VisitInformation,
     InformationHeader,
-  },
+    HisFooter
+},
   data: () => ({
     isBDE: false as boolean,
     currentDate: "",
@@ -72,6 +63,7 @@ export default defineComponent({
     medicationCardItems: [] as Array<Option>,
     labOrderCardItems: [] as Array<Option>,
     alertCardItems: [] as Array<Option>,
+    btns: [] as Array<NavBtnInterface>
   }),
   computed: {
     visitDatesTitle(): string {
@@ -101,6 +93,50 @@ export default defineComponent({
       this.patient = await this.fetchPatient(this.patientId);
       this.patientCardInfo = await this.getPatientCardInfo(this.patient);
       this.visitDates = await this.getPatientVisitDates(this.patientId);
+      this.btns.push(this.getCancelBtn())
+      this.btns.push(this.getDemographicsBtn())
+      this.btns.push(this.getGuardianBtn())
+    },
+    getDemographicsBtn(): NavBtnInterface{
+     return {
+        name: "Edit Demographics",
+        color: "primary",
+        size: "large",
+        slot: "end",
+        visible: true,
+        onClick: () => {
+          return this.$router.push({
+            path: '/patient/registration', 
+            query: { 'edit_person': this.patientId }
+          })
+        }
+      }
+    },
+    getCancelBtn(): NavBtnInterface {
+      return {
+        name: "Cancel",
+        color: "danger",
+        size: "large",
+        slot: "start",
+        visible: true,
+        onClick: async () => {
+          const confirmation = await alertConfirmation("Are you sure you want to cancel?");
+          if (confirmation) return this.$router.back();
+        }
+      }
+    },
+    getGuardianBtn(): NavBtnInterface {
+      // if(this.patient.)
+      return {
+        name: "Add Guardian",
+        color: "primary",
+        size: "large",
+        slot: "end",
+        visible: true,
+        onClick: () => {
+          return this.$router.push(`/guardian/registration/${this.patientId}`);
+        }
+      }
     },
     async fetchPatient(patientId: number | string) {
       const patient: Patient = await Patientservice.findByID(patientId);
@@ -247,13 +283,6 @@ export default defineComponent({
         },
       });
       modal.present();
-    },
-    async onCancel() {
-      const confirmation = await alertConfirmation(
-        "Are you sure you want to cancel?"
-      );
-
-      if (confirmation) return this.$router.back();
     },
     printLabel(date: any) {
       new PatientPrintoutService(this.patientId).printVisitSummaryLbl(date);
