@@ -14,6 +14,7 @@ import { toastWarning, toastSuccess} from "@/utils/Alerts"
 import { VitalsService } from "@/apps/ART/services/vitals_service";
 import { BMIService } from "@/services/bmi_service"
 import { generateDateFields, EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
+import { infoActionSheet } from "@/utils/ActionSheets"
 import HisDate from "@/utils/Date"
 
 export default defineComponent({
@@ -391,6 +392,19 @@ export default defineComponent({
                     helpText: 'Confirmatory HIV test',
                     type: FieldType.TT_SELECT,
                     validation: (val: any) => Validation.required(val),
+                    onValue: async (val: Option) => {
+                        if (val.value === 'Not done') {
+                            await infoActionSheet(
+                                'Reminder',
+                                'UNKNOWN HIV CONFIRMATORY TEST',
+                                'Please arrange for a confirmatory test',
+                                [
+                                    { name: 'Agreed', color: 'success', slot: 'start'}
+                                ]
+                            )
+                        }
+                        return true
+                    },
                     computedValue: ({ value }: Option) => ({
                         tag:'reg',
                         obs: this.registration.buildValueCoded(
