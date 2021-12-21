@@ -16,6 +16,7 @@ import { BMIService } from "@/services/bmi_service"
 import { generateDateFields, EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { infoActionSheet } from "@/utils/ActionSheets"
 import HisDate from "@/utils/Date"
+import dayjs from "dayjs";
 
 export default defineComponent({
     mixins: [StagingMixin],
@@ -438,6 +439,24 @@ export default defineComponent({
                 ...generateDateFields({
                     id: 'date_of_confirmatory_hiv_test',
                     helpText: 'Confirmatory HIV test',
+                    beforeNext: async (date: string, formData: any) => {
+                        if (formData.received_arvs.value != 'Yes') {
+                            const timeElapsed = dayjs(this.staging.getDate()).diff(date, 'days')
+                            if (timeElapsed >= 20) {
+                                const action = await infoActionSheet(
+                                    'Data inconsistency warning',
+                                    `Confirmatory Date for newly initiated ART patient is ${timeElapsed} days ago`,
+                                    'Are you sure this is accurate?',
+                                    [
+                                        { name: 'No, Re-enter date', slot: 'start', color: 'success'},
+                                        { name: 'Yes, its accurate', slot: 'end', color: 'danger'}
+                                    ]
+                                )
+                                return action === 'Yes, its accurate'
+                            }
+                        }
+                        return true
+                    },
                     condition: (f: any) => f.confirmatory_hiv_test_location.value,
                     required: true,
                     minDate: () => this.patient.getBirthdate(),
