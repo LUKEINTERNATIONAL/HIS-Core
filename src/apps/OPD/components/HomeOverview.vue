@@ -22,7 +22,7 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref } from 'vue'
-import { IonGrid, IonRow, IonCol } from "@ionic/vue";
+import { IonGrid, IonRow, IonCol, loadingController } from "@ionic/vue";
 import OpdStatCard from '@/apps/OPD/components/OpdStatCard.vue'
 import OpdStatChart from '@/apps/OPD/components/OpdStatChart.vue'
 import PatientVisitsService from '@/apps/OPD/services/patient_visits_service'
@@ -41,12 +41,18 @@ export default defineComponent({
     const series = ref()
     
     onMounted(async function() {
-      const data = await PatientVisitsService.fetchPatientStats()
-
-      if (data) {
-        patientSummaryStats.value = data.todaysVisits
-        categories.value = data.accumulativeVisits?.days
-        series.value = data.accumulativeVisits?.visits
+      try {
+        (await loadingController.create({
+          message: "loading..."
+        })).present()
+        const {todaysVisits, accumulativeVisits } = await PatientVisitsService.fetchPatientStats()
+        patientSummaryStats.value = todaysVisits
+        categories.value = accumulativeVisits?.days
+        series.value = accumulativeVisits?.visits
+      } catch (e) {
+        console.log(e)
+      } finally {
+        loadingController.dismiss()
       }
     })
 

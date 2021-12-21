@@ -43,6 +43,15 @@ const OPD: AppInterface = {
   homeOverviewComponent: HomeOverview,
   onRegisterPatient,
   formatPatientProgramSummary,
+  programPatientIdentifiers: {
+    'National ID': {
+      id: 28,
+      name: 'National ID',
+      isPrimary: true,
+      useForSearch: true,
+      prefix: () => ''
+    },
+  }
 }
 
 export default OPD
