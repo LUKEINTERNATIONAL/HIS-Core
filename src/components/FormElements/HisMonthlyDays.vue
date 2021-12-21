@@ -1,6 +1,9 @@
 <template>
     <view-port>
-        <base-input :value="value"/>
+        <base-input :value="value" @onValue="onKbValue"/>
+        <span v-if="errors" style="color:red;font-weight:bold">
+            **{{errors}}**
+        </span>
     </view-port>
     <his-keyboard :kbConfig="keyboard" :onKeyPress="keypress" :disabled="false"> </his-keyboard>
 </template>
@@ -20,6 +23,9 @@ export default defineComponent({
     mixins: [FieldMixinVue],
     data: ()=>({ 
         value: '',
+        errors: '',
+        minDays: 1 as number,
+        maxDays: 30 as number,
         keyboard: [] as any
     }),
     async activated() {
@@ -56,12 +62,44 @@ export default defineComponent({
         await this.setDefaultValue()
     },
     methods: {
+        onKbValue(value: any) {
+            this.errors = ''
+            this.value = value
+            this.emitValue()
+        },
+        keypress(text: any){
+            this.value = handleVirtualInput(text, '')
+            this.emitValue()
+        },
+        emitValue() {
+            this.errors = ''
+            let num = this.value as any
+            if (!num) {
+                this.$emit('onValue', null)
+                return
+            }
+
+            if (isNaN(num)) {
+                this.errors = 'Invalid number'
+                this.$emit('onValue', null)
+                return
+            }
+
+            num = parseInt(num) as number
+    
+            if (num < this.minDays || num > this.maxDays) {
+                this.errors = 'Value number is out of range'
+                this.$emit('onValue', null)
+            } else {
+                this.$emit('onValue', { label: num, value: num })
+            }
+        },
         generateKeypad(year: number, month: number) {
             const days: Array<string[]> = [[]]
-            const numberOfDays = new Date(year, month, 0).getDate()
+            this.maxDays = new Date(year, month, 0).getDate()
             let row = 0
             let counter = 0
-            for(let i=0; i < numberOfDays; ++i) {
+            for(let i=0; i < this.maxDays; ++i) {
                 if (counter > 7) {
                     ++row
                     days[row] = []
@@ -77,18 +115,14 @@ export default defineComponent({
                 const defaults = await this.defaultValue(this.fdata, this.cdata)
                 if (defaults){
                     this.value = defaults
-                    this.$emit('onValue', { label: this.value, value: this.value })
+                    this.emitValue()
                 }
             }
-        },
-        async keypress(text: any){
-            this.value = handleVirtualInput(text, '')
-            this.$emit('onValue', { label: this.value, value: this.value })
         }
     },
     watch: {
-        clear(val: boolean){
-            if (val) this.value = ''
+        clear() {
+            this.value = ''
         }
     }
 })
