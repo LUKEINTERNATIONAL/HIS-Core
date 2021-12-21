@@ -77,7 +77,7 @@ export default defineComponent({
         },
         {
           id: "date",
-          helpText: "Set date",
+          helpText: "Delivery Date",
           type: FieldType.TT_FULL_DATE,
           validation: (val: Option) => Validation.required(val),
         },
