@@ -143,7 +143,6 @@
 import HisApp from "@/apps/app_lib"
 import { defineComponent } from "vue";
 import { barcode } from "ionicons/icons";
-import { GlobalPropertyService } from "@/services/global_property_service"
 import ApiClient from "@/services/api_client";
 import HisDate from "@/utils/Date"
 import { AppInterface, FolderInterface } from "@/apps/interfaces/AppInterface";
@@ -151,6 +150,7 @@ import { Service } from "@/services/service"
 import ProgramIcon from "@/components/DataViews/DashboardAppIcon.vue"
 import HomeFolder from "@/components/HomeComponents/HomeFolders.vue"
 import { AuthService } from "@/services/auth_service"
+import GLOBAL_PROP from "@/apps/GLOBAL_APP/global_prop"
 
 import Img from "@/utils/Img"
 import { 
@@ -250,12 +250,12 @@ export default defineComponent({
   },
   methods: {
     fetchLocationID: async function () {
-      const centerID = await GlobalPropertyService.getCurrentHealthCenterId()
+      const centerID = await GLOBAL_PROP.healthCenterID()
 
       if (centerID) this.fetchLocationName(centerID);
     },
     fetchLocationUUID: async function () {
-      const uuid = await GlobalPropertyService.getSiteUUID()
+      const uuid = await GLOBAL_PROP.siteUUID()
 
       if (uuid) sessionStorage.siteUUID = uuid
     },
@@ -299,9 +299,8 @@ export default defineComponent({
     },
     async signOut() {
       const auth = new AuthService()
-      const portalStatus = await GlobalPropertyService.get('portal.enabled');
-      if(portalStatus === "true") {
-        const portalLocation = await GlobalPropertyService.get('portal.properties');
+      if((await GLOBAL_PROP.portalEnabled())) {
+        const portalLocation = await GLOBAL_PROP.portalProperties();
         window.location = portalLocation;
       }else {
         this.$router.push('/login')

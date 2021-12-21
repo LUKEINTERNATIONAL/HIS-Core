@@ -10,7 +10,7 @@ export interface FolderInterface {
     name: string;
     icon?: string;
     defaultFilesIcon?: string;
-    condition?: () => boolean;
+    condition?: () => boolean | Promise<boolean>;
     files: Array<
         {
             name: string;

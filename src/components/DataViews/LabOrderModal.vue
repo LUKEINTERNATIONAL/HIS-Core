@@ -100,7 +100,7 @@ import { OrderService } from "@/services/order_service";
 import { LabOrderService } from "@/apps/ART/services/lab_order_service";
 import { alertAction } from "@/utils/Alerts"
 import { PrintoutService } from "@/services/printout_service";
-import { GlobalPropertyService } from "@/services/global_property_service"
+import ART_GLOBAL_PROP from "@/apps/ART/art_global_props"
 
 export default defineComponent({
   name: "Modal",
@@ -126,8 +126,7 @@ export default defineComponent({
     }
   },
   async created() {
-    const extendedLabsEnabled = await GlobalPropertyService.get('extended_labs')
-    this.extendedLabsEnabled = extendedLabsEnabled === 'true'
+    this.extendedLabsEnabled = await ART_GLOBAL_PROP.extendedLabEnabled()
   },
   methods: {
     async getActivities() {

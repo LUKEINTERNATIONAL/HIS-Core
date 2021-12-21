@@ -14,18 +14,19 @@ import {
   CHARACTERS_AND_NUMBERS_LO,
   NUMBER_PAD_LO,
 } from "@/components/Keyboard/KbLayouts";
-import { GlobalPropertyService } from "@/services/global_property_service";
+import GLOBAL_PROP from "@/apps/GLOBAL_APP/global_prop";
+
 export default defineComponent({
   components: { HisStandardForm },
   methods: {
     async onFinish(formData: any) {
       const enablePortal = formData.use_portal.value;
-      await GlobalPropertyService.set("portal.enabled", enablePortal);
+      await GLOBAL_PROP.setPortalEnabled(enablePortal)
       if (this.enablePortal) {
         const ipAddress = formData.ip_address.value;
         const port = formData.port.value;
         const portalIP = `http://${ipAddress}:${port}`;
-        await GlobalPropertyService.set("portal.properties", portalIP);
+        await GLOBAL_PROP.setPortalIP(portalIP)
       }
       this.$router.back();
     },
