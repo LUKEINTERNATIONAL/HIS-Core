@@ -62,11 +62,9 @@ export default defineComponent({
         active: {} as Option | {}
     }),
     watch: {
-        clear(val: boolean){
-            if (val) {
-                this.active = {}
-                this.clearSelection()
-            } 
+        clear(){
+            this.active = {}
+            this.clearSelection() 
         }
     },
     async activated() {

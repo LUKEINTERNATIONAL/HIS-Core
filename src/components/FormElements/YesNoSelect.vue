@@ -50,8 +50,8 @@ export default defineComponent({
   name: "HisSelect",
   mixins: [SelectMixin],
   watch: {
-    clear(val: boolean) {
-      if (val) this.clearSelection();
+    clear() {
+      this.clearSelection();
     },
     value(value: any) {
       this.$emit('onValue', { label: this.filtered[0].label, value: value })

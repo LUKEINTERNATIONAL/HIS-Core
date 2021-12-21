@@ -11,7 +11,6 @@ export default defineComponent({
     },
     emits: [
         'onValue',
-        'onClear',
         'onFieldActivated'
     ],
     props: {

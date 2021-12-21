@@ -112,11 +112,8 @@ export default defineComponent({
         value(value){
             this.$emit('onValue', { label: value, value: this.fullDate })
         },
-        clear(val: boolean){
-            if (val) {
-                this.value = ''
-                this.$emit('onClear')
-            }
+        clear() {
+            this.value = ''
         }
     }
 })

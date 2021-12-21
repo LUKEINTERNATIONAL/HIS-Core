@@ -45,8 +45,11 @@ export default defineComponent({
   }),
   watch: {
     clear: {
-        handler(clear: boolean) {
-            if(clear) this.onClear(); this.$emit('onClear');
+        handler() {
+            this.listData = this.listData.filter((item: Option) => {
+                item.value = ''
+                return true
+            })
         },
         immediate: true
     },
@@ -63,12 +66,6 @@ export default defineComponent({
     this.listData = await this.options(this.fdata)
   },
   methods: {
-    onClear() {
-        this.listData = this.listData.filter((item: Option) => {
-            item.value = ''
-            return true
-        })
-    },
     async launchKeyPad(item: Option) {
         const modal = await modalController.create({
             component: KeyPad,
