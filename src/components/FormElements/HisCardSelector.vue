@@ -37,7 +37,9 @@ export default defineComponent({
     name: "HisSelect",
     mixins: [SelectMixin],
     watch: {
-        clear(val: boolean){ if (val) this.clearSelection() }
+        clear(){ 
+            this.clearSelection() 
+        }
     },
     async activated() {
         this.$emit('onFieldActivated', this)

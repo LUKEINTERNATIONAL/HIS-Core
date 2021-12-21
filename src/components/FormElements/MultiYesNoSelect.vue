@@ -57,14 +57,11 @@ export default defineComponent({
   name: "HisMultiYesNo",
   mixins: [SelectMixin],
   watch: {
-    clear(val: boolean) {
-      if (val) {
-        this.listData = this.listData.map(i => {
-          i.value = ''
-          return i
-        })
-        this.$emit('onClear')
-      }
+    clear() {
+      this.listData = this.listData.map(i => {
+        i.value = ''
+        return i
+      })
     }
   },
   computed: {

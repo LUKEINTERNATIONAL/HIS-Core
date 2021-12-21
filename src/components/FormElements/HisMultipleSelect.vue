@@ -80,14 +80,11 @@ export default defineComponent({
     }
   },
   watch: {
-    clear(isClear: boolean){
-      if (isClear) {
-        this.listData = this.listData.map((item) => {
-          item.isChecked = false
-          return item
-        })
-        this.$emit('onClear')
-      }
+    clear(){
+      this.listData = this.listData.map((item) => {
+        item.isChecked = false
+        return item
+      })
     }
   },
   async activated() {
