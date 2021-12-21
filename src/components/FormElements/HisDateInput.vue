@@ -1,44 +1,36 @@
 <template>
-    <view-port>
+    <view-port :showFull="false">
         <base-input :value="fullDate" @onValue="onKbValue"/>
     </view-port>
-    <ion-grid>
-        <ion-row>
-            <ion-col size="2">
-                <ion-button @click="add('day')" size="large">+</ion-button>
-            </ion-col>
-            <ion-col size="2">
-                <ion-button @click="add('month')" size="large">+</ion-button>
-            </ion-col>
-            <ion-col size="2">
-                <ion-button @click="add('year')" size="large">+</ion-button>
-            </ion-col>
-        </ion-row>
-        <ion-row>
-            <ion-col size="2">
-                <ion-input class="date-inputs">{{ getDay }}</ion-input>
-            </ion-col>
-            <ion-col size="2">
-                <ion-input class="date-inputs">{{ getMonth }}</ion-input>
-            </ion-col>
-            <ion-col size="2">
-                <ion-input class="date-inputs">{{getYear}}</ion-input>
-            </ion-col>
-            <ion-col size="2">
-                <ion-button @click="today()" size="large">
-                    Today
+    <ion-grid class="his-floating-keyboard">
+        <ion-row> 
+            <ion-col> 
+                <ion-button class="ion-float-right" color="warning" @click="today"> 
+                    TODAY
                 </ion-button>
             </ion-col>
         </ion-row>
-        <ion-row>
-            <ion-col size="2">
-                <ion-button @click="subtract('day')" size="large">-</ion-button>
+        <ion-row> 
+            <ion-col sm-size="12"> 
+                <picker-selector
+                    :value="getYear"
+                    @onIncrement="add('year')"
+                    @onDecrement="subtract('year')"
+                />
             </ion-col>
-            <ion-col size="2">
-                <ion-button @click="subtract('month')" size="large">-</ion-button>
+            <ion-col sm-size="12"> 
+                <picker-selector
+                    :value="getMonth"
+                    @onIncrement="add('month')"
+                    @onDecrement="subtract('month')"
+                />
             </ion-col>
-            <ion-col size="2">
-                <ion-button @click="subtract('year')" size="large">-</ion-button>
+            <ion-col sm-size="12"> 
+                <picker-selector
+                    :value="getDay"
+                    @onIncrement="add('day')"
+                    @onDecrement="subtract('day')"
+                />
             </ion-col>
         </ion-row>
     </ion-grid>
@@ -47,17 +39,17 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import BaseInput from "@/components/FormElements/BaseTextInput.vue"
-import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
 import handleVirtualInput from "@/components/Keyboard/KbHandler"
 import { NUMBERS_ONLY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue'
 import HisDate from "@/utils/Date"
 import { Service } from '@/services/service'
-import {IonInput, IonGrid, IonCol, IonRow, IonButton} from '@ionic/vue'
+import PickerSelector from "@/components/Selectors/PickerSelector.vue"
+import { IonGrid, IonCol, IonRow, IonButton } from '@ionic/vue'
 
 export default defineComponent({
-    components: { BaseInput, ViewPort, IonInput, IonGrid, IonCol, IonRow, IonButton},
+    components: { PickerSelector, BaseInput, ViewPort, IonGrid, IonCol, IonRow, IonButton},
     mixins: [FieldMixinVue],
     data: ()=>({ 
         value: '',
@@ -125,8 +117,6 @@ export default defineComponent({
 .date-inputs {
     border: solid 1px black;
     font-size: 1.7em;
-}
-ion-col {
     text-align: center;
 }
 /* ion-button {
