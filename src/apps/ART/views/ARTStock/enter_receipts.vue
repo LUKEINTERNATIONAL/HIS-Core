@@ -4,6 +4,7 @@
     :activeField="activeField"
     :onFinishAction="onFinish"
     :skipSummary="true"
+    @onIndex="activeField=''"
     :cancelDestinationPath="cancelDestination"
   >
   </his-standard-form>

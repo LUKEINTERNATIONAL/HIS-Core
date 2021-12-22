@@ -112,11 +112,7 @@ export default defineComponent({
       return `${context} (${this.drugs[this.selectedDrug].shortName})`
     },
     getDrugValue(index: number, type: string) {
-      try {
-        return this.drugs[this.selectedDrug].entries[index][type]
-      } catch (e) { 
-        alert(e)
-      }
+      return this.drugs[this.selectedDrug].entries[index][type]
     },
     setDrugValue(index: number, type: string, data: Option | null) {
       this.drugs[this.selectedDrug].entries[index][type] = data ? data.value : ''
