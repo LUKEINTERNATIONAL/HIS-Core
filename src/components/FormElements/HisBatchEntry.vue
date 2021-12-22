@@ -95,6 +95,7 @@ import TouchField from "@/components/Forms/SIngleTouchField.vue"
 import { Field, Option } from "../Forms/FieldInterface";
 import { FieldType } from "../Forms/BaseFormElements";
 import Validation from "@/components/Forms/validations/StandardValidations"
+import { Service } from "@/services/service";
 
 export default defineComponent({
   components: { ViewPort, IonList, IonItem, IonGrid, IonCol, IonRow, IonButton },
@@ -183,8 +184,13 @@ export default defineComponent({
         helpText: this.getModalTitle('Enter expiry date'),
         type: FieldType.TT_FULL_DATE,
         defaultValue: () => this.getDrugValue(index, 'expiry'),
-        validation: (v: Option) => Validation.required(v)
-      }, 
+        validation: (v: Option) => Validation.validateSeries([
+          () => Validation.required(v),
+          () => new Date(v.value) < new Date(Service.getSessionDate()) 
+            ? ['You are not allowed to enter expired drugs']
+            : null
+        ])
+      },
       ({value}: Option) => this.setDrugValue(index, 'expiry', value))
     },
     async launchKeyPad(currentField: Field, onFinish: Function) {
