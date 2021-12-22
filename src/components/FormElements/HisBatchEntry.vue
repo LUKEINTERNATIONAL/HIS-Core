@@ -133,11 +133,15 @@ export default defineComponent({
         helpText: this.getModalTitle('Enter number of tins'),
         type: FieldType.TT_NUMBER,
         defaultValue: () => this.getDrugValue(index, 'tins'),
-        validation: (v: Option) => Validation.validateSeries([
-          () => Validation.required(v),
-          () => Validation.isNumber(v),
-          () => v.value <= 0 ? ['Number of tins must be greater than 1'] : null
-        ])
+        validation: (v: Option) => {
+          if (!v || v && !v.value) {
+            return null
+          } 
+          return Validation.validateSeries([
+            () => Validation.isNumber(v),
+            () => v.value <= 0 ? ['Number of tins must be greater than 1'] : null
+          ])
+        }
       }, 
       ({value}: Option) => this.setDrugValue(index, 'tins', value))
     },
@@ -147,7 +151,6 @@ export default defineComponent({
         helpText: this.getModalTitle('Enter batch number'),
         type: FieldType.TT_TEXT,
         defaultValue: () => this.getDrugValue(index, 'batchNumber'),
-        validation: (v: Option) => Validation.required(v)
       }, 
       ({value}: Option) => this.setDrugValue(index, 'batchNumber', value))
     },
@@ -157,12 +160,13 @@ export default defineComponent({
         helpText: this.getModalTitle('Enter expiry date'),
         type: FieldType.TT_FULL_DATE,
         defaultValue: () => this.getDrugValue(index, 'expiry'),
-        validation: (v: Option) => Validation.validateSeries([
-          () => Validation.required(v),
-          () => new Date(v.value) < new Date(Service.getSessionDate()) 
+        validation: (v: Option) => {
+          if (v && v.value) {
+            return new Date(v.value) < new Date(Service.getSessionDate()) 
             ? ['You are not allowed to enter expired drugs']
             : null
-        ])
+          }
+        }
       },
       ({value}: Option) => this.setDrugValue(index, 'expiry', value))
     },
