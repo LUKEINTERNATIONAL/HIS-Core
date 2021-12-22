@@ -1,7 +1,7 @@
 <template>
   <view-port>
     <ion-grid>
-      <ion-row  class="his-card">
+      <ion-row class="his-card">
         <ion-col> 
           Active drug: <b>{{ fullSelectedDrugName }}</b>
         </ion-col>
@@ -9,71 +9,42 @@
       <ion-row>
         <ion-col size="4" class="side left">
           <ion-list v-for="(drug, index) in drugs" :key="index">
-            <ion-item
-              :color="index === selectedDrug ? 'primary' : ''"
+            <ion-item 
+              detail
+              :color="index === selectedDrug ? 'secondary' : ''"
               @click="selectDrug(index)">
               {{ `${drug.shortName} (${drug.packSizes[0]})` }}
             </ion-item>
           </ion-list>
         </ion-col>
-        <ion-col size="8" class="side">
-          <div v-if="selectedDrug !== null">
-            <table
-              id="batch-table"
-              style="
-                border: 1.5px solid rgb(92, 166, 196);
-                border-radius: 10px;
-                width: 94%;
-                margin-top: 20px;
-                margin-left: 20px;
-                padding-top: 35px;
-                padding-bottom: 20px;
-              "
-            >
-              <tr>
-                <th style="width: 5%; display: none">Tabs Per Tin</th>
-                <th style="width: 5%">Total tins</th>
-                <th style="width: 5%">Date Of Expiry</th>
-                <th style="width: 5%">Batch Number</th>
-              </tr>
-              <tbody>
-                <tr
-                  v-for="(entry, ind) in drugs[selectedDrug].entries" :key="ind"
-                >
-                  <td style="width: 50px; text-align: center; display: none">
-                    <input
-                      class="input-field"
-                      v-model="entry.tabs"
-                      @click="enterTabs(ind)"
-                    />
-                  </td>
-                  <td style="width: 50px; text-align: center">
-                    <input
-                      class="input-field"
-                      v-model="entry.tins"
-                      @click="enterTins(ind)"
-                    />
-                  </td>
-                  <td style="width: 50px; text-align: center">
-                    <input
-                      class="input-field"
-                      @click="enterExpiry(ind)"
-                      v-model="entry.expiry"
-                    />
-                  </td>
-                  <td style="width: 50px; text-align: center">
-                    <input
-                      class="input-field"
-                      @click="enterBatch(ind)"
-                      v-model="entry.batchNumber"
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <br />
-            <ion-button @click="addRow" siz="large">Add row</ion-button>
-          </div>
+        <ion-col>
+          <ion-grid v-if="selectedDrug !== null"> 
+            <ion-row v-for="(entry, ind) in drugs[selectedDrug].entries" :key="ind"> 
+              <ion-col> 
+                <ion-item> 
+                  <ion-label position="floating">Total Tins</ion-label>
+                  <ion-input readonly placeholder="0" :value="entry.tins" @click="enterTins(ind)"></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col> 
+                <ion-item> 
+                  <ion-label position="floating">Expiry Date</ion-label>
+                  <ion-input readonly placeholder="YYYY/MM/DD" :value="entry.expiry" @click="enterExpiry(ind)"></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col> 
+                <ion-item> 
+                  <ion-label position="floating">Batch Number</ion-label>
+                  <ion-input readonly placeholder="abc123" :value="entry.batchNumber" @click="enterBatch(ind)"></ion-input>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+            <ion-row> 
+              <ion-col>
+                <ion-button @click="addRow" siz="large">Add row</ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
         </ion-col>
       </ion-row>
     </ion-grid>
@@ -90,6 +61,8 @@ import {
   IonRow,
   IonButton,
   IonList,
+  IonInput,
+  IonLabel,
   IonItem,
   modalController,
 } from "@ionic/vue";
@@ -101,7 +74,7 @@ import Validation from "@/components/Forms/validations/StandardValidations"
 import { Service } from "@/services/service";
 
 export default defineComponent({
-  components: { ViewPort, IonList, IonItem, IonGrid, IonCol, IonRow, IonButton },
+  components: { ViewPort, IonInput, IonLabel, IonList, IonItem, IonGrid, IonCol, IonRow, IonButton },
   mixins: [FieldMixinVue],
   data: () => ({
     value: "",
