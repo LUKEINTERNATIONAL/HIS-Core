@@ -1,20 +1,23 @@
 <template>
   <view-port>
     <ion-grid>
+      <ion-row  class="his-card">
+        <ion-col> 
+          Active drug: <b>{{ fullSelectedDrugName }}</b>
+        </ion-col>
+      </ion-row>
       <ion-row>
         <ion-col size="4" class="side left">
           <ion-list v-for="(drug, index) in drugs" :key="index">
             <ion-item
               :color="index === selectedDrug ? 'primary' : ''"
-              @click="selectDrug(index)"
-            >
-              {{ `${drug.shortName} (${drug.packSizes[0]})` }}</ion-item
-            >
+              @click="selectDrug(index)">
+              {{ `${drug.shortName} (${drug.packSizes[0]})` }}
+            </ion-item>
           </ion-list>
         </ion-col>
         <ion-col size="8" class="side">
           <div v-if="selectedDrug !== null">
-            <p class="drug-info">{{ fullSelectedDrugName }}</p>
             <table
               id="batch-table"
               style="
