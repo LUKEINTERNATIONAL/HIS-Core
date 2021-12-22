@@ -38,8 +38,6 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import handleVirtualInput from "@/components/Keyboard/KbHandler"
-import { NUMBERS_ONLY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue'
 import HisDate from "@/utils/Date"
@@ -52,21 +50,18 @@ export default defineComponent({
     mixins: [FieldMixinVue],
     data: ()=>({ 
         value: '',
-        keyboard: NUMBERS_ONLY,
         date: '' as any
     }),
     async activated(){
         this.$emit('onFieldActivated', this)
-        this.date = new Date();
+        this.today()
         await this.setDefaultValue()
     },
     methods: {
         async setDefaultValue() {
             if (this.defaultValue && !this.date) {
                 const defaults = await this.defaultValue(this.fdata, this.cdata)
-                if (defaults) {
-                    this.date = defaults.toString()
-                }
+                if (defaults) this.date = defaults.toString()
             }
         },
         add(unit: string) {
@@ -89,8 +84,8 @@ export default defineComponent({
         getDay(): any {
             return HisDate.getDay(`${this.date}`);
         },
-        fullDate(): any{
-            return HisDate.toStandardHisFormat(this.date);
+        fullDate(): any {
+            return this.date ? HisDate.toStandardHisFormat(this.date) : '';
         }
     },
     watch: {
@@ -103,16 +98,3 @@ export default defineComponent({
     }
 })
 </script>
-<style scoped> 
-#view-port {
-    height: 53vh;
-}
-.date-inputs {
-    border: solid 1px black;
-    font-size: 1.7em;
-    text-align: center;
-}
-/* ion-button {
-    font-size: 20px;
-} */
-</style>
