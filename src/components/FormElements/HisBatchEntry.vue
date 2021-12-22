@@ -42,28 +42,28 @@
                     <input
                       class="input-field"
                       v-model="entry.tabs"
-                      @click="launchKeyPad('tabs', ind)"
+                      @click="enterTabs(ind)"
                     />
                   </td>
                   <td style="width: 50px; text-align: center">
                     <input
                       class="input-field"
                       v-model="entry.tins"
-                      @click="launchKeyPad('tins', ind)"
+                      @click="enterTins(ind)"
                       field_type="total_tins"
                     />
                   </td>
                   <td style="width: 50px; text-align: center">
                     <input
                       class="input-field"
-                      @click="launchKeyPad('expiry', ind)"
+                      @click="enterExpiry(ind)"
                       v-model="entry.expiry"
                     />
                   </td>
                   <td style="width: 50px; text-align: center">
                     <input
                       class="input-field"
-                      @click="launchKeyPad('batchNumber', ind)"
+                      @click="enterBatch(ind)"
                       v-model="entry.batchNumber"
                     />
                   </td>
@@ -81,26 +81,27 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import handleVirtualInput from "@/components/Keyboard/KbHandler";
 import { NUMBERS_ONLY } from "@/components/Keyboard/HisKbConfigurations";
 import ViewPort from "@/components/DataViews/ViewPort.vue";
 import FieldMixinVue from "./FieldMixin.vue";
 import HisDate from "@/utils/Date";
-import { Service } from "@/services/service";
 import {
   IonGrid,
   IonCol,
   IonRow,
   IonButton,
+  IonList,
+  IonItem,
   modalController,
 } from "@ionic/vue";
-import HisDateKeyPad from "@/components/Keyboard/HisDateKeypad.vue";
-import KeyBoardModal from "@/components/Keyboard/HisModalKeyboard.vue";
-import { toastWarning } from "@/utils/Alerts";
 import { isEmpty } from "lodash";
+import TouchField from "@/components/Forms/SIngleTouchField.vue"
+import { Field, Option } from "../Forms/FieldInterface";
+import { FieldType } from "../Forms/BaseFormElements";
+import Validation from "@/components/Forms/validations/StandardValidations"
 
 export default defineComponent({
-  components: { ViewPort, IonGrid, IonCol, IonRow, IonButton },
+  components: { ViewPort, IonList, IonItem, IonGrid, IonCol, IonRow, IonButton },
   mixins: [FieldMixinVue],
   data: () => ({
     value: "",
@@ -138,25 +139,58 @@ export default defineComponent({
         }
       }
     },
-    async launchKeyPad(d: any, index: any) {
+    enterTabs(index: number) {
+      this.launchKeyPad({
+        id: 'tabs',
+        helpText: 'Enter tabs',
+        type: FieldType.TT_NUMBER,
+        defaultValue: () => this.drugs[this.selectedDrug].entries[index]['tabs'],
+        validation: (v: Option) => Validation.required(v)
+      }, 
+      ({value}: Option) => this.drugs[this.selectedDrug].entries[index]['tabs'] = value)
+    },
+    enterTins(index: number) {
+      this.launchKeyPad({
+        id: 'tins',
+        helpText: 'Enter number of tins',
+        type: FieldType.TT_NUMBER,
+        defaultValue: () => this.drugs[this.selectedDrug].entries[index]['tins'],
+        validation: (v: Option) => Validation.required(v)
+      }, 
+      ({value}: Option) => this.drugs[this.selectedDrug].entries[index]['tins'] = value)
+    },
+    enterBatch(index: number) {
+      this.launchKeyPad({
+        id: 'batch',
+        helpText: 'Enter batch number',
+        type: FieldType.TT_TEXT,
+        defaultValue: () => this.drugs[this.selectedDrug].entries[index]['batchNumber'],
+        validation: (v: Option) => Validation.required(v)
+      }, 
+      ({value}: Option) => this.drugs[this.selectedDrug].entries[index]['batchNumber'] = value)
+    },
+    enterExpiry(index: number) {
+      this.launchKeyPad({
+        id: 'expiry',
+        helpText: 'Enter expiry date',
+        type: FieldType.TT_FULL_DATE,
+        defaultValue: () => this.drugs[this.selectedDrug].entries[index]['expiry'],
+        validation: (v: Option) => Validation.required(v)
+      }, 
+      ({value}: Option) => this.drugs[this.selectedDrug].entries[index]['expiry'] = value)
+    },
+    async launchKeyPad(currentField: Field, onFinish: Function) {
       const modal = await modalController.create({
-        component: d === "expiry" ? HisDateKeyPad : KeyBoardModal,
+        component: TouchField,
         backdropDismiss: false,
-        cssClass: "large-modal",
+        cssClass: "full-modal",
+        componentProps: {
+          dismissType: 'modal',
+          currentField,
+          onFinish
+        }
       });
       modal.present();
-      const { data } = await modal.onDidDismiss();
-      if (d === "tins") {
-        if (isNaN(data)) {
-          toastWarning("Invalid entry for number of tins");
-          return;
-        }
-      }
-      this.drugs[this.selectedDrug].entries[index][d] = data;
-      return data;
-    },
-    onKbValue(text: any) {
-      this.value = text;
     },
     addRow() {
       this.drugs[this.selectedDrug].entries.push({
@@ -165,18 +199,6 @@ export default defineComponent({
         expiry: null,
         batchNumber: null,
       });
-    },
-    async keypress(text: any) {
-      this.value = handleVirtualInput(text, this.value);
-    },
-    add(unit: string) {
-      this.date = HisDate.add(`${this.date}`, unit, 1);
-    },
-    subtract(unit: string) {
-      this.date = HisDate.subtract(`${this.date}`, unit, 1);
-    },
-    today() {
-      this.date = Service.getSessionDate();
     },
     selectDrug(index: any) {
       this.selectedDrug = index;
