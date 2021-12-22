@@ -35,8 +35,7 @@
               </tr>
               <tbody>
                 <tr
-                  v-for="(entry, ind) in drugs[selectedDrug].entries"
-                  :key="ind"
+                  v-for="(entry, ind) in drugs[selectedDrug].entries" :key="ind"
                 >
                   <td style="width: 50px; text-align: center; display: none">
                     <input
@@ -50,7 +49,6 @@
                       class="input-field"
                       v-model="entry.tins"
                       @click="enterTins(ind)"
-                      field_type="total_tins"
                     />
                   </td>
                   <td style="width: 50px; text-align: center">
@@ -161,7 +159,11 @@ export default defineComponent({
         helpText: this.getModalTitle('Enter number of tins'),
         type: FieldType.TT_NUMBER,
         defaultValue: () => this.getDrugValue(index, 'tins'),
-        validation: (v: Option) => Validation.required(v)
+        validation: (v: Option) => Validation.validateSeries([
+          () => Validation.required(v),
+          () => Validation.isNumber(v),
+          () => v.value <= 0 ? ['Number of tins must be greater than 1'] : null
+        ])
       }, 
       ({value}: Option) => this.setDrugValue(index, 'tins', value))
     },
