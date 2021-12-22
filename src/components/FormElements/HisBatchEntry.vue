@@ -14,7 +14,7 @@
         </ion-col>
         <ion-col size="8" class="side">
           <div v-if="selectedDrug !== null">
-            <p class="drug-info">{{ drugs[selectedDrug].fullName }}</p>
+            <p class="drug-info">{{ fullSelectedDrugName }}</p>
             <table
               id="batch-table"
               style="
@@ -81,10 +81,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { NUMBERS_ONLY } from "@/components/Keyboard/HisKbConfigurations";
 import ViewPort from "@/components/DataViews/ViewPort.vue";
 import FieldMixinVue from "./FieldMixin.vue";
-import HisDate from "@/utils/Date";
 import {
   IonGrid,
   IonCol,
@@ -105,7 +103,6 @@ export default defineComponent({
   mixins: [FieldMixinVue],
   data: () => ({
     value: "",
-    keyboard: NUMBERS_ONLY,
     date: "" as any,
     drugs: [] as any,
     selectedDrug: null as any,
@@ -139,45 +136,54 @@ export default defineComponent({
         }
       }
     },
+    getModalTitle(context: string) {
+      return `${context} (${this.drugs[this.selectedDrug].shortName})`
+    },
+    getDrugValue(index: number, type: string) {
+      return this.drugs[this.selectedDrug].entries[index][type]
+    },
+    setDrugValue(index: number, type: string, value: number | string | undefined | null) {
+      this.drugs[this.selectedDrug].entries[index][type] = value
+    },
     enterTabs(index: number) {
       this.launchKeyPad({
         id: 'tabs',
-        helpText: 'Enter tabs',
+        helpText: this.getModalTitle('Enter tabs'),
         type: FieldType.TT_NUMBER,
-        defaultValue: () => this.drugs[this.selectedDrug].entries[index]['tabs'],
+        defaultValue: () => this.getDrugValue(index, 'tabs'),
         validation: (v: Option) => Validation.required(v)
       }, 
-      ({value}: Option) => this.drugs[this.selectedDrug].entries[index]['tabs'] = value)
+      ({value}: Option) => this.setDrugValue(index, 'tabs', value))
     },
     enterTins(index: number) {
       this.launchKeyPad({
         id: 'tins',
-        helpText: 'Enter number of tins',
+        helpText: this.getModalTitle('Enter number of tins'),
         type: FieldType.TT_NUMBER,
-        defaultValue: () => this.drugs[this.selectedDrug].entries[index]['tins'],
+        defaultValue: () => this.getDrugValue(index, 'tins'),
         validation: (v: Option) => Validation.required(v)
       }, 
-      ({value}: Option) => this.drugs[this.selectedDrug].entries[index]['tins'] = value)
+      ({value}: Option) => this.setDrugValue(index, 'tins', value))
     },
     enterBatch(index: number) {
       this.launchKeyPad({
         id: 'batch',
-        helpText: 'Enter batch number',
+        helpText: this.getModalTitle('Enter batch number'),
         type: FieldType.TT_TEXT,
-        defaultValue: () => this.drugs[this.selectedDrug].entries[index]['batchNumber'],
+        defaultValue: () => this.getDrugValue(index, 'batchNumber'),
         validation: (v: Option) => Validation.required(v)
       }, 
-      ({value}: Option) => this.drugs[this.selectedDrug].entries[index]['batchNumber'] = value)
+      ({value}: Option) => this.setDrugValue(index, 'batchNumber', value))
     },
     enterExpiry(index: number) {
       this.launchKeyPad({
         id: 'expiry',
-        helpText: 'Enter expiry date',
+        helpText: this.getModalTitle('Enter expiry date'),
         type: FieldType.TT_FULL_DATE,
-        defaultValue: () => this.drugs[this.selectedDrug].entries[index]['expiry'],
+        defaultValue: () => this.getDrugValue(index, 'expiry'),
         validation: (v: Option) => Validation.required(v)
       }, 
-      ({value}: Option) => this.drugs[this.selectedDrug].entries[index]['expiry'] = value)
+      ({value}: Option) => this.setDrugValue(index, 'expiry', value))
     },
     async launchKeyPad(currentField: Field, onFinish: Function) {
       const modal = await modalController.create({
@@ -212,17 +218,12 @@ export default defineComponent({
     },
   },
   computed: {
-    getYear(): any {
-      return HisDate.getYear(`${this.date}`);
-    },
-    getMonth(): any {
-      return HisDate.getMonth(`${this.date}`);
-    },
-    getDay(): any {
-      return HisDate.getDay(`${this.date}`);
-    },
-    fullDate(): any {
-      return HisDate.toStandardHisFormat(this.date);
+    fullSelectedDrugName(): string {
+      try {
+        return this.drugs[this.selectedDrug].fullName
+      } catch (e) {
+        return 'N/A'
+      }
     },
     enteredDrugs(): any {
       const f: any = [];
