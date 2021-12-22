@@ -74,20 +74,17 @@ export default defineComponent({
   components: { HisTextInput, ViewPort, IonInput, IonLabel, IonList, IonItem, IonGrid, IonCol, IonRow, IonButton },
   mixins: [FieldMixinVue],
   data: () => ({
-    value: "",
-    date: "" as any,
     drugs: [] as any,
     selectedDrug: null as any,
   }),
   async activated() {
     this.$emit("onFieldActivated", this);
-    this.date = new Date();
     await this.setDefaultValue();
   },
   methods: {
     async setDefaultValue() {
       const drugs = await this.options();
-      this.drugs = [];
+      this.drugs = []
       drugs.forEach((element: any) => {
         const val = {
           tabs: element.value.packSizes[0],
@@ -214,11 +211,15 @@ export default defineComponent({
   },
   watch: {
     drugs: {
-        async handler() {
-          this.$emit("onValue", this.enteredDrugs );
-        },
-        immediate: true,
-        deep: true
+      handler() {
+        if (this.enteredDrugs.length != this.drugs.length) {
+          this.$emit('onValue', null)
+          return
+        }
+        this.$emit("onValue", this.enteredDrugs )
+      },
+      immediate: true,
+      deep: true
     }
   },
 });
