@@ -62,7 +62,7 @@ import {
   IonItem,
   modalController,
 } from "@ionic/vue";
-import { isEmpty } from "lodash";
+import { find, isEmpty } from "lodash";
 import TouchField from "@/components/Forms/SIngleTouchField.vue"
 import { Field, Option } from "../Forms/FieldInterface";
 import { FieldType } from "../Forms/BaseFormElements";
@@ -75,6 +75,7 @@ export default defineComponent({
   mixins: [FieldMixinVue],
   data: () => ({
     drugs: [] as any,
+    allDrugsByName: [] as string[],
     selectedDrug: null as any,
   }),
   async activated() {
@@ -83,9 +84,12 @@ export default defineComponent({
   },
   methods: {
     async setDefaultValue() {
-      const drugs = await this.options();
-      this.drugs = []
-      drugs.forEach((element: any) => {
+      const incomingDrugs = await this.options();
+      // detect if some drugs are still available as options
+      this.drugs = this.drugs.filter((d: any) =>
+        incomingDrugs.map((i: any) => i.label).includes(d.label)
+      )
+      incomingDrugs.forEach((element: any) => {
         const val = {
           tabs: element.value.packSizes[0],
           tins: null,
@@ -93,11 +97,15 @@ export default defineComponent({
           batchNumber: null,
         };
         const d = {
-          ...element.value,
+          label: element.label,
           entries: [{ ...val }, { ...val }, { ...val }],
+          ...element.value,
         };
-        this.drugs.push(d);
-      });
+        // Append if incoming drug is new
+        const drugExists = find(this.drugs, { label: element.label })
+        if (!drugExists) this.drugs.push(d)
+      })
+      // initialise drug selection
       if (this.drugs.length >= 1) this.selectDrug(0)
     },
     getModalTitle(context: string) {
