@@ -28,7 +28,7 @@
         </ion-row>
         <ion-row> 
             <ion-col class="ion-text-center" > 
-                <ion-button style="width:100%; height:10vh;" color="light" @click="today"> 
+                <ion-button style="width:30%; height:6vh;" @click="today"> 
                     <b>TODAY</b>
                 </ion-button>
             </ion-col>

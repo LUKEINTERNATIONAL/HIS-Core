@@ -231,10 +231,6 @@ export default defineComponent({
     },
     drugs: {
       handler() {
-        if (this.enteredDrugs.length != this.drugs.length) {
-          this.$emit('onValue', null)
-          return
-        }
         this.$emit("onValue", this.enteredDrugs )
       },
       immediate: true,

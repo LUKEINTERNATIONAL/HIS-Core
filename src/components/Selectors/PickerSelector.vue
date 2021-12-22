@@ -67,7 +67,7 @@ export default defineComponent({
 <style scoped>
     .w-button {
         width: 100%;
-        height: 8vh;
+        height: 6vh;
         font-size: 3em;
         font-weight: bold;
     }
