@@ -1,11 +1,7 @@
 <template>
   <view-port>
-    <ion-grid>
-      <ion-row class="his-card">
-        <ion-col> 
-          Active drug: <b>{{ fullSelectedDrugName }}</b>
-        </ion-col>
-      </ion-row>
+    <his-text-input readonly :value="fullSelectedDrugName"/> 
+    <ion-grid style="background: white;">
       <ion-row>
         <ion-col size="4" class="border-right scroll-list">
           <ion-list v-for="(drug, index) in drugs" :key="index">
@@ -35,7 +31,7 @@
               <ion-col> 
                 <ion-item> 
                   <ion-label position="floating">Batch Number</ion-label>
-                  <ion-input readonly placeholder="abc123" :value="entry.batchNumber" @click="enterBatch(ind)"></ion-input>
+                  <ion-input readonly placeholder="ABC-123" :value="entry.batchNumber" @click="enterBatch(ind)"></ion-input>
                 </ion-item>
               </ion-col>
             </ion-row>
@@ -72,9 +68,10 @@ import { Field, Option } from "../Forms/FieldInterface";
 import { FieldType } from "../Forms/BaseFormElements";
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { Service } from "@/services/service";
+import HisTextInput from "@/components/FormElements/BaseTextInput.vue";
 
 export default defineComponent({
-  components: { ViewPort, IonInput, IonLabel, IonList, IonItem, IonGrid, IonCol, IonRow, IonButton },
+  components: { HisTextInput, ViewPort, IonInput, IonLabel, IonList, IonItem, IonGrid, IonCol, IonRow, IonButton },
   mixins: [FieldMixinVue],
   data: () => ({
     value: "",
@@ -104,12 +101,7 @@ export default defineComponent({
         };
         this.drugs.push(d);
       });
-      if (this.defaultValue && !this.value) {
-        const defaults = await this.defaultValue(this.fdata, this.cdata);
-        if (defaults) {
-          this.value = defaults.toString();
-        }
-      }
+      if (this.drugs.length >= 1) this.selectDrug(0)
     },
     getModalTitle(context: string) {
       return `${context} (${this.drugs[this.selectedDrug].shortName})`
@@ -238,5 +230,8 @@ export default defineComponent({
 .scroll-list {
   height: 70vh;
   overflow: auto;
+}
+.input_display {
+  font-size: 1.0em;
 }
 </style>
