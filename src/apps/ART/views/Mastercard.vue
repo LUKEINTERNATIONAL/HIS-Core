@@ -6,6 +6,7 @@
         :items="visitDates"
         @onPrint="printLabel"
         @onDetails="showMore"
+        style="font-size: 11px;"
       ></visit-information>
     </ion-content>
     <his-footer :btns="btns" />
@@ -63,7 +64,8 @@ export default defineComponent({
     medicationCardItems: [] as Array<Option>,
     labOrderCardItems: [] as Array<Option>,
     alertCardItems: [] as Array<Option>,
-    btns: [] as Array<NavBtnInterface>
+    btns: [] as Array<NavBtnInterface>,
+    guardians: ''
   }),
   computed: {
     visitDatesTitle(): string {
@@ -93,9 +95,16 @@ export default defineComponent({
       this.patient = await this.fetchPatient(this.patientId);
       this.patientCardInfo = await this.getPatientCardInfo(this.patient);
       this.visitDates = await this.getPatientVisitDates(this.patientId);
+      this.guardians = await this.getGuardian();
       this.btns.push(this.getCancelBtn())
       this.btns.push(this.getDemographicsBtn())
-      this.btns.push(this.getGuardianBtn())
+      if(!this.guardians) this.btns.push(this.getGuardianBtn())
+    },
+    async getGuardian(){
+      const relationship = await RelationshipService.getGuardianDetails(this.patientId);
+      return relationship.map((r: any) => {
+        return ` ${r.name} (${r.relationshipType})`;
+      }).join(" ");
     },
     getDemographicsBtn(): NavBtnInterface{
      return {
@@ -126,7 +135,6 @@ export default defineComponent({
       }
     },
     getGuardianBtn(): NavBtnInterface {
-      // if(this.patient.)
       return {
         name: "Add Guardian",
         color: "primary",
@@ -168,19 +176,16 @@ export default defineComponent({
     onActiveVisitDate(data: Option) {
       this.activeVisitDate = data.value;
     },
+
     async getPatientCardInfo(patient: Patientservice) {
-      const { toStandardHisDisplayFormat, getAgeInYears } = HisDate;
-      const birthDate = this.getProp(patient, "getBirthdate");
+      const { toStandardHisDisplayFormat } = HisDate;
       const age = patient.getAge();
       const ARVNumber = patient.getPatientIdentifier(4);
       const IDNumber = patient.getPatientIdentifier(3);
       const fullName = this.getProp(patient, "getFullName");
       const gender = patient.getGender();
-      const currentDistrict = patient.getCurrentDistrict();
       const currentVillage = patient.getCurrentVillage();
-      const currentTA = patient.getCurrentTA();
       const closestLandMark = patient.getAttribute(19);
-      const phoneNumber = patient.getPhoneNumber();
       let dateOfTest = await ObservationService.getAll(
         this.patientId,
         "Confirmatory HIV test date"
@@ -191,7 +196,7 @@ export default defineComponent({
       const placeOfTest = await ObservationService.getFirstValueText(
         this.patientId,
         "Confirmatory HIV test location"
-      );
+      );      
 
       let startDate = await ObservationService.getAll(
         this.patientId,
@@ -202,15 +207,6 @@ export default defineComponent({
         ? toStandardHisDisplayFormat(startDate[0].value_datetime)
         : 'N/A'
       
-      let guardians = "";
-      RelationshipService.getGuardianDetails(this.patientId).then(
-        (relationship: any) => {
-          const rel = relationship.map((r: any) => {
-            return ` ${r.name} (${r.relationshipType})`;
-          });
-          guardians = rel.join(" ");
-        }
-      );
       const initialWeight = await this.getInitial("weight");
       const initialHeight = await this.getInitial("Height");
       const initialBMI = await this.getInitial("BMI");
@@ -227,6 +223,8 @@ export default defineComponent({
         "Reason for ART eligibility"
       );
 
+      const tb = await this.getTBStats()
+      
       const obj: Option[] = [
         { label: "ARV #", value: ARVNumber },
         { label: "National Patient ID", value: IDNumber },
@@ -235,20 +233,32 @@ export default defineComponent({
         { label: "Sex", value: gender },
         { label: "Location", value: currentVillage },
         { label: "Landmark", value: closestLandMark },
-        { label: "Guardian", value: guardians },
+        { label: "Guardian", value: this.guardians },
         { label: "Init W(KG)", value: initialWeight },
         { label: "Init H(CM)", value: initialHeight },
         { label: "BMI(CM)", value: initialBMI },
         { label: "TI", value: TI },
         { label: "Agrees to follow up", value: agreesToFollowUp },
-        { label: "Reason for starting", value: reasonForStarting },
-        {
-          label: "Date + place of HIV test",
-          value: `${dateOfTest ? dateOfTest  : ''} ${placeOfTest? placeOfTest : ''}`,
-        },
+        { label: "Reason for starting ART", value: reasonForStarting },
+        { label: "HIV test date", value: `${dateOfTest ? dateOfTest  : ''}`},
+        { label: "HIV test place", value: ` ${placeOfTest? placeOfTest : ''}`},
         { label: "Date of starting first line ART", value: startDate },
+        { label: "Pulmonary TB within the last 2 years", value: tb.lastTwoYears},
+        { label: "Extra pulmonary TB (EPTB)", value: tb.eptb},
+        { label: "Pulmonary TB (current)", value: tb.currentTB},
+        { label: "Kaposi's sarcoma:", value: tb.ks}
       ];
       return obj;
+    },
+
+    async getTBStats(){
+      const stats = await ObservationService.getFirstValueCoded(this.patientId, 'Who stages criteria present')
+      return {
+        lastTwoYears: stats && stats.match(/last/i) ? "Yes" : "N/A",
+        eptb: stats && stats.match(/eptb/i) ? "Yes" : "N/A",
+        currentTB: stats && stats.match(/current/i) ? "Yes" : "N/A",
+        ks: stats && stats.match(/kepos/i) ? "Yes" : "N/A",
+      }
     },
 
     async getInitial(concept: string) {
