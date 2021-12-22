@@ -7,7 +7,7 @@
         </ion-col>
       </ion-row>
       <ion-row>
-        <ion-col size="4" class="side left">
+        <ion-col size="4" class="border-right scroll-list">
           <ion-list v-for="(drug, index) in drugs" :key="index">
             <ion-item 
               detail
@@ -18,7 +18,7 @@
           </ion-list>
         </ion-col>
         <ion-col>
-          <ion-grid v-if="selectedDrug !== null"> 
+          <ion-grid v-if="selectedDrug !== null" class="scroll-list"> 
             <ion-row v-for="(entry, ind) in drugs[selectedDrug].entries" :key="ind"> 
               <ion-col> 
                 <ion-item> 
@@ -232,32 +232,11 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-/*  */
-input {
-  background-color: white;
+.border-right {
+  border-right: solid 1px #ccc;
 }
-.drug-info {
-  font-size: 1.5em;
-}
-.input-field {
-  -webkit-transition: all 0.3s ease-in-out;
-  outline: none;
-  box-shadow: 0 0 5px rgba(81, 203, 238, 1);
-  padding: 3px 0px 3px 3px;
-  margin: 5px 1px 3px 0px;
-  border: 1px solid rgba(81, 203, 238, 1);
-  height: 45px;
-  width: 90%;
-  font-size: 26px;
-  margin-left: 10px;
-  text-align: center;
-}
-th {
-  font-size: 1.3em;
-}
-.left {
-  border-right: solid;
+.scroll-list {
   height: 70vh;
-  overflow: scroll;
+  overflow: auto;
 }
 </style>
