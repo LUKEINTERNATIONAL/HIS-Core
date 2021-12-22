@@ -112,20 +112,14 @@ export default defineComponent({
       return `${context} (${this.drugs[this.selectedDrug].shortName})`
     },
     getDrugValue(index: number, type: string) {
-      return this.drugs[this.selectedDrug].entries[index][type]
+      try {
+        return this.drugs[this.selectedDrug].entries[index][type]
+      } catch (e) { 
+        alert(e)
+      }
     },
-    setDrugValue(index: number, type: string, value: number | string | undefined | null) {
-      this.drugs[this.selectedDrug].entries[index][type] = value
-    },
-    enterTabs(index: number) {
-      this.launchKeyPad({
-        id: 'tabs',
-        helpText: this.getModalTitle('Enter tabs'),
-        type: FieldType.TT_NUMBER,
-        defaultValue: () => this.getDrugValue(index, 'tabs'),
-        validation: (v: Option) => Validation.required(v)
-      }, 
-      ({value}: Option) => this.setDrugValue(index, 'tabs', value))
+    setDrugValue(index: number, type: string, data: Option | null) {
+      this.drugs[this.selectedDrug].entries[index][type] = data ? data.value : ''
     },
     enterTins(index: number) {
       this.launchKeyPad({
@@ -143,7 +137,7 @@ export default defineComponent({
           ])
         }
       }, 
-      ({value}: Option) => this.setDrugValue(index, 'tins', value))
+      (v: Option) => this.setDrugValue(index, 'tins', v))
     },
     enterBatch(index: number) {
       this.launchKeyPad({
@@ -152,7 +146,7 @@ export default defineComponent({
         type: FieldType.TT_TEXT,
         defaultValue: () => this.getDrugValue(index, 'batchNumber'),
       }, 
-      ({value}: Option) => this.setDrugValue(index, 'batchNumber', value))
+      (v: Option) => this.setDrugValue(index, 'batchNumber', v))
     },
     enterExpiry(index: number) {
       this.launchKeyPad({
@@ -168,7 +162,7 @@ export default defineComponent({
           }
         }
       },
-      ({value}: Option) => this.setDrugValue(index, 'expiry', value))
+      (v: Option) => this.setDrugValue(index, 'expiry', v))
     },
     async launchKeyPad(currentField: Field, onFinish: Function) {
       const modal = await modalController.create({

@@ -1,6 +1,6 @@
 <template>
     <view-port :showFull="false">
-        <ion-input class="input_display" :readonly="true" :value="fullDate"/>
+        <ion-input class="input_display" :readonly="true" :value="value"/>
     </view-port>
     <ion-grid class="his-floating-keyboard">
         <ion-row> 
@@ -50,18 +50,23 @@ export default defineComponent({
     mixins: [FieldMixinVue],
     data: ()=>({ 
         value: '',
-        date: '' as any
+        date: '' as any,
+        isInit: true as boolean
     }),
     async activated(){
         this.$emit('onFieldActivated', this)
-        this.today()
+        this.date = new Date()
         await this.setDefaultValue()
+        this.isInit = false
     },
     methods: {
         async setDefaultValue() {
-            if (this.defaultValue && !this.date) {
+            if (this.defaultValue && !this.value) {
                 const defaults = await this.defaultValue(this.fdata, this.cdata)
-                if (defaults) this.date = defaults.toString()
+                if (defaults) {
+                    this.isInit = false
+                    this.date = new Date(defaults)
+                } 
             }
         },
         add(unit: string) {
@@ -71,7 +76,7 @@ export default defineComponent({
            this.date = HisDate.subtract(`${this.date}`, unit, 1)
         },
         today() {
-            this.date = Service.getSessionDate();
+            this.date = new Date(Service.getSessionDate())
         }
     },
     computed: {
@@ -83,17 +88,23 @@ export default defineComponent({
         },
         getDay(): any {
             return HisDate.getDay(`${this.date}`);
-        },
-        fullDate(): any {
-            return this.date ? HisDate.toStandardHisFormat(this.date) : '';
         }
     },
     watch: {
-        date(value){
-            this.$emit('onValue', { label: value, value: this.fullDate })
+        date(newDate: string) {
+            if (!this.isInit) { // avoid setting initial date unless otherwise
+                this.value = HisDate.toStandardHisFormat(newDate)
+            }
+        },
+        value(value) {
+            if (!value) {
+                this.$emit('onValue', null)
+                return
+            }
+            this.$emit('onValue', { label: value, value: this.value })
         },
         clear() {
-            this.today()
+            this.value = ''
         }
     }
 })

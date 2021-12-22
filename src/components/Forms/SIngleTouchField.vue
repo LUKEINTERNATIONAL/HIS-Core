@@ -136,6 +136,7 @@ export default defineComponent({
                 this.onFinish(this.value)
             } catch(e) {
                 toastDanger(e)
+                console.error(e)
             }
             this.onClose()
             this.disableBtn = false
