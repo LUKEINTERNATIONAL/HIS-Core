@@ -7,23 +7,25 @@
                 </ion-title>
             </ion-toolbar>
         </ion-header>
-        <ion-content> 
-            <component
-                :key="currentField.id"
-                :is="currentField.type"
-                :currentFieldig="currentField.currentFieldig"
-                :options="currentField.options"
-                :preset="currentField.preset"
-                :clear="valueClearIndex"
-                :fdata="formData"
-                :cdata="computedFormData"
-                :activationState="state"
-                :onValue="currentField.onValue"
-                :defaultValue="currentField.defaultValue"
-                :onValueUpdate="currentField.onValueUpdate"
-                @onValue="onFieldValue"
-            >
-            </component>
+        <ion-content>
+            <keep-alive> 
+                <component
+                    :key="currentField.id"
+                    :is="currentField.type"
+                    :currentFieldig="currentField.currentFieldig"
+                    :options="currentField.options"
+                    :preset="currentField.preset"
+                    :clear="valueClearIndex"
+                    :fdata="formData"
+                    :cdata="computedFormData"
+                    :activationState="state"
+                    :onValue="currentField.onValue"
+                    :defaultValue="currentField.defaultValue"
+                    :onValueUpdate="currentField.onValueUpdate"
+                    @onValue="onFieldValue"
+                >
+                </component>
+            </keep-alive>
         </ion-content>
         <ion-footer> 
             <ion-toolbar color="light">
