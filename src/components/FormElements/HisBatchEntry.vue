@@ -218,6 +218,17 @@ export default defineComponent({
     },
   },
   watch: {
+    clear() {
+      this.drugs = this.drugs.map((d: any) => {
+        d.entries = d.entries.map((e: any) => {
+          e.tins = null
+          e.expiry = null
+          e.batchNumber = null
+          return e
+        })
+        return d
+      })
+    },
     drugs: {
       handler() {
         if (this.enteredDrugs.length != this.drugs.length) {
