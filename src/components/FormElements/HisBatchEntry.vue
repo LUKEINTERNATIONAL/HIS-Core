@@ -142,7 +142,13 @@ export default defineComponent({
         type: FieldType.TT_TEXT,
         defaultValue: () => this.getDrugValue(index, 'batchNumber'),
       }, 
-      (v: Option) => this.setDrugValue(index, 'batchNumber', v))
+      (v: Option) => {
+        const batch = {...v}
+        const value = `${batch.value}`.toUpperCase()
+        batch.label = value
+        batch.value = value
+        this.setDrugValue(index, 'batchNumber', batch)
+      })
     },
     enterExpiry(index: number) {
       this.launchKeyPad({
