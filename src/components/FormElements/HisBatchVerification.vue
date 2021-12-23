@@ -131,13 +131,15 @@ export default defineComponent({
     },
     async selectDrug(index: any) {
       this.selectedDrug = index;
-      const vals = await this.stockService.getItem(
-        this.drugs[this.selectedDrug].drugID
-      )
-      this.drugs[index]["entries"] = vals.map((i: any) => {
-        i.originalQuantity = i['current_quantity']
-        return i
-      })
+      if (!('entries' in this.drugs[index])) {
+        const vals = await this.stockService.getItem(
+          this.drugs[this.selectedDrug].drugID
+        )
+        this.drugs[index]["entries"] = vals.map((i: any) => {
+          i.originalQuantity = i['current_quantity']
+          return i
+        })
+      }
     }
   },
   computed: {
@@ -190,6 +192,9 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+ion-label {
+  font-weight: bold;
+}
 .border-right {
   border-right: solid 1px #ccc;
 }
