@@ -136,7 +136,12 @@ export default defineComponent({
             : null
         }
       }, 
-      (v: Option) => this.setDrugValue(index, 'authorization', v))
+      (v: Option) => {
+        const auth = {...v}
+        auth.value = `${v.value}`.toUpperCase()
+        auth.label = `${v.label}`.toUpperCase()
+        this.setDrugValue(index, 'authorization', auth)
+      })
     },
     enterTins(index: number) {
       this.launchKeyPad({
