@@ -139,28 +139,34 @@ export default defineComponent({
           id: "summary",
           helpText: "Summary",
           type: FieldType.TT_TABLE_VIEWER,
-          options: (d: any) => this.buildResults(d.enter_batches),
+          options: (d: any) => this.buildResults(d),
           config: {
             hiddenFooterBtns: ["Clear"],
           },
         },
       ];
     },
-    buildResults(drugs: any) {
+    buildResults(formData: any) {
+      const isRelocation = formData.task.value === 'Relocations'
       const columns = [
         "Drug",
         "Total units",
         "Expiry date",
         "Authorization code",
       ];
-      const rows = drugs.map((j: any) => {
+
+      if (isRelocation) columns.push('Relocation')
+
+      const rows = formData.enter_batches.map((j: any) => {
         const d = j.value;
-        return [
+        const data = [
           StockService.getShortName(d.drug_id),
           d.tins,
           HisDate.toStandardHisDisplayFormat(d.expiry),
-          d.authorization,
-        ];
+          d.authorization
+        ]
+        if (isRelocation) data.push(formData.relocation_location.label)
+        return data
       });
       return [
         {
