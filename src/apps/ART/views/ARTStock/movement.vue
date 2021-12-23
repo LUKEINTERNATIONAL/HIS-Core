@@ -18,6 +18,8 @@ import HisDate from "@/utils/Date";
 import { StockService } from "./stock_service";
 import { toastDanger, toastSuccess } from "@/utils/Alerts";
 import { getFacilities } from "@/utils/HisFormHelpers/LocationFieldOptions";
+import { BadRequestError } from  "@/services/service"
+import { isEmpty } from "lodash";
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -33,7 +35,7 @@ export default defineComponent({
   methods: {
     async onFinish(formData: any) {
       const data = formData.enter_batches;
-      const errors = [];
+      let errors: string[] = [];
       for (let index = 0; index < data.length; index++) {
         const d = data[index].value;
         const packSize = StockService.getPackSize(d.drug_id);
@@ -44,34 +46,43 @@ export default defineComponent({
           quantity: total,
           reason: formData.reasons.value,
         };
-        if (formData.task.value === "Relocations") {
-          extras["location_id"] = formData.relocation_location.value;
-          const f = await this.stockService.relocateItems(d.pharmacy_batch_id, {
-            ...res,
-            ...extras,
-          });
-          if (!f) {
-            errors.push(
-              "Could not save record for" + StockService.getShortName(d.drug_id)
-            );
+        try {
+          if (formData.task.value === "Relocations") {
+            extras["location_id"] = formData.relocation_location.value;
+            const f = await this.stockService.relocateItems(d.pharmacy_batch_id, {
+              ...res,
+              ...extras,
+            });
+            if (!f) {
+              errors.push(
+                "Could not save record for" + StockService.getShortName(d.drug_id)
+              );
+            }
+          } else {
+            const f = await this.stockService.disposeItems(d.pharmacy_batch_id, {
+              ...res,
+              ...extras,
+            });
+            if (!f) {
+              errors.push(
+                "Could not save record for" + StockService.getShortName(d.drug_id)
+              );
+            }
           }
-        } else {
-          const f = await this.stockService.disposeItems(d.pharmacy_batch_id, {
-            ...res,
-            ...extras,
-          });
-          if (!f) {
-            errors.push(
-              "Could not save record for" + StockService.getShortName(d.drug_id)
-            );
+        } catch (e) {
+          if (e instanceof BadRequestError && !isEmpty(e.errors)) {
+            errors = errors.concat(e.errors)
+          } else {
+            errors.push(e)
           }
+          console.log(e)
         }
       }
       if (errors.length === 0) {
         toastSuccess("Stock succesfully moved");
         this.$router.push("/");
       } else {
-        toastDanger(`${errors.length} items could not be moved`);
+        toastDanger(`${errors.join(',')}`);
       }
     },
     getFields(): Array<Field> {
