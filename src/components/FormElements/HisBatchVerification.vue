@@ -1,58 +1,43 @@
 <template>
   <view-port>
-    <ion-grid>
+    <his-text-input readonly :value="fullSelectedDrugName"/> 
+    <ion-grid style="background: white;">
       <ion-row>
-        <ion-col size="4" class="side left">
+        <ion-col size="4" class="border-right scroll-list">
           <ion-list v-for="(drug, index) in drugs" :key="index">
             <ion-item
-              :color="index === selectedDrug ? 'primary' : ''"
-              @click="selectDrug(index)"
-            >
-              {{ `${drug.shortName} (${drug.packSizes[0]}) ` }}</ion-item
-            >
+              detail
+              :color="index === selectedDrug ? 'secondary' : ''"
+              @click="selectDrug(index)">
+              {{ `${drug.shortName} (${drug.packSizes[0]})` }}
+            </ion-item>
           </ion-list>
         </ion-col>
-        <ion-col size="8" class="side">
-          <div v-if="selectedDrug !== null">
-            <p class="drug-info">{{ drugs[selectedDrug].fullName }}</p>
-            <table
-              id="batch-table"
-              style="
-                border: 1.5px solid rgb(92, 166, 196);
-                border-radius: 10px;
-                width: 94%;
-                margin-top: 20px;
-                margin-left: 20px;
-                padding-top: 35px;
-                padding-bottom: 20px;
-              "
-            >
-              <tr>
-                <th>Expiry date</th>
-                <th>Available tins</th>
-                <th></th>
-              </tr>
-              <tbody>
-                <tr
-                  v-for="(entry, ind) in drugs[selectedDrug].entries"
-                  :key="ind"
-                  :style="entry.updated ? 'color: green' : ''"
-                >
-                  <td style="text-align: center">
-                    <p>{{ entry.expiry_date }}</p>
-                  </td>
-                  <td style="text-align: center">
-                    <p>{{ entry.current_quantity }}</p>
-                  </td>
-                  <td>
-                    <ion-button @click="launchKeyPad(ind)"
-                      >update stock</ion-button
-                    >
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <ion-col>
+          <ion-grid v-if="selectedDrug !== null" class="scroll-list"> 
+            <ion-row v-for="(entry, ind) in drugs[selectedDrug].entries" :key="ind"> 
+              <ion-col> 
+                <ion-item>
+                  <ion-label position="floating">Expiry Date</ion-label>
+                  <ion-input readonly :value="entry.expiry_date"></ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col> 
+                <ion-item>
+                  <ion-label position="floating">Available Tins</ion-label>
+                  <ion-input 
+                    readonly 
+                    placeholder="0"
+                    :value="entry.current_quantity"
+                    :color="entry.current_quantity != entry.originalQuantity ? 'success': ''">
+                  </ion-input>
+                </ion-item>
+              </ion-col>
+              <ion-col> 
+                <ion-button size="large" @click="enterAmount(ind)"> Update Stock </ion-button>
+              </ion-col>
+            </ion-row>
+          </ion-grid>
         </ion-col>
       </ion-row>
     </ion-grid>
@@ -61,12 +46,6 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import handleVirtualInput from "@/components/Keyboard/KbHandler";
-import { NUMBERS_ONLY } from "@/components/Keyboard/HisKbConfigurations";
-import ViewPort from "@/components/DataViews/ViewPort.vue";
-import FieldMixinVue from "./FieldMixin.vue";
-import HisDate from "@/utils/Date";
-import { Service } from "@/services/service";
 import {
   IonGrid,
   IonCol,
@@ -74,18 +53,19 @@ import {
   IonButton,
   modalController,
 } from "@ionic/vue";
-import { toastDanger} from "@/utils/Alerts";
-import { isEmpty } from "lodash";
 import { StockService } from "@/apps/ART/views/ARTStock/stock_service";
-import HisModalKeyboardVue from "@/components/Keyboard/HisModalKeyboard.vue";
+import ViewPort from "@/components/DataViews/ViewPort.vue";
+import FieldMixinVue from "./FieldMixin.vue";
+import { Field, Option } from "../Forms/FieldInterface";
+import TouchField from "@/components/Forms/SIngleTouchField.vue"
+import Validation from "@/components/Forms/validations/StandardValidations"
+import { FieldType } from "../Forms/BaseFormElements";
+import HisTextInput from "@/components/FormElements/BaseTextInput.vue";
 
 export default defineComponent({
-  components: { ViewPort, IonGrid, IonCol, IonRow, IonButton },
+  components: { ViewPort, HisTextInput, IonGrid, IonCol, IonRow, IonButton },
   mixins: [FieldMixinVue],
   data: () => ({
-    value: "",
-    keyboard: NUMBERS_ONLY,
-    date: "" as any,
     drugs: [] as any,
     selectedDrug: null as any,
     stockService: {} as any,
@@ -93,7 +73,6 @@ export default defineComponent({
   async activated() {
     this.$emit("onFieldActivated", this);
     this.stockService = new StockService();
-    this.date = new Date();
     await this.setDefaultValue();
   },
   methods: {
@@ -101,92 +80,74 @@ export default defineComponent({
       const drugs = await this.options();
       this.drugs = [];
       drugs.forEach((element: any) => {
-        const d = {
-          ...element.value,
-        };
-        this.drugs.push(d);
+        this.drugs.push({ ...element.value });
       });
-      if (this.defaultValue && !this.value) {
-        const defaults = await this.defaultValue(this.fdata, this.cdata);
-        if (defaults) {
-          this.value = defaults.toString();
-        }
-      }
     },
-    async launchKeyPad(index: any) {
+    getModalTitle(context: string) {
+      return `${context} (${this.drugs[this.selectedDrug].fullName})`
+    },
+    getDrugValue(index: number, type: string) {
+      return this.drugs[this.selectedDrug].entries[index][type]
+    },
+    setDrugValue(index: number, type: string, data: Option | null) {
+      this.drugs[this.selectedDrug].entries[index][type] = data ? data.value : ''
+
+    },
+    async enterAmount(index: number) {
+      this.launchKeyPad({
+        id: 'tins',
+        helpText: this.getModalTitle('Enter number of tins'),
+        type: FieldType.TT_NUMBER,
+        defaultValue: () => this.getDrugValue(index, 'current_quantity'),
+        validation: (v: Option) => {
+          if (!v || v && !v.value) return null
+          return Validation.validateSeries([
+            () => Validation.isNumber(v),
+            () => v.value < 0 ? ['Number of tins must be greater than 1'] : null
+          ])
+        }
+      },
+      (v: Option) => {
+        this.setDrugValue(index, 'current_quantity', v)
+      })
+    },
+    async launchKeyPad(currentField: Field, onFinish: Function) {
       const modal = await modalController.create({
-        component: HisModalKeyboardVue,
+        component: TouchField,
         backdropDismiss: false,
-        cssClass: "large-modal",
+        cssClass: "full-modal",
+        componentProps: {
+          dismissType: 'modal',
+          currentField,
+          onFinish
+        }
       });
       modal.present();
-      const { data } = await modal.onDidDismiss();
-      if (isNaN(data)) {
-        toastDanger("Invalid entry for number of tins");
-        return;
-      }
-      if (
-        parseInt(data) !==
-        this.drugs[this.selectedDrug].entries[index]["current_quantity"]
-      ) {
-        this.drugs[this.selectedDrug].entries[index]["current_quantity"] = data;
-        this.drugs[this.selectedDrug].entries[index].updated = true;
-      }
-
-      return data;
-    },
-    onKbValue(text: any) {
-      this.value = text;
-    },
-    addRow() {
-      this.drugs[this.selectedDrug].entries.push({
-        tabs: this.drugs[this.selectedDrug].packSizes[0],
-        tins: null,
-        expiry: null,
-        batchNumber: null,
-      });
-    },
-    async keypress(text: any) {
-      this.value = handleVirtualInput(text, this.value);
-    },
-    add(unit: string) {
-      this.date = HisDate.add(`${this.date}`, unit, 1);
-    },
-    subtract(unit: string) {
-      this.date = HisDate.subtract(`${this.date}`, unit, 1);
-    },
-    today() {
-      this.date = Service.getSessionDate();
     },
     async selectDrug(index: any) {
       this.selectedDrug = index;
       const vals = await this.stockService.getItem(
         this.drugs[this.selectedDrug].drugID
-      );
-      this.drugs[index]["entries"] = vals;
-    },
-    validateEntry(drug: any) {
-      return !isEmpty(drug.tins) && !isEmpty(drug.authorization);
-    },
+      )
+      this.drugs[index]["entries"] = vals.map((i: any) => {
+        i.originalQuantity = i['current_quantity']
+        return i
+      })
+    }
   },
   computed: {
-    getYear(): any {
-      return HisDate.getYear(`${this.date}`);
-    },
-    getMonth(): any {
-      return HisDate.getMonth(`${this.date}`);
-    },
-    getDay(): any {
-      return HisDate.getDay(`${this.date}`);
-    },
-    fullDate(): any {
-      return HisDate.toStandardHisFormat(this.date);
+    fullSelectedDrugName(): string {
+      try {
+        return this.drugs[this.selectedDrug].fullName
+      } catch (e) {
+        return 'N/A'
+      }
     },
     enteredDrugs(): any {
       const f: any = [];
       this.drugs.forEach((element: any) => {
         if (element.entries) {
-          const j = element.entries.filter((el: any) => el.updated);
+          const j = element.entries.filter((el: any) => el.current_quantity != el.originalQuantity);
           j.forEach((e: any) => {
             f.push({ label: element.shortname, value: { ...e, ...element } });
           });
@@ -196,6 +157,16 @@ export default defineComponent({
     },
   },
   watch: {
+    clear() {
+      this.drugs = this.drugs.map((d: any) => {
+        if (!d.entries) return d
+        d.entries = d.entries.map((e: any) => {
+          e['current_quantity'] = e.originalQuantity
+          return e
+        })
+        return d
+      })
+    },
     drugs: {
       async handler() {
         this.$emit("onValue", this.enteredDrugs);
@@ -207,32 +178,14 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-/*  */
-input {
-  background-color: white;
+.border-right {
+  border-right: solid 1px #ccc;
 }
-.drug-info {
-  font-size: 1.5em;
-}
-.input-field {
-  -webkit-transition: all 0.3s ease-in-out;
-  outline: none;
-  box-shadow: 0 0 5px rgba(81, 203, 238, 1);
-  padding: 3px 0px 3px 3px;
-  margin: 5px 1px 3px 0px;
-  border: 1px solid rgba(81, 203, 238, 1);
-  height: 45px;
-  width: 90%;
-  font-size: 26px;
-  margin-left: 10px;
-  text-align: center;
-}
-th {
-  font-size: 1.3em;
-}
-.left {
-  border-right: solid;
+.scroll-list {
   height: 70vh;
-  overflow: scroll;
+  overflow: auto;
+}
+.input_display {
+  font-size: 1.3em;
 }
 </style>
