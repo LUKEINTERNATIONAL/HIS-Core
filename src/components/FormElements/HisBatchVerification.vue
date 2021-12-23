@@ -61,6 +61,7 @@ import TouchField from "@/components/Forms/SIngleTouchField.vue"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { FieldType } from "../Forms/BaseFormElements";
 import HisTextInput from "@/components/FormElements/BaseTextInput.vue";
+import { isEmpty } from "lodash";
 
 export default defineComponent({
   components: { ViewPort, HisTextInput, IonGrid, IonCol, IonRow, IonButton },
@@ -77,6 +78,9 @@ export default defineComponent({
   },
   methods: {
     async setDefaultValue() {
+      if (!isEmpty(this.drugs)) {
+        return
+      }
       const drugs = await this.options();
       this.drugs = [];
       drugs.forEach((element: any) => {
