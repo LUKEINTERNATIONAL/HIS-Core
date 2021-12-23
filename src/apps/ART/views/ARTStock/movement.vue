@@ -107,6 +107,7 @@ export default defineComponent({
         },
         {
           id: "date",
+          dynamicHelpText: (f) => `Date of ${f.task.label}`,
           helpText: "Set date",
           type: FieldType.TT_FULL_DATE,
           validation: (val: any) => Validation.required(val),
