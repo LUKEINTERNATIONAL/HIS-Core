@@ -223,6 +223,9 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+ion-label {
+  font-weight: bold;
+}
 .border-right {
   border-right: solid 1px #ccc;
 }

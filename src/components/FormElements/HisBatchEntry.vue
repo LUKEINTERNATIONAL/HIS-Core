@@ -31,7 +31,7 @@
               <ion-col> 
                 <ion-item> 
                   <ion-label position="floating">Batch Number</ion-label>
-                  <ion-input readonly placeholder="ABC-123" :value="entry.batchNumber" @click="enterBatch(ind)"></ion-input>
+                  <ion-input readonly placeholder="e.g. 'ABC-123'" :value="entry.batchNumber" @click="enterBatch(ind)"></ion-input>
                 </ion-item>
               </ion-col>
             </ion-row>
@@ -234,6 +234,9 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+ion-label {
+  font-weight: bold;
+}
 .border-right {
   border-right: solid 1px #ccc;
 }
@@ -242,6 +245,6 @@ export default defineComponent({
   overflow: auto;
 }
 .input_display {
-  font-size: 1.0em;
+  font-size: 1.3em;
 }
 </style>
