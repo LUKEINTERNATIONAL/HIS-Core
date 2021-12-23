@@ -16,7 +16,7 @@ import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import HisDate from "@/utils/Date";
 import { StockService } from "./stock_service";
-import { toastDanger, toastSuccess } from "@/utils/Alerts";
+import { toastWarning, toastDanger, toastSuccess } from "@/utils/Alerts";
 import { getFacilities } from "@/utils/HisFormHelpers/LocationFieldOptions";
 import { BadRequestError } from  "@/services/service"
 import { isEmpty } from "lodash";
@@ -142,6 +142,18 @@ export default defineComponent({
           id: "enter_batches",
           helpText: "Batch entry",
           type: FieldType.TT_BATCH_MOVEMENT,
+          beforeNext: (_: any, f: any, c: any, {currentFieldContext}: any) => {
+            const drugsToStr = (drugs: any) => drugs.map((b: any, i: number) => `${b.label}`).join(' & ')
+            const partialEntries = currentFieldContext.drugs.filter((drug: any) =>
+              drug.entries.map((d: any) => !(d.tins && d.authorization)).every(Boolean)
+            )
+            if (!isEmpty(partialEntries)) {
+              const partialDrugs = drugsToStr(partialEntries)
+              toastWarning(`Please fix partial batch entries for drugs: ${partialDrugs}`)
+              return false
+            }
+            return true
+          },
           options: () => this.selectedDrugs,
           validation: (val: any) => Validation.required(val),
         },
