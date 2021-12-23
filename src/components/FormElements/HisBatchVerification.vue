@@ -15,6 +15,7 @@
         </ion-col>
         <ion-col>
           <ion-grid v-if="selectedDrug !== null" class="scroll-list"> 
+            <h3 class="his-card" v-if="noStockForDrug"> No stock information available for drug</h3>
             <ion-row v-for="(entry, ind) in drugs[selectedDrug].entries" :key="ind"> 
               <ion-col> 
                 <ion-item>
@@ -140,6 +141,13 @@ export default defineComponent({
     }
   },
   computed: {
+    noStockForDrug(): boolean {
+      try {
+        return !this.drugs[this.selectedDrug].entries || this.drugs[this.selectedDrug].entries.length <= 0
+      }catch(e) {
+        return false
+      }
+    },
     fullSelectedDrugName(): string {
       try {
         return this.drugs[this.selectedDrug].fullName
