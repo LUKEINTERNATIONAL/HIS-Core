@@ -118,7 +118,13 @@ export default defineComponent({
           type: FieldType.TT_MULTIPLE_SELECT,
           requireNext: true,
           validation: (val: any) => Validation.required(val),
-          options: () => this.getItems(),
+          options: async (_: any, checked: Option[]) => {
+            const items: Option[] = await this.getItems()
+            return items.map((i: any) => {
+              i.isChecked = checked.filter(c => c.label === i.label).length >= 1 
+              return i
+            })
+          },
           unload: (val: any) => (this.selectedDrugs = val),
         },
         {
