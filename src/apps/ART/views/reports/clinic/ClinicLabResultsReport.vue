@@ -5,9 +5,6 @@
         :rows="rows" 
         :fields="fields"
         :columns="columns"
-        :canExportCsv="true"
-        :canExportPDf="true"
-        :reportReady="reportReady"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>
@@ -47,10 +44,8 @@ export default defineComponent({
             ]
         ],
         disaggregatedColumns: [
-            [
-                table.thTxt('Age group'), 
-                table.thTxt('Gender')
-            ]
+            table.thTxt('Age group'), 
+            table.thTxt('Gender')
         ]
     }),
     created() {
@@ -139,7 +134,7 @@ export default defineComponent({
         setDisaggregatedRows(results: Array<Option>) {
             const males = []
             const females = []
-            this.columns = this.disaggregatedColumns.concat(results.map((i: any) => table.thTxt(i.label)))
+            this.columns = [this.disaggregatedColumns.concat(results.map((i: any) => table.thTxt(i.label)))]
             for(const ageGroupIndex in AGE_GROUPS) {
                 const group = AGE_GROUPS[ageGroupIndex]
                 const maleRow: any = [table.td(group), table.td('M')]
