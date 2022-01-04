@@ -23,7 +23,7 @@
         <ion-chip color="primary">API version: <b>{{ apiVersion }}</b></ion-chip>
       </ion-toolbar>
     </ion-footer>
-    <his-footer :btns="btns"></his-footer>
+    <his-footer :color="footerColor" :btns="btns"></his-footer>
   </ion-page>
 </template>
 
@@ -55,6 +55,13 @@ export default defineComponent({
     customBtns: {
       type: Array,
       default: () => []
+    },
+    footerColor: {
+      type: String,
+      default: 'dark'
+    },
+    onFinish: {
+      type: Function
     }
   },
   data: () => ({
@@ -93,7 +100,12 @@ export default defineComponent({
         slot: "end",
         color: "primary",
         visible: true,
-        onClick: async () => this.$router.push({ path:'/' })
+        onClick: () => {
+          if (typeof this.onFinish === 'function') {
+            return this.onFinish()
+          }
+          this.$router.push({ path:'/' })
+        }
       }
     ]
   }
