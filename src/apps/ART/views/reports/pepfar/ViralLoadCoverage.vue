@@ -63,7 +63,7 @@ export default defineComponent({
       await this.setRows("F");
       await this.setRows("M");
     },
-    drillDown(patients: Array<any>, filter: 'M' | 'F') {
+    drillDown(patients: Array<any>, filter: 'M' | 'F', context: string) {
         const filteredP = patients.filter((p: any) => p.gender === filter)
         if (filteredP.length >= 1) {
             const columns = [
@@ -83,7 +83,7 @@ export default defineComponent({
                       .then(() => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`}))
                     )
                 ]))
-            return table.tdLink(filteredP.length, () => this.drilldownData('Drill table', columns, [], asyncRows))
+            return table.tdLink(filteredP.length, () => this.drilldownData(context, columns, [], asyncRows))
         }
         return table.td(0)
     },
@@ -95,15 +95,31 @@ export default defineComponent({
           this.rows.push([
             table.td(group),
             table.td(gender),
-            this.drillDown(cohortData.tx_curr, gender),
-            this.drillDown(cohortData.due_for_vl, gender),
-            this.drillDown(cohortData.drawn.routine, gender),
-            this.drillDown(cohortData.drawn.targeted, gender),
-            this.drillDown(cohortData.low_vl.routine, gender),
-            this.drillDown(cohortData.low_vl.targeted, gender),
-            this.drillDown(cohortData.high_vl.routine, gender),
-            this.drillDown(cohortData.high_vl.targeted, gender)
-          ]);
+            this.drillDown(cohortData.tx_curr, gender,
+              `${group} Tx Curr (${gender})`
+            ),
+            this.drillDown(cohortData.due_for_vl, gender,
+              `${group} Due for Vl (${gender})`
+            ),
+            this.drillDown(cohortData.drawn.routine, gender,
+              `${group} Routine (${gender})`
+            ),
+            this.drillDown(cohortData.drawn.targeted, gender,
+              `${group} Targetted (${gender})`
+            ),
+            this.drillDown(cohortData.low_vl.routine, gender,
+              `${group} Routine (${gender})`
+            ),
+            this.drillDown(cohortData.low_vl.targeted, gender,
+              `${group} Low VL Targetted (${gender})`
+            ),
+            this.drillDown(cohortData.high_vl.routine, gender,
+              `${group} High Vl routine (${gender})`
+            ),
+            this.drillDown(cohortData.high_vl.targeted, gender,
+              `${group} High VL (${gender})`
+            )
+          ])
         } else {
             this.rows.push([
                 table.td(group), 

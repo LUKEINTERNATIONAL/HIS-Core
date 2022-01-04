@@ -55,7 +55,7 @@ export default defineComponent({
             await this.setRows('F')
             await this.setRows('M')
         },
-        drilldown(patients: Array<number>) {
+        drilldown(patients: Array<number>, context: string) {
             const columns = [
                 [
                     table.thTxt('ARV#'), 
@@ -88,14 +88,25 @@ export default defineComponent({
             if (patients.length <= 0) {
                 return table.td(0)
             }
-            return table.tdLink(patients.length, () => this.drilldownData('Drill Table', columns, [], asyncRows))
+            return table.tdLink(patients.length, () => this.drilldownData(context, columns, [], asyncRows))
         },
         async setRows(gender: string) {
+            const contexts: any = [
+                'Defaulted (new registration)',
+                'Defaulted (old registration)',
+                'Died',
+                'Stopped',
+                'Tranferred out',
+                'Unknown'
+            ]
             for(const i in AGE_GROUPS) {
                 const group = AGE_GROUPS[i]
                 try {
                     const cohortData = this.cohort[group][gender]
-                    const drillable = cohortData.map((d: Array<number>) => this.drilldown(d))
+                    const drillContext = `${gender} ${group}`
+                    const drillable = cohortData.map(
+                        (d: Array<number>, i: number) => this.drilldown(d, `${drillContext} ${contexts[i]}`)
+                    )
                     this.rows.push([
                         table.td(group),
                         table.td(gender),

@@ -90,9 +90,9 @@ export default defineComponent({
             this.setRows('F')
             this.setRows('M')
         },
-        makeDrilldown(data: Array<any>) {
+        makeDrilldown(data: Array<any>, context: string) {
             const values = data.map(p => p.patient_id)
-            return this.drill(values)
+            return this.drill(values, context)
         },
         async setRows(gender: string) {
             for(const i in AGE_GROUPS) {
@@ -101,14 +101,30 @@ export default defineComponent({
                 this.rows.push([
                     table.td(group),
                     table.td(gender),
-                    this.makeDrilldown(cohortData['3HP']['started_new_on_art']),
-                    this.makeDrilldown(cohortData['6H']['started_new_on_art']),
-                    this.makeDrilldown(cohortData['3HP']['started_previously_on_art']),
-                    this.makeDrilldown(cohortData['6H']['started_previously_on_art']),
-                    this.makeDrilldown(cohortData['3HP']['completed_new_on_art']),
-                    this.makeDrilldown(cohortData['6H']['completed_new_on_art']),
-                    this.makeDrilldown(cohortData['3HP']['completed_previously_on_art']),
-                    this.makeDrilldown(cohortData['6H']['completed_previously_on_art'])
+                    this.makeDrilldown(cohortData['3HP']['started_new_on_art'],
+                        `${group} Started new on ART 3HP (${gender})`
+                    ),
+                    this.makeDrilldown(cohortData['6H']['started_new_on_art'],
+                        `${group} Start new on ART 6H (${gender})`
+                    ),
+                    this.makeDrilldown(cohortData['3HP']['started_previously_on_art'],
+                        `${group} Started previously on ART 3HP (${gender})`
+                    ),
+                    this.makeDrilldown(cohortData['6H']['started_previously_on_art'],
+                        `${group} Started previously on ART 6H (${gender})`
+                    ),
+                    this.makeDrilldown(cohortData['3HP']['completed_new_on_art'],
+                        `${group} Completed new on ART 3HP (${gender})`
+                    ),
+                    this.makeDrilldown(cohortData['6H']['completed_new_on_art'],
+                        `${group} Completed new on ART 6H (${gender})`
+                    ),
+                    this.makeDrilldown(cohortData['3HP']['completed_previously_on_art'],
+                        `${group} Completed previously on ART 3HP (${gender})`
+                    ),
+                    this.makeDrilldown(cohortData['6H']['completed_previously_on_art'],
+                        `${group} Completed previously on ART 6H (${gender})`
+                    )
                 ])
             }
         }

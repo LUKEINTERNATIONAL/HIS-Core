@@ -54,10 +54,11 @@ export default defineComponent({
                 const group = AGE_GROUPS[i]
                 if (group in this.cohort) {
                     const cohortData = this.cohort[group][gender]
+                    console.log(cohortData)
                     this.rows.push([
                         table.td(group),
                         table.td(gender),
-                        this.drill(cohortData)
+                        this.drill(cohortData, `${group} (${gender})`)
                     ])
                 } else {
                     this.rows.push([table.td(group), table.td(gender), table.td(0)])

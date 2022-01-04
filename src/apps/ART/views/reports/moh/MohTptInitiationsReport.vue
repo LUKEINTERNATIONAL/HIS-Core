@@ -73,7 +73,7 @@ export default defineComponent({
             this.setHeaderInfoList()
             this.canValidate = true
         },
-        drilldown(patients: Array<any>) {
+        drilldown(patients: Array<any>, context: string) {
             const columns = [
                 [
                     table.thTxt('ARV #'),
@@ -90,9 +90,10 @@ export default defineComponent({
             )
             if (patients.length <= 0) return table.td(0)
 
-            return table.tdLink(patients.length, () => this.drilldownData('', columns, [], asyncRows))
+            return table.tdLink(patients.length, () => this.drilldownData(context, columns, [], asyncRows))
         },
         setRows(gender: 'M' | 'F') {
+            const fullGender = gender === 'M' ? 'Males' : 'Females'
             for(const ageIndex in AGE_GROUPS) {
                 const group = AGE_GROUPS[ageIndex]
                 if (!isEmpty(this.cohort) && group in this.cohort) {
@@ -102,8 +103,8 @@ export default defineComponent({
                     this.rows.push([
                         table.td(group),
                         table.td(gender),
-                        this.drilldown(data['3HP'][gender]),
-                        this.drilldown(data['6H'][gender])
+                        this.drilldown(data['3HP'][gender], `${group} ${fullGender} on 3HP`),
+                        this.drilldown(data['6H'][gender], `${group} ${fullGender} on 6H`)
                     ])
                 } else {
                     this.rows.push([
