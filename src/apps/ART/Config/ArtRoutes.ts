@@ -112,6 +112,11 @@ export default [
         component: Prescription
     },
     {
+        name: 'BP Alert',
+        path: '/art/encounters/bp/alert/:patient_id',
+        component: () => import ("@/apps/ART/views/encounters/BpAlert.vue")
+    },
+    {
         name: "art adherence",
         path: "/art/encounters/adherence/:patient_id",
         component: Adherence

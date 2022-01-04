@@ -1,0 +1,133 @@
+<template>
+    <ion-page> 
+        <ion-content>
+            <h1 class="ion-text-center"> 
+                <span v-show="highBP">High</span> BP Alert 
+            </h1>
+            <h1 v-if="!hasPressureReading" class="vertically-align ion-text-center"> 
+                No Blood pressure reading found for <span class="name">{{ patientName }}</span>...
+            </h1>
+            <div v-if="hasPressureReading" class="vertically-align ion-text-center">
+                <h2 v-show="patientOnBpDrugs" style="font-weight:bold;">
+                    (Patient already on BP drugs)
+                </h2>
+                <h2>
+                    <span class="name"> {{ patientName }} </span> has <span v-show="highBP"> a high </span> blood pressure of 
+                    <span class="bp"> 
+                        {{sysBp}} / {{dsBP}}
+                    </span>
+                    <br/>
+                    <span v-show="highBP">
+                        Retesting BP is <span style="font-weight: bold; color: #000000;text-decoration: underline;">optional</span>. <br>
+                        Do you want to test BP?
+                    </span>
+
+                </h2>
+            </div>
+        </ion-content>
+        <ion-footer> 
+            <ion-toolbar color="dark">
+                <ion-button @click="gotoPatientDashboard"
+                    size="large"
+                    color="danger"
+                    slot="start">
+                    Cancel
+                </ion-button>
+                <ion-button v-if="highBP || !hasPressureReading" 
+                    @click="recaptureBp"
+                    size="large" 
+                    color="success" 
+                    slot="end">
+                    <span v-if="highBP"> Re-test </span>
+                    <span v-if="!hasPressureReading">Capture BP</span>
+                </ion-button>
+                <ion-button
+                    @click="nextTask"
+                    size="large"
+                    :color="highBP ? 'danger' : 'success'"
+                    slot="end">
+                    Continue
+                </ion-button>
+            </ion-toolbar>
+        </ion-footer>
+    </ion-page>
+    
+</template>
+<script lang="ts">
+import { defineComponent } from 'vue'
+import EncounterMixinVue from './EncounterMixin.vue'
+import {
+    IonFooter,
+    IonContent,
+    IonPage,
+    IonButton,
+    IonToolbar
+} from "@ionic/vue"
+import { BPManagementService } from '../../services/htn_service'
+export default defineComponent({
+    mixins: [EncounterMixinVue],
+    components: { 
+        IonFooter,
+        IonContent,
+        IonPage,
+        IonButton,
+        IonToolbar
+    },
+    data: () => ({
+        sysBp: 0 as number,
+        dsBP: 0 as number,
+        patientOnBpDrugs: false as boolean,
+        isPregnant: false as boolean
+    }),
+    methods: {
+        recaptureBp() {
+            this.$router.push(`/art/encounters/vitals/${this.patientID}`)
+        }
+    },
+    watch: {
+        ready: {
+            async handler(r: boolean) {
+                if (!r) return
+                const htn = new BPManagementService(this.patientID, this.providerID)
+                this.dsBP = (await htn.getDiastolicBp()) || 0
+                this.sysBp = (await htn.getSystolicBp()) || 0
+                this.patientOnBpDrugs = (await htn.onBpDrugs()) || false
+                this.isPregnant = this.patient.isChildBearing() 
+                    ? (await this.patient.isPregnant()) || false
+                    : false 
+            },
+            immediate: true
+        }
+    },
+    computed: {
+        patientName(): string {
+            return this.ready ? this.patient.getFullName() : 'Patient'
+        },
+        hasPressureReading(): boolean {
+            return this.sysBp > 0 && this.dsBP > 0
+        },
+        highBP(): boolean {
+            return this.sysBp > 120 && this.dsBP > 80
+                && !this.isPregnant
+        }
+    }
+})
+</script>
+
+<style scoped>
+    div {
+        color: gray;
+    }
+    .bp{
+        color: red;
+        font-style: italic;
+    }
+    .name{
+        color: blue;
+        font-style: italic;
+    }
+    .green{
+        width: 170px;
+    }
+
+</style>

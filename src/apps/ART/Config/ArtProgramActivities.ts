@@ -72,6 +72,12 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
     name: "BP management",
     icon: "dispensing.png",
     globalProperty: `${ART_GLOBAL_PROP.HTN_ENHANCEMENT}=true`
+  },
+  {
+    id: "BP Alert",
+    name: "BP Alert",
+    icon: "dispensing.png",
+    globalProperty: `${ART_GLOBAL_PROP.HTN_ENHANCEMENT}=true`
   }
 ]
 
