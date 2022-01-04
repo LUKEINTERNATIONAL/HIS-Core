@@ -81,6 +81,11 @@ export class Patientservice extends Service {
         return ['Female', 'F'].includes(this.getGender())
     }
 
+    async isPregnant() {
+        const query = await ObservationService.getFirstValueCoded(this.getID(), 'Is patient pregnant')
+        return query ? query === 'Yes' : false
+    }
+
     isChildBearing() {
         const age = this.getAge()
         return this.isFemale() && age >= 12 && age <= 50
