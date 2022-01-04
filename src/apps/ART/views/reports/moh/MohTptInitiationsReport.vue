@@ -74,22 +74,23 @@ export default defineComponent({
             this.canValidate = true
         },
         drilldown(patients: Array<any>) {
-            const columns = ['ARV #', 'DOB', 'Dispensed date']
-            const onRows = () => patients.map((p: any) => [
-                p.arv_number,
-                this.toDate(p.birthdate),
-                this.toDate(p.prescription_date)
-            ])
-            if (patients.length <= 0) {
-                return table.td(0)
-            }
-            return table.tdLink(
-                patients.length, 
-                () => this.tableDrill({
-                    columns, 
-                    onRows 
-                })
+            const columns = [
+                [
+                    table.thTxt('ARV #'),
+                    table.thTxt('DOB'),
+                    table.thTxt('Dispensed date')
+                ]
+            ]
+            const asyncRows = () => patients.map(
+                (p: any) => [
+                    table.td(p.arv_number),
+                    table.tdDate(p.birthdate),
+                    table.tdDate(p.prescription_date)
+                ]
             )
+            if (patients.length <= 0) return table.td(0)
+
+            return table.tdLink(patients.length, () => this.drilldownData('', columns, [], asyncRows))
         },
         setRows(gender: 'M' | 'F') {
             for(const ageIndex in AGE_GROUPS) {

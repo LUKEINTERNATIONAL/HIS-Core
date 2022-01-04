@@ -19,7 +19,7 @@ import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue";
 import table from "@/components/DataViews/tables/ReportDataTable";
 import { ViralLoadReportService } from "@/apps/ART/services/reports/viral_load_report";
 import { AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
-import { IonPage } from "@ionic/vue";
+import { IonPage, modalController } from "@ionic/vue";
 
 export default defineComponent({
   mixins: [ReportMixin],
@@ -66,19 +66,24 @@ export default defineComponent({
     drillDown(patients: Array<any>, filter: 'M' | 'F') {
         const filteredP = patients.filter((p: any) => p.gender === filter)
         if (filteredP.length >= 1) {
-            const columns = ['ARV #', 'DOB', 'Gender']
-            const onRows = () =>
+            const columns = [
+              [
+                table.thTxt('ARV #'),
+                table.thTxt('DOB'),
+                table.thTxt('Gender'),
+                table.thTxt('Action')
+              ]
+            ]
+            const asyncRows = () =>
                 filteredP.map((p: any) => ([
-                    p.arv_number, 
-                    this.toDate(p.birthdate), 
-                    p.gender,
-                    {
-                       type: 'button',
-                       name: 'Show',
-                       action: () => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`})
-                    }
+                    table.td(p.arv_number), 
+                    table.tdDate(p.birthdate), 
+                    table.td(p.gender),
+                    table.tdBtn('Show', () => modalController.dismiss()
+                      .then(() => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`}))
+                    )
                 ]))
-            return table.tdLink(filteredP.length, () => this.tableDrill({columns, onRows}))
+            return table.tdLink(filteredP.length, () => this.drilldownData('Drill table', columns, [], asyncRows))
         }
         return table.td(0)
     },

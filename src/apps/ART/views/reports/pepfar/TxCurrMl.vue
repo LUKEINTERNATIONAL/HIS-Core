@@ -56,8 +56,15 @@ export default defineComponent({
             await this.setRows('M')
         },
         drilldown(patients: Array<number>) {
-            const columns = ['ARV#', 'DOB', 'Dispensed', 'ARVs']
-            const onRows = async () => {
+            const columns = [
+                [
+                    table.thTxt('ARV#'), 
+                    table.thTxt('DOB'), 
+                    table.thTxt('Dispensed'), 
+                    table.thTxt('ARVs')
+                ]
+            ]
+            const asyncRows = async () => {
                 const data = await this.report.getTxMMDClientLevelData(patients)
                 if (!data) { 
                     return []
@@ -71,15 +78,17 @@ export default defineComponent({
                                 <td style='width: 30%;'>(${drug.quantity}, ${drug.dose} a day)</td>
                             </table>`)
                         return [
-                            d.id || 'N/A',
-                            this.toDate(d.dob),
-                            this.toDate(d.dispenseDate),
-                            drugs.join('<p/>')
-                        ]    
+                            table.td(d.id || 'N/A'),
+                            table.tdDate(d.dob),
+                            table.tdDate(d.dispenseDate),
+                            table.td(drugs.join('<p/>'))
+                        ]
                     })
             }
-            if (patients.length <= 0) return table.td(0)
-            return table.tdLink(patients.length, () => this.tableDrill({columns, onRows}))
+            if (patients.length <= 0) {
+                return table.td(0)
+            }
+            return table.tdLink(patients.length, () => this.drilldownData('Drill Table', columns, [], asyncRows))
         },
         async setRows(gender: string) {
             for(const i in AGE_GROUPS) {
