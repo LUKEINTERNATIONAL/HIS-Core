@@ -27,6 +27,7 @@ import { ProgramService } from "@/services/program_service";
 import { ARTLabService } from "../../services/lab_service";
 import { infoActionSheet } from "@/utils/ActionSheets";
 import SideEffectsModalVue from "@/components/DataViews/SideEffectsModal.vue";
+import ART_PROP from "@/apps/ART/art_global_props";
 
 export default defineComponent({
   mixins: [AdherenceMixinVue],
@@ -424,11 +425,12 @@ export default defineComponent({
       ).map((data) => data.name);
       return this.getOptions([...contraIndications], preValues);
     },
-    getPrescriptionFields(preChecked: Array<Option>) {
+    async getPrescriptionFields(preChecked: Array<Option>) {
+      const is3HPEnabled = await ART_PROP.threeHPAutoSelectEnabled()
       const vals = [
-        { label: "ARVs", value: "ARVs", isChecked: false },
-        { label: "CPT", value: "CPT", isChecked: false },
-        { label: "3HP (RFP + INH)", value: "3HP (RFP + INH)", isChecked: false },
+        { label: "ARVs", value: "ARVs", isChecked: true },
+        { label: "CPT", value: "CPT", isChecked: true },
+        { label: "3HP (RFP + INH)", value: "3HP (RFP + INH)", isChecked: is3HPEnabled },
         { label: "IPT", value: "IPT", isChecked: false},
         { label: "NONE OF THE ABOVE", value: "NONE OF THE ABOVE" },
       ];
