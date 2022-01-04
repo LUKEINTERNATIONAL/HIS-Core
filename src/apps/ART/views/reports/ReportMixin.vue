@@ -74,11 +74,11 @@ export default defineComponent({
             const { columns, asyncRows } = await this.patientTableColumns(data)
             this.drilldownData(title, columns, [], asyncRows)
         },
-        drill(values: Array<number>) {
+        drill(values: Array<number>, title='Drill table') {
             if (values.length > 0) {
                 return table.tdLink(
                     values.length, 
-                    () => this.runTableDrill(values)
+                    () => this.runTableDrill(values, title)
                 )
             }
             return table.td(values.length)
