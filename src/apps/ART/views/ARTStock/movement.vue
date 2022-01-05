@@ -16,8 +16,10 @@ import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import HisDate from "@/utils/Date";
 import { StockService } from "./stock_service";
-import { toastDanger, toastSuccess } from "@/utils/Alerts";
+import { toastWarning, toastDanger, toastSuccess } from "@/utils/Alerts";
 import { getFacilities } from "@/utils/HisFormHelpers/LocationFieldOptions";
+import { BadRequestError } from  "@/services/service"
+import { isEmpty } from "lodash";
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -33,7 +35,7 @@ export default defineComponent({
   methods: {
     async onFinish(formData: any) {
       const data = formData.enter_batches;
-      const errors = [];
+      let errors: string[] = [];
       for (let index = 0; index < data.length; index++) {
         const d = data[index].value;
         const packSize = StockService.getPackSize(d.drug_id);
@@ -44,34 +46,43 @@ export default defineComponent({
           quantity: total,
           reason: formData.reasons.value,
         };
-        if (formData.task.value === "Relocations") {
-          extras["location_id"] = formData.relocation_location.value;
-          const f = await this.stockService.relocateItems(d.pharmacy_batch_id, {
-            ...res,
-            ...extras,
-          });
-          if (!f) {
-            errors.push(
-              "Could not save record for" + StockService.getShortName(d.drug_id)
-            );
+        try {
+          if (formData.task.value === "Relocations") {
+            extras["location_id"] = formData.relocation_location.value;
+            const f = await this.stockService.relocateItems(d.pharmacy_batch_id, {
+              ...res,
+              ...extras,
+            });
+            if (!f) {
+              errors.push(
+                "Could not save record for" + StockService.getShortName(d.drug_id)
+              );
+            }
+          } else {
+            const f = await this.stockService.disposeItems(d.pharmacy_batch_id, {
+              ...res,
+              ...extras,
+            });
+            if (!f) {
+              errors.push(
+                "Could not save record for" + StockService.getShortName(d.drug_id)
+              );
+            }
           }
-        } else {
-          const f = await this.stockService.disposeItems(d.pharmacy_batch_id, {
-            ...res,
-            ...extras,
-          });
-          if (!f) {
-            errors.push(
-              "Could not save record for" + StockService.getShortName(d.drug_id)
-            );
+        } catch (e) {
+          if (e instanceof BadRequestError && !isEmpty(e.errors)) {
+            errors = errors.concat(e.errors)
+          } else {
+            errors.push(e)
           }
+          console.log(e)
         }
       }
       if (errors.length === 0) {
         toastSuccess("Stock succesfully moved");
         this.$router.push("/");
       } else {
-        toastDanger(`${errors.length} items could not be moved`);
+        toastDanger(`${errors.join(',')}`);
       }
     },
     getFields(): Array<Field> {
@@ -107,6 +118,7 @@ export default defineComponent({
         },
         {
           id: "date",
+          dynamicHelpText: (f) => `Date of ${f.task.label}`,
           helpText: "Set date",
           type: FieldType.TT_FULL_DATE,
           validation: (val: any) => Validation.required(val),
@@ -117,13 +129,31 @@ export default defineComponent({
           type: FieldType.TT_MULTIPLE_SELECT,
           requireNext: true,
           validation: (val: any) => Validation.required(val),
-          options: () => this.getItems(),
+          options: async (_: any, checked: Option[]) => {
+            const items: Option[] = await this.getItems()
+            return items.map((i: any) => {
+              i.isChecked = checked.filter(c => c.label === i.label).length >= 1 
+              return i
+            })
+          },
           unload: (val: any) => (this.selectedDrugs = val),
         },
         {
           id: "enter_batches",
           helpText: "Batch entry",
           type: FieldType.TT_BATCH_MOVEMENT,
+          beforeNext: (_: any, f: any, c: any, {currentFieldContext}: any) => {
+            const drugsToStr = (drugs: any) => drugs.map((b: any, i: number) => `${b.label}`).join(' & ')
+            const partialEntries = currentFieldContext.drugs.filter((drug: any) =>
+              drug.entries.map((d: any) => !(d.tins && d.authorization)).every(Boolean)
+            )
+            if (!isEmpty(partialEntries)) {
+              const partialDrugs = drugsToStr(partialEntries)
+              toastWarning(`Please fix partial batch entries for drugs: ${partialDrugs}`)
+              return false
+            }
+            return true
+          },
           options: () => this.selectedDrugs,
           validation: (val: any) => Validation.required(val),
         },
@@ -138,28 +168,34 @@ export default defineComponent({
           id: "summary",
           helpText: "Summary",
           type: FieldType.TT_TABLE_VIEWER,
-          options: (d: any) => this.buildResults(d.enter_batches),
+          options: (d: any) => this.buildResults(d),
           config: {
             hiddenFooterBtns: ["Clear"],
           },
         },
       ];
     },
-    buildResults(drugs: any) {
+    buildResults(formData: any) {
+      const isRelocation = formData.task.value === 'Relocations'
       const columns = [
         "Drug",
         "Total units",
         "Expiry date",
         "Authorization code",
       ];
-      const rows = drugs.map((j: any) => {
+
+      if (isRelocation) columns.push('Relocation')
+
+      const rows = formData.enter_batches.map((j: any) => {
         const d = j.value;
-        return [
+        const data = [
           StockService.getShortName(d.drug_id),
           d.tins,
           HisDate.toStandardHisDisplayFormat(d.expiry),
-          d.authorization,
-        ];
+          d.authorization
+        ]
+        if (isRelocation) data.push(formData.relocation_location.label)
+        return data
       });
       return [
         {

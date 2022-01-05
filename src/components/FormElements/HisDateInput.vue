@@ -1,44 +1,36 @@
 <template>
-    <view-port>
-        <base-input :value="fullDate" @onValue="onKbValue"/>
+    <view-port :showFull="false">
+        <ion-input class="input_display" :readonly="true" :value="value"/>
     </view-port>
-    <ion-grid>
-        <ion-row>
-            <ion-col size="2">
-                <ion-button @click="add('day')" size="large">+</ion-button>
+    <ion-grid class="his-floating-keyboard">
+        <ion-row> 
+            <ion-col sm-size="12"> 
+                <picker-selector
+                    :value="getYear"
+                    @onIncrement="add('year')"
+                    @onDecrement="subtract('year')"
+                />
             </ion-col>
-            <ion-col size="2">
-                <ion-button @click="add('month')" size="large">+</ion-button>
+            <ion-col sm-size="12"> 
+                <picker-selector
+                    :value="getMonth"
+                    @onIncrement="add('month')"
+                    @onDecrement="subtract('month')"
+                />
             </ion-col>
-            <ion-col size="2">
-                <ion-button @click="add('year')" size="large">+</ion-button>
+            <ion-col sm-size="12"> 
+                <picker-selector
+                    :value="getDay"
+                    @onIncrement="add('day')"
+                    @onDecrement="subtract('day')"
+                />
             </ion-col>
         </ion-row>
-        <ion-row>
-            <ion-col size="2">
-                <ion-input class="date-inputs">{{ getDay }}</ion-input>
-            </ion-col>
-            <ion-col size="2">
-                <ion-input class="date-inputs">{{ getMonth }}</ion-input>
-            </ion-col>
-            <ion-col size="2">
-                <ion-input class="date-inputs">{{getYear}}</ion-input>
-            </ion-col>
-            <ion-col size="2">
-                <ion-button @click="today()" size="large">
-                    Today
+        <ion-row> 
+            <ion-col class="ion-text-center" > 
+                <ion-button style="width:30%; height:6vh;" @click="today"> 
+                    <b>TODAY</b>
                 </ion-button>
-            </ion-col>
-        </ion-row>
-        <ion-row>
-            <ion-col size="2">
-                <ion-button @click="subtract('day')" size="large">-</ion-button>
-            </ion-col>
-            <ion-col size="2">
-                <ion-button @click="subtract('month')" size="large">-</ion-button>
-            </ion-col>
-            <ion-col size="2">
-                <ion-button @click="subtract('year')" size="large">-</ion-button>
             </ion-col>
         </ion-row>
     </ion-grid>
@@ -46,43 +38,36 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import BaseInput from "@/components/FormElements/BaseTextInput.vue"
-import HisKeyboard from "@/components/Keyboard/HisKeyboard.vue"
-import handleVirtualInput from "@/components/Keyboard/KbHandler"
-import { NUMBERS_ONLY } from "@/components/Keyboard/HisKbConfigurations"
 import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue'
 import HisDate from "@/utils/Date"
 import { Service } from '@/services/service'
-import {IonInput, IonGrid, IonCol, IonRow, IonButton} from '@ionic/vue'
+import PickerSelector from "@/components/Selectors/PickerSelector.vue"
+import { IonGrid, IonInput, IonCol, IonRow, IonButton } from '@ionic/vue'
 
 export default defineComponent({
-    components: { BaseInput, ViewPort, IonInput, IonGrid, IonCol, IonRow, IonButton},
+    components: { PickerSelector, IonInput, ViewPort, IonGrid, IonCol, IonRow, IonButton},
     mixins: [FieldMixinVue],
     data: ()=>({ 
         value: '',
-        keyboard: NUMBERS_ONLY,
-        date: '' as any
+        date: '' as any,
+        isInit: true as boolean
     }),
     async activated(){
         this.$emit('onFieldActivated', this)
-        this.date = new Date();
+        this.date = new Date()
         await this.setDefaultValue()
+        this.isInit = false
     },
     methods: {
         async setDefaultValue() {
             if (this.defaultValue && !this.value) {
                 const defaults = await this.defaultValue(this.fdata, this.cdata)
                 if (defaults) {
-                    this.value = defaults.toString()
-                }
+                    this.isInit = false
+                    this.date = new Date(defaults)
+                } 
             }
-        },
-        onKbValue(text: any) { 
-            this.value = text
-        },
-        async keypress(text: any){
-            this.value = handleVirtualInput(text, this.value)
         },
         add(unit: string) {
             this.date = HisDate.add(`${this.date}`, unit, 1)
@@ -91,7 +76,7 @@ export default defineComponent({
            this.date = HisDate.subtract(`${this.date}`, unit, 1)
         },
         today() {
-            this.date = Service.getSessionDate();
+            this.date = new Date(Service.getSessionDate())
         }
     },
     computed: {
@@ -103,14 +88,20 @@ export default defineComponent({
         },
         getDay(): any {
             return HisDate.getDay(`${this.date}`);
-        },
-        fullDate(): any{
-            return HisDate.toStandardHisFormat(this.date);
         }
     },
     watch: {
-        value(value){
-            this.$emit('onValue', { label: value, value: this.fullDate })
+        date(newDate: string) {
+            if (!this.isInit) { // avoid setting initial date unless otherwise
+                this.value = HisDate.toStandardHisFormat(newDate)
+            }
+        },
+        value(value) {
+            if (!value) {
+                this.$emit('onValue', null)
+                return
+            }
+            this.$emit('onValue', { label: value, value: this.value })
         },
         clear() {
             this.value = ''
@@ -118,18 +109,3 @@ export default defineComponent({
     }
 })
 </script>
-<style scoped> 
-#view-port {
-    height: 53vh;
-}
-.date-inputs {
-    border: solid 1px black;
-    font-size: 1.7em;
-}
-ion-col {
-    text-align: center;
-}
-/* ion-button {
-    font-size: 20px;
-} */
-</style>
