@@ -82,7 +82,8 @@ export default defineComponent({
           [
             table.thTxt('ARV #'),
             table.thTxt('DOB'),
-            table.thTxt('Gender')
+            table.thTxt('Gender'),
+            table.thTxt('Action')
           ]
         ]
         const asyncRows = () =>
