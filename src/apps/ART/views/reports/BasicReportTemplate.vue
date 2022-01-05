@@ -40,7 +40,7 @@ import { toCsv, toTablePDF } from "@/utils/Export"
 import { Service } from "@/services/service"
 import HisDate from "@/utils/Date"
 import TextSkeloton from "@/components/TextSkeleton.vue"
-
+import { delayPromise } from "@/utils/Timers";
 export default defineComponent({
   components: { TextSkeloton, ReportTable, HisFooter, IonPage, IonContent, IonToolbar, IonChip, IonFooter },
   props: {
@@ -97,6 +97,7 @@ export default defineComponent({
       async handler(loader: Function) {
         if (typeof loader === 'function') {
           this.ready = false
+          await delayPromise(125)
           this.tableRows = await loader()
           this.ready = true
         }
