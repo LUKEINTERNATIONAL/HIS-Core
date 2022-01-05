@@ -179,7 +179,7 @@ export default defineComponent({
     computeFormData: {} as any,
     isLoadingData: false as boolean,
     canShowReport: false as boolean,
-    vboxID: Service.getVboxID() as string,
+    siteUUID: Service.getSiteUUID() as string,
     apiVersion: Service.getApiVersion(),
     coreVersion: Service.getCoreVersion(),
     artVersion: Service.getAppVersion(),
@@ -270,7 +270,7 @@ export default defineComponent({
             // TODO: Get actial ART Version from a file
             [`ART Version: ${this.artVersion}`],
             [`API Version: ${this.apiVersion}`],
-            [`Vbox ID: ${this.vboxID}`]
+            [`Site UUID: ${this.siteUUID}`]
           ],
           this.getFileName()
         )

@@ -157,8 +157,8 @@ export class Service {
         return apiDate && apiDate != sessionDate
     }
 
-    static getVboxID() {
-        return sessionStorage.vboxID || ''
+    static getSiteUUID() {
+        return sessionStorage.siteUUID || ''
     }
 
     static getProgramID() {

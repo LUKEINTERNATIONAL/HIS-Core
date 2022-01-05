@@ -1460,7 +1460,7 @@ export default {
           API Version: ${Service.getApiVersion()}
           Report Period: ${this.quarter}
           Site: ${Service.getLocationName()}
-          Vbox ID: ${Service.getVboxID()}`
+          Site UUID: ${Service.getSiteUUID()}`
           ;
       // }
       const csvData = new Blob([y], { type: "text/csv;charset=utf-8;" });
