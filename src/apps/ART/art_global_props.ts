@@ -17,6 +17,10 @@ export enum ART_GLOBAL_PROP {
     FILING_NUMBER_PREFIX = 'filing.number.prefix'
 }
 
+function threeHPAutoSelectEnabled() {
+    return GlobalPropertyService.isProp(`${ART_GLOBAL_PROP.THREE_HP_AUTO_SELECT}=true`)
+}
+
 function extendedLabEnabled() {
     return GlobalPropertyService.isProp(`${ART_GLOBAL_PROP.EXTENDED_LABS}=true`)
 }
@@ -97,5 +101,6 @@ export default {
     htnEnabled,
     appointmentLimit,
     askPillsRemaining,
-    extendedLabEnabled
+    extendedLabEnabled,
+    threeHPAutoSelectEnabled
 }

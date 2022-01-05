@@ -4,6 +4,7 @@
     :activeField="activeField"
     :onFinishAction="onFinish"
     :skipSummary="true"
+    @onIndex="activeField=''"
     :cancelDestinationPath="cancelDestination"
   >
   </his-standard-form>
@@ -16,7 +17,8 @@ import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import HisDate from "@/utils/Date";
 import { StockService } from "./stock_service";
-import { toastDanger, toastSuccess } from "@/utils/Alerts";
+import { toastDanger, toastSuccess, toastWarning } from "@/utils/Alerts";
+import { isEmpty } from "lodash";
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -77,7 +79,7 @@ export default defineComponent({
         },
         {
           id: "date",
-          helpText: "Set date",
+          helpText: "Delivery Date",
           type: FieldType.TT_FULL_DATE,
           validation: (val: Option) => Validation.required(val),
         },
@@ -86,7 +88,33 @@ export default defineComponent({
           helpText: "Batch entry",
           type: FieldType.TT_BATCH_ENTRY,
           options: () => this.selectedDrugs,
-          validation: (val: Option) => Validation.required(val),
+          beforeNext: (_: any, f: any, c: any, {currentFieldContext}: any) => {
+            const drugsToStr = (drugs: any) => drugs.map((b: any, i: number) => `${b.label}`).join(' & ')
+            const drugsWithoutBatches = currentFieldContext.drugs.filter((drug: any) =>
+              drug.entries.map((d: any) => !d.tins && !d.expiry && !d.batchNumber).every(Boolean)
+            )
+            const partialBatches = currentFieldContext.drugs.filter((drug: any) => {
+              return drug.entries.map((e: any) => {
+                let score = 0
+                if (e.tins) score += 1
+                if (e.expiry) score += 1
+                if (e.batchNumber) score += 1
+                return score >= 1 && score <= 2 
+              }).some(Boolean)
+            })
+            if (!isEmpty(partialBatches)) {
+              const partialDrugs = drugsToStr(partialBatches)
+              toastWarning(`Please fix partial batch entries for drugs: ${partialDrugs}`)
+              return false
+            }
+            if (!isEmpty(drugsWithoutBatches)) {
+              const batchlessDrugs = drugsToStr(drugsWithoutBatches)
+              toastWarning(`The following drug batches are empty: ${batchlessDrugs}`)
+              return false
+            }
+            return true
+          },
+          validation: (v: Option) => Validation.required(v)
         },
         {
           id: "adherence_report",
