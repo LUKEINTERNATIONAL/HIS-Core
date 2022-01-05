@@ -128,6 +128,7 @@ export default defineComponent({
     valueClearIndex: 0 as number,
     currentIndex: 0,
     currentField: {} as Field,
+    currentFieldContext: null as any,
     formData: {} as any,
     computedFormData: {} as any,
     footerBtns: [] as Array<FormFooterBtns>,
@@ -552,6 +553,7 @@ export default defineComponent({
      */
     onFieldActivated(fieldContext: any) {
       this.state = "onload";
+      this.currentFieldContext = fieldContext // it might not be used anywhere on this component but it might be used in some callbacks as context
       if (this.currentField.onload) this.currentField.onload(fieldContext);
     },
     /**

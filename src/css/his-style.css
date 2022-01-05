@@ -143,9 +143,15 @@ body {
     width: 90%;
     height: 80%;
 }
+
 .large-modal .modal-wrapper {
     width: 94.9%;
     height: 95.9%;
+}
+
+.full-modal .modal-wrapper {
+    width: 100%;
+    height: 100%;
 }
 
 .action-sheet-modal .modal-wrapper {
