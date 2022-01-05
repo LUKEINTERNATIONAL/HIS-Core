@@ -134,7 +134,7 @@ export default defineComponent({
         name: "Finish",
         size: "large",
         slot: "end",
-        color: "primary",
+        color: "success",
         visible: true,
         onClick: () => {
           if (typeof this.onFinish === 'function') {
