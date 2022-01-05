@@ -92,8 +92,8 @@ import { IonGrid, IonCol, IonRow } from "@ionic/vue";
 import { Calendar } from "v-calendar";
 import HisDate from "@/utils/Date";
 import { AppointmentService } from "@/apps/ART/services/appointment_service";
-import { GlobalPropertyService } from "@/services/global_property_service";
 import FieldMixinVue from "./FieldMixin.vue";
+import ART_GLOBAL_PROP from "@/apps/ART/art_global_props"
 
 export default defineComponent({
   components: { ViewPort, Calendar, IonGrid, IonCol, IonRow },
@@ -138,7 +138,7 @@ export default defineComponent({
       );
     },
     async getAppointmentLimit() {
-      const limit = await GlobalPropertyService.getAppointmentLimit();
+      const limit = await ART_GLOBAL_PROP.appointmentLimit();
       if (limit) {
         this.appointmentLimit = limit;
       }

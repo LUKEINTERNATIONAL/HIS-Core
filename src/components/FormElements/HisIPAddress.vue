@@ -58,16 +58,13 @@ export default defineComponent({
     },
     mixins: [FieldMixinVue],
     watch: {
-        clear(ok: any) {
-            if (ok) {
-                this.addressInputs = {
-                    first:  '',
-                    second: '',
-                    third:  '',
-                    fourth: ''
-                }
-                this.$emit('onClear')
-            }
+        clear() {
+            this.addressInputs = {
+                first:  '',
+                second: '',
+                third:  '',
+                fourth: ''
+            } 
         }
     },
     setup(props, {emit}) {

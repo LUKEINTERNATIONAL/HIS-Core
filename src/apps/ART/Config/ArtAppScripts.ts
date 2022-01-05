@@ -13,9 +13,9 @@ import { ObservationService } from "@/services/observation_service";
 import { ConceptService } from "@/services/concept_service"
 import HisDate from "@/utils/Date"
 import { GeneralDataInterface } from "@/apps/interfaces/AppInterface";
-import { GlobalPropertyService } from "@/services/global_property_service"
 import { PatientTypeService } from "@/apps/ART/services/patient_type_service"
 import DrugModalVue from "@/apps/ART/Components/DrugModal.vue";
+import ART_GLOBAL_PROP from "../art_global_props";
 
 async function enrollInArtProgram(patientID: number, patientType: string, clinic: string) {
     const program = new PatientProgramService(patientID)
@@ -61,22 +61,15 @@ async function showArtActivities() {
  * Present a modal to show drug chart
  */
 async function showStockManagementChart() {
-    try {
-     const prop = await GlobalPropertyService.isStockManagementEnabled();
-    if(prop === "true") {
+    if((await ART_GLOBAL_PROP.drugManagementEnabled())){
         const drugModal = await modalController.create({
-        component: DrugModalVue,
-        cssClass: "large-modal",
-        backdropDismiss: false
+            component: DrugModalVue,
+            cssClass: "large-modal",
+            backdropDismiss: false
         });
-
         drugModal.present() 
         await drugModal.onDidDismiss()
-    }   
-    } catch (error) {
-       // 
     }
-    
 }
 
 export async function init(context='') {
@@ -89,7 +82,7 @@ export async function init(context='') {
 export async function onRegisterPatient(patientID: number, person: any, attr: any, router: any) {
     await enrollInArtProgram(patientID, person.patient_type, person.location)
     // Assign filing number if property use_filing_numbers is enabled
-    if ((await GlobalPropertyService.isProp('use.filing.numbers=true'))) {
+    if ((await ART_GLOBAL_PROP.filingNumbersEnabled())) {
         let nextRoute = `/art/filing_numbers/${patientID}?assign=true`
         if (person.relationship === 'Yes') {
             nextRoute += '&next_workflow_task=Guardian Registration'

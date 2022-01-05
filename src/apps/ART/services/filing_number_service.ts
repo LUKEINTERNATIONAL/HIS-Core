@@ -1,7 +1,7 @@
 import { Service } from "@/services/service";
 import { PrintoutService } from "@/services/printout_service";
-import { GlobalPropertyService } from "@/services/global_property_service";
 import { Patientservice } from "@/services/patient_service";
+import ART_PROP from "../art_global_props";
 
 export class FilingNumberService extends Service {
     patientID: number;
@@ -41,7 +41,7 @@ export class FilingNumberService extends Service {
     }
 
     async loadFilingPrefix() {
-        const prx = await GlobalPropertyService.get('filing.number.prefix')
+        const prx = await ART_PROP.filingNumberPrefix()
         if (prx) {
             const [activePrefix, dormantPrefix] = prx.split(',')
             this.activePrefix = activePrefix
@@ -63,14 +63,6 @@ export class FilingNumberService extends Service {
 
     async assignFilingNumber() {
         return Service.postJson(`patients/${this.patientID}/filing_number`, {})
-    }
-
-    async canUseFilingNumber() {
-        const req = await Service.getJson('filing_number/type=activate')
-        if (req && req['use.filing.numbers'] === 'true') {
-            return true
-        }
-        return false
     }
 
     async getFilingNumber(filingNumber: string) {

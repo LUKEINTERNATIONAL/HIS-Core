@@ -40,6 +40,10 @@ export class PatientReportService extends ArtReportService {
         return this.getReport('patient_outcome_list', { outcome })
     }
 
+    getPatientVisitTypes() {
+        return this.getReport('patient_visit_types')
+    }
+
     getClientsDueForVl() {
         return this.getReport('clients_due_vl')
     }

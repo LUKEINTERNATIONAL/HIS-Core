@@ -23,6 +23,7 @@ export interface DateFieldInterface {
     condition?: Function;
     required?: boolean;
     defaultValue?: Function;
+    beforeNext?: Function;
     minDate?(formData: any, computeForm: any): string;
     maxDate?(formData: any, computeForm: any): string;
     unload?(data: any, state: string, formData: any,  computeForm: any): void; 
@@ -201,7 +202,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
      */
     year.summaryMapValue = () => ({
         label: field.summaryLabel || field.helpText, 
-        value: d(fullDate)
+        value: fullDate ? d(fullDate) : 'Unknown'
     })
 
     // To avoid the year from appearing on the summary, 
@@ -220,6 +221,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             return field.computeValue(fullDate, false)
         }
         if (val && val.value === 'Unknown') {
+            fullDate = ''
             return field.computeValue('Unknown', false)
         }
     }
@@ -272,6 +274,12 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         if (field.unload) field.unload(d, s, f, c)
     }
 
+    day.beforeNext = (v: any, f: any) => {
+        return !field.beforeNext 
+            ? true 
+            : field.beforeNext(fullDate, f)
+    }
+
     day.config = { 
         keyboardActions: [],
         year: (f: any) => f[yearID].value,
@@ -315,6 +323,12 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         return field.computeValue(fullDate, true)
     }
 
+    ageEstimate.beforeNext = (v: any, f: any) => {
+        return !field.beforeNext 
+            ? true 
+            : field.beforeNext(fullDate, f)
+    }
+
     // DURATION ESTIMATE
     durationEstimate.proxyID = field.id
 
@@ -330,6 +344,12 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             )).split('-')
         fullDate = `${year}-07-15`
         return field.computeValue(fullDate, true)
+    }
+
+    durationEstimate.beforeNext = (_: any, f: any) => {
+        return !field.beforeNext 
+            ? true 
+            : field.beforeNext(fullDate, f)
     }
 
     return [

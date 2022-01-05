@@ -7,6 +7,7 @@ import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import { modalController } from "@ionic/vue";
 import DrillTable from "@/components/DataViews/DrillTableModal.vue"
+import DrilldownTable from "@/apps/ART/views/reports/BasicReportTemplate.vue"
 import { ArtReportService } from "@/apps/ART/services/reports/art_report_service"
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Option } from '@/components/Forms/FieldInterface'
@@ -29,51 +30,55 @@ export default defineComponent({
         confirmPatient(patient: number) {
             return this.$router.push(`/patients/confirm?person_id=${patient}`)
         },
-        async tableDrill(tableData: any){
+        async drilldownData(title: string, columns: Array<any>, rows: Array<any>, asyncRows: any) {
             const modal = await modalController.create({
-                component: DrillTable,
-                cssClass: 'custom-modal',
-                componentProps: {
-                    title: 'DrillTable',
-                    columns: tableData.columns,
-                    onRows: tableData.onRows
+                component: DrilldownTable,
+                cssClass: 'large-modal',
+                componentProps: { 
+                    title, 
+                    columns, 
+                    rows,
+                    asyncRows,
+                    showReportStamp: false,
+                    footerColor: 'light',
+                    onFinish: () => modalController.dismiss()
                 }
             })
             modal.present()
         },
         async patientTableColumns(ids: Array<number>) {
-            const columns = ['ARV number', 'Gender', 'Birth Date', 'actions']
-            const onRows = () => Promise.all(ids.map(async(id: number) => {
+            const columns = [
+                [
+                    table.thTxt('ARV number'), 
+                    table.thTxt('Gender'),
+                    table.thTxt('Birth Date'), 
+                    table.thTxt('Actions')
+                ]
+            ]
+            const asyncRows = () => Promise.all(ids.map(async(id: number) => {
                 const data = await Patientservice.findByID(id)
                 const patient = new Patientservice(data)
                 return [
-                    patient.getArvNumber(), 
-                    patient.getGender(), 
-                    HisDate.toStandardHisDisplayFormat(patient.getBirthdate()),
-                    {
-                        type: 'button',
-                        name: 'Show',
-                        action: async () => {
-                            await modalController.dismiss({})
-                            this.$router.push({ path: `/patient/dashboard/${id}`})
-                        }
-                    }
+                    table.td(patient.getArvNumber()), 
+                    table.td(patient.getGender()), 
+                    table.tdDate(patient.getBirthdate().toString()),
+                    table.tdBtn('Show', async () => {
+                        await modalController.dismiss({})
+                        this.$router.push({ path: `/patient/dashboard/${id}`})
+                    })
                 ]
             }))
-            return {
-                onRows,
-                columns
-            }
+            return { asyncRows, columns }
         },
-        async runTableDrill(data: any) {
-            const tableData = await this.patientTableColumns(data)
-            await this.tableDrill(tableData)
+        async runTableDrill(data: any, title='Drilldown patients') {
+            const { columns, asyncRows } = await this.patientTableColumns(data)
+            this.drilldownData(title, columns, [], asyncRows)
         },
-        drill(values: Array<number>) {
+        drill(values: Array<number>, title='Drill table') {
             if (values.length > 0) {
                 return table.tdLink(
                     values.length, 
-                    () => this.runTableDrill(values)
+                    () => this.runTableDrill(values, title)
                 )
             }
             return table.td(values.length)

@@ -131,11 +131,8 @@ export default defineComponent({
             },
             deep: true
         },
-        clear(val: boolean){
-            if (val) {
-                this.value = ''
-                this.$emit('onClear')
-            } 
+        clear() {
+            this.value = ''
         }
     }
 })

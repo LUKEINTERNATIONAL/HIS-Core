@@ -76,21 +76,23 @@ export default defineComponent({
 
       this.totals[gender][key] = this.totals[gender][key].concat(data)
     },
-    drillDown(patients: Array<any>) {
+    drillDown(patients: Array<any>, context: string) {
       if (patients.length >= 1) {
-        const columns = ['ARV #', 'DOB', 'Gender']
-        const onRows = () =>
+        const columns = [
+          [
+            table.thTxt('ARV #'),
+            table.thTxt('DOB'),
+            table.thTxt('Gender')
+          ]
+        ]
+        const asyncRows = () =>
           patients.map((p: any) => ([
-            p.arv_number, 
-            this.toDate(p.birthdate), 
-            p.gender,
-            {
-              type: 'button',
-              name: 'Show',
-              action: () => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`})
-            }
+            table.td(p.arv_number), 
+            table.tdDate(p.birthdate), 
+            table.td(p.gender),
+            table.tdBtn('Show', () => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`}))
           ]))
-        return table.tdLink(patients.length, () => this.tableDrill({columns, onRows}))
+        return table.tdLink(patients.length, () => this.drilldownData(context, columns, [], asyncRows))
       }
       return table.td(0)
     },
@@ -117,40 +119,40 @@ export default defineComponent({
       this.rows.push([
         table.td('All'),
         table.td('FP'),
-        this.drillDown(fp('FP', totals.tx_curr)),
-        this.drillDown(fp('FP', totals.due_for_vl)),
-        this.drillDown(fp('FP', totals.drawn_routine)),
-        this.drillDown(fp('FP', totals.drawn_targeted)),
-        this.drillDown(fp('FP', totals.high_vl_routine)),
-        this.drillDown(fp('FP', totals.high_vl_targeted)),
-        this.drillDown(fp('FP', totals.low_vl_routine)),        
-        this.drillDown(fp('FP', totals.low_vl_targeted)),
+        this.drillDown(fp('FP', totals.tx_curr), 'TX CURR FP'),
+        this.drillDown(fp('FP', totals.due_for_vl), 'Due for VL FP'),
+        this.drillDown(fp('FP', totals.drawn_routine), 'Routine (Sample Drawn) FP'),
+        this.drillDown(fp('FP', totals.drawn_targeted), 'Targetted (Sample Drawn) FP'),
+        this.drillDown(fp('FP', totals.high_vl_routine), 'Routine (High VL (>=1000 copies)) FP'),
+        this.drillDown(fp('FP', totals.high_vl_targeted), 'Targeted High VL (>=1000 copies) FP'),
+        this.drillDown(fp('FP', totals.low_vl_routine), 'Routine (Low VL (<1000 copies)) FP'),  
+        this.drillDown(fp('FP', totals.low_vl_targeted), 'Targeted (Low VL (<1000 copies)) FP'),
       ])
 
       this.rows.push([
         table.td('All'),
         table.td('FNP'),
-        this.drillDown(fnp(totals.tx_curr)),
-        this.drillDown(fnp(totals.due_for_vl)),
-        this.drillDown(fnp(totals.drawn_routine)),
-        this.drillDown(fnp(totals.drawn_targeted)),
-        this.drillDown(fnp(totals.high_vl_routine)),
-        this.drillDown(fnp(totals.high_vl_targeted)),
-        this.drillDown(fnp(totals.low_vl_routine)),        
-        this.drillDown(fnp(totals.low_vl_targeted)),
+        this.drillDown(fnp(totals.tx_curr), 'TX CURR FNP'),
+        this.drillDown(fnp(totals.due_for_vl), 'Due for VL FNP'),
+        this.drillDown(fnp(totals.drawn_routine), 'Routine (Sample Drawn) FNP'),
+        this.drillDown(fnp(totals.drawn_targeted), 'Targetted (Sample Drawn) FNP'),
+        this.drillDown(fnp(totals.high_vl_routine), 'Routine (High VL (>=1000 copies)) FNP'),
+        this.drillDown(fnp(totals.high_vl_targeted), 'Targeted High VL (>=1000 copies) FNP'),
+        this.drillDown(fnp(totals.low_vl_routine), 'Routine (Low VL (<1000 copies)) FNP'),        
+        this.drillDown(fnp(totals.low_vl_targeted), 'Targeted (Low VL (<1000 copies)) FNP'),
       ])
   
       this.rows.push([
         table.td('All'),
         table.td('FBF'),
-        this.drillDown(fp('FBf', totals.tx_curr)),
-        this.drillDown(fp('FBf', totals.due_for_vl)),
-        this.drillDown(fp('FBf', totals.drawn_routine)),
-        this.drillDown(fp('FBf', totals.drawn_targeted)),
-        this.drillDown(fp('FBf', totals.high_vl_routine)),
-        this.drillDown(fp('FBf', totals.high_vl_targeted)),
-        this.drillDown(fp('FBf', totals.low_vl_routine)),        
-        this.drillDown(fp('FBf', totals.low_vl_targeted)),
+        this.drillDown(fp('FBf', totals.tx_curr), 'TX CURR FBf'),
+        this.drillDown(fp('FBf', totals.due_for_vl), 'Due for VL FBf'),
+        this.drillDown(fp('FBf', totals.drawn_routine), 'Routine (Sample Drawn) FBf'),
+        this.drillDown(fp('FBf', totals.drawn_targeted), 'Targetted (Sample Drawn) FBf'),
+        this.drillDown(fp('FBf', totals.high_vl_routine), 'Routine (High VL (>=1000 copies)) FBf'),
+        this.drillDown(fp('FBf', totals.high_vl_targeted), 'Targeted High VL (>=1000 copies) FBf'),
+        this.drillDown(fp('FBf', totals.low_vl_routine), 'Routine (Low VL (<1000 copies)) FBf'),        
+        this.drillDown(fp('FBf', totals.low_vl_targeted), 'Targeted (Low VL (<1000 copies)) FBf'),
       ])
     },
     setAllMalesTotalsRow() {
@@ -158,14 +160,14 @@ export default defineComponent({
       return this.rows.push([
         table.td('All'),
         table.td('Male'),
-        this.drillDown(totals.tx_curr),
-        this.drillDown(totals.due_for_vl),
-        this.drillDown(totals.drawn_routine),
-        this.drillDown(totals.drawn_targeted),
-        this.drillDown(totals.high_vl_routine),
-        this.drillDown(totals.high_vl_targeted),
-        this.drillDown(totals.low_vl_routine),
-        this.drillDown(totals.low_vl_targeted)
+        this.drillDown(totals.tx_curr, 'TX CURR Male'),
+        this.drillDown(totals.due_for_vl, 'Due for VL Male'),
+        this.drillDown(totals.drawn_routine, 'Routine (Sample Drawn) Male'),
+        this.drillDown(totals.drawn_targeted, 'Targetted (Sample Drawn) Male'),
+        this.drillDown(totals.high_vl_routine, 'Routine (High VL (>=1000 copies)) Male'),
+        this.drillDown(totals.high_vl_targeted, 'Targeted High VL (>=1000 copies) Male'),
+        this.drillDown(totals.low_vl_routine, 'Routine (Low VL (<1000 copies)) Male'),
+        this.drillDown(totals.low_vl_targeted, 'Targeted (Low VL (<1000 copies)) Male')
       ])
     },
     async setRows(gender: 'M' | 'F') {
@@ -173,22 +175,38 @@ export default defineComponent({
         const group = AGE_GROUPS[i];
         if (group in this.cohort) {
           const cohortData = this.cohort[group];
-          const td = (id: string, patients: any) => {
+          const td = (id: string, patients: any, context: string) => {
             const filteredPatients =  patients.filter((p: any) => p.gender === gender)
             this.setTotals(id, gender, filteredPatients)
-            return this.drillDown(filteredPatients)
+            return this.drillDown(filteredPatients, context)
           }
           this.rows.push([
             table.td(group),
             table.td(gender),
-            td('tx_curr', cohortData.tx_curr),
-            td('due_for_vl', cohortData.due_for_vl),
-            td('drawn_routine', cohortData.drawn.routine),
-            td('drawn_targeted', cohortData.drawn.targeted),
-            td('high_vl_routine', cohortData.high_vl.routine),
-            td('high_vl_targeted', cohortData.high_vl.targeted),
-            td('low_vl_routine', cohortData.low_vl.routine),
-            td('low_vl_targeted', cohortData.low_vl.targeted)
+            td(
+              'tx_curr', cohortData.tx_curr, `${group} TX CURR (${gender})`
+            ),
+            td(
+              'due_for_vl', cohortData.due_for_vl, `${group} Due for VL (${gender})`
+            ),
+            td(
+              'drawn_routine', cohortData.drawn.routine, `${group} Routine (Sample Drawn) (${gender})`
+            ),
+            td(
+              'drawn_targeted', cohortData.drawn.targeted, `${group} Targeted (Sample Drawn) (${gender})`
+            ),
+            td(
+              'high_vl_routine', cohortData.high_vl.routine, `${group} Routine (High VL (>=1000 copies)) (${gender})`
+            ),
+            td(
+              'high_vl_targeted', cohortData.high_vl.targeted, `${group} Targeted High VL (>=1000 copies) (${gender})`
+            ),
+            td(
+              'low_vl_routine', cohortData.low_vl.routine, `${group} Routine (Low VL (<1000 copies)) (${gender})`
+            ),
+            td(
+              'low_vl_targeted', cohortData.low_vl.targeted, `${group} Targeted (Low VL (<1000 copies)) (${gender})`
+            )
           ]);
         } else {
           this.rows.push([

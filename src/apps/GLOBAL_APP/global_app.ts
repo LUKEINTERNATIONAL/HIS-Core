@@ -1,5 +1,6 @@
 import { PatientPrintoutService } from "@/services/patient_printout_service"
 import { UserService } from "@/services/user_service"
+import { GLOBAL_PROP } from "./global_prop"
 
 export default {
   GlobalAppSettings: [
@@ -96,6 +97,10 @@ export default {
         {
           name: "Merge patients",
           pathUrl: "/patients/merge",
+        },
+        {
+          name: "Patient visit stats",
+          pathUrl: "/art/patient_visits"
         }
       ]
     },
@@ -106,7 +111,7 @@ export default {
       files: [
         {
           name: "DDE Activation",
-          pathUrl: "/preferences?label=Activate DDE&property=dde_enabled"
+          pathUrl: `/preferences?label=Activate DDE&property=${GLOBAL_PROP.DDE_ENABLED}`
         }
       ]
     }

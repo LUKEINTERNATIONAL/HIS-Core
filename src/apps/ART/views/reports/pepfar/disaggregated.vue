@@ -91,7 +91,7 @@ export default defineComponent({
                     label: 'Total Alive and on ART', 
                     value: totalAlive.length,
                     other: {
-                        onclick: () => this.runTableDrill(totalAlive)
+                        onclick: () => this.runTableDrill(totalAlive, 'Total Alive and on ART')
                     }
                 },
                 {
@@ -127,19 +127,22 @@ export default defineComponent({
             this.rows.push([
                 table.td('All'), 
                 table.td('Male'), 
-                this.drill(this.totalNewM),
-                this.drill(this.totalCurM),
-                this.drill(this.totalIptM),
-                this.drill(this.totalTbM)
+                this.drill(this.totalNewM, 'Tx New (new on ART) Males'),
+                this.drill(this.totalCurM, 'Total Curr (received ART) Males'),
+                this.drill(this.totalIptM, 'Total Curr (received IPT) Males'),
+                this.drill(this.totalTbM, 'Total Curr (screened for TB) Males')
             ])
         },
         setFemaleNotPregnantRows() {
-            const row = [ 
-                this.totalNewF, 
-                this.totalCurF, 
-                this.totalIptF,
-                this.totalTbF
-            ].map((data: any) => this.drill(data.filter((i: any) => !this.pregnantF.includes(i))))
+            const row = [
+                [this.totalNewF, 'Tx New (new on ART) FNP'], 
+                [this.totalCurF, 'Tx Curr (receiving ART) FNP'], 
+                [this.totalIptF, 'Tx Curr (received IPT) FNP'],
+                [this.totalTbF, 'Tx Curr (screened for TB) FNP']
+            ].map(([row, context]: any) => {
+                const femaleNotPregnant = row.filter((i: any) => !this.pregnantF.includes(i))
+                return this.drill(femaleNotPregnant, context)
+            })
             this.rows.push([ table.td('All'), table.td('FNP'), ...row ])
         },
         setFemaleRows() {
@@ -150,7 +153,14 @@ export default defineComponent({
                 this.totalCurF = uniq(this.totalCurF.concat(txCur))
                 this.totalIptF = uniq(this.totalIptF.concat(txIpt))
                 this.totalTbF  = uniq(this.totalTbF.concat(txTb))
-                return [ table.td(group), table.td('Female'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
+                return [ 
+                    table.td(group), 
+                    table.td('Female'),
+                    this.drill(txNew, `${group} Tx New (new on ART) Females`), 
+                    this.drill(txCur, `${group} Tx Curr (receiving ART) Females`), 
+                    this.drill(txIpt, `${group} Tx Curr (received IPT) Females`), 
+                    this.drill(txTb, `${group} Tx Curr (screened for TB) Females`)
+                ]
             })
         },
         setMaleRows() {
@@ -161,7 +171,14 @@ export default defineComponent({
                 this.totalCurM = uniq(this.totalCurM.concat(txCur))
                 this.totalIptM = uniq(this.totalIptM.concat(txIpt))
                 this.totalTbM  = uniq(this.totalTbM.concat(txTb))
-                return [ table.td(group), table.td('Male'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]   
+                return [ 
+                    table.td(group), 
+                    table.td('Male'), 
+                    this.drill(txNew, `${group} Tx New (new on ART) Males`), 
+                    this.drill(txCur, `${group} Tx Curr (receiving ART) Males`), 
+                    this.drill(txIpt, `${group} Tx Curr (received IPT) Males`), 
+                    this.drill(txTb, `${group} Tx Curr (screened for TB) Males`)
+                ]   
             })
         },
         setFemalePregnantRows() {
@@ -172,7 +189,14 @@ export default defineComponent({
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
-                return [table.td('All'), table.td('FP'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
+                return [ 
+                    table.td('All'), 
+                    table.td('FP'),
+                    this.drill(txNew, `Tx New (new on ART) Pregnant`),
+                    this.drill(txCur, `Tx Curr (receiving ART) Pregnant`),
+                    this.drill(txIpt, `Tx Curr (received IPT) Pregnant`),
+                    this.drill(txTb, `Tx Curr (screened for TB) Pregnant`)
+                ]
             })
         },
         setFemaleBreastFeedingRows() {
@@ -183,7 +207,14 @@ export default defineComponent({
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
-                return [table.td('All'), table.td('FBf'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
+                return [ 
+                    table.td('All'), 
+                    table.td('FBf'), 
+                    this.drill(txNew, 'Tx New (new on ART) Breastfeeding'), 
+                    this.drill(txCur, 'Tx Curr (receiving ART) Breastfeeding'), 
+                    this.drill(txIpt, 'Tx Curr (received IPT) Breastfeeding'), 
+                    this.drill(txTb, 'Tx Curr (screened for TB) Breastfeeding')
+                ]
             })
         },
         async setRows(category: string, ageGroups: Array<string>, onFormat: Function) {

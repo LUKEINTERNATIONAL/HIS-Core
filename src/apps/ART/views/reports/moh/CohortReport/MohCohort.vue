@@ -38,6 +38,7 @@ import HisDate from "@/utils/Date"
 import Url from "@/utils/Url"
 import { modalController } from "@ionic/vue";
 import { delayPromise } from "@/utils/Timers";
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
   mixins: [ReportMixinVue],
@@ -127,27 +128,30 @@ export default defineComponent({
     },
     async onDrillDown(resourceId: string) {
       const columns = [
-        'ARV number', 'Name', 'Gender', 'Birth Date', 'Action'
+        [
+          table.thTxt('ARV number'),
+          table.thTxt('Name'),
+          table.thTxt('Gender'),
+          table.thTxt('Birth Date'),
+          table.thTxt('Outcome'),
+          table.thTxt('Action')
+        ]
       ]
-      const onRows = async () => {
+      const asyncRows = async () => {
         const persons = await this.report.getCohortDrillDown(resourceId)
         return persons.map((person: any) => ([
-          person['arv_number'],
-          `${person['given_name']} ${person['family_name']}`,
-          person['gender'],
-          HisDate.getAgeInYears(person['birthdate']),
-          person['outcome'] || 'N/A',
-          {
-            type: 'button',
-            name: 'Select',
-            action: async () => {
-              await modalController.dismiss({})
-              this.$router.push({ path: `/patient/dashboard/${person.person_id}`})
-            }
-          }
+          table.td(person['arv_number']),
+          table.td(`${person['given_name']} ${person['family_name']}`),
+          table.td(person['gender']),
+          table.td(HisDate.getAgeInYears(person['birthdate'])),
+          table.td(person['outcome'] || 'N/A'),
+          table.tdBtn('Select', async () => {
+            await modalController.dismiss({})
+            this.$router.push({ path: `/patient/dashboard/${person.person_id}`})
+          })
         ]))
       }
-      await this.tableDrill({ columns, onRows })
+      await this.drilldownData(`Drill table ${resourceId}`, columns, [], asyncRows)
     },
     getBtns() {
       return  [

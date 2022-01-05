@@ -1,3 +1,4 @@
+import { ART_GLOBAL_PROP } from "../art_global_props"
 import Prescription from "@/apps/ART/views/encounters/Prescription.vue"
 import Registration from "@/apps/ART/views/encounters/Registration.vue"
 import Appointments from "@/apps/ART/views/encounters/Appointment.vue"
@@ -51,29 +52,34 @@ import BPAdherence from "@/apps/ART/views/encounters/BPAdherence.vue"
 
 export default [
     {
+        name: 'clinic_days',
+        path: "/art/preferences/clinic_days",
+        component: () => import("@/apps/ART/views/preferences/DefaultPreferences.vue")
+    },
+    {
+        name: ART_GLOBAL_PROP.HTN_SCREENING_AGE_THRESHOLD,
+        path: "/art/preferences/htn_age",
+        component: () => import("@/apps/ART/views/preferences/DefaultPreferences.vue")
+    },
+    {
+        name: ART_GLOBAL_PROP.FILING_NUMBER_LIMIT,
+        path: "/art/preferences/fn/limit",
+        component: () => import("@/apps/ART/views/preferences/DefaultPreferences.vue")
+    },
+    {
+        name: ART_GLOBAL_PROP.APPOINTMENT_LIMIT,
+        path: "/art/preferences/appointment/limit",
+        component: () => import("@/apps/ART/views/preferences/DefaultPreferences.vue")
+    },
+    {
+        name: 'art_patient_visit_stats',
+        path: '/art/patient_visits',
+        component: () => import("@/apps/ART/views/reports/inconsistencies/PatientVisitStats.vue")
+    },
+    {
         name: "filing management",
         path: '/art/filing_numbers/:patient_id',
         component: () => import("@/apps/ART/views/FilingNumberManagement.vue")
-    },
-    {
-        name: "Set Clinic Days",
-        path: "/art/preferences/clinic_days",
-        component: () => import("@/apps/ART/views/preferences/SetClinicDays.vue")
-    },
-    {
-        name: "Set HTN Age",
-        path: "/art/preferences/htn_age",
-        component: () => import("@/apps/ART/views/preferences/SetHTNAge.vue")
-    },
-    {
-        name: "Set filing number limit",
-        path: "/art/preferences/fn/limit",
-        component: () => import("@/apps/ART/views/preferences/SetFilingNumbersLimit.vue")
-    },
-    {
-        name: "Set Appointment limit",
-        path: "/art/preferences/appointment/limit",
-        component: () => import("@/apps/ART/views/preferences/SetAppointmentLimit.vue")
     },
     {
         name: "Enter stock",

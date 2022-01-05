@@ -56,9 +56,16 @@ export default defineComponent({
             await this.setRows('F')
             await this.setRows('M')
         },
-        drilldown(patients: Array<number>) {
-            const columns = ['ARV#', 'DOB', 'Dispensed', 'ARVs']
-            const onRows = async () => {
+        drilldown(patients: Array<number>, context: string) {
+            const columns = [
+                [
+                    table.thTxt('ARV#'), 
+                    table.thTxt('DOB'), 
+                    table.thTxt('Dispensed'), 
+                    table.thTxt('ARVs')
+                ]
+            ]
+            const asyncRows = async () => {
                 const data = await this.report.getTxMMDClientLevelData(patients)
                 if (!data) { 
                     return []
@@ -66,29 +73,48 @@ export default defineComponent({
                 return this.report
                     .remapTxClientLevelData(data)
                     .map((d: any) => {
-                        const drugs: any = d.drugs.map((drug: any) => `
-                            <table style='width: 100%;'> 
-                                <td style='width: 65%;'>${drug.name}</td>
-                                <td style='width: 30%;'>(${drug.quantity}, ${drug.dose} a day)</td>
-                            </table>`)
+                        const drugs: any = d.drugs.map((drug: any) => {
+                            const tableView = `
+                                <table style='width: 100%;'> 
+                                    <td style='width: 65%;'>${drug.name}</td>
+                                    <td style='width: 30%;'>(${drug.quantity}, ${drug.dose} a day)</td>
+                                </table>`
+                            const dataView = `${drug.name} (Quantity: ${drug.quantity} Dose: ${drug.dose})`
+                            return { tableView, dataView }
+                        })
                         return [
-                            d.id || 'N/A',
-                            this.toDate(d.dob),
-                            this.toDate(d.dispenseDate),
-                            drugs.join('<p/>')
-                        ]    
+                            table.td(d.id || 'N/A'),
+                            table.tdDate(d.dob),
+                            table.tdDate(d.dispenseDate),
+                            table.td(drugs.map((d: any) => d.tableView).join('<p/>'), 
+                            { 
+                                value: drugs.map((d: any) => d.dataView).join('|')
+                            })
+                        ]
                     })
             }
-            return patients.length <= 0 
-                ? table.td(0)
-                : table.tdLink(patients.length, () => this.tableDrill({columns, onRows}))
+            if (patients.length <= 0) {
+                return table.td(0)
+            }
+            return table.tdLink(patients.length, () => this.drilldownData(context, columns, [], asyncRows))
         },
         async setRows(gender: string) {
+            const contexts: any = [
+                'Defaulted (new registration)',
+                'Defaulted (old registration)',
+                'Died',
+                'Stopped',
+                'Tranferred out',
+                'Unknown'
+            ]
             for(const i in AGE_GROUPS) {
                 const group = AGE_GROUPS[i]
                 try {
                     const cohortData = this.cohort[group][gender]
-                    const drillable = cohortData.map((d: Array<number>) => this.drilldown(d))
+                    const drillContext = `${gender} ${group}`
+                    const drillable = cohortData.map(
+                        (d: Array<number>, i: number) => this.drilldown(d, `${drillContext} ${contexts[i]}`)
+                    )
                     this.rows.push([
                         table.td(group),
                         table.td(gender),

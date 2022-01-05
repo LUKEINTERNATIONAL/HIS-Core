@@ -11,7 +11,6 @@ export default defineComponent({
     },
     emits: [
         'onValue',
-        'onClear',
         'onFieldActivated'
     ],
     props: {
@@ -38,7 +37,7 @@ export default defineComponent({
             required: true
         },
         clear: {
-            type: Boolean,
+            type: Number,
             required: true
         },
         options: {
