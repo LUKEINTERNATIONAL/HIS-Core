@@ -5,6 +5,7 @@
       :columns="columns"
       :paginated="true"
       :itemPerPage="5"
+      :config="{ showIndex: false }"
     ></report-table>
   </div>
 </template>
@@ -68,12 +69,12 @@ export default defineComponent({
     rows(): RowInterface[][] {  
       return this.items.map((item) => {
         return [
-          table.tdLink(item.label, () => this.printLabel(item.value), smallText),
+          table.tdBtn(item.label, () => this.printLabel(item.value), smallText),
           table.td(item.data.weight, smallText),
           table.td(item.data.regimen, smallText),
           table.td(this.formatAdherence(item.data.adherence), smallText),
           table.td(item.data.outcome, smallText),
-          table.tdLink('show more', () => this.showMore(item.value), smallText)
+          table.tdBtn('show more', () => this.showMore(item.value), smallText)
         ]
       })
     }
