@@ -72,16 +72,23 @@ export default defineComponent({
                 return this.report
                     .remapTxClientLevelData(data)
                     .map((d: any) => {
-                        const drugs: any = d.drugs.map((drug: any) => `
-                            <table style='width: 100%;'> 
-                                <td style='width: 65%;'>${drug.name}</td>
-                                <td style='width: 30%;'>(${drug.quantity}, ${drug.dose} a day)</td>
-                            </table>`)
+                        const drugs: any = d.drugs.map((drug: any) => {
+                            const tableView = `
+                                <table style='width: 100%;'> 
+                                    <td style='width: 65%;'>${drug.name}</td>
+                                    <td style='width: 30%;'>(${drug.quantity}, ${drug.dose} a day)</td>
+                                </table>`
+                            const dataView = `${drug.name} (Quantity: ${drug.quantity} Dose: ${drug.dose})`
+                            return { tableView, dataView }
+                        })
                         return [
                             table.td(d.id || 'N/A'),
                             table.tdDate(d.dob),
                             table.tdDate(d.dispenseDate),
-                            table.td(drugs.join('<p/>'))
+                            table.td(drugs.map((d: any) => d.tableView).join('<p/>'), 
+                            { 
+                                value: drugs.map((d: any) => d.dataView).join('|')
+                            })
                         ]
                     })
             }
