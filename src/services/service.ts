@@ -157,6 +157,10 @@ export class Service {
         return apiDate && apiDate != sessionDate
     }
 
+    static getVboxID() {
+        return sessionStorage.vboxID || ''
+    }
+
     static getProgramID() {
         const app = this.getActiveApp()
         
