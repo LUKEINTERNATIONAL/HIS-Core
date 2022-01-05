@@ -78,8 +78,7 @@ import {
   IonToolbar,
   IonButton,
   IonHeader,
-  IonTitle,
-  toastController
+  IonTitle
 } from "@ionic/vue";
 import { alertConfirmation, toastWarning } from "@/utils/Alerts";
 import InfoCard from "@/components/DataViews/HisFormInfoCard.vue"
@@ -182,14 +181,6 @@ export default defineComponent({
       async handler(field: string) {
         if (field) this.mountField(field)
       }
-    },
-    state: {
-      handler(state: string) {
-        const toastDismissableStates = [
-          'onValue', 'onfinish', 'next', 'prev', 'init'
-        ]
-        if (toastDismissableStates.includes(state)) toastController.dismiss()
-      }
     }
   },
   mounted() {
@@ -227,7 +218,6 @@ export default defineComponent({
             "Are you sure you want to cancel?"
           );
           if (confirmation) {
-            toastController.dismiss()
             this.cancelDestinationPath
               ? this.$router.push(this.cancelDestinationPath)
               : this.$router.back();
@@ -486,7 +476,7 @@ export default defineComponent({
         const errors = this.currentField.validation(
           value, this.formData, this.computedFormData
         )
-        if (errors) return toastWarning(errors.join(", "), 60000);
+        if (errors) return toastWarning(errors.join(", "), 30000);
       }
       // Run callback before proceeding to next field
       if (this.currentField.beforeNext) {
@@ -590,7 +580,6 @@ export default defineComponent({
       })
     },
     async setActiveFieldValue(value: any) {
-      toastController.dismiss()
       this.state = "onValue";
       const proxyID = this.currentField.proxyID
       const id = this.currentField.id

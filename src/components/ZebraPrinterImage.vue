@@ -1,10 +1,8 @@
 <template>
-    <div class='print-section'> 
-        <center>
-        <img src='assets/images/zebra-label-printer.jpeg'/>
-            <h1> Printing in progress </h1>
-            <h3> Please wait.... </h3>
-        </center>
+    <div class='print-section ion-text-center'> 
+        <img src="assets/images/zebra-label-printer.jpeg" alt="zebra printer"/>
+        <h1> Printing in progress </h1>
+        <h3> Please wait.... </h3>
     </div>
 </template>
 <style scoped>
