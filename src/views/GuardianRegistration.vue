@@ -22,6 +22,7 @@ import { isEmpty } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
 import { PatientRegistrationService } from "@/services/patient_registration_service"
 import { nextTask } from "@/utils/WorkflowTaskHelper"
+import { toastWarning } from "@/utils/Alerts";
 
 export default defineComponent({
   components: { HisStandardForm },
@@ -71,6 +72,7 @@ export default defineComponent({
         return fields
     },
     async onFinish(form: any, computedData: any) {
+        if(this.isSameAsPatient(computedData)) return toastWarning("Guardian cannot be the same patient")
         let guardianID = -1
         if (this.isRegistrationMode()) {
             const guardian: any = new PatientRegistrationService()
@@ -96,8 +98,15 @@ export default defineComponent({
             id: data.person_id,
             name: `${data.names[0].given_name} ${data.names[0].family_name}`,
             birthdate: HisDate.toStandardHisDisplayFormat(data.birthdate),
-            homeAddress: `${address.county_district} ${address.neighborhood_cell}`
+            homeAddress: `${address.county_district} ${address.neighborhood_cell}`,
+            gender: data.gender
         }
+    },
+    isSameAsPatient(guardian: any) {
+        const guardianName = guardian.given_name.person + ' ' + guardian.family_name.person
+        return (guardianName === this.patientData.name) 
+            && (HisDate.toStandardHisDisplayFormat(guardian.birth_date.date) === this.patientData.birthdate)
+            && (guardian.gender.person === this.patientData.gender)
     },
     mapToOption(listOptions: Array<string>): Array<Option> {
         return listOptions.map((item: any) => ({ label: item, value: item })) 
