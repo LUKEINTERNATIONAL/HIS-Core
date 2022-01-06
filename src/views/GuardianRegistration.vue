@@ -183,6 +183,7 @@ export default defineComponent({
             id: 'relations',
             helpText: 'Select relationship type',
             type: FieldType.TT_RELATION_SELECTION,
+            validation: (val: Option) => Validation.required(val),
             onload: (context: any) => {
                 context.patient = this.patientData
                 if (this.isRegistrationMode()) {
