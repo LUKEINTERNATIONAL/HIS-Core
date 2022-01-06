@@ -16,6 +16,7 @@ import { GeneralDataInterface } from "@/apps/interfaces/AppInterface";
 import { PatientTypeService } from "@/apps/ART/services/patient_type_service"
 import DrugModalVue from "@/apps/ART/Components/DrugModal.vue";
 import ART_GLOBAL_PROP from "../art_global_props";
+import { isEmpty } from "lodash";
 
 async function enrollInArtProgram(patientID: number, patientType: string, clinic: string) {
     const program = new PatientProgramService(patientID)
@@ -112,6 +113,55 @@ export function formatPatientProgramSummary(data: any) {
         { label: "File Number", value: data.filing_number.number},
         { label: "Current Outcome", value: data.current_outcome},
     ]
+}
+/**
+ * Loads lab order results and filters them by Viral Load results or Order
+ * @param patientId 
+ * @param date 
+ * @returns 
+ */
+export async function getPatientDashboardLabOrderCardItems(patientId: number, date: string) {
+    const orders = await OrderService.getOrders(patientId)
+    const d = (date: string) => HisDate.toStandardHisFormat(date)
+    const t = (date: string) => HisDate.toStandardHisTimeFormat(date)
+    // filter All viral load results on visit date
+    const results = orders.filter((o: any) => {
+        try {
+            return o.tests[0].name.match(/HIV/i) && d(o.tests[0].result[0].date) === d(date) 
+        } catch(e) {
+            return false
+        }
+    })
+    if (!isEmpty(results)) {
+        return results.map((r: any) => {
+            const test = r.tests[0]
+            const result = test.result[0]
+            return {
+                label: `Result: ${test.name} ${result.value_modifier} ${result.value}`,
+                value: t(result.date),
+                other: {
+                    tableRow: [
+                        r.accession_number, 
+                        r.specimen.name,
+                        t(r.order_date)
+                    ]
+                }
+            }
+        })
+    }
+    // Show the order
+    return orders.filter((o: any) => d(o.order_date) === d(date))
+        .map((labOrder: any) => ({
+            label: `Order:  ${labOrder.specimen.name}`,
+            value: t(labOrder.order_date),
+            other: {
+                tableRow: [
+                    labOrder.accession_number, 
+                    labOrder.specimen.name,
+                    t(labOrder.order_date)
+                ]
+            }
+        }))
 }
 
 export function confirmationSummary(patient: any, program: any) {
