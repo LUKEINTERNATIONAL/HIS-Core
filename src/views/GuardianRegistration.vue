@@ -104,7 +104,7 @@ export default defineComponent({
     },
     isSameAsPatient(guardian: any) {
         const guardianName = guardian.given_name.person + ' ' + guardian.family_name.person
-        return (guardianName === this.patientData.name) 
+        return (guardianName.toLowerCase() === this.patientData.name.toLowerCase()) 
             && (HisDate.toStandardHisDisplayFormat(guardian.birth_date.date) === this.patientData.birthdate)
             && (guardian.gender.person === this.patientData.gender)
     },
