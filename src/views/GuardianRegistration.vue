@@ -72,19 +72,22 @@ export default defineComponent({
         return fields
     },
     async onFinish(form: any, computedData: any) {
-        if(this.isSameAsPatient(computedData)) return toastWarning("Guardian cannot be the same patient")
-        let guardianID = -1
-        if (this.isRegistrationMode()) {
-            const guardian: any = new PatientRegistrationService()
-            await guardian.registerGuardian(PersonField.resolvePerson(computedData))
-            guardianID = guardian.getPersonID()
+        if(this.isSameAsPatient(computedData)) {
+            toastWarning("Guardian cannot be the same patient")
         } else {
-            guardianID = this.guardianData.id
-        }
-        await RelationsService.createRelation(
-            this.patientData.id, guardianID, form.relations.other.relationship_type_id
-        )
-        await nextTask(this.patientData.id, this.$router)
+            let guardianID = -1
+            if (this.isRegistrationMode()) {
+                const guardian: any = new PatientRegistrationService()
+                await guardian.registerGuardian(PersonField.resolvePerson(computedData))
+                guardianID = guardian.getPersonID()
+            } else {
+                guardianID = this.guardianData.id
+            }
+            await RelationsService.createRelation(
+                this.patientData.id, guardianID, form.relations.other.relationship_type_id
+            )
+            await nextTask(this.patientData.id, this.$router)
+        }   
     },
     isSearchMode() {
         return ['Search', 'Registration'].includes(this.fieldAction)
@@ -103,9 +106,12 @@ export default defineComponent({
         }
     },
     isSameAsPatient(guardian: any) {
+        const birthdate = !this.isRegistrationMode() && guardian.birth_date
+            ? this.guardianData.birthdate
+            : HisDate.toStandardHisDisplayFormat(guardian.birth_date.date)
         const guardianName = guardian.given_name.person + ' ' + guardian.family_name.person
         return (guardianName.toLowerCase() === this.patientData.name.toLowerCase()) 
-            && (HisDate.toStandardHisDisplayFormat(guardian.birth_date.date) === this.patientData.birthdate)
+            && (birthdate === this.patientData.birthdate)
             && (guardian.gender.person === this.patientData.gender)
     },
     mapToOption(listOptions: Array<string>): Array<Option> {
