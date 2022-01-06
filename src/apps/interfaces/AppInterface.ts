@@ -15,7 +15,7 @@ export interface FolderInterface {
         {
             name: string;
             icon?: string;
-            condition?: () => boolean;
+            condition?: () => boolean | Promise<boolean>;
             pathName?: string;
             pathUrl?: string;
         }
