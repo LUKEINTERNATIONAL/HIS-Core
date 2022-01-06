@@ -1,7 +1,7 @@
 <template>
   <div>
     <view-port :showFull="true">
-      <ion-grid>
+      <ion-grid class="view-port-content">
         <ion-row >
           <ion-col :size="getSize" v-for="(item, index) in listData" :key="index">
             <ion-grid>

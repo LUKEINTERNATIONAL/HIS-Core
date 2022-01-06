@@ -15,11 +15,11 @@ function ddeEnabled() {
 }
 
 function militarySiteEnabled() {
-    return GlobalPropertyService.get(`${GLOBAL_PROP.MILITARY_SITE}=true`)
+    return GlobalPropertyService.isProp(`${GLOBAL_PROP.MILITARY_SITE}=true`)
 }
 
 function portalEnabled() {
-    return GlobalPropertyService.get(`${GLOBAL_PROP.PORTAL_ENABLED}=true`)
+    return GlobalPropertyService.isProp(`${GLOBAL_PROP.PORTAL_ENABLED}=true`)
 }
 
 function siteUUID() {
