@@ -132,14 +132,5 @@ export const SECONDARY_ACTIVITIES: TaskInterface[] = [
     },
     globalProperty: `${ART_GLOBAL_PROP.FILING_NUMBERS}=true`,
     icon: "folder.png"
-  },
-  {
-    id: "change_patient_type",
-    name: "Change patient type",
-    description: "Change patient type",
-    action: ({ patient }: any, router: any) => {
-      router.push(`/art/encounters/patient_type/${patient.patient_id}`)
-    },
-    icon: "patient-type.png"
   }
 ]
