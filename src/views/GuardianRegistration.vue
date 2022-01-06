@@ -106,9 +106,9 @@ export default defineComponent({
         }
     },
     isSameAsPatient(guardian: any) {
-        const birthdate = !this.isRegistrationMode() && guardian.birth_date
-            ? this.guardianData.birthdate
-            : HisDate.toStandardHisDisplayFormat(guardian.birth_date.date)
+        const birthdate = this.isRegistrationMode() && guardian.birth_date
+            ? HisDate.toStandardHisDisplayFormat(guardian.birth_date.date)
+            : this.guardianData.birthdate
         const guardianName = guardian.given_name.person + ' ' + guardian.family_name.person
         return (guardianName.toLowerCase() === this.patientData.name.toLowerCase()) 
             && (birthdate === this.patientData.birthdate)
