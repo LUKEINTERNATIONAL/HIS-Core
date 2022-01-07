@@ -128,6 +128,12 @@ export default {
             helpText: 'Home District',
             type: FieldType.TT_SELECT,
             requireNext: false,
+            dynamicHelpText: (f: any) => {
+                if (f.home_region && f.home_region.label.match(/foreign/i)) {
+                    return 'Home Country'
+                }
+                return 'Home District'
+            },
             computedValue: (val: Option) => ({person: val.label}),
             options: (form: any) => getDistricts(form.home_region.value)
         }
@@ -191,6 +197,12 @@ export default {
             helpText: 'District',
             requireNext: false,
             type: FieldType.TT_SELECT,
+            dynamicHelpText: (f: any) => {
+                if (f.current_region && f.current_region.label.match(/foreign/i)) {
+                    return 'Current Country'
+                }
+                return 'Current District'
+            },
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
             options: (form: any) => getDistricts(form.current_region.value)
