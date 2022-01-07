@@ -235,8 +235,21 @@ export default defineComponent({
                 ...generateDateFields({
                     id: 'date_started_art',
                     helpText: 'Started ART',
-                    condition: (f: any) => f.ever_registered_at_art_clinic.value === 'Yes',
                     required: true,
+                    unload: (d: any, s: string, f: any, c: any) => {
+                        if (s === 'next') {
+                            const age = dayjs(c.date_started_art.date)
+                                .diff(this.patient.getBirthdate(), 'years')
+                            this.staging.setAge(age)
+                            this.stagingFacts.age = age
+                            this.stagingFacts.ageInMonths = age * 12
+                        } else {
+                            this.staging.setAge(this.patient.getAge())
+                            this.stagingFacts.age = this.patient.getAge()
+                            this.stagingFacts.ageInMonths = this.patient.getAgeInMonths()
+                        }
+                    },
+                    condition: (f: any) => f.ever_registered_at_art_clinic.value === 'Yes',
                     minDate: () => this.patient.getBirthdate(),
                     maxDate: () => this.staging.getDate(),
                     estimation: {
