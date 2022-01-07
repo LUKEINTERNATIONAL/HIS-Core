@@ -2,8 +2,8 @@ import { GlobalPropertyService } from "@/services/global_property_service"
 
 export enum ART_GLOBAL_PROP {
     EXTENDED_LABS = 'extended_labs',
-    VL_ROUTINE_CHECK = 'activate_vl_routine_check',
-    PILLS_REMAINING = 'ask_pills_remaining_at_home',
+    VL_ROUTINE_CHECK = 'activate.vl.routine.check',
+    PILLS_REMAINING = 'ask.pills.remaining.at.home',
     FILING_NUMBERS = 'use.filing.numbers',
     DRUG_MANAGEMENT = 'activate.drug.management',
     HTN_ENHANCEMENT = 'activate.htn.enhancement',
@@ -11,10 +11,26 @@ export enum ART_GLOBAL_PROP {
     THREE_HP_AUTO_SELECT = 'activate_3hp_auto_select',
     APPOINTMENT_LIMIT = 'clinic.appointment.limit',
     HTN_SCREENING_AGE_THRESHOLD = 'htn.screening.age.threshold',
+    HTN_SYSTOLIC = 'htn.systolic.threshold',
+    HTN_DIASTOLIC = 'htn.diastolic.threshold',
     PEADS_CLINIC_DAYS = 'peads.clinic.days',
     ADULT_CLINIC_DAYS = 'clinic.days',
     FILING_NUMBER_LIMIT = 'filing.number.limit',
-    FILING_NUMBER_PREFIX = 'filing.number.prefix'
+    FILING_NUMBER_PREFIX = 'filing.number.prefix',
+    CERVICAL_CANCER_SCREENING = 'activate.cervical.cancer.screening',
+    CLINIC_HOLIDAYS = 'clinic.holidays'
+}
+
+function cervicalCancerScreeningEnabled() {
+    return GlobalPropertyService.isProp(`${ART_GLOBAL_PROP.CERVICAL_CANCER_SCREENING}=true`)
+}
+
+function VLEnabled() {
+    return GlobalPropertyService.isProp(`${ART_GLOBAL_PROP.VL_ROUTINE_CHECK}=true`)
+}
+
+function fastTrackEnabled() {
+    return GlobalPropertyService.isProp(`${ART_GLOBAL_PROP.FAST_TRACK}=true`)
 }
 
 function threeHPAutoSelectEnabled() {
@@ -65,6 +81,18 @@ function peadsClinicDays() {
     return GlobalPropertyService.get(ART_GLOBAL_PROP.PEADS_CLINIC_DAYS)
 }
 
+function clinicHolidays() {
+    return GlobalPropertyService.get(ART_GLOBAL_PROP.CLINIC_HOLIDAYS)
+}
+
+function htnSystolic() {
+    return GlobalPropertyService.get(ART_GLOBAL_PROP.HTN_SYSTOLIC)
+}
+
+function htnDiastolic() {
+    return GlobalPropertyService.get(ART_GLOBAL_PROP.HTN_DIASTOLIC)
+}
+
 function setHtnAgeThreshold(threshold: string) {
     return GlobalPropertyService.set(ART_GLOBAL_PROP.HTN_SCREENING_AGE_THRESHOLD, threshold)
 }
@@ -102,5 +130,11 @@ export default {
     appointmentLimit,
     askPillsRemaining,
     extendedLabEnabled,
-    threeHPAutoSelectEnabled
+    threeHPAutoSelectEnabled,
+    VLEnabled,
+    fastTrackEnabled,
+    cervicalCancerScreeningEnabled,
+    clinicHolidays,
+    htnSystolic,
+    htnDiastolic,
 }

@@ -32,7 +32,14 @@ import {
   loadingController, 
 } from "@ionic/vue"
 import { NavBtnInterface } from "@/components/HisDynamicNavFooterInterface";
-import ART_PROP, { ART_GLOBAL_PROP } from "../../art_global_props";
+import ART_PROP from "../../art_global_props";
+
+const maxWidth = {
+  style: {
+    wordWrap: 'break-word',
+    maxWidth: '130px',
+  }
+}
 
 export default defineComponent({
   components: {  
@@ -50,7 +57,7 @@ export default defineComponent({
     columns: [
       [
         table.thTxt('Property'),
-        table.thTxt('Value'),
+        table.thTxt('Value', maxWidth),
       ]
     ] as Array<ColumnInterface[]>
   }),
@@ -75,10 +82,14 @@ export default defineComponent({
       const htnAgeLimit = await ART_PROP.htnAgeThreshold()
       const adultClinicDays = await ART_PROP.adultClinicDays()
       const paedsClinicDays = await ART_PROP.peadsClinicDays()
+      const clinicHolidays = await ART_PROP.clinicHolidays()
+      const htnSystolic = await ART_PROP.htnSystolic()
+      const htnDiastolic = await ART_PROP.htnDiastolic()
+      
       return [
         [
           table.td('Cervical cancer screening activated'),
-          table.td("Not set")
+          table.td((await ART_PROP.cervicalCancerScreeningEnabled()) ? "Yes" : "No")
         ],
         [
           table.td('Drug management activated'),
@@ -118,15 +129,15 @@ export default defineComponent({
         ],
         [
           table.td('Clinic holidays'),
-          table.td("Not set" )
+          table.td(clinicHolidays ? clinicHolidays : "Not set", maxWidth)
         ],
         [
           table.td('Systolic blood pressure'),
-          table.td("Not Set")
+          table.td(htnSystolic ? htnSystolic : "Not Set")
         ],
         [
           table.td('Diastolic blood pressure'),
-          table.td("Not Set")
+          table.td(htnDiastolic ? htnDiastolic : "Not Set")
         ],
         [
           table.td('HTN screening age'),
