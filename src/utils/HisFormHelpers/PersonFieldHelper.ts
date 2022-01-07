@@ -75,13 +75,13 @@ export default {
             computedValue: (val: Option) => ({person: val.value}),
             validation: (val: any) => Validation.required(val),
             options: () => ([
-                { 
-                    label: 'Male',
-                    value: 'M'
-                },
                 {
                     label: 'Female',
                     value: 'F'
+                },
+                { 
+                    label: 'Male',
+                    value: 'M'
                 }
             ])
         }
