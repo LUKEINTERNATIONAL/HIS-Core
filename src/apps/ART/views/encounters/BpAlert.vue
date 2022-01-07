@@ -112,8 +112,8 @@ export default defineComponent({
             return this.sysBp > 0 && this.dsBP > 0
         },
         highBP(): boolean {
-            return this.sysBp > this.systolicThreshold 
-                && this.dsBP > this.diastolicTheshold
+            return this.sysBp >= this.systolicThreshold 
+                && this.dsBP >= this.diastolicTheshold
                 && !this.isPregnant
         }
     }
