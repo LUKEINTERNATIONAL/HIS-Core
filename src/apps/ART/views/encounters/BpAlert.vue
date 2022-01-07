@@ -41,10 +41,18 @@
                     <span v-if="highBP"> Re-test </span>
                     <span v-if="!hasPressureReading">Capture BP</span>
                 </ion-button>
+                <ion-button v-if="highBP" 
+                    :router-link="`/art/encounters/bp_management/${patientID}`"
+                    size="large"
+                    color="warning"
+                    slot="end">
+                    <span v-if="highBP"> Manage BP </span>
+                </ion-button>
                 <ion-button
+                    v-if="!highBP"
                     @click="nextTask"
                     size="large"
-                    :color="highBP ? 'danger' : 'success'"
+                    color="success"
                     slot="end">
                     Continue
                 </ion-button>
@@ -97,9 +105,9 @@ export default defineComponent({
                 this.dsBP = (await htn.getDiastolicBp()) || 0
                 this.sysBp = (await htn.getSystolicBp()) || 0
                 this.patientOnBpDrugs = (await htn.onBpDrugs()) || false
-                this.isPregnant = this.patient.isChildBearing() 
+                this.isPregnant = this.patient.isChildBearing()
                     ? (await this.patient.isPregnant()) || false
-                    : false 
+                    : false
             },
             immediate: true
         }
