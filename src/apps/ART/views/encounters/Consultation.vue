@@ -791,28 +791,29 @@ export default defineComponent({
             ]),
           beforeNext: async (data: any) => {
             const reasons = await this.getSideEffectsReasons(data);
-            if (reasons === -1) 
-              return true
-            if (isEmpty(reasons)) 
-              return false
-            const concept = ConceptService.getCachedConceptID("Drug induced");
-            const sides = reasons.map((r: any) => {
-              const c = ConceptService.getCachedConceptID(r.label);
-              if (r.reason === "other" || r.reason === "drug") {
-                return {
-                  'concept_id': concept,
-                  'value_coded': c,
-                  'value_text': "Past medication history",
-                };
-              } else {
-                return {
-                  'concept_id': concept,
-                  'value_coded': c,
-                  'value_drug': r.reason,
-                };
+            if (reasons != -1) {
+              if (reasons === undefined) {
+                return false
               }
-            });
-            this.relatedObs = [...this.relatedObs, ...sides];
+              const concept = ConceptService.getCachedConceptID("Drug induced");
+              const sides = reasons.map((r: any) => {
+                const c = ConceptService.getCachedConceptID(r.label);
+                if (r.reason === "other" || r.reason === "drug") {
+                  return {
+                    'concept_id': concept,
+                    'value_coded': c,
+                    'value_text': "Past medication history",
+                  };
+                } else {
+                  return {
+                    'concept_id': concept,
+                    'value_coded': c,
+                    'value_drug': r.reason,
+                  };
+                }
+              });
+              this.relatedObs = [...this.relatedObs, ...sides];
+            }
             this.sideEffects = await data.map(async (data: Option) => {
               const host = await this.consultation.buildValueCoded(
                 "Malawi ART side effects",
@@ -831,8 +832,7 @@ export default defineComponent({
             });
             return true
           },
-          options: (_: any, checked: Array<Option>) =>
-            this.getContraindications(checked),
+          options: (_: any, checked: Array<Option>) => this.getContraindications(checked)
         },
         {
           id: "other_side_effects",
