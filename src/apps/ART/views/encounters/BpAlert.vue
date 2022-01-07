@@ -69,7 +69,8 @@ import {
     IonContent,
     IonPage,
     IonButton,
-    IonToolbar
+    IonToolbar,
+    loadingController
 } from "@ionic/vue"
 import ART_PROP from "@/apps/ART/art_global_props"
 import { BPManagementService } from '../../services/htn_service'
@@ -99,6 +100,11 @@ export default defineComponent({
         ready: {
             async handler(r: boolean) {
                 if (!r) return
+                const loading = await loadingController.create({
+                    message: 'Verifying Blood Pressure...',
+                    backdropDismiss: false
+                })
+                await loading.present()
                 const htn = new BPManagementService(this.patientID, this.providerID)
                 this.systolicThreshold = (await ART_PROP.systolicThreshold()) || 145
                 this.diastolicTheshold = (await ART_PROP.diastolicThreshold()) || 94
@@ -108,6 +114,7 @@ export default defineComponent({
                 this.isPregnant = this.patient.isChildBearing()
                     ? (await this.patient.isPregnant()) || false
                     : false
+                loadingController.dismiss()
             },
             immediate: true
         }
