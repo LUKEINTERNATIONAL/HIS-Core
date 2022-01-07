@@ -70,8 +70,8 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
     availableOnActivitySelection: false
   },
   {
-    id: "BP management",
-    name: "BP management",
+    id: "bp_management",
+    name: "bp_management",
     icon: "dispensing.png",
     globalProperty: `${ART_GLOBAL_PROP.HTN_ENHANCEMENT}=true`,
     availableOnActivitySelection: false

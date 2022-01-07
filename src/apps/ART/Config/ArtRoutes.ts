@@ -177,7 +177,7 @@ export default [
         component: FastTrack
     },
     {
-        name: "BP management",
+        name: "bp_management",
         path: "/art/encounters/bp_management/:patient_id",
         component: BPManagment
     },
