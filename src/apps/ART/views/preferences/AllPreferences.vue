@@ -15,7 +15,7 @@
         </report-table>
       </div>
     </ion-content>
-    <his-footer :btns="btns"></his-footer>
+    <his-footer :btns="btns" color="light"></his-footer>
   </ion-page>
 </template>
 
@@ -65,9 +65,9 @@ export default defineComponent({
     const loader = await loadingController.create({})
     loader.present()
     this.btns.push({
-      name: "Cancel",
-      role: 'cancel',
-      color: 'danger',
+      name: "finish",
+      color: 'success',
+      slot: 'end',
       visible: true,
       size: 'large',
       onClick: () => this.$router.push('/')
