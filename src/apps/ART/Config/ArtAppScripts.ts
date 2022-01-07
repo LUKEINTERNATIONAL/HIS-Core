@@ -40,6 +40,10 @@ async function enrollInArtProgram(patientID: number, patientType: string, clinic
  */
 async function showArtActivities() {
     const activities = PRIMARY_ACTIVITIES
+        .filter(a => (typeof a.availableOnActivitySelection === 'boolean' 
+            && a.availableOnActivitySelection)
+            || typeof a.availableOnActivitySelection != 'boolean'
+        )
         .map((activity: TaskInterface)=> ({
             value: activity.workflowID 
                 || activity.name,

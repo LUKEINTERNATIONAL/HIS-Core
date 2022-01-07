@@ -12,20 +12,20 @@ export class PrintoutService extends Service {
     static async showPrinterImage() {
         const modal = await modalController.create({
             component: ZebraPrinterComponent,
-            backdropDismiss: false,
+            backdropDismiss: true
         })
         modal.present()
     }
 
     async printLbl(url: any) {
-        PrintoutService.showPrinterImage()
+        await PrintoutService.showPrinterImage()
         const isNative = getPlatforms().filter(p => [
             'android', 
             ].includes(p)).length >= 1
             if(!isNative) {
                 document.location = (await ApiClient.expandPath(url)) as any
             } 
-        await delayPromise(3000)
+        await delayPromise(3500)
         await modalController.dismiss({})
     }
 

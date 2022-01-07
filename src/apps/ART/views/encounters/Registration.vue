@@ -123,7 +123,7 @@ export default defineComponent({
                     computedValue: ({value}: Option) => ({
                         tag:'reg',
                         obs: this.registration.buildValueCoded(
-                            'Ever registered at ART clinic', value
+                            'Ever received ART', value
                         )
                     }),
                     validation: (v: any) => Validation.required(v),
