@@ -112,7 +112,7 @@ export default [
         component: Prescription
     },
     {
-        name: 'BP Alert',
+        name: 'bp_alert',
         path: '/art/encounters/bp/alert/:patient_id',
         component: () => import ("@/apps/ART/views/encounters/BpAlert.vue")
     },
