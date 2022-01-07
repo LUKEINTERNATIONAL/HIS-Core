@@ -328,7 +328,12 @@ export default defineComponent({
                     }),
                     condition: (f: any) => f.has_transfer_letter.value === 'Yes',
                     validation: (val: any) => this.validateSeries([
-                        () => this.vitals.isNotEmptyandFloat(val),
+                        () => {
+                            const fullValue = {
+                                ...val, other: { modifier: '.' }
+                            }
+                            return this.vitals.isNotEmptyandFloat(fullValue)
+                        },
                         () => Validation.rangeOf(val, 1, 300)
                     ]),
                     config: {
