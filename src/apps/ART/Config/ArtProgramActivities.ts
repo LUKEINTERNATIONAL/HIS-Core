@@ -59,19 +59,29 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
   {
     id: "patient type",
     name: "Patient Type",
-    icon: "patient-type.png"
+    icon: "patient-type.png",
+    availableOnActivitySelection: false
   },
   {
     id: "fast track assesment",
     name: "Fast Track assesment",
     globalProperty: `${ART_GLOBAL_PROP.FAST_TRACK}=true`,
-    icon: "fast-track.png"
+    icon: "fast-track.png",
+    availableOnActivitySelection: false
   },
   {
-    id: "BP management",
-    name: "BP management",
+    id: "bp_management",
+    name: "bp_management",
     icon: "dispensing.png",
-    globalProperty: `${ART_GLOBAL_PROP.HTN_ENHANCEMENT}=true`
+    globalProperty: `${ART_GLOBAL_PROP.HTN_ENHANCEMENT}=true`,
+    availableOnActivitySelection: false
+  },
+  {
+    id: "bp_alert",
+    name: "bp_alert",
+    icon: "dispensing.png",
+    globalProperty: `${ART_GLOBAL_PROP.HTN_ENHANCEMENT}=true`,
+    availableOnActivitySelection: false
   }
 ]
 
@@ -132,14 +142,5 @@ export const SECONDARY_ACTIVITIES: TaskInterface[] = [
     },
     globalProperty: `${ART_GLOBAL_PROP.FILING_NUMBERS}=true`,
     icon: "folder.png"
-  },
-  {
-    id: "change_patient_type",
-    name: "Change patient type",
-    description: "Change patient type",
-    action: ({ patient }: any, router: any) => {
-      router.push(`/art/encounters/patient_type/${patient.patient_id}`)
-    },
-    icon: "patient-type.png"
   }
 ]

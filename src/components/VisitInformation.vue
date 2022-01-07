@@ -1,35 +1,38 @@
 <template>
-  <ion-grid>
-    <ion-row>
-      <ion-col size="2" class="headers">Date</ion-col>
-      <ion-col size="2" class="headers">Weight</ion-col>
-      <ion-col size="2" class="headers">Reg</ion-col>
-      <ion-col size="2" class="headers">ADH</ion-col>
-      <ion-col size="2" class="headers">Out</ion-col>
-      <ion-col size="2" class="headers">Act</ion-col>
-    </ion-row>
-    <ion-row v-for="(item, index) in items" :key="index" class="data-row">
-      <ion-col size="2"><ion-button @click="printLabel(item.value)"> {{item.label}} </ion-button></ion-col>
-      <ion-col size="2"><p>{{item.data.weight}}</p> </ion-col>
-      <ion-col size="2"><p>{{item.data.regimen}}</p> </ion-col>
-      <ion-col size="2"><p class="small">{{formatAdherence(item.data.adherence)}}</p></ion-col>
-      <ion-col size="2"><p>{{item.data.outcome}}</p></ion-col>
-      <ion-col size="2"><ion-button color="success" @click="showMore(item.value)">show more</ion-button></ion-col>
-    </ion-row>
-  </ion-grid>
+  <div class="report-content">
+    <report-table
+      :rows="rows"
+      :columns="columns"
+      :paginated="true"
+      :itemPerPage="5"
+      :config="{ showIndex: false }"
+    ></report-table>
+  </div>
 </template>
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { IonGrid, IonRow, IonCol, IonButton } from "@ionic/vue";
 import { isArray } from "lodash";
+import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
+import table, { ColumnInterface, RowInterface } from "@/components/DataViews/tables/ReportDataTable"
+
+const smallText = {style: {fontSize: '10px'}}
+const largeText = {style: {fontSize: '16px'}, color: 'yellow'}
+
 export default defineComponent({
   name: "HisResultCard",
   components: {
-    IonGrid,
-    IonRow,
-    IonCol,
-    IonButton
+    ReportTable
   },
+  data: () => ({
+    columns: [[
+      table.thTxt('Date', largeText),
+      table.thTxt('Weight', largeText),
+      table.thTxt('Reg', largeText),
+      table.thTxt('ADH', largeText),
+      table.thTxt('Outcome', largeText),
+      table.thTxt('Actions', largeText)
+    ]] as ColumnInterface[][],
+  }),
   props: {
     icon: {
       required: false,
@@ -47,45 +50,34 @@ export default defineComponent({
       this.$emit("onDetails", date);
     },
     formatAdherence(vals: any) {
-      console.log(vals);
       if (isArray(vals)) {
-            const f = [...vals];
-            if (isArray(f)) {
-              let j = "";
-              f.forEach((element) => {
-                j += `${element.join(":")} (%), `;
-              });
-              return j;
-            }
-            return f;
-          } else {
-            return vals;
-          }
-    }
-
+        const f = [...vals];
+        if (isArray(f)) {
+          let j = "";
+          f.forEach((element) => {
+            j += `${element.join(":")} (%), `;
+          });
+          return j;
+        }
+        return f;
+      } else {
+        return vals;
+      }
+    },
   },
+  computed: {
+    rows(): RowInterface[][] {  
+      return this.items.map((item) => {
+        return [
+          table.tdBtn(item.label, () => this.printLabel(item.value), smallText),
+          table.td(item.data.weight, smallText),
+          table.td(item.data.regimen, smallText),
+          table.td(this.formatAdherence(item.data.adherence), smallText),
+          table.td(item.data.outcome, smallText),
+          table.tdBtn('show more', () => this.showMore(item.value), smallText)
+        ]
+      })
+    }
+  }
 });
 </script>
-<style scoped>
-.data {
-  border-bottom: solid 1px black;
-}
-.val {
-  font-weight: bold;
-}
-.headers {
-  border: 1px solid black;
-  border-right-style: none;
-  background-color: #ccccff;
-}
-.data-row {
-  border-bottom: solid 1px black;
-
-}
-ion-col {
-  text-align: center;
-} 
-.small {
-  font-size: 1.1vw;
-}
-</style>

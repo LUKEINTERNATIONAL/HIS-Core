@@ -2,6 +2,7 @@ export interface TaskInterface {
     id: string;
     name: string;
     globalProperty?: string;
+    availableOnActivitySelection?: boolean;
     description?: string;
     url?: string;
     workflowID?: string;

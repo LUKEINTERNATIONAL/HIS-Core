@@ -9,7 +9,8 @@ import {
     confirmationSummary,
     onRegisterPatient,
     formatPatientProgramSummary,
-    getPatientDashboardAlerts
+    getPatientDashboardAlerts,
+    getPatientDashboardLabOrderCardItems
 } from "@/apps/ART/Config/ArtAppScripts"
 import { ART_GLOBAL_PROP } from "./art_global_props";
 import GLOBAL_PROP from "@/apps/GLOBAL_APP/global_prop"
@@ -30,6 +31,7 @@ const ART: AppInterface = {
     formatPatientProgramSummary,
     getPatientDashboardAlerts,
     onRegisterPatient,
+    getPatientDashboardLabOrderCardItems,
     programPatientIdentifiers: {
         'ARV Number': {
             id: 4,

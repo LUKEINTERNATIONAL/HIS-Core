@@ -30,6 +30,7 @@ export default defineComponent({
 	created() {
 		this.preference = this.$route.name as string
 		this.fields = [
+			...this.getBPThresholdPreferences(),
 			...this.getFilingNumberLimitPreferences(),
 			...this.getAppointmentLimitPreferences(),
 			...this.getHtnAgePreferences(),
@@ -46,6 +47,29 @@ export default defineComponent({
 				toastSuccess('Property has been updated', 2000)
 			}
 			this.$router.back()
+		},
+		getBPThresholdPreferences() {
+			const prop = 'bp_thresholds'
+			return [
+				{
+					id: ART_GLOBAL_PROP.HTN_SYSTOLIC_THRESHOLD,
+					helpText: 'Set systolic blood pressure',
+					type: FieldType.TT_NUMBER,
+					condition : () => this.isProp(prop),
+					computedValue: (v: Option) => v.value,
+					defaultValue: () => ART_PROP.systolicThreshold(),
+					validation: (val: any) => Validation.required(val) 
+				},
+				{
+					id: ART_GLOBAL_PROP.HTN_DIASTOLIC_THRESHOLD,
+					helpText: 'Set diastolic blood pressure',
+					type: FieldType.TT_NUMBER,
+					condition : () => this.isProp(prop),
+					computedValue: (v: Option) => v.value,
+					defaultValue: () => ART_PROP.diastolicThreshold(),
+					validation: (val: any) => Validation.required(val)
+				}
+			]
 		},
 		getFilingNumberLimitPreferences() {
 			const prop = ART_GLOBAL_PROP.FILING_NUMBER_LIMIT

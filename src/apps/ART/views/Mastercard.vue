@@ -6,15 +6,10 @@
         :items="visitDates"
         @onPrint="printLabel"
         @onDetails="showMore"
+        style="font-size: 11px;"
       ></visit-information>
     </ion-content>
-    <ion-footer>
-      <ion-toolbar color="dark">
-        <ion-button color="danger" size="large" @click="onCancel">
-          Cancel
-        </ion-button>
-      </ion-toolbar>
-    </ion-footer>
+    <his-footer :btns="btns" />
   </ion-page>
 </template>
 <script lang="ts">
@@ -28,13 +23,11 @@ import { ObservationService } from "@/services/observation_service";
 import InformationHeader from "@/components/InformationHeader.vue";
 import VisitInformation from "@/components/VisitInformation.vue";
 import MastercardDetails from "@/components/MastercardDetails.vue";
+import HisFooter from "@/components/HisDynamicNavFooter.vue";
 import _, { isArray, isEmpty } from "lodash";
 import {
   IonPage,
   IonContent,
-  IonButton,
-  IonFooter,
-  IonToolbar,
   modalController,
 } from "@ionic/vue";
 import { EncounterService } from "@/services/encounter_service";
@@ -42,16 +35,15 @@ import { RelationshipService } from "@/services/relationship_service";
 import { alertConfirmation } from "@/utils/Alerts";
 import { ProgramService } from "@/services/program_service";
 import { PatientPrintoutService } from "@/services/patient_printout_service";
+import { NavBtnInterface } from "@/components/HisDynamicNavFooterInterface";
 export default defineComponent({
   components: {
     IonPage,
-    IonFooter,
     IonContent,
-    IonButton,
-    IonToolbar,
     VisitInformation,
     InformationHeader,
-  },
+    HisFooter
+},
   data: () => ({
     isBDE: false as boolean,
     currentDate: "",
@@ -72,6 +64,8 @@ export default defineComponent({
     medicationCardItems: [] as Array<Option>,
     labOrderCardItems: [] as Array<Option>,
     alertCardItems: [] as Array<Option>,
+    btns: [] as Array<NavBtnInterface>,
+    guardians: ''
   }),
   computed: {
     visitDatesTitle(): string {
@@ -101,6 +95,56 @@ export default defineComponent({
       this.patient = await this.fetchPatient(this.patientId);
       this.patientCardInfo = await this.getPatientCardInfo(this.patient);
       this.visitDates = await this.getPatientVisitDates(this.patientId);
+      this.guardians = await this.getGuardian();
+      this.btns.push(this.getCancelBtn())
+      this.btns.push(this.getDemographicsBtn())
+      if(!this.guardians) this.btns.push(this.getGuardianBtn())
+    },
+    async getGuardian(){
+      const relationship = await RelationshipService.getGuardianDetails(this.patientId);
+      return relationship.map((r: any) => {
+        return ` ${r.name} (${r.relationshipType})`;
+      }).join(" ");
+    },
+    getDemographicsBtn(): NavBtnInterface{
+     return {
+        name: "Edit Demographics",
+        color: "primary",
+        size: "large",
+        slot: "end",
+        visible: true,
+        onClick: () => {
+          return this.$router.push({
+            path: '/patient/registration', 
+            query: { 'edit_person': this.patientId }
+          })
+        }
+      }
+    },
+    getCancelBtn(): NavBtnInterface {
+      return {
+        name: "Cancel",
+        color: "danger",
+        size: "large",
+        slot: "start",
+        visible: true,
+        onClick: async () => {
+          const confirmation = await alertConfirmation("Are you sure you want to cancel?");
+          if (confirmation) return this.$router.back();
+        }
+      }
+    },
+    getGuardianBtn(): NavBtnInterface {
+      return {
+        name: "Add Guardian",
+        color: "primary",
+        size: "large",
+        slot: "end",
+        visible: true,
+        onClick: () => {
+          return this.$router.push(`/guardian/registration/${this.patientId}`);
+        }
+      }
     },
     async fetchPatient(patientId: number | string) {
       const patient: Patient = await Patientservice.findByID(patientId);
@@ -132,19 +176,16 @@ export default defineComponent({
     onActiveVisitDate(data: Option) {
       this.activeVisitDate = data.value;
     },
+
     async getPatientCardInfo(patient: Patientservice) {
-      const { toStandardHisDisplayFormat, getAgeInYears } = HisDate;
-      const birthDate = this.getProp(patient, "getBirthdate");
+      const { toStandardHisDisplayFormat } = HisDate;
       const age = patient.getAge();
       const ARVNumber = patient.getPatientIdentifier(4);
       const IDNumber = patient.getPatientIdentifier(3);
       const fullName = this.getProp(patient, "getFullName");
       const gender = patient.getGender();
-      const currentDistrict = patient.getCurrentDistrict();
       const currentVillage = patient.getCurrentVillage();
-      const currentTA = patient.getCurrentTA();
       const closestLandMark = patient.getAttribute(19);
-      const phoneNumber = patient.getPhoneNumber();
       let dateOfTest = await ObservationService.getAll(
         this.patientId,
         "Confirmatory HIV test date"
@@ -155,7 +196,7 @@ export default defineComponent({
       const placeOfTest = await ObservationService.getFirstValueText(
         this.patientId,
         "Confirmatory HIV test location"
-      );
+      );      
 
       let startDate = await ObservationService.getAll(
         this.patientId,
@@ -166,15 +207,6 @@ export default defineComponent({
         ? toStandardHisDisplayFormat(startDate[0].value_datetime)
         : 'N/A'
       
-      let guardians = "";
-      RelationshipService.getGuardianDetails(this.patientId).then(
-        (relationship: any) => {
-          const rel = relationship.map((r: any) => {
-            return ` ${r.name} (${r.relationshipType})`;
-          });
-          guardians = rel.join(" ");
-        }
-      );
       const initialWeight = await this.getInitial("weight");
       const initialHeight = await this.getInitial("Height");
       const initialBMI = await this.getInitial("BMI");
@@ -191,6 +223,8 @@ export default defineComponent({
         "Reason for ART eligibility"
       );
 
+      const tb = await this.getTBStats()
+      
       const obj: Option[] = [
         { label: "ARV #", value: ARVNumber },
         { label: "National Patient ID", value: IDNumber },
@@ -199,20 +233,32 @@ export default defineComponent({
         { label: "Sex", value: gender },
         { label: "Location", value: currentVillage },
         { label: "Landmark", value: closestLandMark },
-        { label: "Guardian", value: guardians },
+        { label: "Guardian", value: this.guardians },
         { label: "Init W(KG)", value: initialWeight },
         { label: "Init H(CM)", value: initialHeight },
         { label: "BMI(CM)", value: initialBMI },
         { label: "TI", value: TI },
         { label: "Agrees to follow up", value: agreesToFollowUp },
-        { label: "Reason for starting", value: reasonForStarting },
-        {
-          label: "Date + place of HIV test",
-          value: `${dateOfTest ? dateOfTest  : ''} ${placeOfTest? placeOfTest : ''}`,
-        },
+        { label: "Reason for starting ART", value: reasonForStarting },
+        { label: "HIV test date", value: `${dateOfTest ? dateOfTest  : ''}`},
+        { label: "HIV test place", value: ` ${placeOfTest? placeOfTest : ''}`},
         { label: "Date of starting first line ART", value: startDate },
+        { label: "Pulmonary TB within the last 2 years", value: tb.lastTwoYears},
+        { label: "Extra pulmonary TB (EPTB)", value: tb.eptb},
+        { label: "Pulmonary TB (current)", value: tb.currentTB},
+        { label: "Kaposi's sarcoma:", value: tb.ks}
       ];
       return obj;
+    },
+
+    async getTBStats(){
+      const stats = await ObservationService.getFirstValueCoded(this.patientId, 'Who stages criteria present')
+      return {
+        lastTwoYears: stats && stats.match(/last/i) ? "Yes" : "N/A",
+        eptb: stats && stats.match(/eptb/i) ? "Yes" : "N/A",
+        currentTB: stats && stats.match(/current/i) ? "Yes" : "N/A",
+        ks: stats && stats.match(/kepos/i) ? "Yes" : "N/A",
+      }
     },
 
     async getInitial(concept: string) {
@@ -247,13 +293,6 @@ export default defineComponent({
         },
       });
       modal.present();
-    },
-    async onCancel() {
-      const confirmation = await alertConfirmation(
-        "Are you sure you want to cancel?"
-      );
-
-      if (confirmation) return this.$router.back();
     },
     printLabel(date: any) {
       new PatientPrintoutService(this.patientId).printVisitSummaryLbl(date);

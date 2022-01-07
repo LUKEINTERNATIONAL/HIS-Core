@@ -3,22 +3,36 @@ import { ObservationService } from "@/services/observation_service"
 
 export class BPManagementService extends AppEncounterService {
     constructor(patientID: number, providerID: number) {
-        super(patientID, 48, providerID) //TODO: Use encounter type reference name'
+      super(patientID, 48, providerID) //TODO: Use encounter type reference name'
     }
+
+    getSystolicBp() {
+      return ObservationService.getFirstValueNumber(this.patientID, 'Systolic blood pressure')
+    }
+
+    getDiastolicBp() {
+      return ObservationService.getFirstValueNumber(this.patientID, 'Diastolic blood pressure')
+    }
+
+    async onBpDrugs() {
+      const query = await ObservationService.getFirstValueCoded(this.patientID, 'Treatment status')
+      return query ? query === 'Yes' : false
+    }
+  
     async getBPTrail() {
-        return await AppEncounterService.getJson(`/patients/${this.patientID}/bp_trail`);
+      return await AppEncounterService.getJson(`/patients/${this.patientID}/bp_trail`);
     }
     async getCurrentDrugs() {
-        return await AppEncounterService.getJson(`/patients/${this.patientID}/current_bp_drugs`);
+      return await AppEncounterService.getJson(`/patients/${this.patientID}/current_bp_drugs`);
     }
     async getLastDrugs() {
-        return await AppEncounterService.getJson(`/patients/${this.patientID}/last_bp_drugs_dispensation`);
+      return await AppEncounterService.getJson(`/patients/${this.patientID}/last_bp_drugs_dispensation`);
     }
     async getAdherence(drugID: number, pills: number) {
-        return await AppEncounterService.postJson(`/patients/${this.patientID}/remaining_bp_drugs`, {
-            'drug_id': drugID,
-            pills: pills
-        });
+      return await AppEncounterService.postJson(`/patients/${this.patientID}/remaining_bp_drugs`, {
+        'drug_id': drugID,
+        pills: pills
+      });
     }
     async enrollPatient(state: any) {
       return await AppEncounterService.postJson(`/patients/${this.patientID}/update_or_create_htn_state`, state);

@@ -85,6 +85,10 @@ export const PROPERTIES: FolderInterface[] = [
                 GLOBAL_PROP.MILITARY_SITE
             ),
             {
+                name: "Set Hypertension Thresholds",
+                pathUrl: "/art/preferences/bp_thresholds"
+            },
+            {
                 name: "Set Clinic Days",
                 pathUrl: "/art/preferences/clinic_days"
             },
