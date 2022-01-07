@@ -63,6 +63,7 @@ import {
     IonButton,
     IonToolbar
 } from "@ionic/vue"
+import ART_PROP from "@/apps/ART/art_global_props"
 import { BPManagementService } from '../../services/htn_service'
 export default defineComponent({
     mixins: [EncounterMixinVue],
@@ -77,7 +78,9 @@ export default defineComponent({
         sysBp: 0 as number,
         dsBP: 0 as number,
         patientOnBpDrugs: false as boolean,
-        isPregnant: false as boolean
+        isPregnant: false as boolean,
+        systolicThreshold: 145,
+        diastolicTheshold: 94
     }),
     methods: {
         recaptureBp() {
@@ -89,6 +92,8 @@ export default defineComponent({
             async handler(r: boolean) {
                 if (!r) return
                 const htn = new BPManagementService(this.patientID, this.providerID)
+                this.systolicThreshold = (await ART_PROP.systolicThreshold()) || 145
+                this.diastolicTheshold = (await ART_PROP.diastolicThreshold()) || 94
                 this.dsBP = (await htn.getDiastolicBp()) || 0
                 this.sysBp = (await htn.getSystolicBp()) || 0
                 this.patientOnBpDrugs = (await htn.onBpDrugs()) || false
@@ -107,7 +112,8 @@ export default defineComponent({
             return this.sysBp > 0 && this.dsBP > 0
         },
         highBP(): boolean {
-            return this.sysBp > 120 && this.dsBP > 80
+            return this.sysBp > this.systolicThreshold 
+                && this.dsBP > this.diastolicTheshold
                 && !this.isPregnant
         }
     }

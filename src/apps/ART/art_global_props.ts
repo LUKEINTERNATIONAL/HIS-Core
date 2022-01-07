@@ -14,7 +14,9 @@ export enum ART_GLOBAL_PROP {
     PEADS_CLINIC_DAYS = 'peads.clinic.days',
     ADULT_CLINIC_DAYS = 'clinic.days',
     FILING_NUMBER_LIMIT = 'filing.number.limit',
-    FILING_NUMBER_PREFIX = 'filing.number.prefix'
+    FILING_NUMBER_PREFIX = 'filing.number.prefix',
+    HTN_SYSTOLIC_THRESHOLD = 'htn.systolic.threshold',
+    HTN_DIASTOLIC_THRESHOLD = 'htn.diastolic.threshold'
 }
 
 function extendedLabEnabled() {
@@ -27,6 +29,14 @@ function filingNumbersEnabled() {
 
 function drugManagementEnabled() {
     return GlobalPropertyService.isProp(`${ART_GLOBAL_PROP.DRUG_MANAGEMENT}=true`)
+}
+
+function systolicThreshold() {
+    return GlobalPropertyService.get(ART_GLOBAL_PROP.HTN_SYSTOLIC_THRESHOLD)
+}
+
+function diastolicThreshold() {
+    return GlobalPropertyService.get(ART_GLOBAL_PROP.HTN_DIASTOLIC_THRESHOLD)
 }
 
 function htnEnabled() {
@@ -82,6 +92,8 @@ function setFilingNumberLimit(limit: string) {
 }
 
 export default {
+    systolicThreshold,
+    diastolicThreshold,
     htnAgeThreshold,
     setHtnAgeThreshold,
     setFilingNumberLimit,
