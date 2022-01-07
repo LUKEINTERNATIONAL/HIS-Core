@@ -128,8 +128,9 @@ export class ObservationService extends ConceptService {
             'date': date,
             'page_size': 1
         })
-
-        if (!isEmpty(obs)) return ConceptService.getConceptName(obs[0].value_coded)
+        if (!isEmpty(obs) && obs[0].value_coded) {
+            return ConceptService.getConceptName(obs[0].value_coded)
+        } 
     }
     static async getFirstValueNumber(patientID: number, conceptName: string, date=this.getSessionDate(), strictMode=true) {
         const concept = await ConceptService.getConceptID(conceptName, strictMode)
@@ -139,8 +140,7 @@ export class ObservationService extends ConceptService {
             'date': date,
             'page_size': 1
         })
-
-        if (!isEmpty(obs)) return ConceptService.getConceptName(obs[0].value_number)
+        if (!isEmpty(obs)) return obs[0].value_numeric
     }
     static async resolvePrimaryValue(obs: any) {
         let value: string | number = ''
