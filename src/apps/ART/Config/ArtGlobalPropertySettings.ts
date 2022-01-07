@@ -95,6 +95,10 @@ export const PROPERTIES: FolderInterface[] = [
             {
                 name: "Set Filing Numbers Limit",
                 pathUrl: "/art/preferences/fn/limit"
+            },
+            {
+                name: "Systems settings",
+                pathUrl: "/art/preferences"
             }
         ]
     }

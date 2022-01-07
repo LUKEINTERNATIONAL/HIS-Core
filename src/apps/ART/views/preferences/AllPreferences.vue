@@ -1,0 +1,168 @@
+<template>
+  <ion-page>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title> 
+          <span v-html="title"></span> 
+        </ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <div class="report-content">
+        <report-table
+          :rows="rows"
+          :columns="columns">
+        </report-table>
+      </div>
+    </ion-content>
+    <his-footer :btns="btns"></his-footer>
+  </ion-page>
+</template>
+
+<script lang="ts">
+import { defineComponent } from "vue";
+import HisFooter from "@/components/HisDynamicNavFooter.vue";
+import ReportTable from "@/components/DataViews/tables/ReportDataTable.vue"
+import table, { ColumnInterface, RowInterface } from "@/components/DataViews/tables/ReportDataTable"
+import { 
+  IonPage,
+  IonHeader,
+  IonContent,
+  IonToolbar,
+  loadingController, 
+} from "@ionic/vue"
+import { NavBtnInterface } from "@/components/HisDynamicNavFooterInterface";
+import ART_PROP, { ART_GLOBAL_PROP } from "../../art_global_props";
+
+export default defineComponent({
+  components: {  
+    IonHeader,
+    ReportTable, 
+    HisFooter, 
+    IonPage, 
+    IonContent, 
+    IonToolbar,
+  },
+  data: () => ({
+    title: "Systems settings",
+    btns: [] as Array<NavBtnInterface>,
+    rows: [] as Array<RowInterface[]>,
+    columns: [
+      [
+        table.thTxt('Property'),
+        table.thTxt('Value'),
+      ]
+    ] as Array<ColumnInterface[]>
+  }),
+  async created() {
+    const loader = await loadingController.create({})
+    loader.present()
+    this.btns.push({
+      name: "Cancel",
+      role: 'cancel',
+      color: 'danger',
+      visible: true,
+      size: 'large',
+      onClick: () => this.$router.push('/')
+    })
+    this.rows = await this.buildRows()
+    loader.dismiss()
+  },
+  methods: {
+    async buildRows() {
+      const fillingNumberLimit = await ART_PROP.filingNumberLimit()
+      const fillingNumberPrefix = await ART_PROP.filingNumberPrefix()
+      const htnAgeLimit = await ART_PROP.htnAgeThreshold()
+      const adultClinicDays = await ART_PROP.adultClinicDays()
+      const paedsClinicDays = await ART_PROP.peadsClinicDays()
+      return [
+        [
+          table.td('Cervical cancer screening activated'),
+          table.td("Not set")
+        ],
+        [
+          table.td('Drug management activated'),
+          table.td((await ART_PROP.drugManagementEnabled()) ? "Yes" : "No" )
+        ],
+        [
+          table.td('Hypertension screening activated'),
+          table.td((await ART_PROP.htnEnabled()) ? "Yes" : "No" )
+        ],
+        [
+          table.td('Viral load activated'),
+          table.td((await ART_PROP.VLEnabled()) ? "Yes" : "No" )
+        ],
+        [
+          table.td('Extended Lab activated'),
+          table.td((await ART_PROP.extendedLabEnabled()) ? "Yes" : "No" )
+        ],
+        [
+          table.td('3HP auto select activated'),
+          table.td((await ART_PROP.threeHPAutoSelectEnabled()) ? "Yes" : "No" )
+        ],
+        [
+          table.td('Ask pills at home'),
+          table.td((await ART_PROP.askPillsRemaining()) ? "Yes" : "No" )
+        ],
+        [
+          table.td('Appointment limit'),
+          table.td((await ART_PROP.appointmentLimit()))
+        ],
+        [
+          table.td('Adult clinic days'),
+          table.td(adultClinicDays ? adultClinicDays : "Not set")
+        ],
+        [
+          table.td('Paeds clinic days'),
+          table.td(paedsClinicDays ? paedsClinicDays : "Not set")
+        ],
+        [
+          table.td('Clinic holidays'),
+          table.td("Not set" )
+        ],
+        [
+          table.td('Systolic blood pressure'),
+          table.td("Not Set")
+        ],
+        [
+          table.td('Diastolic blood pressure'),
+          table.td("Not Set")
+        ],
+        [
+          table.td('HTN screening age'),
+          table.td(htnAgeLimit ? htnAgeLimit : "Not set")
+        ],
+        [
+          table.td('Filling number limit'),
+          table.td(fillingNumberLimit ? fillingNumberLimit : "Not set")
+        ],
+        [
+          table.td('Use filling number'),
+          table.td((await ART_PROP.filingNumbersEnabled()) ? "Yes" : "No" )
+        ],
+        [
+          table.td('Filling number prefix'),
+          table.td(fillingNumberPrefix ? fillingNumberPrefix : "Not set")
+        ],
+        [
+          table.td('Fast track activated'),
+          table.td((await ART_PROP.fastTrackEnabled()) ? "Yes" : "No" )
+        ],
+      ]
+    },
+  }
+})
+</script>
+<style scoped>
+.report-content {
+  margin: auto;
+  width: 99.9%;
+  height: 99%;
+  overflow: auto;
+}
+a {
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1em;
+}
+</style>
