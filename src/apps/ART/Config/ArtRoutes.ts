@@ -52,6 +52,11 @@ import BPAdherence from "@/apps/ART/views/encounters/BPAdherence.vue"
 
 export default [
     {
+        name: 'bp_thresholds',
+        path: "/art/preferences/bp_thresholds",
+        component: () => import("@/apps/ART/views/preferences/DefaultPreferences.vue")
+    },
+    {
         name: 'clinic_days',
         path: "/art/preferences/clinic_days",
         component: () => import("@/apps/ART/views/preferences/DefaultPreferences.vue")
@@ -112,6 +117,11 @@ export default [
         component: Prescription
     },
     {
+        name: 'bp_alert',
+        path: '/art/encounters/bp/alert/:patient_id',
+        component: () => import ("@/apps/ART/views/encounters/BpAlert.vue")
+    },
+    {
         name: "art adherence",
         path: "/art/encounters/adherence/:patient_id",
         component: Adherence
@@ -167,7 +177,7 @@ export default [
         component: FastTrack
     },
     {
-        name: "BP management",
+        name: "bp_management",
         path: "/art/encounters/bp_management/:patient_id",
         component: BPManagment
     },

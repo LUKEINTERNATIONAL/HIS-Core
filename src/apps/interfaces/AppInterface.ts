@@ -1,3 +1,4 @@
+import { Option } from '@/components/Forms/FieldInterface';
 import { RouteRecordRaw } from 'vue-router';
 import { TaskInterface } from './TaskInterface';
 
@@ -110,6 +111,10 @@ export interface AppInterface {
      * return generic object to be displayed on patient dashboard
      */
     readonly formatPatientProgramSummary?: (programInfo: any) => Promise<GeneralDataInterface[]> | GeneralDataInterface[];
+    /**
+     * Callback which retrieves and formats Lab order card on the patient dashboard
+     */
+    readonly getPatientDashboardLabOrderCardItems?: (patientId: number, date: string) => Promise<Option[]> | Option[];
     /**
      * Summary data that is rendered on patient confirmation page
     */
