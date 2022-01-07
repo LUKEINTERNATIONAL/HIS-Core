@@ -20,11 +20,15 @@ function toStandardHisTimeFormat(date: string | Date) {
 }
 
 function toStandardHisDisplayFormat(date: string | Date): string {
-    return dayjs(date).format(DISPLAY_DATE_FORMAT)
+    const fdate = dayjs(date).format(DISPLAY_DATE_FORMAT)
+    if (fdate.match(/invalid/i)) return ''
+    return fdate
 }
 
 function toStandardHisFormat(date: string | Date): string {
-    return dayjs(date).format(STANDARD_DATE_FORMAT)
+    const fdate = dayjs(date).format(STANDARD_DATE_FORMAT)
+    if (fdate.match(/invalid/i)) return ''
+    return fdate
 }
 
 function estimateDateFromAge(age: number): string {
