@@ -96,10 +96,6 @@ export default defineComponent({
           table.td((await ART_PROP.drugManagementEnabled()) ? "Yes" : "No" )
         ],
         [
-          table.td('Hypertension screening activated'),
-          table.td((await ART_PROP.htnEnabled()) ? "Yes" : "No" )
-        ],
-        [
           table.td('Viral load activated'),
           table.td((await ART_PROP.VLEnabled()) ? "Yes" : "No" )
         ],
@@ -132,16 +128,20 @@ export default defineComponent({
           table.td(clinicHolidays ? clinicHolidays : "Not set", maxWidth)
         ],
         [
+          table.td('HTN screening activated'),
+          table.td((await ART_PROP.htnEnabled()) ? "Yes" : "No" )
+        ],
+        [
+          table.td('HTN screening age'),
+          table.td(htnAgeLimit ? htnAgeLimit : "Not set")
+        ],
+        [
           table.td('Systolic blood pressure'),
           table.td(htnSystolic ? htnSystolic : "Not Set")
         ],
         [
           table.td('Diastolic blood pressure'),
           table.td(htnDiastolic ? htnDiastolic : "Not Set")
-        ],
-        [
-          table.td('HTN screening age'),
-          table.td(htnAgeLimit ? htnAgeLimit : "Not set")
         ],
         [
           table.td('Filling number limit'),
