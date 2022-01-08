@@ -16,23 +16,11 @@
             <img class="logo" :src="reportLogo"/>
           </ion-col>
           <ion-col>
-            <!-- DEFAULT HEADER ROWS -->
-            <ion-row>
-              <ion-col size="2">Title</ion-col> 
-              <ion-col> <b>{{ title }}</b> </ion-col>
-            </ion-row>
-            <ion-row v-if="period">
-              <ion-col size="2">Period</ion-col> 
-              <ion-col><b>{{ period }}</b> </ion-col>
-            </ion-row>
-            <!-- DYNAMIC HEADER ROWS -->
-            <ion-row v-for="(info, index) in headerInfoList" :key="index"> 
-              <ion-col size="2">
-                <ion-label>
-                  <span>{{ info.label }}</span> 
-                </ion-label>
-              </ion-col>
-              <ion-col>
+            <ul class="header-text-list"> 
+              <li>Title <b>{{ title }}</b></li>
+              <li>Period <b>{{ period }}</b></li>
+              <li v-for="(info, index) in headerInfoList" :key="index"> 
+                {{ info.label }}
                 <a href="#" v-if="info && info?.other?.onclick"
                   @click.prevent="info.other.onclick()">
                   {{ info.value }}
@@ -40,8 +28,8 @@
                 <ion-label v-if="info && !info?.other?.onclick">
                   <b><span v-html="info.value"></span></b> 
                 </ion-label>
-              </ion-col>
-            </ion-row>
+              </li>
+            </ul>
           </ion-col>
         </ion-row>
       </ion-toolbar>
@@ -329,7 +317,11 @@ export default defineComponent({
 </script>
 <style scoped>
 .logo {
-  width: 100px;
+  width: 60px;
+  margin: auto;
+}
+.header-text-list {
+  list-style: none;
 }
 .report-content {
   margin: auto;
