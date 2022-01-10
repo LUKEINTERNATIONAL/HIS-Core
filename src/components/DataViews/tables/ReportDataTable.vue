@@ -4,7 +4,7 @@
         <div style="display: flex; justify-content: space-between; position: sticky; top:0">
             <div>
                 items per page 
-                <select v-model="itemsPerPage">
+                <select v-model="itemsPerPage" :disabled="isLoading">
                     <option :selected="currentPage === 5" value="5">5</option>
                     <option :selected="currentPage === 10" value="10">10</option>
                     <option :selected="currentPage === 20" value="20">20</option>
