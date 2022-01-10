@@ -1,105 +1,114 @@
 <template>
-<ion-page>
-    <div class="report-table-top" v-show="rows.length && paginated">
-        <div style="display: flex; justify-content: space-between; position: sticky; top:0">
-            <div>
-                items per page 
-                <select v-model="itemsPerPage" :disabled="isLoading">
-                    <option :selected="currentPage === 5" value="5">5</option>
-                    <option :selected="currentPage === 10" value="10">10</option>
-                    <option :selected="currentPage === 20" value="20">20</option>
-                    <option :selected="currentPage === 50" value="50">50</option>
-                    <option :selected="currentPage === 100" value="100">100</option>
-                    <option :selected="currentPage === 1000" value="1000">1000</option>
-                    <option :selected="currentPage === tableRows.length" :value="tableRows.length">All</option>
-                </select>
+    <ion-page>
+        <div class="report-table-top" v-show="rows.length && paginated">
+            <div style="display: flex; justify-content: space-between; position: sticky; top:0">
+                <div>
+                    items per page 
+                    <select v-model="itemsPerPage" :disabled="isLoading">
+                        <option :selected="currentPage === 5" value="5">5</option>
+                        <option :selected="currentPage === 10" value="10">10</option>
+                        <option :selected="currentPage === 20" value="20">20</option>
+                        <option :selected="currentPage === 50" value="50">50</option>
+                        <option :selected="currentPage === 100" value="100">100</option>
+                        <option :selected="currentPage === 1000" value="1000">1000</option>
+                        <option :selected="currentPage === tableRows.length" :value="tableRows.length">All</option>
+                    </select>
+                </div>
+                <input type="search" placeholder="search here...">
             </div>
-            <input type="search" placeholder="search here...">
         </div>
-    </div>
-    <table class="report-table">
-        <thead class='stick-report-header' v-if="tableColumns">
-            <tr v-for="(columns, colIndex) in tableColumns" :key="colIndex">
-                <th v-for="(column, columnIndex) in columns" 
-                    :key="columnIndex"
-                    :colspan="column.colspan || 0"
-                    @click="sort(columnIndex, column)"
-                    :style="column.style" 
-                    :class="column.cssClass">
-                    {{column.th}}
-                    <ion-icon
-                        v-if="sortedIndex === columnIndex && column.sortable"
-                        :icon="sortOrder==='ascSort' ? arrowUp : arrowDown"
-                    ></ion-icon>
-                </th>
-            </tr>
-        </thead>
-        <!-- Skeleton Rows -->
-        <tbody v-if="isLoading"> 
-            <tr v-for="(skeletonRow, skeletonIndex) in skeletonRows" :key="skeletonIndex">
-                <td :colspan="columnLength">
-                    <ion-skeleton-text animated style="width: 100%; height: 30px;"></ion-skeleton-text>
-                </td>
-            </tr>
-        </tbody>
-        <!-- End skeleton rows --->
-        <tbody v-if="!noData">
-            <tr v-for="(row, rowIndex) in activeRows" :key="rowIndex">
-                <td v-for="(item, itemIndex) in row" :key="itemIndex"
-                    :colspan="item.colspan || 0"
-                    :class="item.cssClass" 
-                    :style="item.style"
-                    > 
-                    <div v-if="item.event"> 
-                        <a href="#" :style="item.style" :class="item.cssClass"
-                            v-if="item?.event?.obj === 'link'"
-                            @click.prevent="item.event.click()">
-                            {{ item.td }}
-                        </a>
-                        <ion-button
-                            :color="item?.event?.color || ''"
-                            :class="item.cssClass"
-                            :style="item.style"
-                            :disabled="item?.event?.disabled != undefined
-                                ? item.event.disabled === true
-                                : false"
-                            v-if="item.event.obj === 'button'"
-                            @click="item.event.click()">
-                            {{ item.td }}
-                        </ion-button>
-                    </div>
-                    <div v-else> 
-                        <span v-html="item.td"></span>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <h1 v-if="noData" class="no-data-section vertically-align"> 
-        No data available in table 
-    </h1>
-    <pagination 
-        v-show="showPagination"
-        :perPage="itemsPerPage"
-        :maxVisibleButtons="10"
-        :currentPage="currentPage"
-        :totalPages="totalPages"
-        @onChangePage="onChangePage"
-    />
-</ion-page>
+        <table class="report-table">
+            <thead class='stick-report-header' v-if="tableColumns">
+                <tr v-for="(columns, colIndex) in tableColumns" :key="colIndex">
+                    <th v-for="(column, columnIndex) in columns" 
+                        :key="columnIndex"
+                        :colspan="column.colspan || 0"
+                        @click="sort(columnIndex, column)"
+                        :style="column.style" 
+                        :class="column.cssClass">
+                        {{column.th}}
+                        <ion-icon
+                            v-if="sortedIndex === columnIndex && column.sortable"
+                            :icon="sortOrder==='ascSort' ? arrowUp : arrowDown"
+                        ></ion-icon>
+                    </th>
+                </tr>
+            </thead>
+            <!-- Skeleton Rows -->
+            <tbody v-if="isLoading"> 
+                <tr v-for="(skeletonRow, skeletonIndex) in skeletonRows" :key="skeletonIndex">
+                    <td :colspan="columnLength">
+                        <ion-skeleton-text animated style="width: 100%; height: 30px;"></ion-skeleton-text>
+                    </td>
+                </tr>
+            </tbody>
+            <!-- End skeleton rows --->
+            <tbody v-if="!noData">
+                <tr v-for="(row, rowIndex) in activeRows" :key="rowIndex">
+                    <td v-for="(item, itemIndex) in row" :key="itemIndex"
+                        :colspan="item.colspan || 0"
+                        :class="item.cssClass" 
+                        :style="item.style"
+                        > 
+                        <div v-if="item.event"> 
+                            <a href="#" :style="item.style" :class="item.cssClass"
+                                v-if="item?.event?.obj === 'link'"
+                                @click.prevent="item.event.click()">
+                                {{ item.td }}
+                            </a>
+                            <ion-button
+                                :color="item?.event?.color || ''"
+                                :class="item.cssClass"
+                                :style="item.style"
+                                :disabled="item?.event?.disabled != undefined
+                                    ? item.event.disabled === true
+                                    : false"
+                                v-if="item.event.obj === 'button'"
+                                @click="item.event.click()">
+                                {{ item.td }}
+                            </ion-button>
+                        </div>
+                        <div v-else> 
+                            <span v-html="item.td"></span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <h1 v-if="noData" class="no-data-section vertically-align"> 
+            <span v-if="errorMessage"> 
+                {{ errorMessage }}
+            </span> 
+            <span v-else> 
+                No data available in table
+            </span>
+        </h1>
+        <pagination 
+            v-show="showPagination"
+            :perPage="itemsPerPage"
+            :maxVisibleButtons="10"
+            :currentPage="currentPage"
+            :totalPages="totalPages"
+            @onChangePage="onChangePage"
+        />
+    </ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import { arrowUp, arrowDown, caretBack, caretForward } from "ionicons/icons";
-import { ColumnInterface, RowInterface, TableInterface } 
-from "@/components/DataViews/tables/ReportDataTable"
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { isEmpty } from "lodash";
 import Pagination from "@/components/Pagination.vue";
 import { chunk } from "lodash"
 import { IonButton, IonIcon, IonSkeletonText } from "@ionic/vue"
 import { delayPromise } from "@/utils/Timers"
+import { toastDanger } from "@/utils/Alerts";
+import {
+    ColumnInterface,
+    RowInterface,
+    TableInterface
+} from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
   components: { IonButton, IonIcon, Pagination, IonSkeletonText },
@@ -114,7 +123,10 @@ export default defineComponent({
     },
     rows: {
       type: Object as PropType<Array<any[]>>,
-      required: true
+      default: () => []
+    },
+    asyncRows: {
+        type: Function
     },
     rowParser: {
         type: Function
@@ -137,7 +149,8 @@ export default defineComponent({
     activeRows: [] as Array<any>,
     currentPage: 0,
     itemsPerPage: 20 as number,
-    isLoading: false as boolean
+    isLoading: false as boolean,
+    errorMessage: '' as string
   }),
   watch: {
     async itemsPerPage(perPage: number) {
@@ -166,9 +179,36 @@ export default defineComponent({
         immediate: true,
         deep: true
     },
+    asyncRows: {
+        async handler(func: Function) {
+            this.errorMessage = ''
+            if (typeof func === 'function') {
+                this.isLoading = true
+                try {
+                    this.tableRows = await func()
+                    if (this.paginated) {
+                        this.paginateRows()
+                        await this.setPage(0)
+                    } else {
+                        this.activeRows = this.tableRows
+                    }
+                } catch (e) {
+                    this.errorMessage = `${e}`
+                    toastDanger(e)
+                    console.error(e)
+                }
+                this.isLoading = false
+            }
+        },
+        immediate: true,
+        deep: true
+    },
     rows: {
         async handler(rows: Array<any[]>) {
-            if (!rows) return
+            this.errorMessage = ''
+            if (!rows || isEmpty(rows)) {
+                return
+            }
             this.isLoading = true
             this.tableRows = this.showIndex()
                 ?
@@ -202,9 +242,15 @@ export default defineComponent({
     async setPage(index: number) {
         this.activeRows = []
         const pageRows = this.paginatedRows[index]
-        this.activeRows = typeof this.rowParser === 'function'
-            ? await Promise.all(this.rowParser(pageRows))
-            : pageRows
+        try {
+            this.activeRows = typeof this.rowParser === 'function'
+                ? await Promise.all(this.rowParser(pageRows))
+                : pageRows
+        } catch (e) {
+            toastDanger(e)
+            this.errorMessage = `${e}`
+            console.error(e)
+        }
     },
     async sort(index: number, column: any ) {
         if (index === this.sortedIndex) {

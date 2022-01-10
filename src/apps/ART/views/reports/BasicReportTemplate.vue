@@ -14,6 +14,7 @@
         <report-table
           :rows="rows"
           :paginated="paginated"
+          :asyncRows="asyncRows"
           :rowParser="rowParser"
           :columns="columns">
         </report-table>
@@ -55,6 +56,9 @@ export default defineComponent({
       default: () => []
     },
     rowParser: {
+      type: Function
+    },
+    asyncRows: {
       type: Function
     },
     paginated: {
