@@ -83,8 +83,8 @@ export default defineComponent({
       const adultClinicDays = await ART_PROP.adultClinicDays()
       const paedsClinicDays = await ART_PROP.peadsClinicDays()
       const clinicHolidays = await ART_PROP.clinicHolidays()
-      const htnSystolic = await ART_PROP.htnSystolic()
-      const htnDiastolic = await ART_PROP.htnDiastolic()
+      const htnSystolic = await ART_PROP.systolicThreshold()
+      const htnDiastolic = await ART_PROP.diastolicThreshold()
       
       return [
         [

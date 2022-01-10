@@ -11,8 +11,6 @@ export enum ART_GLOBAL_PROP {
     THREE_HP_AUTO_SELECT = 'activate_3hp_auto_select',
     APPOINTMENT_LIMIT = 'clinic.appointment.limit',
     HTN_SCREENING_AGE_THRESHOLD = 'htn.screening.age.threshold',
-    HTN_SYSTOLIC = 'htn.systolic.threshold',
-    HTN_DIASTOLIC = 'htn.diastolic.threshold',
     HTN_SYSTOLIC_THRESHOLD = 'htn.systolic.threshold',
     HTN_DIASTOLIC_THRESHOLD = 'htn.diastolic.threshold',
     PEADS_CLINIC_DAYS = 'peads.clinic.days',
@@ -95,14 +93,6 @@ function clinicHolidays() {
     return GlobalPropertyService.get(ART_GLOBAL_PROP.CLINIC_HOLIDAYS)
 }
 
-function htnSystolic() {
-    return GlobalPropertyService.get(ART_GLOBAL_PROP.HTN_SYSTOLIC)
-}
-
-function htnDiastolic() {
-    return GlobalPropertyService.get(ART_GLOBAL_PROP.HTN_DIASTOLIC)
-}
-
 function setHtnAgeThreshold(threshold: string) {
     return GlobalPropertyService.set(ART_GLOBAL_PROP.HTN_SCREENING_AGE_THRESHOLD, threshold)
 }
@@ -147,6 +137,4 @@ export default {
     fastTrackEnabled,
     cervicalCancerScreeningEnabled,
     clinicHolidays,
-    htnSystolic,
-    htnDiastolic,
 }
