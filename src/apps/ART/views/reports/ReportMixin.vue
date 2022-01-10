@@ -22,6 +22,7 @@ export default defineComponent({
         period: '' as string,
         startDate: '' as string,
         endDate: '' as string,
+        drillDownCache: {} as Record<number, Array<any>>
     }),
     methods: {
         toDate(date: string) {
@@ -56,9 +57,11 @@ export default defineComponent({
                 ]
             ]
             const asyncRows = () => Promise.all(ids.map(async(id: number) => {
+                if (id in this.drillDownCache) return this.drillDownCache[id]
+
                 const data = await Patientservice.findByID(id)
                 const patient = new Patientservice(data)
-                return [
+                const row = [
                     table.td(patient.getArvNumber()), 
                     table.td(patient.getGender()), 
                     table.tdDate(patient.getBirthdate().toString()),
@@ -67,6 +70,8 @@ export default defineComponent({
                         this.$router.push({ path: `/patient/dashboard/${id}`})
                     })
                 ]
+                this.drillDownCache[id] = row
+                return row
             }))
             return { asyncRows, columns }
         },
