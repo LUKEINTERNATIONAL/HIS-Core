@@ -129,6 +129,12 @@ export default defineComponent({
     itemsPerPage: 20 as number
   }),
   watch: {
+    itemsPerPage(perPage: number) {
+        if (!isEmpty(this.tableRows)) {
+            this.paginateRows(perPage)
+            this.setPage(this.currentPage)
+        } 
+    },
     columns: {
         handler(columns: Array<ColumnInterface[]>) {
             if (!columns) return
@@ -173,8 +179,9 @@ export default defineComponent({
             ?  this.config.showIndex
             : true
     },
-    paginateRows() {
-        this.paginatedRows = Transformer.convertArrayToTurples(this.tableRows, this.itemsPerPage)
+    paginateRows(perPage=0) {
+        const _perPage = !perPage ? this.itemsPerPage : perPage
+        this.paginatedRows = Transformer.convertArrayToTurples(this.tableRows, _perPage)
     },
     async setPage(index: number) {
         const pageRows = this.paginatedRows[index]
