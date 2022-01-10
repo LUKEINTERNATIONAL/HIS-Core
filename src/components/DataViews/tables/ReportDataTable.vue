@@ -34,7 +34,16 @@
                 </th>
             </tr>
         </thead>
-        <tbody v-if="rows">
+        <!-- Skeleton Rows -->
+        <tbody v-if="isLoading"> 
+            <tr v-for="(skeletonRow, skeletonIndex) in skeletonRows" :key="skeletonIndex">
+                <td :colspan="columnLength">
+                    <ion-skeleton-text animated style="width: 100%"></ion-skeleton-text>
+                </td>
+            </tr>
+        </tbody>
+        <!-- End skeleton rows --->
+        <tbody v-if="!noData">
             <tr v-for="(row, rowIndex) in activeRows" :key="rowIndex">
                 <td v-for="(item, itemIndex) in row" :key="itemIndex"
                     :colspan="item.colspan || 0"
@@ -66,7 +75,7 @@
             </tr>
         </tbody>
     </table>
-    <div v-if="!rows || rows.length <= 0" class="no-data-section his-card"> 
+    <div v-if="noData" class="no-data-section his-card"> 
         No data available in table 
     </div>
     <pagination 
@@ -87,13 +96,12 @@ import { ColumnInterface, RowInterface, TableInterface }
 from "@/components/DataViews/tables/ReportDataTable"
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { isEmpty } from "lodash";
-import { IonButton, IonIcon } from "@ionic/vue"
 import Pagination from "@/components/Pagination.vue";
-import Transformer from "@/utils/Transformers"
 import { chunk } from "lodash"
+import { IonButton, IonIcon, IonSkeletonText } from "@ionic/vue"
 
 export default defineComponent({
-  components: { IonButton, IonIcon, Pagination },
+  components: { IonButton, IonIcon, Pagination, IonSkeletonText },
   props: {
     config: {
         type: Object as PropType<TableInterface>,
@@ -127,14 +135,17 @@ export default defineComponent({
     paginatedRows: [] as Array<any>,
     activeRows: [] as Array<any>,
     currentPage: 0,
-    itemsPerPage: 20 as number
+    itemsPerPage: 20 as number,
+    isLoading: false as boolean
   }),
   watch: {
-    itemsPerPage(perPage: number) {
+    async itemsPerPage(perPage: number) {
         if (!isEmpty(this.tableRows)) {
+            this.isLoading = true
             this.currentPage = 0
             this.paginateRows(perPage)
-            this.setPage(this.currentPage)
+            await this.setPage(this.currentPage)
+            this.isLoading = false
         }
     },
     columns: {
@@ -156,6 +167,7 @@ export default defineComponent({
     rows: {
         async handler(rows: Array<any[]>) {
             if (!rows) return
+            this.isLoading = true
             this.tableRows = this.showIndex()
                 ?
                 rows.map((r, i) => {
@@ -166,10 +178,11 @@ export default defineComponent({
                 rows
             if (this.paginated) {
                 this.paginateRows()
-                this.setPage(0)
+                await this.setPage(0)
             } else {
                 this.activeRows = this.tableRows
             }
+            this.isLoading = false
         },
         immediate: true,
         deep: true
@@ -191,7 +204,7 @@ export default defineComponent({
             ? await Promise.all(this.rowParser(pageRows))
             : pageRows
     },
-    sort(index: number, column: any ) {
+    async sort(index: number, column: any ) {
         if (index === this.sortedIndex) {
             this.sortOrder = this.sortOrder === 'ascSort' ? 'descSort' : 'ascSort'
         } else {
@@ -199,21 +212,44 @@ export default defineComponent({
             this.sortedIndex = index
         }
         if (this.sortOrder in column) {
+            this.isLoading = true
             if (this.paginated) {
                 this.tableRows = column[this.sortOrder](index, this.tableRows)
                 this.paginateRows()
-                this.setPage(this.currentPage)
+                await this.setPage(this.currentPage)
             } else {
                 this.activeRows = column[this.sortOrder](index, this.tableRows)
             }
+            this.isLoading = false
         }
     },
     async onChangePage(page: number) {
         this.currentPage = page
-        this.setPage(page)
+        this.isLoading = true
+        await this.setPage(page)
+        this.isLoading = false
     }
   },
   computed: {
+    noData(): boolean {
+        console.log(this.isLoading && isEmpty(this.activeRows))
+        return !this.isLoading && isEmpty(this.activeRows)
+    },
+    columnLength(): number {
+        try {
+            return this.tableColumns[this.tableColumns.length].length
+        } catch (e) {
+            console.warn(e)
+            return 5
+        }
+    },
+    skeletonRows(): Array<number> {
+        const rows = []
+        for(let i=0; i < this.itemsPerPage; ++i) {
+            rows.push(i)
+        }
+        return rows
+    },
     totalPages(): number {
         return this.paginatedRows.length
     },
