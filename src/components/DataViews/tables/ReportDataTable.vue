@@ -185,7 +185,7 @@ export default defineComponent({
             if (typeof func === 'function') {
                 this.isLoading = true
                 try {
-                    this.tableRows = await func()
+                    this.tableRows = this.addColumnIndexes(await func())
                     if (this.paginated) {
                         this.paginateRows()
                         await this.setPage(0)
@@ -206,18 +206,11 @@ export default defineComponent({
     rows: {
         async handler(rows: Array<any[]>) {
             this.errorMessage = ''
-            if (!rows || isEmpty(rows)) {
-                return
-            }
+            if (!rows || isEmpty(rows)) return
+
             this.isLoading = true
-            this.tableRows = this.showIndex()
-                ?
-                rows.map((r, i) => {
-                    const row = [table.td(i + 1)]
-                    return Array.isArray(r) ? row.concat(r) : [...row, r]
-                })
-                : 
-                rows
+            this.tableRows = this.addColumnIndexes(rows)
+
             if (this.paginated) {
                 this.paginateRows()
                 await this.setPage(0)
@@ -235,6 +228,16 @@ export default defineComponent({
         return this.config && 'showIndex' in this.config
             ?  this.config.showIndex
             : true
+    },
+    addColumnIndexes(rows: Array<any>) {
+        return this.showIndex()
+            ?
+            rows.map((r, i) => {
+                const row = [table.td(i + 1)]
+                return Array.isArray(r) ? row.concat(r) : [...row, r]
+            })
+            : 
+            rows
     },
     paginateRows(perPage=0) {
         this.paginatedRows = chunk(this.tableRows ,perPage ? perPage : this.itemsPerPage)
