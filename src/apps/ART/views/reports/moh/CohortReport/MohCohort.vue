@@ -151,7 +151,7 @@ export default defineComponent({
           })
         ]))
       }
-      await this.drilldownData(`Drill table ${resourceId}`, columns, [], asyncRows)
+      await this.drilldownAsyncRows(`Drill table ${resourceId}`, columns, asyncRows)
     },
     getBtns() {
       return  [

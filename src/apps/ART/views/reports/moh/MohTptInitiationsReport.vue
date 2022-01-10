@@ -82,15 +82,15 @@ export default defineComponent({
                 ]
             ]
             const asyncRows = () => patients.map(
-                (p: any) => [
-                    table.td(p.arv_number),
-                    table.tdDate(p.birthdate),
-                    table.tdDate(p.prescription_date)
-                ]
+                (p: any) => ([
+                   table.td(p.arv_number),
+                   table.tdDate(p.birthdate),
+                   table.tdDate(p.prescription_date)
+               ])
             )
             if (patients.length <= 0) return table.td(0)
 
-            return table.tdLink(patients.length, () => this.drilldownData(context, columns, [], asyncRows))
+            return table.tdLink(patients.length, () => this.drilldownAsyncRows(context, columns, asyncRows))
         },
         setRows(gender: 'M' | 'F') {
             const fullGender = gender === 'M' ? 'Males' : 'Females'

@@ -96,7 +96,7 @@ export default defineComponent({
             if (patients.length <= 0) {
                 return table.td(0)
             }
-            return table.tdLink(patients.length, () => this.drilldownData(context, columns, [], asyncRows))
+            return table.tdLink(patients.length, () => this.drilldownAsyncRows(context, columns, asyncRows))
         },
         async setRows(gender: string) {
             const contexts: any = [

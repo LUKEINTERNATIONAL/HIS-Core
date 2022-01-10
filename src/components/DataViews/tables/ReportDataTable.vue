@@ -1,6 +1,6 @@
 <template>
     <ion-page>
-        <div class="report-table-top" v-show="rows.length && paginated">
+        <div class="report-table-top" v-show="!noData && paginated">
             <div style="display: flex; justify-content: space-between; position: sticky; top:0">
                 <div>
                     items per page 

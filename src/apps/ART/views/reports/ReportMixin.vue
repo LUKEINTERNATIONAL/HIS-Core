@@ -30,6 +30,22 @@ export default defineComponent({
         confirmPatient(patient: number) {
             return this.$router.push(`/patients/confirm?person_id=${patient}`)
         },
+        async drilldownAsyncRows(title: string, columns: Array<any>, asyncRows: Function) {
+            const modal = await modalController.create({
+                component: DrilldownTable,
+                cssClass: 'large-modal',
+                componentProps: { 
+                    title, 
+                    columns, 
+                    asyncRows,
+                    paginated: true,
+                    showReportStamp: false,
+                    footerColor: 'light',
+                    onFinish: () => modalController.dismiss()
+                }
+            })
+            modal.present()
+        },
         async drilldownData(title: string, columns: Array<any>, rows: Array<any>, rowParser: any) {
             const modal = await modalController.create({
                 component: DrilldownTable,

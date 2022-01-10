@@ -93,7 +93,7 @@ export default defineComponent({
             table.td(p.gender),
             table.tdBtn('Show', () => this.$router.push({ path: `/patient/dashboard/${p.patient_id}`}))
           ]))
-        return table.tdLink(patients.length, () => this.drilldownData(context, columns, [], asyncRows))
+        return table.tdLink(patients.length, () => this.drilldownAsyncRows(context, columns, asyncRows))
       }
       return table.td(0)
     },
