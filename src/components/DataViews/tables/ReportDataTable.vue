@@ -142,9 +142,9 @@ export default defineComponent({
   watch: {
     async itemsPerPage(perPage: number) {
         if (!isEmpty(this.tableRows)) {
-            this.isLoading = true
-            await delayPromise(125)
             this.currentPage = 0
+            this.isLoading = true
+            await delayPromise(100)
             this.paginateRows(perPage)
             await this.setPage(this.currentPage)
             this.isLoading = false

@@ -59,7 +59,10 @@ export default defineComponent({
             const rowParser = (tableRows: Array<any[]>) => {
                 return tableRows.map(async (defaultRow: Array<any>) => {
                     const [index, id ] = defaultRow
-                    if (id in this.drillDownCache) return this.drillDownCache[id]
+                    if (id in this.drillDownCache) {
+                        const [oldIndex, ...rest] = this.drillDownCache[id]
+                        return [index, ...rest] // Assign new index number and maintain patient record
+                    } 
     
                     const data = await Patientservice.findByID(id)
                     const patient = new Patientservice(data)
