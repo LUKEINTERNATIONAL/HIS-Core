@@ -1,75 +1,97 @@
 <template>
-  <table class="report-table">
-    <thead class='stick-report-header' v-if="tableColumns">
-        <tr v-for="(columns, colIndex) in tableColumns" :key="colIndex">
-            <th v-for="(column, columnIndex) in columns" 
-                :key="columnIndex"
-                :colspan="column.colspan || 0"
-                @click="sort(columnIndex, column)"
-                :style="column.style" 
-                :class="column.cssClass">
-                {{column.th}}
-                <ion-icon
-                    v-if="sortedIndex === columnIndex && column.sortable"
-                    :icon="sortOrder==='ascSort' ? arrowUp : arrowDown"
-                ></ion-icon>
-            </th>
-        </tr>
-    </thead>
-    <tbody v-if="rows">
-        <tr v-for="(row, rowIndex) in tableRows" :key="rowIndex">
-            <td v-for="(item, itemIndex) in row" :key="itemIndex"
-                :colspan="item.colspan || 0"
-                :class="item.cssClass" 
-                :style="item.style"
-                > 
-                <div v-if="item.event"> 
-                    <a href="#" :style="item.style" :class="item.cssClass"
-                        v-if="item?.event?.obj === 'link'"
-                        @click.prevent="item.event.click()">
-                        {{ item.td }}
-                    </a>
-                    <ion-button
-                        :color="item?.event?.color || ''"
-                        :class="item.cssClass"
-                        :style="item.style"
-                        :disabled="item?.event?.disabled != undefined
-                            ? item.event.disabled === true
-                            : false"
-                        v-if="item.event.obj === 'button'"
-                        @click="item.event.click()">
-                        {{ item.td }}
-                    </ion-button>
-                </div>
-                <div v-else> 
-                    <span v-html="item.td"></span>
-                </div>
-            </td>
-        </tr>
-    </tbody>
-  </table>
-  <div v-if="!rows || rows.length <= 0" class="no-data-section his-card"> 
-    No data available in table 
-  </div>
+<ion-page>
+    <div class="report-table-top" v-show="rows.length">
+        <div style="display: flex; justify-content: space-between; position: sticky; top:0">
+            <div>
+                items per page 
+                <select v-model="itemsPerPage">
+                    <option :selected="currentPage === 5" value="5">5</option>
+                    <option :selected="currentPage === 10" value="10">10</option>
+                    <option :selected="currentPage === 20" value="20">20</option>
+                    <option :selected="currentPage === 50" value="50">50</option>
+                    <option :selected="currentPage === 100" value="100">100</option>
+                    <option :selected="currentPage === 1000" value="1000">1000</option>
+                    <option :selected="currentPage === tableRows.length" :value="tableRows.length">All</option>
+                </select>
+            </div>
+            <input type="search" placeholder="search here...">
+        </div>
+    </div>
+    <table class="report-table">
+        <thead class='stick-report-header' v-if="tableColumns">
+            <tr v-for="(columns, colIndex) in tableColumns" :key="colIndex">
+                <th v-for="(column, columnIndex) in columns" 
+                    :key="columnIndex"
+                    :colspan="column.colspan || 0"
+                    @click="sort(columnIndex, column)"
+                    :style="column.style" 
+                    :class="column.cssClass">
+                    {{column.th}}
+                    <ion-icon
+                        v-if="sortedIndex === columnIndex && column.sortable"
+                        :icon="sortOrder==='ascSort' ? arrowUp : arrowDown"
+                    ></ion-icon>
+                </th>
+            </tr>
+        </thead>
+        <tbody v-if="rows">
+            <tr v-for="(row, rowIndex) in paginatedItems" :key="rowIndex">
+                <td v-for="(item, itemIndex) in row" :key="itemIndex"
+                    :colspan="item.colspan || 0"
+                    :class="item.cssClass" 
+                    :style="item.style"
+                    > 
+                    <div v-if="item.event"> 
+                        <a href="#" :style="item.style" :class="item.cssClass"
+                            v-if="item?.event?.obj === 'link'"
+                            @click.prevent="item.event.click()">
+                            {{ item.td }}
+                        </a>
+                        <ion-button
+                            :color="item?.event?.color || ''"
+                            :class="item.cssClass"
+                            :style="item.style"
+                            :disabled="item?.event?.disabled != undefined
+                                ? item.event.disabled === true
+                                : false"
+                            v-if="item.event.obj === 'button'"
+                            @click="item.event.click()">
+                            {{ item.td }}
+                        </ion-button>
+                    </div>
+                    <div v-else> 
+                        <span v-html="item.td"></span>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <div v-if="!rows || rows.length <= 0" class="no-data-section his-card"> 
+        No data available in table 
+    </div>
+    <pagination 
+        v-show="showPagination"
+        :perPage="itemsPerPage"
+        :maxVisibleButtons="10"
+        :currentPage="currentPage"
+        :totalPages="totalPages"
+        @onChangePage="onChangePage"
+    />
+</ion-page>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { arrowUp, arrowDown } from "ionicons/icons";
-import { 
-    ColumnInterface, 
-    RowInterface, 
-    TableInterface
-} 
+import { arrowUp, arrowDown, caretBack, caretForward } from "ionicons/icons";
+import { ColumnInterface, RowInterface, TableInterface } 
 from "@/components/DataViews/tables/ReportDataTable"
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { isEmpty } from "lodash";
-import {
-    IonButton,
-    IonIcon
-} from "@ionic/vue"
+import { IonButton, IonIcon } from "@ionic/vue"
+import Pagination from "@/components/Pagination.vue";
+
 export default defineComponent({
-  components: { IonButton, IonIcon},
+  components: { IonButton, IonIcon, Pagination },
   props: {
     config: {
         type: Object as PropType<TableInterface>,
@@ -82,15 +104,23 @@ export default defineComponent({
     rows: {
       type: Object as PropType<Array<RowInterface[]>>,
       required: true
-    }
+    },
+    paginated: {
+        type: Boolean,
+        default: false
+    },
   },
   data: () => ({
     arrowUp: arrowUp,
     arrowDown: arrowDown,
+    caretBack, 
+    caretForward,
     sortedIndex: -1 as number,
     sortOrder: 'descSort' as 'ascSort' | 'descSort',
     tableColumns: [] as Array<ColumnInterface[]>,
-    tableRows: [] as Array<RowInterface[]>
+    tableRows: [] as Array<RowInterface[]>,
+    currentPage: 1,
+    itemsPerPage: 5 as number
   }),
   watch: {
     columns: {
@@ -142,6 +172,24 @@ export default defineComponent({
         if (this.sortOrder in column) {
             this.tableRows = column[this.sortOrder](index, this.tableRows)
         }
+    },
+    onChangePage(page: number) {
+        this.currentPage = page
+    }
+  },
+  computed: {
+    paginatedItems(): RowInterface[][] {
+        if (!this.paginated) return this.tableRows
+        return this.tableRows.slice(
+            this.itemsPerPage * (this.currentPage - 1),
+            this.itemsPerPage * this.currentPage
+        )
+    },
+    totalPages(): number {
+        return Math.ceil(this.tableRows.length / this.itemsPerPage)
+    },
+    showPagination(): boolean {
+       return this.paginated && this.totalPages > 1
     }
   }
 })
@@ -158,6 +206,11 @@ export default defineComponent({
         text-decoration: none;
         font-weight: 600;
         font-size: 1em;
+    }
+    .report-table-top {
+        padding: 1rem;
+        position: relative;
+        width: 100%;
     }
     .report-table {
         width: 100%;
@@ -192,5 +245,29 @@ export default defineComponent({
     }
     tr:nth-child(even) {
         background-color: #f0f0f0;
+    }
+
+    .pagination {
+        display: flex;
+        justify-content: space-between;
+        justify-items: center;
+    }
+    .pagination .btn-group {
+        margin: .5rem;
+        display: flex;
+        justify-content: start;
+    }
+
+    .pagination ion-button {
+        margin: .1rem;
+    }
+
+    h6 {
+        margin-right: .5rem;
+    }
+
+    .pagination .active {
+        background-color: blue;
+        color: white;
     }
 </style>
