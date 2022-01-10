@@ -75,9 +75,9 @@
             </tr>
         </tbody>
     </table>
-    <div v-if="noData" class="no-data-section his-card"> 
+    <h1 v-if="noData" class="no-data-section vertically-align"> 
         No data available in table 
-    </div>
+    </h1>
     <pagination 
         v-show="showPagination"
         :perPage="itemsPerPage"
@@ -99,6 +99,7 @@ import { isEmpty } from "lodash";
 import Pagination from "@/components/Pagination.vue";
 import { chunk } from "lodash"
 import { IonButton, IonIcon, IonSkeletonText } from "@ionic/vue"
+import { delayPromise } from "@/utils/Timers"
 
 export default defineComponent({
   components: { IonButton, IonIcon, Pagination, IonSkeletonText },
@@ -142,6 +143,7 @@ export default defineComponent({
     async itemsPerPage(perPage: number) {
         if (!isEmpty(this.tableRows)) {
             this.isLoading = true
+            await delayPromise(125)
             this.currentPage = 0
             this.paginateRows(perPage)
             await this.setPage(this.currentPage)
@@ -232,7 +234,6 @@ export default defineComponent({
   },
   computed: {
     noData(): boolean {
-        console.log(this.isLoading && isEmpty(this.activeRows))
         return !this.isLoading && isEmpty(this.activeRows)
     },
     columnLength(): number {
