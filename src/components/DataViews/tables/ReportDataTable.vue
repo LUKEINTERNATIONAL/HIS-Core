@@ -1,6 +1,6 @@
 <template>
 <ion-page>
-    <div class="report-table-top" v-show="rows.length">
+    <div class="report-table-top" v-show="rows.length && paginated">
         <div style="display: flex; justify-content: space-between; position: sticky; top:0">
             <div>
                 items per page 
@@ -90,6 +90,7 @@ import { isEmpty } from "lodash";
 import { IonButton, IonIcon } from "@ionic/vue"
 import Pagination from "@/components/Pagination.vue";
 import Transformer from "@/utils/Transformers"
+import { chunk } from "lodash"
 
 export default defineComponent({
   components: { IonButton, IonIcon, Pagination },
@@ -131,9 +132,10 @@ export default defineComponent({
   watch: {
     itemsPerPage(perPage: number) {
         if (!isEmpty(this.tableRows)) {
+            this.currentPage = 0
             this.paginateRows(perPage)
             this.setPage(this.currentPage)
-        } 
+        }
     },
     columns: {
         handler(columns: Array<ColumnInterface[]>) {
@@ -180,19 +182,16 @@ export default defineComponent({
             : true
     },
     paginateRows(perPage=0) {
-        const _perPage = !perPage ? this.itemsPerPage : perPage
-        this.paginatedRows = Transformer.convertArrayToTurples(this.tableRows, _perPage)
+        this.paginatedRows = chunk(this.tableRows ,perPage ? perPage : this.itemsPerPage)
     },
     async setPage(index: number) {
+        this.activeRows = []
         const pageRows = this.paginatedRows[index]
-        if (typeof this.rowParser === 'function') {
-            const rows = await this.rowParser(pageRows)
-            this.activeRows = await Promise.all(rows)
-        } else {
-            this.activeRows = pageRows
-        }
+        this.activeRows = typeof this.rowParser === 'function'
+            ? await Promise.all(this.rowParser(pageRows))
+            : pageRows
     },
-    async sort(index: number, column: any ) {
+    sort(index: number, column: any ) {
         if (index === this.sortedIndex) {
             this.sortOrder = this.sortOrder === 'ascSort' ? 'descSort' : 'ascSort'
         } else {
@@ -203,7 +202,7 @@ export default defineComponent({
             if (this.paginated) {
                 this.tableRows = column[this.sortOrder](index, this.tableRows)
                 this.paginateRows()
-                await this.setPage(this.currentPage)
+                this.setPage(this.currentPage)
             } else {
                 this.activeRows = column[this.sortOrder](index, this.tableRows)
             }
@@ -211,7 +210,7 @@ export default defineComponent({
     },
     async onChangePage(page: number) {
         this.currentPage = page
-        await this.setPage(page)
+        this.setPage(page)
     }
   },
   computed: {
