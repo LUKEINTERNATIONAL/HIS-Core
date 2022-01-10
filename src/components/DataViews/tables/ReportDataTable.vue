@@ -38,7 +38,7 @@
         <tbody v-if="isLoading"> 
             <tr v-for="(skeletonRow, skeletonIndex) in skeletonRows" :key="skeletonIndex">
                 <td :colspan="columnLength">
-                    <ion-skeleton-text animated style="width: 100%"></ion-skeleton-text>
+                    <ion-skeleton-text animated style="width: 100%; height: 30px;"></ion-skeleton-text>
                 </td>
             </tr>
         </tbody>
