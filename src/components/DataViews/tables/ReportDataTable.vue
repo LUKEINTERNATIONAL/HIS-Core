@@ -35,7 +35,7 @@
             </tr>
         </thead>
         <tbody v-if="rows">
-            <tr v-for="(row, rowIndex) in paginatedItems" :key="rowIndex">
+            <tr v-for="(row, rowIndex) in activeRows" :key="rowIndex">
                 <td v-for="(item, itemIndex) in row" :key="itemIndex"
                     :colspan="item.colspan || 0"
                     :class="item.cssClass" 
@@ -89,6 +89,7 @@ import table from "@/components/DataViews/tables/ReportDataTable"
 import { isEmpty } from "lodash";
 import { IonButton, IonIcon } from "@ionic/vue"
 import Pagination from "@/components/Pagination.vue";
+import Transformer from "@/utils/Transformers"
 
 export default defineComponent({
   components: { IonButton, IonIcon, Pagination },
@@ -102,8 +103,11 @@ export default defineComponent({
       required: true
     },
     rows: {
-      type: Object as PropType<Array<RowInterface[]>>,
+      type: Object as PropType<Array<any[]>>,
       required: true
+    },
+    rowParser: {
+        type: Function
     },
     paginated: {
         type: Boolean,
@@ -119,15 +123,16 @@ export default defineComponent({
     sortOrder: 'descSort' as 'ascSort' | 'descSort',
     tableColumns: [] as Array<ColumnInterface[]>,
     tableRows: [] as Array<RowInterface[]>,
-    currentPage: 1,
-    itemsPerPage: 5 as number
+    paginatedRows: [] as Array<any>,
+    activeRows: [] as Array<any>,
+    currentPage: 0,
+    itemsPerPage: 20 as number
   }),
   watch: {
     columns: {
         handler(columns: Array<ColumnInterface[]>) {
-            if (!columns) {
-                return
-            } 
+            if (!columns) return
+
             if (this.showIndex() && !isEmpty(this.columns)) {
                 const tcolumns: Array<any[]> = [...this.columns]
                 const lastColIndex = this.columns.length-1
@@ -141,14 +146,21 @@ export default defineComponent({
         deep: true
     },
     rows: {
-        handler(rows: Array<RowInterface[]>) {
-            if (!rows) {
-                return
-            }
-            if (this.showIndex() && !isEmpty(this.rows)) {
-               this.tableRows = this.rows.map((r, i) => ([table.td(i + 1), ...r]))
+        async handler(rows: Array<any[]>) {
+            if (!rows) return
+            this.tableRows = this.showIndex()
+                ?
+                rows.map((r, i) => {
+                    const row = [table.td(i + 1)]
+                    return Array.isArray(r) ? row.concat(r) : [...row, r]
+                })
+                : 
+                rows
+            if (this.paginated) {
+                this.paginateRows()
+                this.setPage(0)
             } else {
-                this.tableRows = rows
+                this.activeRows = this.tableRows
             }
         },
         immediate: true,
@@ -157,12 +169,23 @@ export default defineComponent({
   },
   methods: {
     showIndex() {
-        if (this.config && 'showIndex' in this.config) {
-            return this.config.showIndex
-        }
-        return true
+        return this.config && 'showIndex' in this.config
+            ?  this.config.showIndex
+            : true
     },
-    sort(index: number, column: any ) {
+    paginateRows() {
+        this.paginatedRows = Transformer.convertArrayToTurples(this.tableRows, this.itemsPerPage)
+    },
+    async setPage(index: number) {
+        const pageRows = this.paginatedRows[index]
+        if (typeof this.rowParser === 'function') {
+            const rows = await this.rowParser(pageRows)
+            this.activeRows = await Promise.all(rows)
+        } else {
+            this.activeRows = pageRows
+        }
+    },
+    async sort(index: number, column: any ) {
         if (index === this.sortedIndex) {
             this.sortOrder = this.sortOrder === 'ascSort' ? 'descSort' : 'ascSort'
         } else {
@@ -170,23 +193,23 @@ export default defineComponent({
             this.sortedIndex = index
         }
         if (this.sortOrder in column) {
-            this.tableRows = column[this.sortOrder](index, this.tableRows)
+            if (this.paginated) {
+                this.tableRows = column[this.sortOrder](index, this.tableRows)
+                this.paginateRows()
+                await this.setPage(this.currentPage)
+            } else {
+                this.activeRows = column[this.sortOrder](index, this.tableRows)
+            }
         }
     },
-    onChangePage(page: number) {
+    async onChangePage(page: number) {
         this.currentPage = page
+        await this.setPage(page)
     }
   },
   computed: {
-    paginatedItems(): RowInterface[][] {
-        if (!this.paginated) return this.tableRows
-        return this.tableRows.slice(
-            this.itemsPerPage * (this.currentPage - 1),
-            this.itemsPerPage * this.currentPage
-        )
-    },
     totalPages(): number {
-        return Math.ceil(this.tableRows.length / this.itemsPerPage)
+        return this.paginatedRows.length
     },
     showPagination(): boolean {
        return this.paginated && this.totalPages > 1

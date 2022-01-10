@@ -6,7 +6,6 @@ import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import { modalController } from "@ionic/vue";
-import DrillTable from "@/components/DataViews/DrillTableModal.vue"
 import DrilldownTable from "@/apps/ART/views/reports/BasicReportTemplate.vue"
 import { ArtReportService } from "@/apps/ART/services/reports/art_report_service"
 import { FieldType } from "@/components/Forms/BaseFormElements"
@@ -31,7 +30,7 @@ export default defineComponent({
         confirmPatient(patient: number) {
             return this.$router.push(`/patients/confirm?person_id=${patient}`)
         },
-        async drilldownData(title: string, columns: Array<any>, rows: Array<any>, asyncRows: any) {
+        async drilldownData(title: string, columns: Array<any>, rows: Array<any>, rowParser: any) {
             const modal = await modalController.create({
                 component: DrilldownTable,
                 cssClass: 'large-modal',
@@ -39,7 +38,8 @@ export default defineComponent({
                     title, 
                     columns, 
                     rows,
-                    asyncRows,
+                    rowParser,
+                    paginated: true,
                     showReportStamp: false,
                     footerColor: 'light',
                     onFinish: () => modalController.dismiss()
@@ -47,7 +47,7 @@ export default defineComponent({
             })
             modal.present()
         },
-        async patientTableColumns(ids: Array<number>) {
+        getDefaultDrillDownTable() {
             const columns = [
                 [
                     table.thTxt('ARV number'), 
@@ -56,28 +56,32 @@ export default defineComponent({
                     table.thTxt('Actions')
                 ]
             ]
-            const asyncRows = () => Promise.all(ids.map(async(id: number) => {
-                if (id in this.drillDownCache) return this.drillDownCache[id]
-
-                const data = await Patientservice.findByID(id)
-                const patient = new Patientservice(data)
-                const row = [
-                    table.td(patient.getArvNumber()), 
-                    table.td(patient.getGender()), 
-                    table.tdDate(patient.getBirthdate().toString()),
-                    table.tdBtn('Show', async () => {
-                        await modalController.dismiss({})
-                        this.$router.push({ path: `/patient/dashboard/${id}`})
-                    })
-                ]
-                this.drillDownCache[id] = row
-                return row
-            }))
-            return { asyncRows, columns }
+            const rowParser = (tableRows: Array<any[]>) => {
+                return tableRows.map(async (defaultRow: Array<any>) => {
+                    const [index, id ] = defaultRow
+                    if (id in this.drillDownCache) return this.drillDownCache[id]
+    
+                    const data = await Patientservice.findByID(id)
+                    const patient = new Patientservice(data)
+                    const row = [
+                        index,
+                        table.td(patient.getArvNumber()), 
+                        table.td(patient.getGender()), 
+                        table.tdDate(patient.getBirthdate().toString()),
+                        table.tdBtn('Show', async () => {
+                            await modalController.dismiss({})
+                            this.$router.push({ path: `/patient/dashboard/${id}`})
+                        })
+                    ]
+                    this.drillDownCache[id] = row
+                    return row
+                })
+            }
+            return { rowParser, columns }
         },
-        async runTableDrill(data: any, title='Drilldown patients') {
-            const { columns, asyncRows } = await this.patientTableColumns(data)
-            this.drilldownData(title, columns, [], asyncRows)
+        runTableDrill(data: any, title='Drilldown patients') {
+            const { columns, rowParser } = this.getDefaultDrillDownTable()
+            this.drilldownData(title, columns, data, rowParser)
         },
         drill(values: Array<number>, title='Drill table') {
             if (values.length > 0) {

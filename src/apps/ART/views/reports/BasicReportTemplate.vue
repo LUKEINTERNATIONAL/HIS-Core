@@ -10,14 +10,13 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <div v-if="ready" class="report-content">
+      <div class="report-content">
         <report-table
-          :rows="tableRows"
+          :rows="rows"
+          :paginated="paginated"
+          :rowParser="rowParser"
           :columns="columns">
         </report-table>
-      </div>
-      <div v-else> 
-        <text-skeloton/>
       </div>
     </ion-content>
     <ion-footer v-if="showReportStamp"> 
@@ -39,10 +38,9 @@ import { IonPage, IonContent, IonToolbar, IonChip, IonFooter } from "@ionic/vue"
 import { toCsv, toTablePDF } from "@/utils/Export"
 import { Service } from "@/services/service"
 import HisDate from "@/utils/Date"
-import TextSkeloton from "@/components/TextSkeleton.vue"
-import { delayPromise } from "@/utils/Timers";
+
 export default defineComponent({
-  components: { TextSkeloton, ReportTable, HisFooter, IonPage, IonContent, IonToolbar, IonChip, IonFooter },
+  components: { ReportTable, HisFooter, IonPage, IonContent, IonToolbar, IonChip, IonFooter },
   props: {
     title: {
       type: String,
@@ -56,8 +54,12 @@ export default defineComponent({
       type: Object as PropType<Array<RowInterface[]>>,
       default: () => []
     },
-    asyncRows: {
+    rowParser: {
       type: Function
+    },
+    paginated: {
+      type: Boolean,
+      default: false
     },
     customBtns: {
       type: Array,
@@ -79,33 +81,7 @@ export default defineComponent({
     btns: [] as Array<any>,
     date: HisDate.toStandardHisDisplayFormat(Service.getSessionDate()),
     apiVersion: Service.getApiVersion(),
-    ready: false as boolean,
-    tableRows: [] as Array<any>
   }),
-  watch: {
-    rows: {
-      handler(rows: Array<any>) {
-        if (rows) {
-          this.tableRows = rows
-        }
-        this.ready = true
-      },
-      immediate: true,
-      deep: true
-    },
-    asyncRows: {
-      async handler(loader: Function) {
-        if (typeof loader === 'function') {
-          this.ready = false
-          await delayPromise(125)
-          this.tableRows = await loader()
-          this.ready = true
-        }
-      },
-      immediate: true,
-      deep: true
-    }
-  },
   created() {
     this.btns = [
       ...this.customBtns,
@@ -116,7 +92,7 @@ export default defineComponent({
         color: "primary",
         visible: true,
         onClick: async () => {
-          const {columns, rows} = toExportableFormat(this.columns, this.tableRows)
+          const {columns, rows} = toExportableFormat(this.columns, this.rows)
           toCsv(columns, rows, this.title)
         }
       },
@@ -127,7 +103,7 @@ export default defineComponent({
         color: "primary",
         visible: true,
         onClick: async () => {
-          const {columns, rows} = toExportableFormat(this.columns, this.tableRows)
+          const {columns, rows} = toExportableFormat(this.columns, this.rows)
           toTablePDF(columns, rows, this.title)
         }
       },
