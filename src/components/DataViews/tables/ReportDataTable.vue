@@ -370,7 +370,7 @@ export default defineComponent({
         width: 100%;
         position: relative;
         text-align: left;
-        font-size: 0.9em;
+        font-size: 0.8em;
     }
     .stick-report-header {
         background: white;
@@ -385,6 +385,7 @@ export default defineComponent({
         background: #3880ff;
         color: white;
         padding: 0.5em;
+        font-size: 1.2em!important;
     }
     th, td {
         width: 3%;
@@ -392,13 +393,13 @@ export default defineComponent({
         text-align: center;
     }
     td {
-        border-bottom: 2px solid rgb(165, 165, 165);
+        border-bottom: 1px solid rgb(165, 165, 165);
         padding: 0.5em;
         font-weight: 500;
-        font-size: 1.2em;
+        font-size: 1.3em;
     }
     tr:nth-child(even) {
-        background-color: #f0f0f0;
+        background-color: #f7f3f3;
     }
 
     .pagination {
