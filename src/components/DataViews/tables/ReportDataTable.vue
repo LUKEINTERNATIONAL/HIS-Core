@@ -398,7 +398,7 @@ export default defineComponent({
         return rows
     },
     totalPages(): number {
-        return this.paginatedRows.length
+        return this.paginatedRows.length - 11
     },
     showPagination(): boolean {
        return this.paginated && this.totalPages > 1
