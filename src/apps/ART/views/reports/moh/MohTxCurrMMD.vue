@@ -78,7 +78,7 @@ export default defineComponent({
                     label: 'Total clients', 
                     value: this.totals.size,
                     other: {
-                        onclick: () => this.runTableDrill(Array.from(this.totals))
+                        onclick: () => this.runTableDrill(Array.from(this.totals), 'Total Clients')
                     }
                 },
                 {
@@ -87,7 +87,7 @@ export default defineComponent({
                 }
             ]
         },
-        getValues(patients: Record<string, Array<any>>) {
+        getValues(patients: Record<string, Array<any>>, context: string) {
             const underThreeMonths: Array<any> = []
             const betweenThreeAndFiveMonths: Array<any> = []
             const overSixMonths: Array<any> = []
@@ -110,9 +110,9 @@ export default defineComponent({
                 }
             }
             return [
-                this.drill(underThreeMonths),
-                this.drill(betweenThreeAndFiveMonths),
-                this.drill(overSixMonths)
+                this.drill(underThreeMonths, `${context} < 3 months of Arvs`),
+                this.drill(betweenThreeAndFiveMonths, `${context} 3-5 months of Arvs`),
+                this.drill(overSixMonths, `${context} > 6 months months of Arvs`)
             ]
         },
         async setRows() {
@@ -139,12 +139,12 @@ export default defineComponent({
                     females.push([
                         table.td(group),
                         table.td('Female'),
-                        ...this.getValues(res['Female'])
+                        ...this.getValues(res['Female'], `${group} (F)`)
                     ])
                     males.push([
                         table.td(group),
                         table.td('Male'),
-                        ...this.getValues(res['Male'])
+                        ...this.getValues(res['Male'], `${group} (M)`)
                     ])
                 } else {
                     females.push([
