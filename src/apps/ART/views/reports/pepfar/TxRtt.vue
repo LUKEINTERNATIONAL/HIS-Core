@@ -68,7 +68,9 @@ export default defineComponent({
                     this.rows.push([
                         table.td(group),
                         table.td(gender),
-                        this.drill(cohortData, `${group} (${gender})`)
+                        this.drill(lessThanThreeMonths, `${group} (${gender}) Returned <3 mo`),
+                        this.drill(threeToFiveMonths, `${group} (${gender}) Returned 3-5 mo`),
+                        this.drill(sixPlusMonths, `${group} (${gender}) Returned 6+ mo`),
                     ])
                 } else {
                     this.rows.push([
