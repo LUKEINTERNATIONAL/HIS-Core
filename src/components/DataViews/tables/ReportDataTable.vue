@@ -22,12 +22,11 @@
                             @click="launchSearcher"
                             placeholder="Search here...">
                         </ion-input>
-                        <!-- <input type="search" placeholder="search here..."> -->
                     </ion-col>
                 </ion-row>
             </ion-toolbar>
         </ion-header>
-        <ion-content>
+        <ion-content scrollY scrollX>
             <table class="report-table">
                 <thead class='stick-report-header' v-if="tableColumns">
                     <tr v-for="(columns, colIndex) in tableColumns" :key="colIndex">
