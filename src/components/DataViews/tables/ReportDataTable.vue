@@ -3,16 +3,16 @@
         <ion-header v-show="showFilters"> 
             <ion-toolbar>
                 <ion-row>
-                    <ion-col>
-                        items per page
+                    <ion-col v-if="paginated">
+                        <br/>
                         <select class="input_display" v-model="itemsPerPage" :disabled="isLoading">
-                            <option :selected="currentPage === 5" value="5">5</option>
-                            <option :selected="currentPage === 10" value="10">10</option>
-                            <option :selected="currentPage === 20" value="20">20</option>
-                            <option :selected="currentPage === 50" value="50">50</option>
-                            <option :selected="currentPage === 100" value="100">100</option>
-                            <option :selected="currentPage === 1000" value="1000">1000</option>
-                            <option :selected="currentPage === tableRows.length" :value="tableRows.length">All</option>
+                            <option :selected="currentPage === 5" value="5">5 rows/page</option>
+                            <option :selected="currentPage === 10" value="10">10 rows/page</option>
+                            <option :selected="currentPage === 20" value="20">20 rows/page</option>
+                            <option :selected="currentPage === 50" value="50">50 rows/page</option>
+                            <option :selected="currentPage === 100" value="100">100 rows/page</option>
+                            <option :selected="currentPage === 1000" value="1000">1000 rows/page</option>
+                            <option :selected="currentPage === tableRows.length" :value="tableRows.length">Show all rows</option>
                         </select>
                     </ion-col>
                     <ion-col>
