@@ -54,6 +54,7 @@ export default defineComponent({
         totalIptM: [] as Array<any>,
         totalTbM:  [] as Array<any>,
         pregnantF: [] as Array<any>,
+        txtNewFp: [] as Array<any>,
         canValidate: false as boolean
     }),
     created() {
@@ -189,6 +190,7 @@ export default defineComponent({
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
+                this.txtNewFp = txNew
                 return [ 
                     table.td('All'), 
                     table.td('FP'),
@@ -253,7 +255,7 @@ export default defineComponent({
                     `
                 },
                 'initial_pregnant_females_all_ages': {
-                    param: this.pregnantF.length,
+                    param: this.txtNewFp.length,
                     check: (i: number, p: number) => i != p,
                     error: (i: number, p: number) => `
                         MOH cohort initial pregnant females all ages 
