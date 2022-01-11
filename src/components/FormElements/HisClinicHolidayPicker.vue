@@ -7,8 +7,8 @@
             <DatePicker 
               is-expanded  
               :attributes="attributes"
+              :select-attribute="selectAttribute"
               @dayclick="onDayClick"
-              class="custom-calendar max-w-full"
             />
           </ion-col>
           <ion-col size="3">
@@ -66,6 +66,9 @@ export default defineComponent({
   },
   data: () => ({
     days: [] as Array<DayInterface>,
+    selectAttribute: {
+      dot: true,
+    },
   }),
   computed: {
     attributes(): Array<any> {
@@ -105,30 +108,6 @@ export default defineComponent({
   }
 });
 </script>
-<style>
-.vc-day {
-  position: relative;
-  min-height: 32px;
-  z-index: 1;
-  text-align: center;
-  font-size: 3vh;
-  height: 80px;
-}
-.vc-highlight {
-  width: 100%;
-  height: 100%;
-  border-radius: 0%;
-}
-.selected {
-  font-size: 4vh;
-  height: 100%;
-  margin-top: 15%;
-  color: white;
-}
-.isDisabled {
-  color: #00000040;
-}
-</style>
 <style scoped>
 .view-port-content {
   background-color: white;
@@ -142,13 +121,5 @@ td,
 th {
   text-align: left;
   padding: 8px;
-}
-.appointments {
-  font-size: 3vh;
-  color: rgb(0, 255, 115);
-}
-.custom-calendar .vc-day {
-  height: 50px;
-  text-align: center;
 }
 </style>
