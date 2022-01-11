@@ -19,7 +19,7 @@
                         <ion-input
                             class="input_display"
                             :value="searchFilter"
-                            @click="search"
+                            @click="launchSearcher"
                             placeholder="Search here...">
                         </ion-input>
                         <!-- <input type="search" placeholder="search here..."> -->
@@ -95,6 +95,7 @@
                 </span>
             </h1>
             <pagination 
+                v-if="!searchFilter"
                 v-show="showPagination"
                 :perPage="itemsPerPage"
                 :maxVisibleButtons="10"
@@ -210,18 +211,9 @@ export default defineComponent({
         if (!searchTerm) {
             this.setPage(this.currentPage)
         } else {
-            this.activeRows = this.tableRows.filter((r: any) => {
-                const found = r.filter((rowData: any) => {
-                    if (typeof rowData === 'object' && rowData !=null &&  'td' in rowData) {
-                        if (typeof rowData.td === 'string' || typeof rowData.td === 'number') {
-                            return rowData.td.toString().match(new RegExp(searchTerm, 'i'))
-                        }
-                        return false
-                    }
-                    return false
-                })
-                return !isEmpty(found)
-            })
+            this.activeRows = this.searchDataSet(
+                searchTerm, this.paginated ? this.activeRows : this.tableRows 
+            )
         }
     },
     activeRows: {
@@ -342,7 +334,21 @@ export default defineComponent({
             this.isLoading = false
         }
     },
-    search() {
+    searchDataSet(searchTerm: string, dataset: Array<any>) {
+        return dataset.filter((r: any) => {
+            const found = r.filter((rowData: any) => {
+                if (typeof rowData === 'object' && rowData !=null &&  'td' in rowData) {
+                    if (typeof rowData.td === 'string' || typeof rowData.td === 'number') {
+                        return rowData.td.toString().match(new RegExp(searchTerm, 'i'))
+                    }
+                    return false
+                }
+                return false
+            })
+            return !isEmpty(found)
+        })
+    },
+    launchSearcher() {
         this.launchKeyboard({
             id: 'search',
             helpText: 'Search table data',
