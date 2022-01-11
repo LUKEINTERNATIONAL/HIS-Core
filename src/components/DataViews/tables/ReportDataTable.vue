@@ -1,6 +1,6 @@
 <template>
     <ion-page>
-        <ion-header v-show="!noData && showFilters"> 
+        <ion-header v-show="showFilters"> 
             <ion-toolbar>
                 <ion-row>
                     <ion-col>
@@ -16,7 +16,13 @@
                         </select>
                     </ion-col>
                     <ion-col>
-                        <input type="search" placeholder="search here...">
+                        <ion-input
+                            class="input_display"
+                            :value="searchFilter"
+                            @click="search"
+                            placeholder="Search here...">
+                        </ion-input>
+                        <!-- <input type="search" placeholder="search here..."> -->
                     </ion-col>
                 </ion-row>
             </ion-toolbar>
@@ -102,6 +108,7 @@
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
+import { FieldType } from "../../Forms/BaseFormElements";
 import { arrowUp, arrowDown, caretBack, caretForward } from "ionicons/icons";
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { isEmpty } from "lodash";
@@ -115,6 +122,7 @@ import {
     TableInterface
 } from "@/components/DataViews/tables/ReportDataTable"
 import { 
+    IonInput,
     IonPage,
     IonButton, 
     IonIcon, 
@@ -122,12 +130,16 @@ import {
     IonToolbar,
     IonHeader,
     IonCol,
-    IonContent
+    IonContent,
+    modalController
 } from "@ionic/vue"
+import TouchField from "@/components/Forms/SIngleTouchField.vue"
+import { Field } from "../../Forms/FieldInterface";
 
 export default defineComponent({
   emits: ['onActiveRows', 'onActiveColumns'],
   components: {
+    IonInput,
     IonContent,
     IonPage,
     IonButton, 
@@ -171,6 +183,7 @@ export default defineComponent({
     arrowDown: arrowDown,
     caretBack, 
     caretForward,
+    searchFilter: '' as string,
     sortedIndex: -1 as number,
     sortOrder: 'descSort' as 'ascSort' | 'descSort',
     tableColumns: [] as Array<ColumnInterface[]>,
@@ -193,11 +206,27 @@ export default defineComponent({
             this.isLoading = false
         }
     },
+    searchFilter(searchTerm: string) {
+        if (!searchTerm) {
+            this.setPage(this.currentPage)
+        } else {
+            this.activeRows = this.tableRows.filter((r: any) => {
+                const found = r.filter((rowData: any) => {
+                    if (typeof rowData === 'object' && rowData !=null &&  'td' in rowData) {
+                        if (typeof rowData.td === 'string' || typeof rowData.td === 'number') {
+                            return rowData.td.toString().match(new RegExp(searchTerm, 'i'))
+                        }
+                        return false
+                    }
+                    return false
+                })
+                return !isEmpty(found)
+            })
+        }
+    },
     activeRows: {
         handler(rows: any) {
-            if (!isEmpty(rows)) {
-                this.$emit('onActiveRows', rows)
-            } 
+            if (!isEmpty(rows)) this.$emit('onActiveRows', rows)
         },
         immediate: true,
         deep: true
@@ -312,6 +341,29 @@ export default defineComponent({
             }
             this.isLoading = false
         }
+    },
+    search() {
+        this.launchKeyboard({
+            id: 'search',
+            helpText: 'Search table data',
+            defaultValue: () => this.searchFilter,
+            type: FieldType.TT_TEXT,
+        }, (data: any) => {
+            this.searchFilter = data ? data.value : ''
+        })
+    },
+    async launchKeyboard(currentField: Field, onFinish: Function) {
+      const modal = await modalController.create({
+        component: TouchField,
+        backdropDismiss: false,
+        cssClass: "full-modal",
+        componentProps: {
+          dismissType: 'modal',
+          currentField,
+          onFinish
+        }
+      });
+      modal.present();
     },
     async onChangePage(page: number) {
         this.currentPage = page
