@@ -209,7 +209,7 @@ export default defineComponent({
     },
     searchFilter(searchTerm: string) {
         if (!searchTerm) {
-            this.setPage(this.currentPage)
+            this.paginated ? this.setPage(this.currentPage) : this.activeRows = this.tableRows
         } else {
             this.activeRows = this.searchDataSet(
                 searchTerm, this.paginated ? this.activeRows : this.tableRows 
