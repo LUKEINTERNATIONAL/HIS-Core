@@ -1,96 +1,102 @@
 <template>
     <ion-page>
-        <div class="report-table-top" v-show="!noData && paginated">
-            <div style="display: flex; justify-content: space-between; position: sticky; top:0">
-                <div>
-                    items per page 
-                    <select v-model="itemsPerPage" :disabled="isLoading">
-                        <option :selected="currentPage === 5" value="5">5</option>
-                        <option :selected="currentPage === 10" value="10">10</option>
-                        <option :selected="currentPage === 20" value="20">20</option>
-                        <option :selected="currentPage === 50" value="50">50</option>
-                        <option :selected="currentPage === 100" value="100">100</option>
-                        <option :selected="currentPage === 1000" value="1000">1000</option>
-                        <option :selected="currentPage === tableRows.length" :value="tableRows.length">All</option>
-                    </select>
-                </div>
-                <input type="search" placeholder="search here...">
-            </div>
-        </div>
-        <table class="report-table">
-            <thead class='stick-report-header' v-if="tableColumns">
-                <tr v-for="(columns, colIndex) in tableColumns" :key="colIndex">
-                    <th v-for="(column, columnIndex) in columns" 
-                        :key="columnIndex"
-                        :colspan="column.colspan || 0"
-                        @click="sort(columnIndex, column)"
-                        :style="column.style" 
-                        :class="column.cssClass">
-                        {{column.th}}
-                        <ion-icon
-                            v-if="sortedIndex === columnIndex && column.sortable"
-                            :icon="sortOrder==='ascSort' ? arrowUp : arrowDown"
-                        ></ion-icon>
-                    </th>
-                </tr>
-            </thead>
-            <!-- Skeleton Rows -->
-            <tbody v-if="isLoading"> 
-                <tr v-for="(skeletonRow, skeletonIndex) in skeletonRows" :key="skeletonIndex">
-                    <td :colspan="columnLength">
-                        <ion-skeleton-text animated style="width: 100%; height: 30px;"></ion-skeleton-text>
-                    </td>
-                </tr>
-            </tbody>
-            <!-- End skeleton rows --->
-            <tbody v-if="!noData">
-                <tr v-for="(row, rowIndex) in activeRows" :key="rowIndex">
-                    <td v-for="(item, itemIndex) in row" :key="itemIndex"
-                        :colspan="item.colspan || 0"
-                        :class="item.cssClass" 
-                        :style="item.style"
-                        > 
-                        <div v-if="item.event"> 
-                            <a href="#" :style="item.style" :class="item.cssClass"
-                                v-if="item?.event?.obj === 'link'"
-                                @click.prevent="item.event.click()">
-                                {{ item.td }}
-                            </a>
-                            <ion-button
-                                :color="item?.event?.color || ''"
-                                :class="item.cssClass"
-                                :style="item.style"
-                                :disabled="item?.event?.disabled != undefined
-                                    ? item.event.disabled === true
-                                    : false"
-                                v-if="item.event.obj === 'button'"
-                                @click="item.event.click()">
-                                {{ item.td }}
-                            </ion-button>
-                        </div>
-                        <div v-else> 
-                            <span v-html="item.td"></span>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <h1 v-if="noData" class="no-data-section vertically-align"> 
-            <span v-if="errorMessage"> 
-                {{ errorMessage }}
-            </span> 
-            <span v-else> 
-                No data available in table
-            </span>
-        </h1>
-        <pagination 
-            v-show="showPagination"
-            :perPage="itemsPerPage"
-            :maxVisibleButtons="10"
-            :currentPage="currentPage"
-            :totalPages="totalPages"
-            @onChangePage="onChangePage"
-        />
+        <ion-header v-show="!noData && paginated"> 
+            <ion-toolbar>
+                <ion-row>
+                    <ion-col>
+                        items per page
+                        <select v-model="itemsPerPage" :disabled="isLoading">
+                            <option :selected="currentPage === 5" value="5">5</option>
+                            <option :selected="currentPage === 10" value="10">10</option>
+                            <option :selected="currentPage === 20" value="20">20</option>
+                            <option :selected="currentPage === 50" value="50">50</option>
+                            <option :selected="currentPage === 100" value="100">100</option>
+                            <option :selected="currentPage === 1000" value="1000">1000</option>
+                            <option :selected="currentPage === tableRows.length" :value="tableRows.length">All</option>
+                        </select>
+                    </ion-col>
+                    <ion-col>
+                        <input type="search" placeholder="search here...">
+                    </ion-col>
+                </ion-row>
+            </ion-toolbar>
+        </ion-header>
+        <ion-content>
+            <table class="report-table">
+                <thead class='stick-report-header' v-if="tableColumns">
+                    <tr v-for="(columns, colIndex) in tableColumns" :key="colIndex">
+                        <th v-for="(column, columnIndex) in columns" 
+                            :key="columnIndex"
+                            :colspan="column.colspan || 0"
+                            @click="sort(columnIndex, column)"
+                            :style="column.style" 
+                            :class="column.cssClass">
+                            {{column.th}}
+                            <ion-icon
+                                v-if="sortedIndex === columnIndex && column.sortable"
+                                :icon="sortOrder==='ascSort' ? arrowUp : arrowDown"
+                            ></ion-icon>
+                        </th>
+                    </tr>
+                </thead>
+                <!-- Skeleton Rows -->
+                <tbody v-if="isLoading"> 
+                    <tr v-for="(skeletonRow, skeletonIndex) in skeletonRows" :key="skeletonIndex">
+                        <td :colspan="columnLength">
+                            <ion-skeleton-text animated style="width: 100%; height: 30px;"></ion-skeleton-text>
+                        </td>
+                    </tr>
+                </tbody>
+                <!-- End skeleton rows --->
+                <tbody v-if="!noData">
+                    <tr v-for="(row, rowIndex) in activeRows" :key="rowIndex">
+                        <td v-for="(item, itemIndex) in row" :key="itemIndex"
+                            :colspan="item.colspan || 0"
+                            :class="item.cssClass" 
+                            :style="item.style"
+                            > 
+                            <div v-if="item.event"> 
+                                <a href="#" :style="item.style" :class="item.cssClass"
+                                    v-if="item?.event?.obj === 'link'"
+                                    @click.prevent="item.event.click()">
+                                    {{ item.td }}
+                                </a>
+                                <ion-button
+                                    :color="item?.event?.color || ''"
+                                    :class="item.cssClass"
+                                    :style="item.style"
+                                    :disabled="item?.event?.disabled != undefined
+                                        ? item.event.disabled === true
+                                        : false"
+                                    v-if="item.event.obj === 'button'"
+                                    @click="item.event.click()">
+                                    {{ item.td }}
+                                </ion-button>
+                            </div>
+                            <div v-else> 
+                                <span v-html="item.td"></span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <h1 v-if="noData" class="no-data-section vertically-align"> 
+                <span v-if="errorMessage"> 
+                    {{ errorMessage }}
+                </span> 
+                <span v-else> 
+                    No data available in table
+                </span>
+            </h1>
+            <pagination 
+                v-show="showPagination"
+                :perPage="itemsPerPage"
+                :maxVisibleButtons="10"
+                :currentPage="currentPage"
+                :totalPages="totalPages"
+                @onChangePage="onChangePage"
+            />
+        </ion-content>
     </ion-page>
 </template>
 
@@ -101,7 +107,6 @@ import table from "@/components/DataViews/tables/ReportDataTable"
 import { isEmpty } from "lodash";
 import Pagination from "@/components/Pagination.vue";
 import { chunk } from "lodash"
-import { IonButton, IonIcon, IonSkeletonText } from "@ionic/vue"
 import { delayPromise } from "@/utils/Timers"
 import { toastDanger } from "@/utils/Alerts";
 import {
@@ -109,10 +114,30 @@ import {
     RowInterface,
     TableInterface
 } from "@/components/DataViews/tables/ReportDataTable"
+import { 
+    IonPage,
+    IonButton, 
+    IonIcon, 
+    IonSkeletonText,
+    IonToolbar,
+    IonHeader,
+    IonCol,
+    IonContent
+} from "@ionic/vue"
 
 export default defineComponent({
   emits: ['onActiveRows', 'onActiveColumns'],
-  components: { IonButton, IonIcon, Pagination, IonSkeletonText },
+  components: {
+    IonContent,
+    IonPage,
+    IonButton, 
+    IonIcon, 
+    Pagination, 
+    IonSkeletonText, 
+    IonToolbar,
+    IonHeader,
+    IonCol
+  },
   props: {
     config: {
         type: Object as PropType<TableInterface>,
