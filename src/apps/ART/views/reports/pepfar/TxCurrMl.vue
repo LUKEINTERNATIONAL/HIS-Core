@@ -28,6 +28,7 @@ export default defineComponent({
     data: () => ({
         title: 'PEPFAR Curr Ml Report',
         rows: [] as Array<any>,
+        drillData: {} as any,
         columns: [
             [
                 table.thTxt('Age group'),
@@ -66,11 +67,13 @@ export default defineComponent({
                 ]
             ]
             const asyncRows = async () => {
+                if (context in this.drillData) return this.drillData[context]
+
                 const data = await this.report.getTxMMDClientLevelData(patients)
-                if (!data) { 
-                    return []
-                }
-                return this.report
+
+                if (!data) return []
+
+                const rows = this.report
                     .remapTxClientLevelData(data)
                     .map((d: any) => {
                         const drugs: any = d.drugs.map((drug: any) => {
@@ -92,6 +95,8 @@ export default defineComponent({
                             })
                         ]
                     })
+                this.drillData[context] = rows
+                return rows
             }
             if (patients.length <= 0) {
                 return table.td(0)
