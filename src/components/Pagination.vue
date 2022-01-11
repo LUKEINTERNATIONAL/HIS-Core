@@ -52,7 +52,7 @@ export default defineComponent({
   },
   emits: ['onChangePage'],
   setup(props, { emit }) {
-    const isInFirstPage = computed(() => props.currentPage === 1)
+    const isInFirstPage = computed(() => props.currentPage === 0)
     const isInLastPage = computed(() => props.currentPage === props.totalPages)
     const startPage = computed(() => {
       if(props.currentPage === 0) return 0
@@ -67,7 +67,7 @@ export default defineComponent({
         i++
       ) {
         range.push({
-          name: i,
+          name: i + 1,
           isActive: i === props.currentPage
         })
       }
