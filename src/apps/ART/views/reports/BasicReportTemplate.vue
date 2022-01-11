@@ -17,6 +17,7 @@
           :asyncRows="asyncRows"
           :rowParser="rowParser"
           :columns="columns"
+          :showFilters="showFilters"
           @onActiveColumns="onActiveColumns"
           @onActiveRows="onActiveRows">
         </report-table>
@@ -59,6 +60,10 @@ export default defineComponent({
     },
     rowParser: {
       type: Function
+    },
+    showFilters: {
+      type: Boolean,
+      default: false
     },
     asyncRows: {
       type: Function

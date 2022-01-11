@@ -39,6 +39,7 @@
         <report-table
           :rows="rows"
           :columns="columns"
+          :showFilters="showFilters"
           @onActiveColumns="onActiveColumns"
           @onActiveRows="onActiveRows"
           >
@@ -119,6 +120,10 @@ export default defineComponent({
     },
     period: {
       type: String
+    },
+    showFilters: {
+      type: Boolean,
+      default: false
     },
     fields: {
       type: Object as PropType<Field[]>,

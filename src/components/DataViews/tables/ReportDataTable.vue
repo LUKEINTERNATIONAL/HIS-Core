@@ -1,6 +1,6 @@
 <template>
     <ion-page>
-        <ion-header v-show="!noData && paginated"> 
+        <ion-header v-show="!noData && showFilters"> 
             <ion-toolbar>
                 <ion-row>
                     <ion-col>
@@ -156,6 +156,10 @@ export default defineComponent({
     },
     rowParser: {
         type: Function
+    },
+    showFilters: {
+        type: Boolean,
+        default: false
     },
     paginated: {
         type: Boolean,
