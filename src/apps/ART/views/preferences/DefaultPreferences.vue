@@ -34,7 +34,8 @@ export default defineComponent({
 			...this.getFilingNumberLimitPreferences(),
 			...this.getAppointmentLimitPreferences(),
 			...this.getHtnAgePreferences(),
-			...this.getClinicDaysPreferences()
+			...this.getClinicDaysPreferences(),
+			...this.getClinicHolidaysPreferences(),
 		]
 	},
 	methods: {
@@ -47,6 +48,20 @@ export default defineComponent({
 				toastSuccess('Property has been updated', 2000)
 			}
 			this.$router.back()
+		},
+		getClinicHolidaysPreferences() {
+			const prop = ART_GLOBAL_PROP.CLINIC_HOLIDAYS
+			return [
+				{
+					id: prop,
+					helpText: "Set clinic holiday(s)",
+					type: FieldType.TT_CLINIC_HOLIDAY_PICKER,
+					condition: () => this.isProp(prop),
+					computedValue: (v: Option) => v.value,
+					defaultValue: () => ART_PROP.clinicHolidays(),
+					validation: (val: string) => Validation.required(val)
+				}
+			]
 		},
 		getBPThresholdPreferences() {
 			const prop = 'bp_thresholds'

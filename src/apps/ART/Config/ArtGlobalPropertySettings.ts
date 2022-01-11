@@ -105,6 +105,10 @@ export const PROPERTIES: FolderInterface[] = [
                 pathUrl: "/art/preferences/fn/limit"
             },
             {
+                name: "Set Clinic Holidays",
+                pathUrl: "/art/preferences/clinic_holidays"
+            },
+            {
                 name: "Systems settings",
                 pathUrl: "/art/preferences"
             }
