@@ -11,11 +11,11 @@
         <ion-title v-if="showtitleOnly"> 
           <span v-html="title"></span> 
         </ion-title>
-        <ion-row v-if="!showtitleOnly">
-          <ion-col size="2" v-if="reportLogo">
-            <img class="logo" :src="reportLogo"/>
-          </ion-col>
-          <ion-col>
+        <ion-item  v-if="!showtitleOnly"> 
+          <ion-thumbnail slot="start"> 
+            <ion-img :src="reportLogo"/>
+          </ion-thumbnail>
+          <ion-label>
             <ul class="header-text-list"> 
               <li>Title <b>{{ title }}</b></li>
               <li>Period <b>{{ period }}</b></li>
@@ -30,8 +30,8 @@
                 </ion-label>
               </li>
             </ul>
-          </ion-col>
-        </ion-row>
+          </ion-label>
+        </ion-item>
       </ion-toolbar>
     </ion-header>
     <ion-content>
@@ -71,10 +71,12 @@ import {
   IonHeader,
   IonContent,
   IonFooter,
-  IonToolbar, 
-  IonRow,
-  IonCol,
+  IonToolbar,
+  IonLabel,
+  IonThumbnail,
+  IonItem,
   IonChip,
+  IonImg,
   loadingController
 } from "@ionic/vue"
 import { alertConfirmation, toastDanger } from "@/utils/Alerts";
@@ -91,11 +93,13 @@ export default defineComponent({
     HisFooter, 
     IonPage, 
     IonContent, 
-    IonToolbar, 
-    IonRow, 
-    IonCol,
+    IonToolbar,
     IonChip,
-    IonFooter
+    IonFooter,
+    IonLabel,
+    IonThumbnail,
+    IonItem,
+    IonImg
   },
   props: {
     headerInfoList: {
