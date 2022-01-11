@@ -38,7 +38,10 @@
       <div class="report-content">
         <report-table
           :rows="rows"
-          :columns="columns">
+          :columns="columns"
+          @onActiveColumns="onActiveColumns"
+          @onActiveRows="onActiveRows"
+          >
         </report-table>
       </div>
     </ion-content>
@@ -165,6 +168,8 @@ export default defineComponent({
     formData: {} as any,
     btns: [] as Array<any>,
     computeFormData: {} as any,
+    activeColumns: [] as any,
+    activeRows: [] as any,
     isLoadingData: false as boolean,
     canShowReport: false as boolean,
     siteUUID: Service.getSiteUUID() as string,
@@ -173,6 +178,12 @@ export default defineComponent({
     artVersion: Service.getAppVersion(),
   }),
   methods: {
+    onActiveColumns(columns: any) {
+      this.activeColumns = columns
+    },
+    onActiveRows(rows: any) {
+      this.activeRows = rows
+    },
     getFileName() {
       return `${this.reportPrefix} ${Service.getLocationName()} ${this.title} ${this.period}`
     },
@@ -246,7 +257,7 @@ export default defineComponent({
       color: "primary",
       visible: this.canExportCsv,
       onClick: async () => {
-        const {columns, rows} = toExportableFormat(this.columns, this.rows)
+        const {columns, rows} = toExportableFormat(this.activeColumns, this.activeRows)
         toCsv(
           columns, 
           [
@@ -271,7 +282,7 @@ export default defineComponent({
       color: "primary",
       visible: this.canExportPDf,
       onClick: async () => {
-        const {columns, rows} = toExportableFormat(this.columns, this.rows)
+        const {columns, rows} = toExportableFormat(this.activeColumns, this.activeRows)
         toTablePDF(columns, rows, this.getFileName(), this.enabledPDFHorizontalPageBreak)
       }
     })

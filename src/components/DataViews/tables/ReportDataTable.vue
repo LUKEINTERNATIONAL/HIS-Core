@@ -111,6 +111,7 @@ import {
 } from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
+  emits: ['onActiveRows', 'onActiveColumns'],
   components: { IonButton, IonIcon, Pagination, IonSkeletonText },
   props: {
     config: {
@@ -158,23 +159,33 @@ export default defineComponent({
             this.currentPage = 0
             this.isLoading = true
             await delayPromise(100)
-            this.paginateRows(perPage)
+            this.paginateTableRows(perPage)
             await this.setPage(this.currentPage)
             this.isLoading = false
         }
     },
+    activeRows: {
+        handler(rows: any) {
+            if (!isEmpty(rows)) {
+                this.$emit('onActiveRows', rows)
+            } 
+        },
+        immediate: true,
+        deep: true
+    },
     columns: {
         handler(columns: Array<ColumnInterface[]>) {
-            if (!columns) return
+            if (isEmpty(columns)) return
 
-            if (this.showIndex() && !isEmpty(this.columns)) {
+            if (this.showIndex()) {
                 const tcolumns: Array<any[]> = [...this.columns]
                 const lastColIndex = this.columns.length-1
                 tcolumns[lastColIndex] = [table.thNum("#"), ...tcolumns[lastColIndex]]
                 this.tableColumns = tcolumns
             } else {
-                this.tableColumns = this.columns
+                this.tableColumns = columns
             }
+            this.$emit('onActiveColumns', this.tableColumns)
         },
         immediate: true,
         deep: true
@@ -187,7 +198,7 @@ export default defineComponent({
                 try {
                     this.tableRows = this.addColumnIndexes(await func())
                     if (this.paginated) {
-                        this.paginateRows()
+                        this.paginateTableRows()
                         await this.setPage(0)
                     } else {
                         this.activeRows = this.tableRows
@@ -210,9 +221,8 @@ export default defineComponent({
 
             this.isLoading = true
             this.tableRows = this.addColumnIndexes(rows)
-
             if (this.paginated) {
-                this.paginateRows()
+                this.paginateTableRows()
                 await this.setPage(0)
             } else {
                 this.activeRows = this.tableRows
@@ -239,7 +249,7 @@ export default defineComponent({
             : 
             rows
     },
-    paginateRows(perPage=0) {
+    paginateTableRows(perPage=0) {
         this.paginatedRows = chunk(this.tableRows ,perPage ? perPage : this.itemsPerPage)
     },
     async setPage(index: number) {
@@ -266,7 +276,7 @@ export default defineComponent({
             this.isLoading = true
             if (this.paginated) {
                 this.tableRows = column[this.sortOrder](index, this.tableRows)
-                this.paginateRows()
+                this.paginateTableRows()
                 await this.setPage(this.currentPage)
             } else {
                 this.activeRows = column[this.sortOrder](index, this.tableRows)

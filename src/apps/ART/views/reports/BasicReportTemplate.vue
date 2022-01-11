@@ -16,7 +16,9 @@
           :paginated="paginated"
           :asyncRows="asyncRows"
           :rowParser="rowParser"
-          :columns="columns">
+          :columns="columns"
+          @onActiveColumns="onActiveColumns"
+          @onActiveRows="onActiveRows">
         </report-table>
       </div>
     </ion-content>
@@ -83,9 +85,19 @@ export default defineComponent({
   },
   data: () => ({
     btns: [] as Array<any>,
+    activeColumns: [] as any,
+    activeRows: [] as any,
     date: HisDate.toStandardHisDisplayFormat(Service.getSessionDate()),
     apiVersion: Service.getApiVersion(),
   }),
+  methods: {
+    onActiveColumns(columns: any) {
+      this.activeColumns = columns
+    },
+    onActiveRows(rows: any) {
+      this.activeRows = rows
+    }
+  },
   created() {
     this.btns = [
       ...this.customBtns,
@@ -95,8 +107,8 @@ export default defineComponent({
         slot: "start",
         color: "primary",
         visible: true,
-        onClick: async () => {
-          const {columns, rows} = toExportableFormat(this.columns, this.rows)
+        onClick: () => {
+          const {columns, rows} = toExportableFormat(this.activeColumns, this.activeRows)
           toCsv(columns, rows, this.title)
         }
       },
@@ -106,8 +118,8 @@ export default defineComponent({
         slot: "start",
         color: "primary",
         visible: true,
-        onClick: async () => {
-          const {columns, rows} = toExportableFormat(this.columns, this.rows)
+        onClick: () => {
+          const {columns, rows} = toExportableFormat(this.activeColumns, this.activeRows)
           toTablePDF(columns, rows, this.title)
         }
       },
