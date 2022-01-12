@@ -18,6 +18,7 @@
           :rowParser="rowParser"
           :columns="columns"
           :showFilters="showFilters"
+          :rowsPerPage="rowsPerPage"
           @onActiveColumns="onActiveColumns"
           @onActiveRows="onActiveRows">
         </report-table>
@@ -64,6 +65,9 @@ export default defineComponent({
     showFilters: {
       type: Boolean,
       default: false
+    },
+    rowsPerPage: {
+      type: Number
     },
     asyncRows: {
       type: Function

@@ -6,13 +6,13 @@
                     <ion-col v-if="paginated">
                         <br/>
                         <select class="input_display" v-model="itemsPerPage" :disabled="isLoading">
-                            <option :selected="currentPage === 5" value="5">5 rows/page</option>
-                            <option :selected="currentPage === 10" value="10">10 rows/page</option>
-                            <option :selected="currentPage === 20" value="20">20 rows/page</option>
-                            <option :selected="currentPage === 50" value="50">50 rows/page</option>
-                            <option :selected="currentPage === 100" value="100">100 rows/page</option>
-                            <option :selected="currentPage === 1000" value="1000">1000 rows/page</option>
-                            <option :selected="currentPage === tableRows.length" :value="tableRows.length">Show all rows</option>
+                            <option :selected="itemsPerPage === 5" value="5">5 rows/page</option>
+                            <option :selected="itemsPerPage === 10" value="10">10 rows/page</option>
+                            <option :selected="itemsPerPage === 20" value="20">20 rows/page</option>
+                            <option :selected="itemsPerPage === 50" value="50">50 rows/page</option>
+                            <option :selected="itemsPerPage === 100" value="100">100 rows/page</option>
+                            <option :selected="itemsPerPage === 1000" value="1000">1000 rows/page</option>
+                            <option :selected="itemsPerPage === tableRows.length" :value="tableRows.length">Show all rows</option>
                         </select>
                     </ion-col>
                     <ion-col>
@@ -163,6 +163,9 @@ export default defineComponent({
       type: Object as PropType<Array<any[]>>,
       default: () => []
     },
+    rowsPerPage: {
+        type: Number
+    },
     asyncRows: {
         type: Function
     },
@@ -196,6 +199,12 @@ export default defineComponent({
     errorMessage: '' as string
   }),
   watch: {
+    rowsPerPage: {
+        handler(perPage: number) {
+            if (perPage) this.itemsPerPage = perPage
+        },
+        immediate: true
+    },
     async itemsPerPage(perPage: number) {
         if (!isEmpty(this.tableRows)) {
             this.currentPage = 0
