@@ -44,6 +44,10 @@ export const PROPERTIES: FolderInterface[] = [
         icon: 'hiv-staging.png',
         condition: () => UserService.isAdmin(),
         files: [
+            {
+                name: "View Systems settings",
+                pathUrl: "/art/preferences"
+            },
             globalPropConfig(
                 'Activate Extended Lab',
                 ART_GLOBAL_PROP.EXTENDED_LABS
@@ -108,10 +112,6 @@ export const PROPERTIES: FolderInterface[] = [
                 name: "Set Clinic Holidays",
                 pathUrl: "/art/preferences/clinic_holidays"
             },
-            {
-                name: "Systems settings",
-                pathUrl: "/art/preferences"
-            }
         ]
     }
 ]

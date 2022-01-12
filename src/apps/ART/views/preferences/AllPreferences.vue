@@ -15,7 +15,7 @@
         </report-table>
       </div>
     </ion-content>
-    <his-footer :btns="btns" color="light"></his-footer>
+    <his-footer :btns="btns" color="dark"></his-footer>
   </ion-page>
 </template>
 
@@ -33,6 +33,7 @@ import {
 } from "@ionic/vue"
 import { NavBtnInterface } from "@/components/HisDynamicNavFooterInterface";
 import ART_PROP from "../../art_global_props";
+import HisDate from "@/utils/Date";
 
 const maxWidth = {
   style: {
@@ -76,13 +77,19 @@ export default defineComponent({
     loader.dismiss()
   },
   methods: {
+    async getClinicHolidays() {
+      const holidays: string = await ART_PROP.clinicHolidays()
+      return holidays.split(',')
+                     .map(day => HisDate.toStandardHisDisplayFormat(day))
+                     .join(', ')
+    },
     async buildRows() {
       const fillingNumberLimit = await ART_PROP.filingNumberLimit()
       const fillingNumberPrefix = await ART_PROP.filingNumberPrefix()
       const htnAgeLimit = await ART_PROP.htnAgeThreshold()
       const adultClinicDays = await ART_PROP.adultClinicDays()
       const paedsClinicDays = await ART_PROP.peadsClinicDays()
-      const clinicHolidays = await ART_PROP.clinicHolidays()
+      const clinicHolidays = await this.getClinicHolidays()
       const htnSystolic = await ART_PROP.systolicThreshold()
       const htnDiastolic = await ART_PROP.diastolicThreshold()
       

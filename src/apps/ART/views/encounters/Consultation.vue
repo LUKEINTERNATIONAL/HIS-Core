@@ -980,8 +980,7 @@ export default defineComponent({
           unload: async (data: any) => {
             this.updateCompletedTPT(data);
             this.treatmentStatusObs = this.consultation.buildValueText(
-              "TB Status",
-              data.value
+              "Previous TB treatment history", data.value
             );
           },
           type: FieldType.TT_SELECT,
