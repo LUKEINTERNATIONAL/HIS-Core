@@ -44,6 +44,10 @@ export const PROPERTIES: FolderInterface[] = [
         icon: 'hiv-staging.png',
         condition: () => UserService.isAdmin(),
         files: [
+            {
+                name: "View Systems settings",
+                pathUrl: "/art/preferences"
+            },
             globalPropConfig(
                 'Activate Extended Lab',
                 ART_GLOBAL_PROP.EXTENDED_LABS
@@ -104,10 +108,6 @@ export const PROPERTIES: FolderInterface[] = [
                 name: "Set Filing Numbers Limit",
                 pathUrl: "/art/preferences/fn/limit"
             },
-            {
-                name: "Systems settings",
-                pathUrl: "/art/preferences"
-            }
         ]
     }
 ]
