@@ -52,6 +52,11 @@ import BPAdherence from "@/apps/ART/views/encounters/BPAdherence.vue"
 
 export default [
     {
+        name: 'preferences',
+        path: "/art/preferences",
+        component: () => import("@/apps/ART/views/preferences/AllPreferences.vue")
+    },
+    {
         name: 'bp_thresholds',
         path: "/art/preferences/bp_thresholds",
         component: () => import("@/apps/ART/views/preferences/DefaultPreferences.vue")
