@@ -236,9 +236,9 @@ export default defineComponent({
                     id: 'date_started_art',
                     helpText: 'Started ART',
                     required: true,
-                    unload: (d: any, s: string, f: any, c: any) => {
-                        if (s === 'next') {
-                            const age = dayjs(c.date_started_art.date)
+                    unload: (d: any, state: string, f: any, computedData: any) => {
+                        if (state === 'next') {
+                            const age = dayjs(computedData.date_started_art.date)
                                 .diff(this.patient.getBirthdate(), 'years')
                             this.staging.setAge(age)
                             this.stagingFacts.age = age
