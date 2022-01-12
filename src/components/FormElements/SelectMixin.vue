@@ -61,7 +61,9 @@ export default defineComponent({
             this.selected = ''
         },
         onKbValue(text: any, filtered = true) {
-            if (!filtered) return
+            // check if a selected item from list matches keyboard input. 
+            // We dont want selected options to filter anything
+            if (!filtered || this.selected === text) return
 
             this.filter = text
             this.selected = this.filter

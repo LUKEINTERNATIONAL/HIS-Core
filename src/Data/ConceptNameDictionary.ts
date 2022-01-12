@@ -1,5 +1,10 @@
 export default [
    {
+      "categories": [],
+      "concept_id": 1588,
+      "name": "Previous TB treatment history"
+   },
+   {
       "categories": ['bp_measures'],
       "concept_id": 5085,
       "name": "Systolic blood pressure"

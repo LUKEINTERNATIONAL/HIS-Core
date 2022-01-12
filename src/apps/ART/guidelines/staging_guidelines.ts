@@ -307,7 +307,7 @@ export const CHILD_ART_ELIGIBILITY: Record<string, GuideLineInterface> = {
                 return cd4 <= 750
             },
             cd4Modifier(modifier: string) {
-                return modifier === '<'
+                return modifier === '<' || modifier === '='
             },
             stage(stage: number) {
                 return stage <= 2
@@ -319,10 +319,10 @@ export const CHILD_ART_ELIGIBILITY: Record<string, GuideLineInterface> = {
         priority: 7,
         conditions: {
             cd4(cd4: number){
-                return cd4 < 500
+                return cd4 <= 500
             },
             cd4Modifier(modifier: string){
-                return modifier === '<'
+                return modifier === '<' || modifier === '='
             },
             stage(stage: number) {
                 return stage <= 2
@@ -340,10 +340,10 @@ export const CHILD_ART_ELIGIBILITY: Record<string, GuideLineInterface> = {
                 return age > 5
             },
             cd4(cd4: number) {
-                return cd4 < 500
+                return cd4 <= 500
             },
             cd4Modifier(modifier: string) {
-                return modifier === '<'
+                return modifier === '<' || modifier === '='
             }
         }
     },
@@ -405,7 +405,7 @@ export const ADULT_ART_ELIGIBILITY: Record<string, GuideLineInterface> = {
                 return cd4 <= 350
             },
             cd4Modifier(modifier: string) {
-                return modifier === '<'
+                return modifier === '<' || modifier === '='
             }
         }
     },
@@ -420,7 +420,7 @@ export const ADULT_ART_ELIGIBILITY: Record<string, GuideLineInterface> = {
                 return cd4 <= 250
             },
             cd4Modifier(modifier: string) {
-                return modifier === '<'
+                return modifier === '<' || modifier === '='
             }
         }
     },
@@ -435,7 +435,7 @@ export const ADULT_ART_ELIGIBILITY: Record<string, GuideLineInterface> = {
                 return cd4 <= 350
             },
             cd4Modifier(modifier: string) {
-                return modifier === '<'
+                return modifier === '<' || modifier === '='
             }
         }
     },
@@ -450,7 +450,7 @@ export const ADULT_ART_ELIGIBILITY: Record<string, GuideLineInterface> = {
                 return cd4 <= 500
             },
             cd4Modifier(modifier: string) {
-                return modifier === '<'
+                return modifier === '<' || modifier === '='
             }
         }
     },

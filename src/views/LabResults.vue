@@ -293,7 +293,11 @@ export default defineComponent({
                     type: FieldType.TT_TABLE_VIEWER,
                     options: (_: any, c: any) => {
                         const rows = Object.values(c)
-                                           .filter((d: any) => d.tag === 'result_indicator')
+                                           .filter((d: any) => 
+                                                typeof d === 'object'
+                                                && d != null
+                                                && d.tag === 'result_indicator'
+                                            )
                                            .map((d: any) => ([d.test, d.modifier, d.result ]))
                         return [{
                             label: '',

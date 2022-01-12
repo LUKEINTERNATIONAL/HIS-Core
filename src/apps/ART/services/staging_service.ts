@@ -37,6 +37,10 @@ export class StagingService extends AppEncounterService {
 
     isPedaid() { return this.age <= 14 }
 
+    setAge(age: number) {
+        this.age = age
+    }
+
     getFacilities (filter='') { return LocationService.getFacilities({name: filter}) }
     
     getConfirmatoryTestType() { return this.confirmatoryTest }

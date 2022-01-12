@@ -87,7 +87,7 @@ export const REPORTS: FolderInterface[] = [
                 pathName: 'clinic_other_outcome_list'
             },
             {
-                name: 'Regimns and Formulation',
+                name: 'Regimens and Formulation',
                 pathName: 'clinic_regimen_formulation'
             },
             {
