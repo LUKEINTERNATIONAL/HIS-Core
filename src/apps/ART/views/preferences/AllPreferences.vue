@@ -15,7 +15,7 @@
         </report-table>
       </div>
     </ion-content>
-    <his-footer :btns="btns" color="light"></his-footer>
+    <his-footer :btns="btns" color="dark"></his-footer>
   </ion-page>
 </template>
 
