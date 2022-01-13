@@ -38,7 +38,7 @@
                             :class="column.cssClass">
                             {{column.th}}
                             <ion-icon
-                                v-if="sortedIndex === columnIndex && column.sortable"
+                                v-if="sortedIndex === columnIndex && column.sortable && colIndex+1 === tableColumns.length"
                                 :icon="sortOrder==='ascSort' ? arrowUp : arrowDown"
                             ></ion-icon>
                         </th>
@@ -332,8 +332,8 @@ export default defineComponent({
             this.sortOrder = this.sortOrder === 'ascSort' ? 'descSort' : 'ascSort'
         } else {
             this.sortOrder = 'ascSort'
-            this.sortedIndex = index
         }
+        this.sortedIndex = index
         if (this.sortOrder in column) {
             this.isLoading = true
             if (this.paginated) {
