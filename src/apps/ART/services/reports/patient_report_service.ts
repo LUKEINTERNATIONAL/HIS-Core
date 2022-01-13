@@ -53,7 +53,7 @@ export class PatientReportService extends ArtReportService {
     }
 
     getExternalConsultationClients() {
-        return this.getReport('external_consultation_clients')
+        return this.getReport(`${this.programID}/external_consultation_clients`)
     }
 
     getMissedAppointments() {
