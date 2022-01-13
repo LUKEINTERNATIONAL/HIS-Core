@@ -7,8 +7,6 @@
         :columns="columns"
         :canExportCsv="false"
         :canExportPDf="false"
-        :reportReady="reportReady"
-        :isLoading="isLoading"
         :onReportConfiguration="onPeriod"
         > 
     </report-template>
@@ -23,28 +21,38 @@ import { FieldType } from '@/components/Forms/BaseFormElements'
 import { Option } from '@/components/Forms/FieldInterface'
 import Validation from "@/components/Forms/validations/StandardValidations"
 import table from "@/components/DataViews/tables/ReportDataTable"
-
 export default defineComponent({
     mixins: [ReportMixin],
     components: { ReportTemplate },
     data: () => ({
         title: '',
         totalClients: [],
-        rows: [] as Array<any>,
+        rows: [] as any,
+        columns: [] as any,
         outcome: '' as string,
-        isLoading: false as boolean,
-        columns:[ 
+    }),
+    created() {
+        const commonColumns = [
             [
                 table.thTxt('ARV#'),
                 table.thTxt('First name'),
                 table.thTxt('Last name'), 
                 table.thTxt('Birthdate'), 
                 table.thTxt('Gender'), 
-                table.thTxt('Outcome date')
+                table.thTxt('Outcome date'),
+                table.thTxt('Actions')
             ]
         ]
-    }),
-    created() {
+        const buildCommonRow = (d: any) => ([
+            table.td(d.identifier),
+            table.td(d.given_name),
+            table.td(d.family_name),
+            table.tdDate(d.birthdate),
+            table.td(d.gender),
+            table.tdDate(d.start_date),
+            table.tdBtn('View', () => this.$router.push({ path: `/patient/dashboard/${d.patient_id}`}))
+        ])
+
         this.fields = [
             ...this.getDateDurationFields(),
             {
@@ -55,15 +63,48 @@ export default defineComponent({
                 options: () => [
                     {
                         label: 'Transfer Out',
-                        value: 'Transfer Out'
+                        value: 'Transfer Out',
+                        other: {
+                            columns: [
+                                [
+                                    table.thTxt('ARV#'),
+                                    table.thTxt('First name'),
+                                    table.thTxt('Last name'), 
+                                    table.thTxt('Birthdate'), 
+                                    table.thTxt('Gender'), 
+                                    table.thTxt('Outcome date'),
+                                    table.thTxt('TO Location'),
+                                    table.thTxt('Actions')
+                                ]
+                            ],
+                            rowBuilder: (d: any) => ([
+                                table.td(d.identifier),
+                                table.td(d.given_name),
+                                table.td(d.family_name),
+                                table.tdDate(d.birthdate),
+                                table.td(d.gender),
+                                table.tdDate(d.start_date),
+                                table.td(d.transferred_out_to),
+                                table.tdBtn('View', () => this.$router.push({ path: `/patient/dashboard/${d.patient_id}`}))
+
+                            ])
+                        }
                     },
                     {
                         label: 'Died',
-                        value: 'Died'
+                        value: 'Died',
+                        other: {
+                            columns: commonColumns,
+                            rowBuilder: buildCommonRow
+                        }
                     },
                     {
                         label: 'Stopped',
-                        value: 'Stopped'
+                        value: 'Stopped',
+                        other: {
+                            columns: commonColumns,
+                            rowBuilder: buildCommonRow
+                        }
                     }
                 ]
             }
@@ -71,40 +112,21 @@ export default defineComponent({
     },
     methods: {
         async onPeriod({outcome}: any, config: any) {
-            this.reportReady = true
-            this.isLoading = true
             this.rows = []
+            this.columns = outcome.other.columns
             this.report = new PatientReportService()
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
             this.outcome  = outcome.value.toString()
             this.title = `${this.outcome} Report`
             this.period = this.report.getDateIntervalPeriod()
-            this.setRows((await this.report.getOtherOutcome(this.outcome)))
-            this.isLoading = false
+            this.setRows(
+                (await this.report.getOtherOutcome(this.outcome)),
+                outcome.other.rowBuilder
+            )
         },
-        async setRows(data: Array<any>) {
-            const isTransferOut = this.outcome.match(/trans/i)
-            if (isTransferOut) {
-                this.columns[0].push(table.thTxt('TO Location'))
-            }
-            this.columns[0].push(table.thTxt('Action'))
-            data.forEach((d: any) => {
-               const row = []
-               row.push(table.td(d.identifier))
-               row.push(table.td(d.given_name))
-               row.push(table.td(d.family_name))
-               row.push(table.tdDate(d.birthdate))
-               row.push(d.gender)
-               row.push(table.tdDate(d.start_date))
-               if (isTransferOut) {
-                   row.push(table.td(d.transferred_out_to))
-               } 
-               row.push(table.tdBtn('View', () => {
-                   this.$router.push({ path: `/patient/dashboard/${d.patient_id}`})
-               }))
-               this.rows.push(row)
-            })
+        setRows(data: Array<any>, rowBuilder: Function) {
+            if (data) data.forEach((d: any) => this.rows.push(rowBuilder(d)))
         }
     }
 })
