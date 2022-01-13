@@ -328,6 +328,11 @@ export default defineComponent({
         }
     },
     async sort(index: number, column: any ) {
+        // Do not sort rows which have a parser function because not all values
+        // will be available for sorting upfront. The only value we can guarantee for 
+        // sorting is the first index or index === 0 value if Show Index is available
+        if (this.showIndex() && typeof this.rowParser === 'function' && index != 0) return
+
         if (index === this.sortedIndex) {
             this.sortOrder = this.sortOrder === 'ascSort' ? 'descSort' : 'ascSort'
         } else {
