@@ -79,6 +79,7 @@ export default defineComponent({
         ],
         mohCohort: {} as any,
         ageGroupCohort: {} as any,
+        totalCurP: [] as Array<any>,
         totalNewF: [] as Array<any>,
         totalCurF: [] as Array<any>,
         totalIptF: [] as Array<any>,
@@ -270,6 +271,7 @@ export default defineComponent({
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
+                this.totalCurP = uniq(this.totalCurP.concat(txCur))
                 return [ 
                     table.td('All'), 
                     table.td('FP'),
@@ -288,6 +290,7 @@ export default defineComponent({
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
+                this.totalCurP = uniq(this.totalCurP.concat(txCur))
                 return [ 
                     table.td('All'), 
                     table.td('FBf'), 
@@ -345,15 +348,9 @@ export default defineComponent({
         },
         async validateReport() {
             const totalAlive = uniq([
-                ...this.totalNewF, 
-                ...this.totalCurF, 
-                ...this.totalIptF,
-                ...this.totalTbF,
-                ...this.totalNewM, 
-                ...this.totalCurM, 
-                ...this.totalIptM,
-                ...this.totalTbM,
-                ...this.pregnantF
+                ...this.totalCurF,
+                ...this.totalCurM,
+                ...this.totalCurP
             ])
             const validations: any = {
                 'total_alive_and_on_art' : {
