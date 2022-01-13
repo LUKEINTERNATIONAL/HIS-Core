@@ -70,7 +70,7 @@ export default defineComponent({
             this.canValidate = true
             this.setHeaderInfoList()
         },
-        getValues(patients: Record<string, Array<any>>) {
+        getValues(patients: Record<string, Array<any>>, context: string) {
             const underThreeMonths: Array<any> = []
             const betweenThreeAndFiveMonths: Array<any> = []
             const overSixMonths: Array<any> = []
@@ -93,9 +93,9 @@ export default defineComponent({
                 }
             }
             return [
-                this.drill(underThreeMonths),
-                this.drill(betweenThreeAndFiveMonths),
-                this.drill(overSixMonths)
+                this.drill(underThreeMonths, `# of clients on < 3 months of ARVs (${context})`),
+                this.drill(betweenThreeAndFiveMonths, `# of clients on 3 - 5 months of ARVs (${context})`),
+                this.drill(overSixMonths, `# of clients on  >= 6 months of ARVs (${context})`)
             ]
         },
         async setRows() {
@@ -122,12 +122,12 @@ export default defineComponent({
                     females.push([
                         table.td(group),
                         table.td('Female'),
-                        ...this.getValues(res['Female'])
+                        ...this.getValues(res['Female'], `${group} Female`)
                     ])
                     males.push([
                         table.td(group),
                         table.td('Male'),
-                        ...this.getValues(res['Male'])
+                        ...this.getValues(res['Male'], `${group} Male`)
                     ])
                 } else {
                     females.push([
@@ -154,7 +154,7 @@ export default defineComponent({
                     label: 'Total clients', 
                     value: this.totals.size,
                     other: {
-                        onclick: () => this.runTableDrill(Array.from(this.totals))
+                        onclick: () => this.runTableDrill(Array.from(this.totals), 'Total Clients')
                     }
                 },
                 {
