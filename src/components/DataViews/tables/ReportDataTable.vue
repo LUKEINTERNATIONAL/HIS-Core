@@ -226,7 +226,7 @@ export default defineComponent({
     },
     activeRows: {
         handler(rows: any) {
-            if (!isEmpty(rows)) this.$emit('onActiveRows', rows)
+            this.$emit('onActiveRows', rows)
         },
         immediate: true,
         deep: true
@@ -275,7 +275,11 @@ export default defineComponent({
     rows: {
         async handler(rows: Array<any[]>) {
             this.errorMessage = ''
-            if (!rows || isEmpty(rows)) return
+            if (!rows || isEmpty(rows)) {
+                this.activeRows = []
+                this.tableRows = []
+                return
+            } 
 
             this.isLoading = true
             this.tableRows = this.addColumnIndexes(rows)
