@@ -124,7 +124,7 @@ export default defineComponent({
                     onValue: async (i: Option, isBarcodeScanned: boolean) => {
                         if (i.value  === -1) {
                             const voided = await this.dispensation.voidOrder(i.other.order_id)
-                            return voided ? true : false
+                            return !voided
                         }
 
                         if (!isBarcodeScanned) {
