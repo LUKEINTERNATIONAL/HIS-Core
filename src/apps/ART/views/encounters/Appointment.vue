@@ -17,8 +17,6 @@ import { toastWarning, toastSuccess } from "@/utils/Alerts"
 import EncounterMixinVue from './EncounterMixin.vue';
 import {AppointmentService} from '@/apps/ART/services/appointment_service'
 import { PatientPrintoutService } from "@/services/patient_printout_service";
-import { nextTask } from "@/utils/WorkflowTaskHelper"
-import { isEmpty } from "lodash"
 
 export default defineComponent({
   mixins: [EncounterMixinVue],

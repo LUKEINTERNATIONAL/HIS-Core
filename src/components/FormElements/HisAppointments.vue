@@ -48,10 +48,9 @@
                   <tr>
                     <td>
                       <b>
-
                         User set appointment date
                       </b>
-</td>
+                    </td>
                   </tr>
                   <tr>
                     <td>{{ aDate }}</td>
@@ -94,6 +93,7 @@ import HisDate from "@/utils/Date";
 import { AppointmentService } from "@/apps/ART/services/appointment_service";
 import FieldMixinVue from "./FieldMixin.vue";
 import ART_GLOBAL_PROP from "@/apps/ART/art_global_props"
+import { toastWarning } from "@/utils/Alerts";
 
 export default defineComponent({
   components: { ViewPort, Calendar, IonGrid, IonCol, IonRow },
@@ -101,9 +101,8 @@ export default defineComponent({
   watch: {
     startDate: {
       async handler(params: any) {
-        
         if (params) {
-          this.getAppointments();
+          await this.getAppointments();
           this.emitVal(params);
         }else {
           this.emitVal(HisDate.toStandardHisDisplayFormat(this.sessionDate));
@@ -153,7 +152,9 @@ export default defineComponent({
       !day.isDisabled && this.setDate(day.id);
     },
     emitVal(date: any) {
-      this.$emit("onValue", { label: "", value: date });
+      if(this.appointments.length < this.appointmentLimit) return this.$emit("onValue", { label: "", value: date });
+      toastWarning("Appointment limit reached for the selected date. Please select another date")
+      this.$emit("onValue", {})
     }
   },
   computed: {
