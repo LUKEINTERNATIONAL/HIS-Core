@@ -16,11 +16,11 @@ export const ENCOUNTER_GUIDELINES: Record<string, GuideLineInterface> = {
     "Warn if attempting to create new encounters for a deceased patient": {
         priority: 1,
         actions: {
-            alert: async ({ outcomeStartDate, sessionDate }: any) => {
+            alert: async ({ outcomeStartDate }: any) => {
                 const action = await infoActionSheet(
                     'Data Integrity Issue Found',
                     `Patient died on ${dformat(outcomeStartDate)}`,
-                    'Proceeding with this outcome might affect accurancy of some reports',
+                    'Proceeding with this outcome might affect accuracy of some reports',
                     [
                         { name: 'Cancel', slot: 'end', color: 'primary'},
                         { name: 'Change outcome', slot: 'end', color: 'primary'},
@@ -39,7 +39,7 @@ export const ENCOUNTER_GUIDELINES: Record<string, GuideLineInterface> = {
                 return outcome === 'Patient died'
             },
             outcomeStartDate(startDate: string, { sessionDate }: any) {
-                return sessionDate > startDate
+                return sessionDate >= startDate
             }
         }
     },
