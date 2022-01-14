@@ -101,11 +101,8 @@ export default defineComponent({
   watch: {
     startDate: {
       async handler(params: any) {
-        if (params) {
-          this.emitVal(params);
-        }else {
-          this.emitVal(HisDate.toStandardHisDisplayFormat(this.sessionDate));
-        }
+        const date = params ? params : HisDate.toStandardHisDisplayFormat(this.sessionDate)
+        this.$emit("onValue", { label: "", value: date });
       },
       immediate: true,
     },
@@ -175,9 +172,6 @@ export default defineComponent({
     async dayClicked(day: any) {
       !day.isDisabled && (await this.isDateAvalaible(day.id)) && this.setDate(day.id);
     },
-    emitVal(date: any) {
-      this.$emit("onValue", { label: "", value: date });
-    }
   },
   computed: {
     aDate(): string {
