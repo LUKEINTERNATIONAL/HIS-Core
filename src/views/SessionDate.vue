@@ -15,7 +15,7 @@ export default defineComponent({
     components: { HisStandardForm },
     data: () => ({
         apiDate: '' as string,
-        fields: [] as Array<Field>    
+        fields: [] as Array<Field>,
     }),
     async created(){
         this.apiDate = await Service.getApiDate()
@@ -76,27 +76,30 @@ export default defineComponent({
                 return await this.resetSessionDate()
             }
             if (action === 'Keep BDE Date') {
-                this.exitPage()
+                this.redirect()
             }
         },
         async resetSessionDate() {
             try {
                 await Service.resetSessionDate()
                 toastSuccess(`Session date has been reset to ${this.formatDate(this.apiDate)}`)
-                this.exitPage()
+                this.redirect()
             } catch (e) {
                 toastWarning(e)
             }
         },
-        exitPage() {
-            this.$router.back()
+        redirect() {
+            const patientId = this.$route.query.patient_dashboard_redirection_id
+            patientId 
+                ? this.$router.push(`/patient/dashboard/${patientId}`)
+                : this.$router.back()
         },
         async onSubmit(_: any, computedData: any) {
             const date = computedData.session_date
             try {
                 await Service.setSessionDate(date)
                 toastSuccess(`Successfully Back dated to ${this.formatDate(date)}`)
-                this.exitPage()
+                this.redirect()
             } catch(e) {
                 toastWarning(e)
             }

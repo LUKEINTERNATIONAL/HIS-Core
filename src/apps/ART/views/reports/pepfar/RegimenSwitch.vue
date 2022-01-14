@@ -50,9 +50,9 @@ export default defineComponent({
             this.report.setStartDate(config.start_date)
             this.report.setEndDate(config.end_date)
             this.period = this.report.getDateIntervalPeriod()
-            this.setRows((await this.report.getRegimenSwitchReport()))
+            this.setRows((await this.report.getRegimenSwitchReport(true)))
         },
-        async setRows(data: any) {
+        setRows(data: any) {
             Object.values(data).forEach((d: any) => {
                 let lastDispenseDate = ''
                 const medications = d.medication.map((m: any) => {

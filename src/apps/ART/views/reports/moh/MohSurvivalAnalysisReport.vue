@@ -7,6 +7,7 @@
             :fields="fields"
             :columns="columns"
             reportPrefix="MoH"
+            :hasServerSideCaching="true"
             :onReportConfiguration="onPeriod"
             > 
         </report-template>
@@ -24,7 +25,13 @@ import { Option } from '@/components/Forms/FieldInterface'
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { IonPage } from "@ionic/vue"
+import Transformer from "@/utils/Transformers"
 
+const borderSplitStyle = {
+    style: {
+        borderRight: '5px solid black !important'
+    }
+}
 export default defineComponent({
     mixins: [ReportMixin],
     components: { ReportTemplate, IonPage },
@@ -38,11 +45,7 @@ export default defineComponent({
                 table.thTxt('Interval (months)'),
                 table.thTxt('Sub group'),
                 table.thTxt('Total Reg (database)'),
-                table.thTxt('Total Reg (Confirmed)', {
-                    style: {
-                        borderRight: '5px solid black !important'
-                    }
-                }),
+                table.thTxt('Total Reg (Confirmed)', borderSplitStyle),
                 table.thTxt('Alive'),
                 table.thTxt('Died'),
                 table.thTxt('Defaulted'),
@@ -54,7 +57,7 @@ export default defineComponent({
     }),
     created() {
         this.fields = [
-            ...this.getDateDurationFields(true),
+            ...this.getDateDurationFields(true, false, 17),
             {
                 id: 'group',
                 helpText: 'Select sub-group',
@@ -78,40 +81,50 @@ export default defineComponent({
         ]
     },
     methods: {
-        async onPeriod({ quarter, group }: any) {
+        async onPeriod({ quarter, group }: any, _: any, shouldRebuildCache=false) {
             this.rows = []
             this.period = quarter.label
             this.report = new SurvivalAnalysisReportService()
+            this.report.setRegenerate(shouldRebuildCache)
             this.report.setQuarter(quarter.label)
             this.report.setAgeGroup(group.value)
             this.setRows((await this.report.getSurvivalAnalysis()))
         },
+        sortReportData(data: any) {
+            return Transformer.orderObj(data, (a: string, b: string) => {
+                const [b_, yearA] = a.split(' ')
+                const [a_, yearB] = b.split(' ')
+                return parseInt(yearA) > parseInt(yearB) ? 1 : 0
+            })
+        },
         setRows(quarterList: any) {
-            for(const quarterIndex in quarterList) {
-                const quarterOutcomes = quarterList[quarterIndex]
+            const ordered = this.sortReportData(quarterList)
+            for(const quarterIndex in ordered) {
+                const quarterOutcomes = ordered[quarterIndex]
                 let qInterval = 0
                 let totalRegInQuarter = 0
                 const outcomeRef: any = {
                     'On antiretrovirals': 0,
                     'Defaulted': 0,
                     'Patient died': 0,
-                    'Patient transferred out': 0,
                     'Treatment stopped': 0,
+                    'Patient transferred out': 0,
                     'unknown': 0
                 }
-
-                if (isEmpty(quarterOutcomes)) continue
+                if (isEmpty(quarterOutcomes)) {
+                    continue
+                }
                 for(const outcome in quarterOutcomes) {
                     const outcomeIntervals =  quarterOutcomes[outcome]
                     for (const interval in outcomeIntervals) {
-                        qInterval = parseInt(interval)
                         const count = outcomeIntervals[interval]
-                        totalRegInQuarter += count
+                        qInterval = parseInt(interval)
                         if (outcome in outcomeRef) {
                             outcomeRef[outcome] = count
                         } else {
                             outcomeRef['unknown'] = count
                         }
+                        totalRegInQuarter += count
                     }
                 }
                 this.rows.push([
@@ -119,11 +132,7 @@ export default defineComponent({
                     table.td(qInterval),
                     table.td(this.report.getAgeGroup()),
                     table.td(totalRegInQuarter),
-                    table.td(0, {
-                        style: {
-                            'border-right': '5px solid black'
-                        }
-                    }), // This column is there for show according to Mwatha
+                    table.td('', borderSplitStyle), // Must remain blank according to guidelines
                     table.td(outcomeRef['On antiretrovirals']),
                     table.td(outcomeRef['Patient died']),
                     table.td(outcomeRef['Defaulted']),

@@ -25,9 +25,13 @@ export function toTablePDF(
   fileName='document',
   canHorizontalPageBreak=false) {
     const doc = new jsPDF()
+    const title = doc.splitTextToSize(fileName, 180)
+    const tableMarginStartY = title.length <= 1 ? 20 : title.length * 10
+    doc.text(title, 14, 10)
     // Important note: only rendering the last array of headers. was experiencing bugs 
     // rendering multiple headers... maybe this can be improved later
     const config: any = {
+      startY: tableMarginStartY,
       head: [tableColumns[tableColumns.length-1]],
       body: tableRows
     }

@@ -6,6 +6,7 @@
       :rows="rows"
       :fields="fields"
       :columns="columns"
+      :showFilters="true"
       :onReportConfiguration="onPeriod"
     >
     </report-template>

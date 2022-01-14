@@ -84,8 +84,8 @@ export default defineComponent({
         },
         calculateCompletePack(order: any) {
             const units = parseFloat(order.amount_needed) - (order.quantity || 0)
-            const completePack = this.dispensation.calcCompletePack(order, units)
-            return completePack < 0 ? 0 : completePack
+            if(units <= 0) return 0
+            return this.dispensation.calcCompletePack(order, units)
         },
         isDoneDispensing(orders: Array<Option>) {
             return orders.map(o => o.value != 0).every(Boolean)
@@ -124,7 +124,7 @@ export default defineComponent({
                     onValue: async (i: Option, isBarcodeScanned: boolean) => {
                         if (i.value  === -1) {
                             const voided = await this.dispensation.voidOrder(i.other.order_id)
-                            return voided ? true : false
+                            return !voided
                         }
 
                         if (!isBarcodeScanned) {

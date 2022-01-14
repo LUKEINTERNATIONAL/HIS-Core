@@ -95,6 +95,7 @@ export default defineComponent({
         toastWarning("Invalid location")
       }else {
         const data = response
+        sessionStorage.siteUUID = data.uuid
         sessionStorage.userLocation = data.name;
         router.push("/");
       }

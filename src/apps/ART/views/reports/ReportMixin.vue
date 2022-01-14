@@ -6,7 +6,7 @@ import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import { modalController } from "@ionic/vue";
-import DrillTable from "@/components/DataViews/DrillTableModal.vue"
+import DrilldownTable from "@/apps/ART/views/reports/BasicReportTemplate.vue"
 import { ArtReportService } from "@/apps/ART/services/reports/art_report_service"
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Option } from '@/components/Forms/FieldInterface'
@@ -21,6 +21,7 @@ export default defineComponent({
         period: '' as string,
         startDate: '' as string,
         endDate: '' as string,
+        drillDownCache: {} as Record<number, Array<any>>
     }),
     methods: {
         toDate(date: string) {
@@ -29,51 +30,87 @@ export default defineComponent({
         confirmPatient(patient: number) {
             return this.$router.push(`/patients/confirm?person_id=${patient}`)
         },
-        async tableDrill(tableData: any){
+        async drilldownAsyncRows(title: string, columns: Array<any>, asyncRows: Function) {
             const modal = await modalController.create({
-                component: DrillTable,
-                cssClass: 'custom-modal',
-                componentProps: {
-                    title: 'DrillTable',
-                    columns: tableData.columns,
-                    onRows: tableData.onRows
+                component: DrilldownTable,
+                cssClass: 'large-modal',
+                componentProps: { 
+                    title, 
+                    columns, 
+                    asyncRows,
+                    showFilters: true,
+                    rowsPerPage: 50,
+                    paginated: true,
+                    showReportStamp: false,
+                    footerColor: 'light',
+                    onFinish: () => modalController.dismiss()
                 }
             })
             modal.present()
         },
-        async patientTableColumns(ids: Array<number>) {
-            const columns = ['ARV number', 'Gender', 'Birth Date', 'actions']
-            const onRows = () => Promise.all(ids.map(async(id: number) => {
-                const data = await Patientservice.findByID(id)
-                const patient = new Patientservice(data)
-                return [
-                    patient.getArvNumber(), 
-                    patient.getGender(), 
-                    HisDate.toStandardHisDisplayFormat(patient.getBirthdate()),
-                    {
-                        type: 'button',
-                        name: 'Show',
-                        action: async () => {
+        async drilldownData(title: string, columns: Array<any>, rows: Array<any>, rowParser: any) {
+            const modal = await modalController.create({
+                component: DrilldownTable,
+                cssClass: 'large-modal',
+                componentProps: { 
+                    title, 
+                    columns, 
+                    rows,
+                    rowParser,
+                    rowsPerPage: 50,
+                    showFilters: true,
+                    paginated: true,
+                    showReportStamp: false,
+                    footerColor: 'light',
+                    onFinish: () => modalController.dismiss()
+                }
+            })
+            modal.present()
+        },
+        getDefaultDrillDownTable() {
+            const columns = [
+                [
+                    table.thTxt('ARV number'), 
+                    table.thTxt('Gender'),
+                    table.thTxt('Birth Date'), 
+                    table.thTxt('Actions')
+                ]
+            ]
+            const rowParser = (tableRows: Array<any[]>) => {
+                return tableRows.map(async (defaultRow: Array<any>) => {
+                    const [index, id ] = defaultRow
+                    if (id in this.drillDownCache) {
+                        const [oldIndex, ...rest] = this.drillDownCache[id]
+                        return [index, ...rest] // Assign new index number and maintain patient record
+                    } 
+    
+                    const data = await Patientservice.findByID(id)
+                    const patient = new Patientservice(data)
+                    const row = [
+                        index,
+                        table.td(patient.getArvNumber()), 
+                        table.td(patient.getGender()), 
+                        table.tdDate(patient.getBirthdate().toString()),
+                        table.tdBtn('Show', async () => {
                             await modalController.dismiss({})
                             this.$router.push({ path: `/patient/dashboard/${id}`})
-                        }
-                    }
-                ]
-            }))
-            return {
-                onRows,
-                columns
+                        })
+                    ]
+                    this.drillDownCache[id] = row
+                    return row
+                })
             }
+            return { rowParser, columns }
         },
-        async runTableDrill(data: any) {
-            const tableData = await this.patientTableColumns(data)
-            await this.tableDrill(tableData)
+        runTableDrill(data: any, title='Drilldown patients') {
+            const { columns, rowParser } = this.getDefaultDrillDownTable()
+            this.drilldownData(title, columns, data, rowParser)
         },
-        drill(values: Array<number>) {
+        drill(values: Array<number>, title='Drill table') {
             if (values.length > 0) {
                 return table.tdLink(
                     values.length, 
-                    () => this.runTableDrill(values)
+                    () => this.runTableDrill(values, title)
                 )
             }
             return table.td(values.length)
@@ -84,7 +121,7 @@ export default defineComponent({
                 label: q.name, value: q.start, other: q
             }))
         },
-        getDateDurationFields(useQuarter=false, setCustomQuarterPeriod=false): Array<Field> {
+        getDateDurationFields(useQuarter=false, setCustomQuarterPeriod=false, maxQuarter=5): Array<Field> {
             const minDate = '2001-01-01'
             const maxDate = Service.getSessionDate()
             return [
@@ -95,7 +132,7 @@ export default defineComponent({
                     condition: () => useQuarter,
                     validation: (val: Option) => Validation.required(val),
                     options: () => {
-                        const quarters = ArtReportService.getReportQuarters()
+                        const quarters = ArtReportService.getReportQuarters(maxQuarter)
                         let items: Array<Option> = quarters.map((q: any) => ({
                             label: q.name,
                             value: q.start,
