@@ -20,7 +20,7 @@
 <script lang='ts'>
 import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
-import { DisaggregatedReportService, AGE_GROUPS, TEMP_OUTCOME_TABLE } from "@/apps/ART/services/reports/disaggregated_service"
+import { DisaggregatedReportService, TEMP_OUTCOME_TABLE } from "@/apps/ART/services/reports/disaggregated_service"
 import { REGIMENS } from "@/apps/ART/services/reports/regimen_report_service"
 import { toastWarning } from '@/utils/Alerts'
 import { isEmpty, uniq } from "lodash"
@@ -29,6 +29,7 @@ import table from "@/components/DataViews/tables/ReportDataTable"
 import { IonPage } from "@ionic/vue"
 import { MohCohortReportService } from "@/apps/ART/services/reports/moh_cohort_service"
 import { Option } from '@/components/Forms/FieldInterface'
+import { AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -78,6 +79,7 @@ export default defineComponent({
         ],
         mohCohort: {} as any,
         ageGroupCohort: {} as any,
+        totalCurP: [] as Array<any>,
         totalNewF: [] as Array<any>,
         totalCurF: [] as Array<any>,
         totalIptF: [] as Array<any>,
@@ -108,7 +110,7 @@ export default defineComponent({
                     }
                 },{})
         }
-        this.fields = this.getDateDurationFields(true, false)
+        this.fields = this.getDateDurationFields(true, false, 21)
     },
     watch: {
         async canValidate(doIt: boolean) {
@@ -153,7 +155,7 @@ export default defineComponent({
             await this.setTotalMalesRow()
             this.setFemaleNotPregnantRows()
         },
-        async appendRegimensToRow(curRow: Array<any>) {
+        async appendRegimensToRow(curRow: Array<any>, context: string) {
             switch(this.report.getGender()) {
                 case 'breastfeeding':
                     this.report.setAgeGroup('All')
@@ -171,12 +173,12 @@ export default defineComponent({
             regimens.forEach((i: any) => {
                 if (data[i]) {
                     totals = totals.concat(data[i])
-                    row.push(this.drill(data[i]))
+                    row.push(this.drill(data[i], `${context} (Regimen ${i})`))
                 } else {
                     row.push(table.td(0))
                 }
             })
-            return [...row, this.drill(totals)]
+            return [...row, this.drill(totals, `Totals for ${context}`)]
         },
         async getValue(prop: string, gender: string, data: any) {
             let res: any = []
@@ -199,23 +201,30 @@ export default defineComponent({
             const row = await this.appendRegimensToRow([
                 table.td('All'), 
                 table.td('Male'), 
-                this.drill(this.totalNewM),
-                this.drill(this.totalCurM),
-                this.drill(this.totalIptM),
-                this.drill(this.totalTbM)
-            ])
+                this.drill(this.totalNewM, 'Tx New (new on ART) Males'),
+                this.drill(this.totalCurM, 'Total Curr (received ART) Males'),
+                this.drill(this.totalIptM, 'Total Curr (received IPT) Males'),
+                this.drill(this.totalTbM, 'Total Curr (screened for TB) Males')
+            ], 'All Male')
             this.rows.push(row)
         },
         async setFemaleNotPregnantRows() {
             const row = [ 
-                this.totalNewF, 
-                this.totalCurF, 
-                this.totalIptF,
-                this.totalTbF
-            ].map((data: any) => this.drill(data.filter((i: any) => !this.pregnantF.includes(i))))
+                [this.totalNewF, 'Tx New (new on ART) FNP'], 
+                [this.totalCurF, 'Tx Curr (receiving ART) FNP'], 
+                [this.totalIptF, 'Tx Curr (received IPT) FNP'],
+                [this.totalTbF, 'Tx Curr (screened for TB) FNP']
+            ].map(([row, context]: any) => {
+                const femaleNotPregnant = row.filter((i: any) => !this.pregnantF.includes(i))
+                return this.drill(femaleNotPregnant, context)
+            })
             this.report.setGender('FNP')
             this.report.setAgeGroup('All')
-            const r = await this.appendRegimensToRow([ table.td('All'), table.td('FNP'), ...row ])
+            const r = await this.appendRegimensToRow([ 
+                table.td('All'), 
+                table.td('FNP'), 
+                ...row 
+            ], 'FNP')
             this.rows.push(r)
         },
         setFemaleRows() {
@@ -226,8 +235,15 @@ export default defineComponent({
                 this.totalCurF = uniq(this.totalCurF.concat(txCur))
                 this.totalIptF = uniq(this.totalIptF.concat(txIpt))
                 this.totalTbF  = uniq(this.totalTbF.concat(txTb))
-                return [ table.td(group), table.td('Female'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
-            })
+                return [ 
+                    table.td(group), 
+                    table.td('Female'),
+                    this.drill(txNew, `${group} Tx New (new on ART) Females`), 
+                    this.drill(txCur, `${group} Tx Curr (receiving ART) Females`), 
+                    this.drill(txIpt, `${group} Tx Curr (received IPT) Females`), 
+                    this.drill(txTb, `${group} Tx Curr (screened for TB) Females`)
+                ]
+            }, 'Females')
         },
         setMaleRows() {
             this.report.setGender('male')
@@ -237,8 +253,15 @@ export default defineComponent({
                 this.totalCurM = uniq(this.totalCurM.concat(txCur))
                 this.totalIptM = uniq(this.totalIptM.concat(txIpt))
                 this.totalTbM  = uniq(this.totalTbM.concat(txTb))
-                return [ table.td(group), table.td('Male'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]   
-            })
+                return [ 
+                    table.td(group), 
+                    table.td('Male'), 
+                    this.drill(txNew, `${group} Tx New (new on ART) Males`), 
+                    this.drill(txCur, `${group} Tx Curr (receiving ART) Males`), 
+                    this.drill(txIpt, `${group} Tx Curr (received IPT) Males`), 
+                    this.drill(txTb, `${group} Tx Curr (screened for TB) Males`)
+                ]
+            }, 'Males')
         },
         setFemalePregnantRows() {
             this.report.setGender('pregnant')
@@ -248,8 +271,16 @@ export default defineComponent({
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
-                return [ table.td('All'), table.td('FP'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
-            })
+                this.totalCurP = uniq(this.totalCurP.concat(txCur))
+                return [ 
+                    table.td('All'), 
+                    table.td('FP'),
+                    this.drill(txNew, `Tx New (new on ART) Pregnant`),
+                    this.drill(txCur, `Tx Curr (receiving ART) Pregnant`),
+                    this.drill(txIpt, `Tx Curr (received IPT) Pregnant`),
+                    this.drill(txTb, `Tx Curr (screened for TB) Pregnant`)
+                ]
+            }, '')
         },
         setFemaleBreastFeedingRows() {
             this.report.setGender('breastfeeding')
@@ -259,10 +290,18 @@ export default defineComponent({
                 this.pregnantF = uniq(this.pregnantF.concat(txCur))
                 this.pregnantF = uniq(this.pregnantF.concat(txIpt))
                 this.pregnantF = uniq(this.pregnantF.concat(txTb))
-                return [ table.td('All'), table.td('FBf'), this.drill(txNew), this.drill(txCur), this.drill(txIpt), this.drill(txTb)]
-            })
+                this.totalCurP = uniq(this.totalCurP.concat(txCur))
+                return [ 
+                    table.td('All'), 
+                    table.td('FBf'), 
+                    this.drill(txNew, 'Tx New (new on ART) Breastfeeding'), 
+                    this.drill(txCur, 'Tx Curr (receiving ART) Breastfeeding'), 
+                    this.drill(txIpt, 'Tx Curr (received IPT) Breastfeeding'), 
+                    this.drill(txTb, 'Tx Curr (screened for TB) Breastfeeding')
+                ]
+            }, '')
         },
-        async setRows(category: string, ageGroups: Array<string>, onFormat: Function) {
+        async setRows(category: string, ageGroups: Array<string>, onFormat: Function, context: string) {
             for(const i in ageGroups) {
                 let txNew = []
                 let txCurr= []
@@ -286,7 +325,8 @@ export default defineComponent({
                     txScreenTB = await value('tx_screened_for_tb')
                 }
                 const row = await this.appendRegimensToRow(
-                    onFormat(group, txNew, txCurr, txGivenIpt, txScreenTB)
+                    onFormat(group, txNew, txCurr, txGivenIpt, txScreenTB), 
+                    `${group} ${context}`
                 ) 
                 this.rows.push(row)
             }
@@ -297,7 +337,7 @@ export default defineComponent({
                     label: 'Total Alive and on ART', 
                     value: totalAlive.length,
                     other: {
-                        onclick: () => this.runTableDrill(totalAlive)
+                        onclick: () => this.runTableDrill(totalAlive, 'Total Alive on ART')
                     }
                 },
                 {
@@ -308,15 +348,9 @@ export default defineComponent({
         },
         async validateReport() {
             const totalAlive = uniq([
-                ...this.totalNewF, 
-                ...this.totalCurF, 
-                ...this.totalIptF,
-                ...this.totalTbF,
-                ...this.totalNewM, 
-                ...this.totalCurM, 
-                ...this.totalIptM,
-                ...this.totalTbM,
-                ...this.pregnantF
+                ...this.totalCurF,
+                ...this.totalCurM,
+                ...this.totalCurP
             ])
             const validations: any = {
                 'total_alive_and_on_art' : {

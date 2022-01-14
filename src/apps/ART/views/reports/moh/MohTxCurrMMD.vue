@@ -17,14 +17,15 @@
 <script lang='ts'>
 import { defineComponent } from 'vue'
 import ReportMixin from "@/apps/ART/views/reports/ReportMixin.vue"
-import { TxReportService, OTHER_AGE_GROUPS } from '@/apps/ART/services/reports/tx_report_service'
+import { TxReportService } from '@/apps/ART/services/reports/tx_report_service'
 import ReportTemplate from "@/apps/ART/views/reports/TableReportTemplate.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { Option } from '@/components/Forms/FieldInterface'
 import { IonPage } from "@ionic/vue"
 import { MohCohortReportService } from "@/apps/ART/services/reports/moh_cohort_service"
 import { toastWarning } from '@/utils/Alerts'
-import { isEmpty, uniq } from "lodash"
+import { isEmpty } from "lodash"
+import { AGE_GROUPS } from "@/apps/ART/services/reports/patient_report_service"
 
 export default defineComponent({
     mixins: [ReportMixin],
@@ -77,7 +78,7 @@ export default defineComponent({
                     label: 'Total clients', 
                     value: this.totals.size,
                     other: {
-                        onclick: () => this.runTableDrill(Array.from(this.totals))
+                        onclick: () => this.runTableDrill(Array.from(this.totals), 'Total Clients')
                     }
                 },
                 {
@@ -86,7 +87,7 @@ export default defineComponent({
                 }
             ]
         },
-        getValues(patients: Record<string, Array<any>>) {
+        getValues(patients: Record<string, Array<any>>, context: string) {
             const underThreeMonths: Array<any> = []
             const betweenThreeAndFiveMonths: Array<any> = []
             const overSixMonths: Array<any> = []
@@ -109,9 +110,9 @@ export default defineComponent({
                 }
             }
             return [
-                this.drill(underThreeMonths),
-                this.drill(betweenThreeAndFiveMonths),
-                this.drill(overSixMonths)
+                this.drill(underThreeMonths, `${context} < 3 months of Arvs`),
+                this.drill(betweenThreeAndFiveMonths, `${context} 3-5 months of Arvs`),
+                this.drill(overSixMonths, `${context} > 6 months months of Arvs`)
             ]
         },
         async setRows() {
@@ -120,13 +121,13 @@ export default defineComponent({
             const males = []
             const females = []
 
-            for(const i in OTHER_AGE_GROUPS) {
-                const group = OTHER_AGE_GROUPS[i]
+            for(const i in AGE_GROUPS) {
+                const group = AGE_GROUPS[i]
                 if (group === '<1 year') {
                     minAge = 0
                     maxAge = 0
-                } else if (group === '50 plus years') {
-                    minAge = 50
+                } else if (group === '90 plus years') {
+                    minAge = 90
                     maxAge = 120
                 } else {
                     const [min, max] = group.split('-')
@@ -138,12 +139,12 @@ export default defineComponent({
                     females.push([
                         table.td(group),
                         table.td('Female'),
-                        ...this.getValues(res['Female'])
+                        ...this.getValues(res['Female'], `${group} (F)`)
                     ])
                     males.push([
                         table.td(group),
                         table.td('Male'),
-                        ...this.getValues(res['Male'])
+                        ...this.getValues(res['Male'], `${group} (M)`)
                     ])
                 } else {
                     females.push([

@@ -13,8 +13,12 @@ export class SurvivalAnalysisReportService extends ArtReportService {
     constructor() {
         super()
         this.quarter = ''
-        this.regenerate = true
+        this.regenerate = false
         this.ageGroup = AGE_GROUP.GENERAL
+    }
+
+    setRegenerate(ok: boolean) {
+        this.regenerate = ok
     }
 
     getAgeGroup() {

@@ -1459,7 +1459,9 @@ export default {
           ART Version : ${Service.getAppVersion()}
           API Version: ${Service.getApiVersion()}
           Report Period: ${this.quarter}
-          Site: ${Service.getLocationName()}`;
+          Site: ${Service.getLocationName()}
+          Site UUID: ${Service.getSiteUUID()}`
+          ;
       // }
       const csvData = new Blob([y], { type: "text/csv;charset=utf-8;" });
       //IE11 & Edge

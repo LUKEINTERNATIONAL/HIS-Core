@@ -13,17 +13,24 @@
       <div class="report-content">
         <report-table
           :rows="rows"
-          :columns="columns">
+          :paginated="paginated"
+          :asyncRows="asyncRows"
+          :rowParser="rowParser"
+          :columns="columns"
+          :showFilters="showFilters"
+          :rowsPerPage="rowsPerPage"
+          @onActiveColumns="onActiveColumns"
+          @onActiveRows="onActiveRows">
         </report-table>
       </div>
     </ion-content>
-    <ion-footer> 
+    <ion-footer v-if="showReportStamp"> 
       <ion-toolbar> 
         <ion-chip color="primary">Date Generated: <b>{{ date }}</b></ion-chip>
         <ion-chip color="primary">API version: <b>{{ apiVersion }}</b></ion-chip>
       </ion-toolbar>
     </ion-footer>
-    <his-footer :btns="btns"></his-footer>
+    <his-footer :color="footerColor" :btns="btns"></his-footer>
   </ion-page>
 </template>
 
@@ -50,18 +57,56 @@ export default defineComponent({
     },
     rows: {
       type: Object as PropType<Array<RowInterface[]>>,
-      required: true
+      default: () => []
+    },
+    rowParser: {
+      type: Function
+    },
+    showFilters: {
+      type: Boolean,
+      default: false
+    },
+    rowsPerPage: {
+      type: Number
+    },
+    asyncRows: {
+      type: Function
+    },
+    paginated: {
+      type: Boolean,
+      default: false
     },
     customBtns: {
       type: Array,
       default: () => []
+    },
+    showReportStamp: {
+      type: Boolean,
+      default: true
+    },
+    footerColor: {
+      type: String,
+      default: 'dark'
+    },
+    onFinish: {
+      type: Function
     }
   },
   data: () => ({
     btns: [] as Array<any>,
+    activeColumns: [] as any,
+    activeRows: [] as any,
     date: HisDate.toStandardHisDisplayFormat(Service.getSessionDate()),
-    apiVersion: Service.getApiVersion()
+    apiVersion: Service.getApiVersion(),
   }),
+  methods: {
+    onActiveColumns(columns: any) {
+      this.activeColumns = columns
+    },
+    onActiveRows(rows: any) {
+      this.activeRows = rows
+    }
+  },
   created() {
     this.btns = [
       ...this.customBtns,
@@ -71,8 +116,8 @@ export default defineComponent({
         slot: "start",
         color: "primary",
         visible: true,
-        onClick: async () => {
-          const {columns, rows} = toExportableFormat(this.columns, this.rows)
+        onClick: () => {
+          const {columns, rows} = toExportableFormat(this.activeColumns, this.activeRows)
           toCsv(columns, rows, this.title)
         }
       },
@@ -82,8 +127,8 @@ export default defineComponent({
         slot: "start",
         color: "primary",
         visible: true,
-        onClick: async () => {
-          const {columns, rows} = toExportableFormat(this.columns, this.rows)
+        onClick: () => {
+          const {columns, rows} = toExportableFormat(this.activeColumns, this.activeRows)
           toTablePDF(columns, rows, this.title)
         }
       },
@@ -91,9 +136,14 @@ export default defineComponent({
         name: "Finish",
         size: "large",
         slot: "end",
-        color: "primary",
+        color: "success",
         visible: true,
-        onClick: async () => this.$router.push({ path:'/' })
+        onClick: () => {
+          if (typeof this.onFinish === 'function') {
+            return this.onFinish()
+          }
+          this.$router.push({ path:'/' })
+        }
       }
     ]
   }
