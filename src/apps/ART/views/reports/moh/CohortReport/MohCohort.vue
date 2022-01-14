@@ -59,7 +59,7 @@ export default defineComponent({
   }),
   created() {
     this.btns = this.getBtns()
-    this.fields = this.getDateDurationFields(true, true)
+    this.fields = this.getDateDurationFields(true, true, 21)
   },
   methods: {
     async onPeriod(form: any, config: any, regenerate=false) {

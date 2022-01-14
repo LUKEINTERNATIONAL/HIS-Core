@@ -116,9 +116,7 @@ export class ArtReportService extends Service {
         let qtr = currentQtr.qtr;
         let i = 0;
 
-        if (qtr === 4) {
-            qtrs.push(this.buildQtrObj('Q1', currYear + 1))
-        }
+        if (qtr === 4) qtrs.push(this.buildQtrObj('Q1', currYear + 1))
 
         while (i < maxQuarters) {
           qtrs.push(this.buildQtrObj(`Q${qtr}`, currYear))

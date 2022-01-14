@@ -110,7 +110,7 @@ export default defineComponent({
                     }
                 },{})
         }
-        this.fields = this.getDateDurationFields(true, false)
+        this.fields = this.getDateDurationFields(true, false, 21)
     },
     watch: {
         async canValidate(doIt: boolean) {
