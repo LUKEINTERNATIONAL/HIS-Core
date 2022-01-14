@@ -93,7 +93,7 @@ import HisDate from "@/utils/Date";
 import { AppointmentService } from "@/apps/ART/services/appointment_service";
 import FieldMixinVue from "./FieldMixin.vue";
 import ART_GLOBAL_PROP from "@/apps/ART/art_global_props"
-import { toastWarning } from "@/utils/Alerts";
+import { alertConfirmation, toastWarning } from "@/utils/Alerts";
 
 export default defineComponent({
   components: { ViewPort, Calendar, IonGrid, IonCol, IonRow },
@@ -101,12 +101,8 @@ export default defineComponent({
   watch: {
     startDate: {
       async handler(params: any) {
-        if (params) {
-          await this.getAppointments();
-          this.emitVal(params);
-        }else {
-          this.emitVal(HisDate.toStandardHisDisplayFormat(this.sessionDate));
-        }
+        const date = params ? params : HisDate.toStandardHisDisplayFormat(this.sessionDate)
+        this.$emit("onValue", { label: "", value: date });
       },
       immediate: true,
     },
@@ -116,6 +112,7 @@ export default defineComponent({
     startDate: null as any,
     runOutDate: null as any,
     appointments: [],
+    clinicHolidays: [] as Array<string>,
     appointmentLimit: 0 as any,
     sessionDate: null as any
   }),
@@ -123,17 +120,19 @@ export default defineComponent({
     this.$emit('onFieldActivated', this)
   },
   async created() {
+    await this.getAppointmentLimit()
+    await this.getClinicHolidays()
     const items = await this.options(this.fdata);
     this.sessionDate = AppointmentService.getSessionDate();
     const date = items[0].other.appointmentDate;
-    this.setDate(date);
-    this.getAppointmentLimit();
+    this.appointments = await this.getAppointments(date)
+    this.setDate(date)
     this.runOutDate = new Date(items[0].other.runOutDate);
   },
   methods: {
-    async getAppointments() {
-      this.appointments = await AppointmentService.getDailiyAppointments(
-        HisDate.toStandardHisFormat(this.aDate)
+    getAppointments(date: string) {
+      return AppointmentService.getDailiyAppointments(
+        HisDate.toStandardHisFormat(date)
       );
     },
     async getAppointmentLimit() {
@@ -142,20 +141,37 @@ export default defineComponent({
         this.appointmentLimit = limit;
       }
     },
+    async getClinicHolidays() {
+      const holidays: string = await ART_GLOBAL_PROP.clinicHolidays()
+      if(holidays) {
+        this.clinicHolidays = holidays.split(',')
+      }
+    },
+    async isDateAvalaible(date: string) {
+      const appointments = await this.getAppointments(date)
+      if(appointments.length !== 0 && appointments.length >= this.appointmentLimit) {
+        toastWarning("Appointment limit reached for the selected date. Please select another date", 3000)
+        return false
+      }
+
+      if(this.clinicHolidays.includes(HisDate.toStandardHisFormat(date))){
+        const proceed = await alertConfirmation(
+          "Do you really want to set appointment on a clinic holiday?"
+        )
+        if (!proceed) return false
+      }
+      this.appointments = appointments
+      return true
+    },
     async setDate(date: any) {
       this.startDate = new Date(date);
       const calendar: any = this.$refs.calendar;
       await calendar.move(this.startDate);
       await calendar.focusDate(this.startDate);
     },
-    dayClicked(day: any) {
-      !day.isDisabled && this.setDate(day.id);
+    async dayClicked(day: any) {
+      !day.isDisabled && (await this.isDateAvalaible(day.id)) && this.setDate(day.id);
     },
-    emitVal(date: any) {
-      if(this.appointments.length < this.appointmentLimit) return this.$emit("onValue", { label: "", value: date });
-      toastWarning("Appointment limit reached for the selected date. Please select another date")
-      this.$emit("onValue", {})
-    }
   },
   computed: {
     aDate(): string {
