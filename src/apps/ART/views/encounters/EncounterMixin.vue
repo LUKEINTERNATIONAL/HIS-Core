@@ -93,7 +93,9 @@ export default defineComponent({
                     ],
                     'his-danger-color'
                 )
-                action === 'Cancel' ? this.gotoPatientDashboard() : this.$router.push('/session/date')
+                action === 'Cancel'
+                    ? this.gotoPatientDashboard()
+                    : this.$router.push(`/session/date?patient_dashboard_redirection_id=${this.patientID}`)
                 return true
             }
             return false
