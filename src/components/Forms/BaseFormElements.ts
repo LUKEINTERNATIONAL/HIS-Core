@@ -14,7 +14,7 @@ import MultiYesNo from "@/components/FormElements/MultiYesNoSelect.vue"
 import WeightChart from "@/components/FormElements/HisWeightChart.vue"
 import VitalsEntry from "@/components/FormElements/HisVitalsEntry.vue"
 import AppointmentsEntry from "@/components/FormElements/HisAppointments.vue"
-
+import ClinicHolidayPicker from "@/components/FormElements/HisClinicHolidayPicker.vue"
 import SummaryPage from "@/components/FormElements/HisSummary.vue"
 import ArtStagingSummary from "@/components/FormElements/ArtStagingSummary.vue"
 import AdherenceInput from "@/components/FormElements/HisAdherenceInput.vue"
@@ -68,7 +68,8 @@ export enum FieldType {
     TT_BATCH_VERIFICATION = 'batch-verification',
     TT_BATCH_MOVEMENT = 'batch-movement',
     TT_IP_ADDRESS = 'IPAddressInput',
-    TT_TEXT_BANNER = 'text-banner'
+    TT_TEXT_BANNER = 'text-banner',
+    TT_CLINIC_HOLIDAY_PICKER = 'clinic-holiday-picker'
 }
 
 // Components to be rendered
@@ -105,5 +106,6 @@ export const BaseFormComponents = {
     BatchVerification,
     BatchMovement,
     IPAddressInput,
-    TextBanner
+    TextBanner,
+    ClinicHolidayPicker
 }

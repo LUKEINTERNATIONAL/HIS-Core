@@ -57,6 +57,11 @@ export default [
         component: () => import("@/apps/ART/views/preferences/AllPreferences.vue")
     },
     {
+        name: ART_GLOBAL_PROP.CLINIC_HOLIDAYS,
+        path: "/art/preferences/clinic_holidays",
+        component: () => import("@/apps/ART/views/preferences/DefaultPreferences.vue")
+    },
+    {
         name: 'bp_thresholds',
         path: "/art/preferences/bp_thresholds",
         component: () => import("@/apps/ART/views/preferences/DefaultPreferences.vue")
