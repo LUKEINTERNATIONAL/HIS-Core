@@ -1,14 +1,14 @@
 <script lang="ts">
+import HisDate from "@/utils/Date"
+import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { defineComponent } from 'vue'
 import { Field, Option } from '@/components/Forms/FieldInterface'
 import { Patientservice } from "@/services/patient_service"
 import { ProgramService } from "@/services/program_service"
-import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
-import { optionsActionSheet } from "@/utils/ActionSheets"
+import { optionsActionSheet, infoActionSheet } from "@/utils/ActionSheets"
 import { UserService } from "@/services/user_service"
 import { find } from "lodash"
 import { nextTask } from "@/utils/WorkflowTaskHelper"
-import HisDate from "@/utils/Date"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -27,10 +27,14 @@ export default defineComponent({
        '$route': {
             async handler(route: any) {
                 if(route.params.patient_id) {
-                    await this.checkBDE()
                     this.patientID = route.params.patient_id;
                     const response = await Patientservice.findByID(this.patientID);
                     this.patient = new Patientservice(response);
+
+                    const hasWarning = await this.warnIfSessionDataIsLessThanDob(this.patient.getBirthdate())
+                    if (hasWarning) return
+
+                    await this.checkBDE()
                     this.programInfo = await ProgramService.getProgramInformation(this.patientID)
                     this.ready = true;
                 }
@@ -75,13 +79,34 @@ export default defineComponent({
             )
             return modal.selection
         },
+        async warnIfSessionDataIsLessThanDob(birthdate: string) {
+            const bdeDate = HisDate.toStandardHisFormat(ProgramService.getSessionDate())
+            const dob = HisDate.toStandardHisFormat(birthdate)
+            if (ProgramService.isBDE() && bdeDate < dob) {
+                const action = await infoActionSheet(
+                    'Data Integrity Issue found', ``,
+                    `Session date ${HisDate.toStandardHisDisplayFormat(bdeDate)} 
+                     is less than birth date of ${HisDate.toStandardHisDisplayFormat(birthdate)}`,
+                    [
+                        { name: 'Cancel', slot: 'end', color: 'danger' },
+                        { name: 'Change session date', slot: 'end', color: 'success' }
+                    ],
+                    'his-danger-color'
+                )
+                action === 'Cancel'
+                    ? this.gotoPatientDashboard()
+                    : this.$router.push(`/session/date?patient_dashboard_redirection_id=${this.patientID}`)
+                return true
+            }
+            return false
+        },
         patientDashboardUrl() {
             return `/patient/dashboard/${this.patientID}`
         },
         gotoPatientDashboard() {
             return this.$router.push({path: this.patientDashboardUrl()}) 
         },
-        async nextTask() {
+        nextTask() {
             return nextTask(this.patientID, this.$router)
         },
         yesNoOptions() {
