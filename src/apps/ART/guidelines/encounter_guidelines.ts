@@ -17,7 +17,6 @@ export const ENCOUNTER_GUIDELINES: Record<string, GuideLineInterface> = {
         priority: 1,
         actions: {
             alert: async ({ outcomeStartDate, sessionDate }: any) => {
-                console.log(sessionDate > outcomeStartDate)
                 const action = await infoActionSheet(
                     'Data Integrity Issue Found',
                     `Patient died on ${dformat(outcomeStartDate)}`,
