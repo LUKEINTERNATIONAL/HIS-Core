@@ -1,14 +1,15 @@
 <script lang="ts">
-import HisDate from "@/utils/Date"
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { defineComponent } from 'vue'
 import { Field, Option } from '@/components/Forms/FieldInterface'
 import { Patientservice } from "@/services/patient_service"
 import { ProgramService } from "@/services/program_service"
-import { optionsActionSheet, infoActionSheet } from "@/utils/ActionSheets"
+import { PatientProgramService } from "@/services/patient_program_service"
 import { UserService } from "@/services/user_service"
 import { find } from "lodash"
 import { nextTask } from "@/utils/WorkflowTaskHelper"
+import { ENCOUNTER_GUIDELINES, FlowState } from "@/apps/ART/guidelines/encounter_guidelines"
+import { matchToGuidelines } from "@/utils/GuidelineEngine"
 
 export default defineComponent({
     components: { HisStandardForm },
@@ -20,21 +21,28 @@ export default defineComponent({
         patientID: '' as any,
         providerID: -1 as number,
         providers: [] as any,
-        bdeChecked: false as boolean,
+        verified: false as boolean,
+        facts: {
+            sessionDate: '' as string,
+            apiDate: '' as string,
+            encounterName: 'N/A' as string,
+            providers: [] as Array<any>,
+            isBdeMode: false as boolean,
+            birthDate: '' as string,
+            outcome: '' as string,
+            outcomeStartDate: '' as string
+        },
         ready: false
     }),
     watch: {
        '$route': {
             async handler(route: any) {
-                if(route.params.patient_id) {
+                if(route.params.patient_id && this.patientID != route.params.patient_id) {
                     this.patientID = route.params.patient_id;
                     const response = await Patientservice.findByID(this.patientID);
                     this.patient = new Patientservice(response);
-
-                    const hasWarning = await this.warnIfSessionDataIsLessThanDob(this.patient.getBirthdate())
-                    if (hasWarning) return
-
-                    await this.checkBDE()
+                    await this.setEncounterFacts()
+                    await this.checkEncounterGuidelines()
                     this.programInfo = await ProgramService.getProgramInformation(this.patientID)
                     this.ready = true;
                 }
@@ -49,56 +57,61 @@ export default defineComponent({
         }
     },
     methods: {
-        async checkBDE() {
-            if (ProgramService.isBDE() && !this.bdeChecked) {
-                this.bdeChecked = true
-                this.providers = await UserService.getUsers()
-                const providerNames = this.providers.map((p: any) => `${p.username} \
-                    (${p.person.names[0].given_name} ${p.person.names[0].family_name})`)
-
-                const selection = await this.selectProvider(providerNames)
+        runflowState(state: FlowState, params=null) {
+            const states: any = {}
+            states[FlowState.SET_PROVIDER] = (selection: any) => {
                 const [ username ] = selection.split(' ')
                 const provider = find(this.providers, { username })
-
                 if (provider) this.providerID = provider.person_id
+                return FlowState.CONTINUE
+            }
+            states[FlowState.CHANGE_SESSION_DATE] = () => { 
+                this.$router.push(`/session/date?patient_dashboard_redirection_id=${this.patientID}`)
+                return FlowState.EXIT
+            }
+            states[FlowState.CHANGE_PATIENT_OUTCOME] = () => {
+                this.$router.push(`/patient/programs/${this.patientID}`)
+                return FlowState.EXIT
+            }
+            states[FlowState.GO_TO_PATIENT_DASHBOARD] = () => {
+                this.gotoPatientDashboard()
+                return FlowState.EXIT
+            }
+            if (state in states) {
+                return states[state](params)
             }
         },
-        async selectProvider(providers: Array<string>) {
-            const toDate = (date: any) => HisDate.toStandardHisDisplayFormat(date)
-            const encounterName = this.$route.name 
+        async checkEncounterGuidelines() {
+            const findings = matchToGuidelines(this.facts, ENCOUNTER_GUIDELINES)
+            for(const index in findings) {
+                const finding = findings[index]
+                if (finding?.actions?.alert) {
+                    const status = this.runflowState((await finding?.actions?.alert(this.facts)))
+                    if (status === FlowState.EXIT) return
+                }
+                if (finding?.actions?.selection) {
+                    const selection = await finding?.actions?.selection(this.facts)
+                    this.runflowState(selection.flowState, selection.value)
+                }
+            }
+        },
+        async setEncounterFacts() {
+            const program = await new PatientProgramService(this.patientID).getProgram()
+            this.facts.sessionDate = ProgramService.getSessionDate()
+            this.facts.apiDate = ProgramService.getCachedApiDate() as string
+            this.facts.isBdeMode = ProgramService.isBDE() as boolean
+            this.facts.birthDate = this.patient.getBirthdate()
+            this.facts.outcome = program.outcome
+            this.facts.outcomeStartDate = program.startDate
+            this.facts.encounterName = this.$route.name 
                 ? this.$route.name.toString().toUpperCase()
-                : 'Kaya'
-            const modal = await optionsActionSheet(
-                `Please select a provider for ${encounterName}`,
-                `BDE: ${toDate(ProgramService.getSessionDate())} 
-                    | Current: ${toDate(ProgramService.getCachedApiDate())}`,
-                providers,
-                [
-                    { name: 'Confirm', slot: 'end', role: 'action' }
-                ]
-            )
-            return modal.selection
-        },
-        async warnIfSessionDataIsLessThanDob(birthdate: string) {
-            const bdeDate = HisDate.toStandardHisFormat(ProgramService.getSessionDate())
-            const dob = HisDate.toStandardHisFormat(birthdate)
-            if (ProgramService.isBDE() && bdeDate < dob) {
-                const action = await infoActionSheet(
-                    'Data Integrity Issue found', ``,
-                    `Session date ${HisDate.toStandardHisDisplayFormat(bdeDate)} 
-                     is less than birth date of ${HisDate.toStandardHisDisplayFormat(birthdate)}`,
-                    [
-                        { name: 'Cancel', slot: 'end', color: 'danger' },
-                        { name: 'Change session date', slot: 'end', color: 'success' }
-                    ],
-                    'his-danger-color'
+                : 'N/A'
+            if (ProgramService.isBDE()) {
+                this.providers = await UserService.getUsers()
+                this.facts.providers = this.providers.map((p: any) => `${p.username} \
+                    (${p.person.names[0].given_name} ${p.person.names[0].family_name})`
                 )
-                action === 'Cancel'
-                    ? this.gotoPatientDashboard()
-                    : this.$router.push(`/session/date?patient_dashboard_redirection_id=${this.patientID}`)
-                return true
             }
-            return false
         },
         patientDashboardUrl() {
             return `/patient/dashboard/${this.patientID}`

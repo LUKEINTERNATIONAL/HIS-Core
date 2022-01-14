@@ -39,34 +39,38 @@ export class PatientProgramService extends ProgramService {
     getPrograms() {
         return ProgramService.getPatientPrograms(this.patientId)
     }
+
     /**
      * Get Patient program information by Session Program ID
      * @returns 
      */
     async getProgram() {
-        const defaults = { program: 'N/A', outcome: 'N/A' }
+        const defaults = { program: 'N/A', outcome: 'N/A', startDate: '', endDate: '' }
         const req = await this.getPrograms()
-        if (isEmpty(req)) {
-            return defaults
-        }
+        if (isEmpty(req)) return defaults
         /**
          * Filter programs by sessionID
          */
-        const programs = req.filter((p: any) => {
-            return p.program.program_id === ProgramService.getProgramID()
-        }).map((p: any) => {
+        const programs = req.filter((p: any) => p.program.program_id === ProgramService.getProgramID())
+            .map((p: any) => {
             /**
              * Find active state/outcome by checking if the 
              * end_date is empty
              */
-            const availableStates = p.patient_states.filter(
-                (s: any) => s.end_date === null
-            )
-            const outcome = isEmpty(availableStates) 
-                ? 'N/A' 
-                : availableStates[0].name 
+            const availableStates = p.patient_states.filter((s: any) => s.end_date === null)
+            let outComeStartDate = ''
+            let outComeEndDate = ''
+            let currentOutcome = 'N/A'
+            if (!isEmpty(availableStates)) {
+                outComeStartDate = availableStates[0].start_date
+                outComeEndDate = availableStates[0].end_date
+                currentOutcome = availableStates[0].name
+            }
             return {
-                program: p.program.name, outcome
+                program: p.program.name, 
+                outcome: currentOutcome,
+                startDate: outComeStartDate,
+                endDate: outComeEndDate,
             }
         })
         return !isEmpty(programs) 
