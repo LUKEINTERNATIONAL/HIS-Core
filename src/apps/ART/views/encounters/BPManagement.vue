@@ -55,7 +55,7 @@
       </div>
     </ion-content>
     <ion-footer>
-      <ion-toolbar color="black">
+      <ion-toolbar color="dark">
         <ion-button
           size="large"
           color="danger"
