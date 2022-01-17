@@ -341,7 +341,12 @@
           cancel
         </ion-button>
 
-        <ion-button size="large" color="success" slot="end" @click="gotoPatientDashboard">
+        <ion-button 
+          v-if="selectedDrugs && selectedDrugs.length > 0" 
+          size="large" 
+          color="success" 
+          slot="end" 
+          @click="gotoPatientDashboard">
           Continue
         </ion-button>
       </ion-toolbar>
@@ -371,6 +376,7 @@ import {
 import EncounterMixinVue from "./EncounterMixin.vue";
 import { BPManagementService } from "../../services/htn_service";
 import { ProgramService } from "@/services/program_service";
+import { isEmpty } from "lodash";
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -459,10 +465,12 @@ export default defineComponent({
   computed: {
     selectedDrugs(): any {
       let drugs: any[] = [];
-      Object.keys(this.drugs).forEach((d: any) => {
-        const dr = this.drugs[d].drugs.filter((d: any) => d.selected === true);
-        drugs = [...drugs, ...dr];
-      });
+      if (!isEmpty(this.drugs)) {
+        Object.keys(this.drugs).forEach((d: any) => {
+          const dr = this.drugs[d].drugs.filter((d: any) => d.selected === true);
+          drugs = [...drugs, ...dr];
+        });
+      }
       return drugs;
     },
   },
