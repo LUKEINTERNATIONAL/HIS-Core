@@ -276,7 +276,7 @@
                         <div
                           class="button button-success"
                           id="alert_HCZ (25mg tablet)"
-                          @click="launchKeyPad(drug)"
+                          @click="launchNotePad(drug)"
                         >
                           Add notes
                         </div>
@@ -348,12 +348,14 @@
     </ion-footer>
   </ion-page>
 </template>
+
 <script lang="ts">
 import { defineComponent } from "vue";
 import ViewPort from "@/components/DataViews/ViewPort.vue";
-import { CHARACTERS_AND_NUMBERS_LO } from "@/components/Keyboard/KbLayouts";
-import KeyBoardModal from "@/components/Keyboard/HisModalKeyboard.vue";
-import handleVirtualInput from "@/components/Keyboard/KbHandler";
+import { FieldType } from "@/components/Forms/BaseFormElements"
+import { Field } from '@/components/Forms/FieldInterface'
+import TouchField from "@/components/Forms/SIngleTouchField.vue"
+
 import {
   IonToolbar,
   IonHeader,
@@ -369,6 +371,7 @@ import {
 import EncounterMixinVue from "./EncounterMixin.vue";
 import { BPManagementService } from "../../services/htn_service";
 import { ProgramService } from "@/services/program_service";
+
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
@@ -385,7 +388,7 @@ export default defineComponent({
   },
   watch: {
     patient: {
-      async handler(patient: any) {
+      async handler() {
         this.HTN = new BPManagementService(this.patientID, this.providerID);
         this.drugs = this.HTN.getDrugs();
         await this.getCurrentDrugs();
@@ -397,14 +400,6 @@ export default defineComponent({
     return {
       input: "",
       HTN: {} as any,
-      keyboard: [
-        CHARACTERS_AND_NUMBERS_LO,
-        [
-          ["Done", "Hide"],
-          ["Space", "Delete"],
-          ["", "Clear"],
-        ],
-      ] as any,
       drugs: null as any,
     };
   },
@@ -412,7 +407,34 @@ export default defineComponent({
     removeNote(d: any, i: any, ind: any) {
       this.drugs[d].notes.splice(ind, 1);
     },
-
+    launchNotePad(drugIndex: any) {
+      this.showModal({
+        id: 'note',
+        helpText: `Add notes for ${drugIndex}`,
+        type: FieldType.TT_TEXT
+      }, 
+      (data: any) => {
+        if (data) {
+          this.drugs[drugIndex].notes.push({
+            date: ProgramService.getSessionDate(),
+            description: data.value || '',
+          })
+        }
+      })
+    },
+    async showModal(currentField: Field, onFinish: Function) {
+      const modal = await modalController.create({
+        component: TouchField,
+        backdropDismiss: false,
+        cssClass: "full-modal",
+        componentProps: {
+          dismissType: 'modal',
+          currentField,
+          onFinish
+        }
+      });
+      modal.present();
+    },
     async getCurrentDrugs() {
       const drugs = await this.HTN.getCurrentDrugs();
       drugs.drugs.forEach((drug: any) => {
@@ -432,21 +454,7 @@ export default defineComponent({
         this.drugs[key].drugs[i].selected = false;
       });
       this.drugs[key].drugs[index].selected = event.detail.checked;
-    },
-    async launchKeyPad(d: any) {
-      const modal = await modalController.create({
-        component: KeyBoardModal,
-        backdropDismiss: false,
-        cssClass: "large-modal",
-      });
-      modal.present();
-      const { data } = await modal.onDidDismiss();
-      this.drugs[d].notes.push({
-        date: ProgramService.getSessionDate(),
-        description: data,
-      });
-      return data;
-    },
+    }
   },
   computed: {
     selectedDrugs(): any {
