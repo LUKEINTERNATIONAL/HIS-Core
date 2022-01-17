@@ -123,6 +123,7 @@ import { UserService } from "@/services/user_service";
 import { ProgramService } from "@/services/program_service";
 import { VitalsService } from "@/apps/ART/services/vitals_service"
 import { toastDanger } from "@/utils/Alerts";
+import { PatientProgramService } from "@/services/patient_program_service";
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
@@ -352,15 +353,12 @@ export default defineComponent({
       }
     },
     async enrollInHTN() {
-      const sessionDate = ProgramService.getSessionDate();
-      await ProgramService.enrollProgram(
-        this.patientID,
-        this.HTNProgramID,
-        sessionDate
-      );
-      await ProgramService.createState(this.patientID, this.HTNProgramID, {
-        state: this.aliveState,
-      });
+      const program  = new PatientProgramService(this.patientID)
+      program.setProgramId(this.HTNProgramID)
+      program.setStateDate(ProgramService.getSessionDate())
+      program.setStateId(this.aliveState)
+      await program.enrollProgram()
+      await program.updateState()
     },
     async setHtnTransferred(transferred: 'Yes' | 'No'){
       const vitals = new VitalsService(this.patientID, this.providerID)
