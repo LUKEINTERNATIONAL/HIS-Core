@@ -247,11 +247,9 @@ export default defineComponent({
           this.$router.push(
             `/art/encounters/bp_adherence/${this.patientID}?review=true`
           );
-          this.nextTask();
           break;
         case "Continue Drugs":
           this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`);
-          this.nextTask();
           break;
         case "Did not take prescribed BP drugs today":
           this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`);
