@@ -221,7 +221,7 @@ export default defineComponent({
             state: this.action.value,
           };
           await this.htn.enrollPatient(patientState);
-          this.nextAction(this.action.value);
+          this.nextAction(this.action.label);
         }
       } else {
         toastWarning("Please select an action");
@@ -238,7 +238,7 @@ export default defineComponent({
     },
     nextAction(state: string) {
       switch (state) {
-        case "Start anti-hypertensives":
+        case "Start anti hypertensives":
           this.$router.push(
             `/art/encounters/bp_prescription/${this.patientID}`
           );
