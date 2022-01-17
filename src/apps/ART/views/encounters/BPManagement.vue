@@ -121,6 +121,8 @@ import { isEmpty } from "lodash";
 import { BPManagementService } from "../../services/htn_service";
 import { UserService } from "@/services/user_service";
 import { ProgramService } from "@/services/program_service";
+import { VitalsService } from "@/apps/ART/services/vitals_service"
+import { toastDanger } from "@/utils/Alerts";
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
@@ -360,6 +362,18 @@ export default defineComponent({
         state: this.aliveState,
       });
     },
+    async setHtnTransferred(transferred: 'Yes' | 'No'){
+      const vitals = new VitalsService(this.patientID, this.providerID)
+      const encounter = await vitals.createEncounter()
+      if (!encounter) {
+        toastDanger('Unable to create patient transferr encounter')
+      } else {
+        const obs = await vitals.saveValueCodedObs('Transferred', transferred)
+        if (!obs) {
+          toastDanger('Unable to create observation Transferred for patient')
+        }
+      }
+    },
     async getItems() {
       if (this.patientOnBPDrugs && this.patientFirstVisit) {
         if (!this.isEnrolledInHTN) {
@@ -368,13 +382,17 @@ export default defineComponent({
               text: "Yes",
               handler: async () => {
                 await this.enrollInHTN();
+                await this.setHtnTransferred('Yes')
                 this.patientFirstVisit = false;
                 await this.getItems();
               },
             },
             {
               text: "No",
-              handler: () => this.nextTask(),
+              handler: async () => {
+                await this.setHtnTransferred('No')
+                this.nextTask()
+              },
             },
           ]);
         } else {
