@@ -6,6 +6,22 @@ export class BPManagementService extends AppEncounterService {
       super(patientID, 48, providerID) //TODO: Use encounter type reference name'
     }
 
+    static getBpGrade(sbp: number, dbp: number) {
+      if ((sbp < 140) && (dbp < 90)) {
+        return "normal"
+      }
+      else if ((sbp >= 140 && sbp < 160) || (dbp >= 100 && dbp < 110)) {
+        return "grade 1"
+      }
+      else if ((sbp >= 180 && dbp > 110) || sbp >= 180) {
+        return "grade 3"
+      }
+      else if ((sbp >= 160 && sbp < 180) || (dbp >= 110)) {
+        return "grade 2"
+      }
+      return 'N/A'
+    }
+
     getSystolicBp() {
       return ObservationService.getFirstValueNumber(this.patientID, 'Systolic blood pressure')
     }
