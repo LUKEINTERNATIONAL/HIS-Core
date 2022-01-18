@@ -226,7 +226,12 @@ export default defineComponent({
             state: this.action.value,
           };
           await this.htn.enrollPatient(patientState);
-          this.nextAction(this.action.label);
+
+          if (typeof this.action?.other?.action === 'function') {
+            return this.action.other.action()
+          } else {
+            this.nextTask()
+          }
         }
       } else {
         toastWarning("Please select an action");
@@ -239,32 +244,8 @@ export default defineComponent({
     goToDiagnosis() {
       return this.$router.push({
         path: `/art/encounters/hypertension_diagnosis/${this.patientID}`,
-      });
+      })
     },
-    nextAction(state: string) {
-      switch (state) {
-        case "Start anti hypertensives":
-          this.$router.push(
-            `/art/encounters/bp_prescription/${this.patientID}`
-          );
-          break;
-        case "Review Drugs":
-          this.$router.push(
-            `/art/encounters/bp_adherence/${this.patientID}?review=true`
-          );
-          break;
-        case "Continue Drugs":
-          this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`);
-          break;
-        case "Did not take prescribed BP drugs today":
-          this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`);
-          break;
-        default:
-          this.nextTask();
-          break;
-      }
-    },
-
     async hasHyperTenstion() {
       const ob = await ObservationService.getFirstValueCoded(
         this.patientID,
@@ -415,14 +396,25 @@ export default defineComponent({
             {
               label: "Did not take prescribed drugs",
               value: "on treatment",
+              other: {
+                action: () => this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`)
+              }
             },
             {
               label: "Continue drugs",
               value: "on treatment",
+              other: {
+                action: () => this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`)
+              }
             },
             {
               label: "Review drugs",
               value: "on treatment",
+              other: {
+                action: () => this.$router.push(
+                  `/art/encounters/bp_adherence/${this.patientID}?review=true`
+                )
+              }
             },
           ];
         } else {
@@ -439,7 +431,7 @@ export default defineComponent({
               label: "Patient declining BP drugs ",
               value: "Symptomatic but not in treatment",
             },
-          ];
+          ]
           if (this.normatensive) {
             this.items.push({
               label: "Return to annual screening",
@@ -449,10 +441,15 @@ export default defineComponent({
           this.items.push({
             label: "Start anti hypertensives",
             value: "On treatment",
-          });
+            other: {
+              action: () => this.$router.push(
+                `/art/encounters/bp_prescription/${this.patientID}`
+              )
+            }
+          })
         }
       }
-    },
-  },
-});
+    }
+  }
+})
 </script>
