@@ -133,7 +133,6 @@ import table from "@/components/DataViews/tables/ReportDataTable"
 const HEADER_STYLE = {
   background: '#444444',
 }
-
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
@@ -167,10 +166,14 @@ export default defineComponent({
         table.thTxt("Action / Note", { style: HEADER_STYLE })
       ]
     ] as any,
+    bpGradeColorMap: {
+      'N/A': '#ffffff',
+      'normal': '#2dd36f',
+      'grade 1': '#feede2',
+      'grade 2': '#fef9df',
+      'grade 3': '#fcd4d4'
+    } as any,
     rows: [] as any,
-    rowColors: [] as Array<any>,
-    cellColors: [] as Array<any>,
-    styles: [] as Array<string>,
     riskFactors: [] as any,
     action: null as any,
     trail: [] as any,
@@ -189,13 +192,13 @@ export default defineComponent({
   }),
   watch: {
     patient: {
-      async handler(patient: any) {
+      async handler() {
         this.htn = new BPManagementService(this.patientID, this.providerID);
+        this.trail = await this.htn.getBPTrail();
+        this.rows = this.formatBpTrailRows(this.trail);
+        this.normatensive = BPManagementService.isBpNormotensive(this.trail)
         this.riskFactors = await this.getRiskFactors();
-        this.rows = await this.formatTrail();
-        this.date = HisDate.toStandardHisDisplayFormat(
-          Service.getSessionDate()
-        );
+        this.date = HisDate.toStandardHisDisplayFormat(Service.getSessionDate());
         await this.isTransfered();
         await this.hasHyperTenstion();
         await this.getTreatmentStatus();
@@ -326,21 +329,11 @@ export default defineComponent({
         return {
           concept: concept.name,
           value: val,
-        };
-      });
+        }
+      })
       return Promise.all(j);
     },
-    async formatTrail() {
-      const colorMap: any = {
-        'N/A': '#ffffff',
-        'normal': '#2dd36f',
-        'grade 1': '#feede2',
-        'grade 2': '#fef9df',
-        'grade 3': '#fcd4d4'
-      }
-
-      const trail = await this.htn.getBPTrail();
-
+    formatBpTrailRows(trail: any) {
       return Object.keys(trail).map(m => {
         const date = HisDate.toStandardHisDisplayFormat(m);
         this.currentDrugs = trail[m]["drugs"];
@@ -349,7 +342,7 @@ export default defineComponent({
             parseInt(trail[m].sbp),
             parseInt(trail[m].dbp)
           )
-          return colorMap[grade]
+          return this.bpGradeColorMap[grade]
         }
         const style = {
           background: colorGrade()
@@ -363,7 +356,6 @@ export default defineComponent({
         ]
       })
     },
-
     async showRiskFactors() {
       const modal = await modalController.create({
         component: RiskFactorModal,

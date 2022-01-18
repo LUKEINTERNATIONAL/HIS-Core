@@ -22,6 +22,18 @@ export class BPManagementService extends AppEncounterService {
       return 'N/A'
     }
 
+    /**
+     * BP is normointensive if two most recent consecutive tests are normal
+     * @param bpTrail 
+     * @returns
+    */
+    static isBpNormotensive(bpTrail: any) {
+      const [ firstRecentGrade, secondRecentGrade ] = Object.values(bpTrail)
+        .sort((a: any, b: any) => a.date < b.date ? 1 : 0)
+        .map((bp: any) => this.getBpGrade(bp.sbp, bp.dbp))
+      return firstRecentGrade === 'normal' && secondRecentGrade === 'normal'
+    }
+
     getSystolicBp() {
       return ObservationService.getFirstValueNumber(this.patientID, 'Systolic blood pressure')
     }
