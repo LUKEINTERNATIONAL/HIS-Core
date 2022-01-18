@@ -37,6 +37,73 @@ export class BPManagementService extends AppEncounterService {
     async enrollPatient(state: any) {
       return await AppEncounterService.postJson(`/patients/${this.patientID}/update_or_create_htn_state`, state);
     }
+    static htnDrugReferences() {
+      return [
+        { 
+          'drug_id': 275,
+          'drug_name': "HCZ (25mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        },
+        {
+          'drug_id': 942,
+          'drug_name': "Enalapril (5mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        },
+        {
+          'drug_id': 943,
+          'drug_name': "Enalapril (10mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        },
+        {
+          'drug_id': 558,
+          'drug_name': "Amlodipine (5mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        },
+        {
+          'drug_id': 559,
+          'drug_name': "Amlodipine (10mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        },
+        {
+          'drug_id': 117,
+          'drug_name': "Atenolol (50mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        },
+        {
+          'drug_id': 11,
+          'drug_name': "Atenolol(100mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        }
+      ]
+    }
     getDrugs() {
         return {
         HCZ: {

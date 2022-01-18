@@ -21,6 +21,7 @@ import {
     FlowState 
 } from "@/apps/ART/guidelines/prescription_guidelines"
 import ART_PROPS from "@/apps/ART/art_global_props"
+import { BPManagementService } from '../../services/htn_service'
 
 export default defineComponent({
     mixins: [EncounterMixinVue],
@@ -89,7 +90,6 @@ export default defineComponent({
                 } else if (!this.prescription.shouldPrescribeArvs() && this.prescription.shouldPrescribeExtras()) {
                     this.drugs = this.prescription.getRegimenExtras()
                 }
-
                 this.patientToolbar = await this.getPatientToolBar()
                 this.fields = this.getFields()
             },
@@ -193,15 +193,31 @@ export default defineComponent({
             } else {
                 drugs = this.facts.regimenDrugs
             }
-
-            this.drugs = [...this.prescription.getRegimenExtras(), ...drugs]
-
+            const regimenExtras = (() => {
+                const e = this.prescription.getRegimenExtras()
+                const htnDrugIDs = this.$route.query.htn_drugs as string
+                return htnDrugIDs
+                    ? [...e, ...this.resolveHtnDrugs(htnDrugIDs)]
+                    : e
+            })()
+            this.drugs = [...regimenExtras, ...drugs]
             return true
         },
         getLpvDrugs() {
             return this.prescription.getLvpDrugsByType(
                 this.facts.lpvType, this.facts.regimenCode
             ) 
+        },
+        resolveHtnDrugs(htnRefs: string) {
+            try {
+                return htnRefs.split(',').map((drugID: string) => {
+                    return BPManagementService.htnDrugReferences()
+                        .filter((d: any) => d.drug_id === parseInt(drugID))[0]
+                })
+            } catch (e) {
+                console.warn(e)
+                return []
+            }
         },
         getStarterPackDrugs() {
             return this.prescription.getRegimenStarterpack(

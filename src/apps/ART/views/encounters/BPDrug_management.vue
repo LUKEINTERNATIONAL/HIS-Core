@@ -346,7 +346,7 @@
           size="large" 
           color="success" 
           slot="end" 
-          @click="gotoPatientDashboard">
+          @click="gotoTreatment">
           Continue
         </ion-button>
       </ion-toolbar>
@@ -427,6 +427,10 @@ export default defineComponent({
           })
         }
       })
+    },
+    gotoTreatment() {
+      const htnDrugs = this.selectedDrugs.map((d: any) => d.drugID).join(',')
+      this.$router.push(`/art/encounters/prescriptions/${this.patientID}?htn_drugs=${htnDrugs}`)
     },
     async showModal(currentField: Field, onFinish: Function) {
       const modal = await modalController.create({
