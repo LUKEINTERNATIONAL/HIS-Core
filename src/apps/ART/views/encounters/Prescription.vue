@@ -30,6 +30,7 @@ export default defineComponent({
         prescription: {} as any,
         patientToolbar: [] as Array<Option>,
         fieldComponent: '' as string,
+        regimenExtras: [] as Array<any>,
         facts: {
             age: -1 as number,
             gender: '' as string,
@@ -82,13 +83,24 @@ export default defineComponent({
 
                 await this.initFacts(patient)
 
+                if (this.prescription.shouldPrescribeExtras()) {
+                    this.regimenExtras = this.prescription.getRegimenExtras()
+                }
+                
+                if (!isEmpty(this.$route.query.htn_drugs)) {
+                    this.regimenExtras = [
+                        ...this.regimenExtras, 
+                        ...this.resolveHtnDrugs(this.$route.query.htn_drugs as string)
+                    ]
+                }
+
                 if (this.prescription.isFastTrack()) {
                     await this.prescription.loadFastTrackMedications()
                     this.drugs = this.prescription.getFastTrackMedications()
                     this.fieldComponent = 'next_visit_interval'
 
-                } else if (!this.prescription.shouldPrescribeArvs() && this.prescription.shouldPrescribeExtras()) {
-                    this.drugs = this.prescription.getRegimenExtras()
+                } else if (!this.prescription.shouldPrescribeArvs() && !isEmpty(this.regimenExtras)) {
+                    this.drugs = this.regimenExtras
                 }
                 this.patientToolbar = await this.getPatientToolBar()
                 this.fields = this.getFields()
@@ -193,14 +205,7 @@ export default defineComponent({
             } else {
                 drugs = this.facts.regimenDrugs
             }
-            const regimenExtras = (() => {
-                const e = this.prescription.getRegimenExtras()
-                const htnDrugIDs = this.$route.query.htn_drugs as string
-                return htnDrugIDs
-                    ? [...e, ...this.resolveHtnDrugs(htnDrugIDs)]
-                    : e
-            })()
-            this.drugs = [...regimenExtras, ...drugs]
+            this.drugs = [...this.regimenExtras, ...drugs]
             return true
         },
         getLpvDrugs() {
@@ -210,10 +215,10 @@ export default defineComponent({
         },
         resolveHtnDrugs(htnRefs: string) {
             try {
-                return htnRefs.split(',').map((drugID: string) => {
-                    return BPManagementService.htnDrugReferences()
+                return htnRefs.split(',').map((drugID: string) =>
+                    BPManagementService.htnDrugReferences()
                         .filter((d: any) => d.drug_id === parseInt(drugID))[0]
-                })
+                )
             } catch (e) {
                 console.warn(e)
                 return []
