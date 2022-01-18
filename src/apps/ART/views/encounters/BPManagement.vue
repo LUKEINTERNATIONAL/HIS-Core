@@ -21,21 +21,10 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <view-port>
-        <div class="view-port-content">
-          <ion-header> </ion-header>
-          <ion-content>
-            <div style="height: 100%;">
-              <ion-grid style="height: 100%;">
-                <ion-row style="max-height: 80%; overflow: scroll; ">
-                  <data-table :config="{showIndex: false}" :columns="columns" :rows="rows"></data-table>
-                </ion-row>
-              </ion-grid>
-            </div>
-          </ion-content>
-        </div>
-      </view-port>
-      <div class="his-floating-keyboard"> 
+      <data-table :config="{showIndex: false}" :columns="columns" :rows="rows"></data-table>
+    </ion-content>
+    <ion-footer>
+      <ion-toolbar v-if="patientHasHyperTensionObs"> 
         <ion-radio-group v-model="action">
           <ion-grid>
             <ion-row>
@@ -52,9 +41,7 @@
             </ion-row>
           </ion-grid>
         </ion-radio-group>
-      </div>
-    </ion-content>
-    <ion-footer>
+      </ion-toolbar>
       <ion-toolbar color="dark">
         <ion-button
           size="large"
@@ -138,7 +125,6 @@ export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
     DataTable,
-    ViewPort,
     IonTitle,
     IonToolbar,
     IonHeader,
