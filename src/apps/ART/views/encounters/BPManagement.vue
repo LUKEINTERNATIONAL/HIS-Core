@@ -75,14 +75,19 @@
         </ion-button>
         <ion-button
           size="large"
-          slot="start"
+          slot="end"
           @click="goToDiagnosis"
           v-if="!patientHasHyperTensionObs"
         >
           Hypertension Diagnosis
         </ion-button>
 
-        <ion-button size="large" color="success" slot="end" @click="onFinish">
+        <ion-button 
+          v-if="!goToDiagnosis" 
+          size="large"
+          color="success"
+          slot="end"
+          @click="onFinish">
           Finish
         </ion-button>
       </ion-toolbar>
