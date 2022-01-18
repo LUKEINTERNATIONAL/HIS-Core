@@ -21,6 +21,7 @@ import EncounterMixinVue from "./EncounterMixin.vue";
 import { BMIService } from "@/services/bmi_service";
 import { ProgramService } from "@/services/program_service";
 import ART_PROP from "@/apps/ART/art_global_props"
+import { find } from "lodash";
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -221,16 +222,43 @@ export default defineComponent({
           helpText: "Vitals entry",
           type: FieldType.TT_VITALS_ENTRY,
           validation: (value: any) => this.validateVitals(value),
-          preset: {
-            label: "Gender",
-            value: this.gender,
-          },
           config: {
-            patientId: this.patientID,
-            providerId: this.providerID,
             hiddenFooterBtns : [
               'Clear'
-            ]
+            ],
+            onUpdateAlertStatus: async (params: Option[]) => {
+              const weightOption = find(params, { label: 'Weight'})
+              const heightOption = find(params, { label: 'Height'})
+
+              if (!(weightOption && heightOption)) return
+
+              const weight = parseFloat(weightOption.value as string)
+              const height = parseFloat(heightOption.value as string)
+
+              if (weight <= 0 || height <=0) return { 
+                label: 'BMI',
+                value: 'N/A',
+                color: '', 
+                status: ''
+              }
+
+              const BMI = await BMIService.getBMI(weight, height, this.gender, this.age);
+
+              return {
+                label: 'BMI',
+                value: BMI.index,
+                color: BMI.color, 
+                status: BMI.result
+              }
+            },
+            onChangeOption: (activeItem: any) => {
+              if (!activeItem.value && activeItem.other.required) {
+                throw `Value for ${activeItem.label} is required`
+              }else if (activeItem.value) {
+                const errs = this.vitals.validator(activeItem)
+                if(errs && errs.length) throw errs
+              }
+            }
           },
           options: () => [
             {
