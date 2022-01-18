@@ -83,9 +83,10 @@
         </ion-button>
 
         <ion-button 
-          size="large" 
+          size="large"
           color="success" 
-          slot="end" 
+          slot="end"
+          v-if="patientHasHyperTensionObs"
           @click="onFinish">
           Finish
         </ion-button>
