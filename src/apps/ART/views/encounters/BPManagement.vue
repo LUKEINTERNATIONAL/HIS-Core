@@ -4,8 +4,8 @@
       <ion-toolbar>
         <ion-title> 
           <span>BP management screening on {{ date }}</span>
-          <span v-if="patientOnBPDrugs" style="color: green">
-            Patient already on BP drugs</span>
+          <small v-if="patientOnBPDrugs" style="color: green">
+            (Patient already on BP drugs)</small>
         </ion-title>
         <span slot="end">
           <ion-button
