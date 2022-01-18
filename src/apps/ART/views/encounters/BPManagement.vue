@@ -130,6 +130,10 @@ import { PatientProgramService } from "@/services/patient_program_service";
 import DataTable from "@/components/DataViews/tables/ReportDataTable.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
 
+const HEADER_STYLE = {
+  background: '#444444',
+}
+
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
@@ -156,11 +160,11 @@ export default defineComponent({
     suggestedNumber: "" as any,
     columns: [
       [
-        table.thTxt("Date"),
-        table.thTxt("Systolic"),
-        table.thTxt("Diastolic"),
-        table.thTxt("BP Drugs"),
-        table.thTxt("Action / Note")
+        table.thTxt("Date", { style: HEADER_STYLE }),
+        table.thTxt("Systolic", { style: HEADER_STYLE }),
+        table.thTxt("Diastolic", { style: HEADER_STYLE }),
+        table.thTxt("BP Drugs", { style: HEADER_STYLE }),
+        table.thTxt("Action / Note", { style: HEADER_STYLE })
       ]
     ] as any,
     rows: [] as any,
@@ -330,9 +334,9 @@ export default defineComponent({
       const colorMap: any = {
         'N/A': '#ffffff',
         'normal': '#2dd36f',
-        'grade 1': '#ffedbf',
-        'grade 2': '#ffad5a',
-        'grade 3': '#ffac8d'
+        'grade 1': '#feede2',
+        'grade 2': '#fef9df',
+        'grade 3': '#fcd4d4'
       }
 
       const trail = await this.htn.getBPTrail();
