@@ -28,7 +28,7 @@
             <div style="height: 100%;">
               <ion-grid style="height: 100%;">
                 <ion-row style="max-height: 80%; overflow: scroll; ">
-                  <his-table :columns="columns" :rows="rows"></his-table>
+                  <data-table :config="{showIndex: false}" :columns="columns" :rows="rows"></data-table>
                 </ion-row>
               </ion-grid>
             </div>
@@ -83,10 +83,9 @@
         </ion-button>
 
         <ion-button 
-          v-if="!goToDiagnosis" 
-          size="large"
-          color="success"
-          slot="end"
+          size="large" 
+          color="success" 
+          slot="end" 
           @click="onFinish">
           Finish
         </ion-button>
@@ -97,7 +96,6 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import ViewPort from "@/components/DataViews/ViewPort.vue";
-import HisTable from "@/components/DataViews/HisBasicTable.vue";
 import {
   IonToolbar,
   IonTitle,
@@ -129,11 +127,14 @@ import { ProgramService } from "@/services/program_service";
 import { VitalsService } from "@/apps/ART/services/vitals_service"
 import { toastDanger } from "@/utils/Alerts";
 import { PatientProgramService } from "@/services/patient_program_service";
+import DataTable from "@/components/DataViews/tables/ReportDataTable.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
+
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
+    DataTable,
     ViewPort,
-    HisTable,
     IonTitle,
     IonToolbar,
     IonHeader,
@@ -154,13 +155,15 @@ export default defineComponent({
     hasARVNumber: true,
     suggestedNumber: "" as any,
     columns: [
-      "Date",
-      "Systolic",
-      "Diastolic",
-      "BP Drugs",
-      "Action / Note",
-    ] as Array<string>,
-    rows: [] as Array<string>,
+      [
+        table.thTxt("Date"),
+        table.thTxt("Systolic"),
+        table.thTxt("Diastolic"),
+        table.thTxt("BP Drugs"),
+        table.thTxt("Action / Note")
+      ]
+    ] as any,
+    rows: [] as any,
     rowColors: [] as Array<any>,
     cellColors: [] as Array<any>,
     styles: [] as Array<string>,
@@ -324,16 +327,37 @@ export default defineComponent({
       return Promise.all(j);
     },
     async formatTrail() {
+      const colorMap: any = {
+        'N/A': '#ffffff',
+        'normal': '#2dd36f',
+        'grade 1': '#ffedbf',
+        'grade 2': '#ffad5a',
+        'grade 3': '#ffac8d'
+      }
+
       const trail = await this.htn.getBPTrail();
-      return Object.keys(trail).map((m) => {
+
+      return Object.keys(trail).map(m => {
         const date = HisDate.toStandardHisDisplayFormat(m);
         this.currentDrugs = trail[m]["drugs"];
-        return {
-          ...trail[m],
-          date: date,
-          drugs: trail[m]["drugs"].join(""),
-        };
-      });
+        const colorGrade = () => {
+          const grade: string = BPManagementService.getBpGrade(
+            parseInt(trail[m].sbp),
+            parseInt(trail[m].dbp)
+          )
+          return colorMap[grade]
+        }
+        const style = {
+          background: colorGrade()
+        }
+        return [
+          table.tdDate(date, { style }),
+          table.td(trail[m].sbp, { style }),
+          table.td(trail[m].dbp, { style }),
+          table.td(trail[m]["drugs"].join(", "), { style }),
+          table.td(trail[m].notes, { style })
+        ]
+      })
     },
 
     async showRiskFactors() {
