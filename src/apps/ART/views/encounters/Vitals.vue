@@ -21,7 +21,7 @@ import EncounterMixinVue from "./EncounterMixin.vue";
 import { BMIService } from "@/services/bmi_service";
 import { ProgramService } from "@/services/program_service";
 import ART_PROP from "@/apps/ART/art_global_props"
-import { find } from "lodash";
+import { find, isEmpty } from "lodash";
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -33,6 +33,7 @@ export default defineComponent({
     hasBPinfo: false,
     recentHeight: null,
     HTNEnabled: false,
+    optionWhiteList: [] as string[],
     hasHTNObs: false,
     vitals: {} as any,
     weightForHeight: {} as any,
@@ -48,25 +49,91 @@ export default defineComponent({
   },
   methods: {
     async init(patient: any) {
+      const optionWhiteList = this.$route.query.vital_options as string
       this.vitals = new VitalsService(patient.getID(), this.providerID);
-
       this.age = patient.getAge();
       this.gender = patient.getGender();
 
-      const lastHeight = await patient.getRecentHeight();
-      this.recentHeight = lastHeight == -1 ? null : lastHeight;
+      if (optionWhiteList) this.optionWhiteList = optionWhiteList.split(',')
 
-      if (this.age <= 14) {
-        this.medianWeightandHeight = await patient.getMedianWeightHeight();
-        this.weightForHeight = await ProgramService.getWeightForHeightValues();
+      if (this.canCheckWeightHeight()) {
+        const lastHeight = await patient.getRecentHeight();
+        this.recentHeight = lastHeight == -1 ? null : lastHeight;
+        if (this.age <= 14) {
+          this.medianWeightandHeight = await patient.getMedianWeightHeight();
+          this.weightForHeight = await ProgramService.getWeightForHeightValues();
+        }
       }
       await VitalsService.getAll(patient.getID(), "Treatment status").then(
         (data: any) => {
           this.hasHTNObs = data && data.length > 0;
         }
-      );
+      )
       this.HTNEnabled = await ART_PROP.htnEnabled()
       this.fields = this.getFields();
+    },
+    getOptions() {
+      const recentHeight = this.recentHeight && this.age > 18? this.recentHeight : "";
+      const showHeight = !(recentHeight && this.age > 18);
+      const options = [
+        {
+          label: "Weight",
+          value: "",
+          other: {
+            modifier: "KG",
+            icon: "weight",
+            required: true,
+          },
+        },
+        {
+          label: "Height",
+          value: `${recentHeight}`,
+          other: {
+            modifier: "CM",
+            icon: "height",
+            recentHeight: this.recentHeight,
+            visible: showHeight,
+            required: showHeight,
+          },
+        },
+        { label: "BP", value: "", other: { modifier: "mmHG", icon: "bp" } },
+        {
+          label: "Temp",
+          value: "",
+          other: { modifier: "°C", icon: "temp" },
+        },
+        {
+          label: "SP02",
+          value: "",
+          other: { modifier: "%", icon: "spo2" },
+        },
+        {
+          label: "Pulse",
+          value: "",
+          other: { modifier: "BPM", icon: "pulse-rate" },
+        },
+        {
+          label: "Age",
+          value: this.age,
+          other: { modifier: "Years old", icon: "", visible: false },
+        }
+      ]
+
+      if (!isEmpty(this.optionWhiteList)) {
+        return options.filter((o: any) => this.optionWhiteList.includes(o.label))
+          .map((o: any) => {
+            o.other.required = true
+            return o
+          })
+      }
+      return options
+    },
+    canCheckWeightHeight() {
+      return isEmpty(this.optionWhiteList) || this.optionWhiteList.includes('Height') 
+        && this.optionWhiteList.includes('Weight')
+    },
+    canCheckBp() {
+      return isEmpty(this.optionWhiteList) || this.optionWhiteList.includes('BP')
     },
     async onFinish(formData: any) {
       const encounter = await this.vitals.createEncounter();
@@ -138,7 +205,6 @@ export default defineComponent({
             value: weightForHeightPercentile,
           });
         }
-        
         obs.push({
           label: "Weight for age percent of median",
           value: currentWeightPercentile,
@@ -178,13 +244,19 @@ export default defineComponent({
       return this.vitals.validateAll(v);
     },
     sanitizeVitals(vitals: Array<Option>) {
-      const p = vitals.filter((element) => {
+      let p = vitals.filter((element) => {
         if (element.label === "Height" && element.other.required == false) {
           return false;
         }
         return element.value !== "" && element.label !== "Age";
-      });
-      return [...this.splitBP(p), ...p, ...this.getBMI(vitals)];
+      })
+      if (this.canCheckBp()) {
+        p = p.concat(this.splitBP(p))
+      }
+      if (this.canCheckWeightHeight()){
+        p = p.concat(this.getBMI(vitals))
+      }
+      return p
     },
     checkRequiredVitals(vitals: Array<Option>) {
       return vitals.filter((element) => {
@@ -192,11 +264,8 @@ export default defineComponent({
       });
     },
     getFields(): Array<Field> {
-      const recentHeight = this.recentHeight && this.age > 18? this.recentHeight : "";
       const HTNEnabled = this.HTNEnabled;
       const hasHTNObs = this.hasHTNObs;
-
-      const showHeight = !(recentHeight && this.age > 18);
       return [
         {
           id: "on_htn_medication",
@@ -260,49 +329,7 @@ export default defineComponent({
               }
             }
           },
-          options: () => [
-            {
-              label: "Weight",
-              value: "",
-              other: {
-                modifier: "KG",
-                icon: "weight",
-                required: true,
-              },
-            },
-            {
-              label: "Height",
-              value: `${recentHeight}`,
-              other: {
-                modifier: "CM",
-                icon: "height",
-                recentHeight: this.recentHeight,
-                visible: showHeight,
-                required: showHeight,
-              },
-            },
-            { label: "BP", value: "", other: { modifier: "mmHG", icon: "bp" } },
-            {
-              label: "Temp",
-              value: "",
-              other: { modifier: "°C", icon: "temp" },
-            },
-            {
-              label: "SP02",
-              value: "",
-              other: { modifier: "%", icon: "spo2" },
-            },
-            {
-              label: "Pulse",
-              value: "",
-              other: { modifier: "BPM", icon: "pulse-rate" },
-            },
-            {
-              label: "Age",
-              value: this.age,
-              other: { modifier: "Years old", icon: "", visible: false },
-            },
-          ],
+          options: () => this.getOptions(),
         },
       ];
     },
