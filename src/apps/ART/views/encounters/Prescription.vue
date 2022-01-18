@@ -280,10 +280,14 @@ export default defineComponent({
             }
         },
         extractRegimenCode(regimen: string): number {
-           if (regimen.match(/n\/a/i))
-               return -1
+          try {
+               if (regimen.match(/n\/a/i)) return -1
 
-           return parseInt(regimen.substring(0, regimen.length))
+               return parseInt(regimen.substring(0, regimen.length))
+           } catch (e) {
+               console.warn(e)
+               return -1
+           }
         },
         getDosageTableOptions(regimen: any) {
             const rowColors: any = [ 
