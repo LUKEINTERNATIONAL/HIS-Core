@@ -62,7 +62,7 @@
             </tr>
           </table>
           <p/>
-          <table id="table-notes">
+          <table id="table-notes" style="width:100%">
             <caption style="font-size: 1.2em">
               Notes
             </caption>
@@ -113,7 +113,7 @@
           size="large" 
           color="success" 
           slot="end" 
-          @click="gotoTreatment">
+          @click="onFinish">
           Continue
         </ion-button>
       </ion-toolbar>
@@ -143,7 +143,8 @@ import {
 import EncounterMixinVue from "./EncounterMixin.vue";
 import { BPManagementService } from "../../services/htn_service";
 import { ProgramService } from "@/services/program_service";
-import { isEmpty } from "lodash";
+import { toastWarning } from "@/utils/Alerts";
+import { isEmpty } from "lodash"
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -187,13 +188,31 @@ export default defineComponent({
         type: FieldType.TT_TEXT
       }, 
       (data: any) => {
-        if (data) {
-          this.drugs[drugIndex].notes.push({
-            date: ProgramService.getSessionDate(),
-            description: data.value || '',
-          })
-        }
+        if (data) this.drugs[drugIndex].notes.push({
+          date: ProgramService.getSessionDate(),
+          description: data.value || '',
+          drugID: this.drugs[drugIndex].drugs[0].drugID
+        })
       })
+    },
+    async onFinish() {
+      const drugNotes = Object.values(this.drugs)
+        .filter((d: any) => !isEmpty(d.notes))
+        .map((d: any) => d.notes)
+        .reduce((accum: any, cur: any) => accum.concat(cur), [])
+        .map((note: any) => this.HTN.buildObs('Clinician notes', {
+          'value_text': note.description, 
+          'value_drug': note.drugID
+        }))
+      if (!isEmpty(drugNotes)) {
+        try {
+          await this.HTN.createEncounter()
+          await this.HTN.saveObservationList(await (Promise.all(drugNotes)))
+        } catch (e) {
+          return toastWarning(`Unable to save notes ${e}`)
+        }
+      }
+      this.gotoTreatment()
     },
     gotoTreatment() {
       const htnDrugs = this.selectedDrugs.map((d: any) => d.drugID).join(',')
@@ -238,9 +257,11 @@ export default defineComponent({
       let drugs: any[] = [];
       if (!isEmpty(this.drugs)) {
         Object.keys(this.drugs).forEach((d: any) => {
-          const dr = this.drugs[d].drugs.filter((d: any) => d.selected === true);
+          const drug = this.drugs[d]
+          const dr = drug.drugs.filter((d: any) => d.selected === true)
+            .map((d: any) => ({ ...d, notes: drug.notes }));
           drugs = [...drugs, ...dr];
-        });
+        })
       }
       return drugs;
     },

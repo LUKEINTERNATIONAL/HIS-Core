@@ -1,6 +1,11 @@
 export default [
    {
       "categories": [],
+      "concept_id": 2592,
+      "name": "Clinician notes"
+   },
+   {
+      "categories": [],
       "concept_id": 6986,
       "name": "Transferred"
    },
