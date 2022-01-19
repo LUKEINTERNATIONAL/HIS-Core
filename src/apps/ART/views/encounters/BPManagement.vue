@@ -197,6 +197,9 @@ export default defineComponent({
         await this.hasHyperTenstion();
         await this.getTreatmentStatus();
         await this.getProgramStatus();
+        if (this.patientHasHyperTensionObs && !this.isEnrolledInHTN) {
+          await this.alertHtnEnrollment()
+        }
         this.getItems();
       },
       immediate: true,
@@ -353,6 +356,26 @@ export default defineComponent({
         });
       }
     },
+    alertHtnEnrollment() {
+      alertAction("Do you want to enroll this client in the HTN program?", [
+        {
+          text: "Yes",
+          handler: async () => {
+            await this.enrollInHTN();
+            await this.setHtnTransferred('Yes')
+            this.patientFirstVisit = false;
+            await this.getItems();
+          },
+        },
+        {
+          text: "No",
+          handler: async () => {
+            await this.setHtnTransferred('No')
+            this.nextTask()
+          },
+        }
+      ])
+    },
     async enrollInHTN() {
       try {
         const program  = new PatientProgramService(this.patientID)
@@ -381,88 +404,62 @@ export default defineComponent({
       }
     },
     async getItems() {
-      if (this.patientOnBPDrugs && this.patientFirstVisit) {
-        if (!this.isEnrolledInHTN) {
-          alertAction("Do you want to enroll this client in the HTN program?", [
-            {
-              text: "Yes",
-              handler: async () => {
-                await this.enrollInHTN();
-                await this.setHtnTransferred('Yes')
-                this.patientFirstVisit = false;
-                await this.getItems();
-              },
-            },
-            {
-              text: "No",
-              handler: async () => {
-                await this.setHtnTransferred('No')
-                this.nextTask()
-              },
-            },
-          ]);
-        } else {
-          this.patientFirstVisit = false;
-          await this.getItems();
-        }
-      } else {
-        if (this.currentDrugs.length > 0) {
-          this.items = [
-            {
-              label: "Did not take prescribed drugs",
-              value: "on treatment",
-              other: {
-                action: () => this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`)
-              }
-            },
-            {
-              label: "Continue drugs",
-              value: "on treatment",
-              other: {
-                action: () => this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`)
-              }
-            },
-            {
-              label: "Review drugs",
-              value: "on treatment",
-              other: {
-                action: () => this.$router.push(
-                  `/art/encounters/bp_adherence/${this.patientID}?review=true`
-                )
-              }
-            },
-          ];
-        } else {
-          this.items = [
-            {
-              label: "Lifestyle advice given",
-              value: "Lifestyle changes only",
-            },
-            {
-              label: "Not yet stable on ART",
-              value: "Symptomatic but not in treatment",
-            },
-            {
-              label: "Patient declining BP drugs ",
-              value: "Symptomatic but not in treatment",
-            },
-          ]
-          if (this.normatensive) {
-            this.items.push({
-              label: "Return to annual screening",
-              value: "Alive",
-            });
-          }
-          this.items.push({
-            label: "Start anti hypertensives",
-            value: "On treatment",
+      if (this.currentDrugs.length > 0) {
+        this.items = [
+          {
+            label: "Did not take prescribed drugs",
+            value: "on treatment",
+            other: {
+              action: () => this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`)
+            }
+          },
+          {
+            label: "Continue drugs",
+            value: "on treatment",
+            other: {
+              action: () => this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`)
+            }
+          },
+          {
+            label: "Review drugs",
+            value: "on treatment",
             other: {
               action: () => this.$router.push(
-                `/art/encounters/bp_prescription/${this.patientID}`
+                `/art/encounters/bp_adherence/${this.patientID}?review=true`
               )
             }
+          },
+        ];
+      } else {
+        this.items = [
+          {
+            label: "Lifestyle advice given",
+            value: "Lifestyle changes only",
+          },
+          {
+            label: "Not yet stable on ART",
+            value: "Symptomatic but not in treatment",
+          },
+          {
+            label: "Patient declining BP drugs ",
+            value: "Symptomatic but not in treatment",
+          },
+        ]
+        if (this.normatensive) {
+          this.items.push({
+            label: "Return to annual screening",
+            value: "Alive",
           })
         }
+        this.items.push({
+          label: "Start anti hypertensives",
+          value: "On treatment",
+          other: {
+            action: () => this.$router.push(
+              `/art/encounters/bp_prescription/${this.patientID}`
+            )
+          }
+        })
       }
     }
   }
