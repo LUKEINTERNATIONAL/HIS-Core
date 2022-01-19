@@ -190,7 +190,7 @@ export default defineComponent({
                     await this.patientProgram.voidProgram(reason)
                     const fieldContext = this.programSelectionFieldContext
                     const programIndex = findIndex(fieldContext.listData, { value: this.patientProgram.getProgramId() })
-                    fieldContext.listData.splice(programIndex)
+                    fieldContext.listData.splice(programIndex, 1)
                     fieldContext.activeProgram = {}
                     this.patientProgram.setPatientProgramId(-1)
                     this.patientProgram.setProgramId(-1)
