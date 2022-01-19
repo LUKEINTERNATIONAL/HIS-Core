@@ -113,7 +113,7 @@
         >
           Change drugs 
         </ion-button>
-        <ion-button size="large" color="success" slot="end" @click="gotoTreatment">
+        <ion-button size="large" color="success" slot="end" @click="onFinish">
           Continue
         </ion-button>
       </ion-toolbar>
@@ -139,8 +139,8 @@ import {
 import EncounterMixinVue from "./EncounterMixin.vue";
 import { BPManagementService, HTN_SESSION_KEY } from "../../services/htn_service";
 import HisKeypadVue from "@/components/Keyboard/HisKeypad.vue";
+import { optionsActionSheet } from "@/utils/ActionSheets"
 import { find } from "lodash"
-
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
@@ -175,11 +175,13 @@ export default defineComponent({
     };
   },
   methods: {
+    onFinish() {
+      this.selectNextAction()
+    },
     goToPrescription() {
       this.$router.push(`/art/encounters/bp_prescription/${this.patientID}`);
     },
     gotoTreatment() {
-      console.log(this.selectedDrugs)
       const htnDrugs = this.selectedDrugs.map((selected: any) =>  
         find( BPManagementService.htnDrugReferences(), { 'drug_id': selected.drugID})
       )
@@ -187,6 +189,32 @@ export default defineComponent({
       data[this.patientID] = htnDrugs
       sessionStorage.setItem(HTN_SESSION_KEY.Prescription, JSON.stringify(data))
       this.$router.push(`/art/encounters/prescriptions/${this.patientID}`)
+    },
+    async selectNextAction() {
+      const modal = await optionsActionSheet(
+        'Action confirmation',
+        'Please specify how to proceed with patient',
+        [
+          'Continue with current BP Drugs',
+          'Continue without BP Drugs',
+          'Change BP drugs'
+        ],
+        [
+          { name: 'Cancel', color: 'danger',  slot:'start'},
+          { name: 'Confirm', color: 'primary', slot:'end', role: 'action'}
+        ]
+      )
+      if (modal.selection && modal.action != 'Cancel') {
+        switch(modal.selection) {
+          case 'Continue without BP Drugs':
+            sessionStorage.removeItem(HTN_SESSION_KEY.Prescription)
+            return this.nextTask()
+          case 'Continue with current BP Drugs':
+            return this.gotoTreatment()
+          case 'Change BP drugs':
+            this.goToPrescription()
+        }
+      }
     },
     async getCurrentDrugs() {
       const drugs = await this.HTN.getCurrentDrugs();
