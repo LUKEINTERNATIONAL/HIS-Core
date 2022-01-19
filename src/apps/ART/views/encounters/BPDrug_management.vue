@@ -165,7 +165,9 @@ export default defineComponent({
       async handler() {
         this.HTN = new BPManagementService(this.patientID, this.providerID);
         this.drugs = this.HTN.getDrugs();
-        await this.getCurrentDrugs();
+        const { drugs, notes} = await this.HTN.getCurrentDrugs();
+        this.setPreviousBpDrugs(drugs)
+        this.setPreviousBpNotes(notes)
       },
       deep: true,
     },
@@ -233,18 +235,17 @@ export default defineComponent({
       });
       modal.present();
     },
-    async getCurrentDrugs() {
-      const { drugs, notes} = await this.HTN.getCurrentDrugs();
-      // build notes
+    setPreviousBpNotes(notes: Record<string, any>) {
       for (const drugIndex in notes) {
         this.drugs[drugIndex].notes = Object.keys(notes[drugIndex])
           .map((date: string) => notes[drugIndex][date].map(
-            (description: string) => ({ date, description }))
+            (description: string) => ({ date, description, isNewNote: false }))
           ).reduce(
             (accum: any[], cur: any[]) => accum.concat(cur), []
           )
       }
-      // activate drug selection
+    },
+    setPreviousBpDrugs(drugs: any) {
       drugs.forEach((drug: any) => {
         for (const key in this.drugs) {
           this.drugs[key].drugs.forEach((element: any, index: any) => {
