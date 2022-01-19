@@ -60,7 +60,6 @@
                 </td>
               </tr>
             </table>
-
             <table id="table-notes">
               <caption style="font-size: 1.6em">
                 Adherence summary
@@ -203,17 +202,20 @@ export default defineComponent({
         component: HisKeypadVue,
         backdropDismiss: false,
         cssClass: "keypad-modal",
-      });
+        componentProps: {
+          strictNumbers: true,
+          onKeyPress: async (data: any) => {
+            const adh = await this.HTN.getAdherence(
+              this.drugs[d].drugs[index].drugID,
+              data
+            )
+            this.drugs[d].drugs[index].adherence = adh.adherence;
+            this.drugs[d].drugs[index].remaining = data;
+          }
+        }
+      })
       modal.present();
-      const { data } = await modal.onDidDismiss();
-      const adh = await this.HTN.getAdherence(
-        this.drugs[d].drugs[index].drugID,
-        data
-      );
-      this.drugs[d].drugs[index].adherence = adh.adherence;
-      this.drugs[d].drugs[index].remaining = data;
-      return data;
-    },
+    }
   },
   computed: {
     selectedDrugs(): any {
