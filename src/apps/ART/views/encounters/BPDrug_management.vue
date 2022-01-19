@@ -12,321 +12,88 @@
     <ion-content>
       <view-port>
         <div class="view-port-content" v-if="drugs">
-          <ion-content>
-            <table id="main-table">
-              <tr>
-                <th>&nbsp;</th>
-                <th>
-                  HCZ
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="
-                          width: 100%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>25mg</span>
-                      </td>
-                    </tr>
-                  </table>
-                </th>
+          <table id="main-table" style="width:100%;">
+            <tr>
+              <th>&nbsp;</th>
+              <th v-for="(item, itemIndex) in drugs" :key="itemIndex"> 
+                {{ itemIndex }}
+                <ion-row> 
+                  <ion-col class="col-borders" v-for="(drug, drugIndex) in item.drugs" :key="drugIndex"> 
+                    {{drug.amount || '0mg'}}
+                  </ion-col>
+                </ion-row>
+              </th>
+            </tr>
 
-                <th>
-                  Enalapril
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="
-                          width: 50%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>5mg</span>
-                      </td>
-                      <td
-                        style="
-                          width: 50%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>10mg</span>
-                      </td>
-                    </tr>
-                  </table>
-                </th>
+            <tr>
+              <td class="td-remaining td-title">
+                <span>New/Current</span>
+              </td>
+              <td v-for="(item, itemIndex) in drugs" :key="itemIndex"  class="td-current td-value">
+                <ion-row> 
+                  <ion-col v-for="(drug, i) in item.drugs" :key="i">
+                    <ion-checkbox
+                      :checked="drug.selected"
+                      @ionChange="selectDrug(itemIndex, i, $event)"
+                    ></ion-checkbox>
+                  </ion-col>
+                </ion-row>
+              </td>
+            </tr>
 
-                <th>
-                  Amlodipine
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="
-                          width: 50%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
+            <tr>
+              <td class="td-remaining td-title">
+                <span>&nbsp;</span>
+              </td>
+              <td
+                class="td-remaining td-value"
+                v-for="(drug, ind) in Object.keys(drugs)"
+                :key="ind">
+                <ion-row>
+                  <ion-col>
+                    <ion-button 
+                      @click="launchNotePad(drug)"
+                      color="warning">
+                        Add notes
+                    </ion-button>
+                  </ion-col>
+                </ion-row>
+              </td>
+            </tr>
+          </table>
+          <p/>
+          <table id="table-notes">
+            <caption style="font-size: 1.2em">
+              Notes
+            </caption>
+            <p/>
+            <tr>
+              <th style="width: 25%" v-for="(d, drugIndex) in drugs" :key="drugIndex">
+                <span>{{ drugIndex }}</span>
+              </th>
+            </tr>
+            <tr>
+              <td
+                id="HCZ"
+                style="padding-top: 2px !important"
+                valign="top"
+                v-for="(drug, ind) in Object.keys(drugs)"
+                :key="ind"
+              >
+                <table class="table-inner-notes" id="notes-HCZ">
+                  <tr v-for="(note, i) in drugs[drug].notes" :key="i">
+                    <td class="date-td today-td">{{ note.date }}</td>
+                    <td class="date-td today-td">{{ note.description }}</td>
+                    <td>
+                      <ion-button color="danger" @click="removeNote(drug, i)"
+                        >X</ion-button
                       >
-                        <span>5mg</span>
-                      </td>
-                      <td
-                        style="
-                          width: 50%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>10mg</span>
-                      </td>
-                    </tr>
-                  </table>
-                </th>
-
-                <th>
-                  Atenolol
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="
-                          width: 50%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>50mg</span>
-                      </td>
-                      <td
-                        style="
-                          width: 50%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>100mg</span>
-                      </td>
-                    </tr>
-                  </table>
-                </th>
-              </tr>
-
-              <tr>
-                <td class="td-current td-title"><span>Current</span></td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="width: 100%"
-                        v-for="(drug, i) in drugs['HCZ'].drugs"
-                        :key="i"
-                      >
-                        <ion-checkbox
-                          :checked="drug.current"
-                          disabled
-                        ></ion-checkbox>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <td
-                      style="width: 50%"
-                      v-for="(drug, i) in drugs['Enalapril'].drugs"
-                      :key="i"
-                    >
-                      <ion-checkbox
-                        :checked="drug.current"
-                        disabled
-                      ></ion-checkbox>
                     </td>
-                    <tr></tr>
-                  </table>
-                </td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="width: 50%"
-                        v-for="(drug, i) in drugs['Amlodipine'].drugs"
-                        :key="i"
-                      >
-                        <ion-checkbox
-                          :checked="drug.current"
-                          disabled
-                        ></ion-checkbox>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="width: 50%"
-                        v-for="(drug, i) in drugs['Atenolol'].drugs"
-                        :key="i"
-                      >
-                        <ion-checkbox
-                          :checked="drug.current"
-                          disabled
-                        ></ion-checkbox>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-
-              <tr>
-                <td class="td-remaining td-title"><span>New</span></td>
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="width: 100%"
-                        v-for="(drug, i) in drugs['HCZ'].drugs"
-                        :key="i"
-                      >
-                        <ion-checkbox
-                          :checked="drug.selected"
-                          @ionChange="selectDrug('HCZ', i, $event)"
-                        ></ion-checkbox>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <td
-                      style="width: 50%"
-                      v-for="(drug, i) in drugs['Enalapril'].drugs"
-                      :key="i"
-                    >
-                      <ion-checkbox
-                        :checked="drug.selected"
-                        @ionChange="selectDrug('Enalapril', i, $event)"
-                      ></ion-checkbox>
-                    </td>
-                    <tr></tr>
-                  </table>
-                </td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="width: 50%"
-                        v-for="(drug, i) in drugs['Amlodipine'].drugs"
-                        :key="i"
-                      >
-                        <ion-checkbox
-                          :checked="drug.selected"
-                          @ionChange="selectDrug('Amlodipine', i, $event)"
-                        ></ion-checkbox>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="width: 50%"
-                        v-for="(drug, i) in drugs['Atenolol'].drugs"
-                        :key="i"
-                      >
-                        <ion-checkbox
-                          :checked="drug.selected"
-                          @ionChange="selectDrug('Atenolol', i, $event)"
-                        ></ion-checkbox>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-              <tr>
-                <td class="td-remaining td-title">
-                  <span>&nbsp;</span>
-                </td>
-
-                <td
-                  class="td-remaining td-value"
-                  v-for="(drug, ind) in Object.keys(drugs)"
-                  :key="ind"
-                >
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        colspan="1"
-                        style="
-                          max-height: 20px !important;
-                          margin: 0px !important;
-                          padding: 0px !important;
-                          height: 15px !important;
-                        "
-                      >
-                        <div
-                          class="button button-success"
-                          id="alert_HCZ (25mg tablet)"
-                          @click="launchNotePad(drug)"
-                        >
-                          Add notes
-                        </div>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-            <table id="table-notes">
-              <caption style="font-size: 1.2em">
-                Notes
-              </caption>
-              <tr>
-                <th style="width: 25%">
-                  <span>HCZ</span>
-                </th>
-                <th style="width: 25%">
-                  <span>Enalapril</span>
-                </th>
-                <th style="width: 25%">
-                  <span>Amlodipine</span>
-                </th>
-                <th style="width: 25%">
-                  <span>Atenolol</span>
-                </th>
-              </tr>
-              <tr>
-                <td
-                  id="HCZ"
-                  style="padding-top: 2px !important"
-                  valign="top"
-                  v-for="(drug, ind) in Object.keys(drugs)"
-                  :key="ind"
-                >
-                  <table class="table-inner-notes" id="notes-HCZ">
-                    <tr v-for="(note, i) in drugs[drug].notes" :key="i">
-                      <td class="date-td today-td">{{ note.date }}</td>
-                      <td class="date-td today-td">{{ note.description }}</td>
-                      <td>
-                        <ion-button color="danger" @click="removeNote(drug, i)"
-                          >X</ion-button
-                        >
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-              </tr>
-            </table>
-          </ion-content>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
         </div>
       </view-port>
     </ion-content>
@@ -481,12 +248,13 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-
 ion-checkbox {
   --size: 30px;
 }
-
-
+.col-borders {
+  border: 1px dotted lightgray;
+  border-radius: 3px;
+}
 #main-table,
 #table-notes {
   width: 95%;

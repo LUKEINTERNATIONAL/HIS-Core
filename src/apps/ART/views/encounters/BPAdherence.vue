@@ -241,7 +241,7 @@ ion-input {
 .col-borders {
   border: 1px dotted lightgray;
   border-radius: 3px;
-  padding: 0.6em;
+  padding: 0.3em;
 }
 .holder {
   width: 99%;
