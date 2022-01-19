@@ -111,7 +111,14 @@
         >
           cancel
         </ion-button>
-
+        <ion-button 
+          v-if="canClearHtnSessionPrescription"
+          size="large"
+          color="warning" 
+          slot="end"
+          @click="clearPrescriptionInSession">
+          Clear Session Prescription
+        </ion-button>
         <ion-button 
           v-if="selectedDrugs && selectedDrugs.length > 0" 
           size="large" 
@@ -173,6 +180,7 @@ export default defineComponent({
           const { drugs, notes} = await this.HTN.getCurrentDrugs();
           this.setPreviousBpDrugs(drugs)
           this.setPreviousBpNotes(notes)
+          this.canClearHtnSessionPrescription = this.patientHasHtnSessionKey()
         }
       },
       immediate: true
@@ -182,9 +190,26 @@ export default defineComponent({
     return {
       HTN: {} as any,
       drugs: null as any,
+      canClearHtnSessionPrescription: false
     };
   },
   methods: {
+    clearPrescriptionInSession() {
+      sessionStorage.removeItem(HTN_SESSION_KEY.Prescription)
+      this.canClearHtnSessionPrescription = false
+    },
+    patientHasHtnSessionKey() {
+      try {
+        const sessionData = sessionStorage.getItem(HTN_SESSION_KEY.Prescription)
+        if (sessionData) {
+          const data = JSON.parse(sessionData)
+          return data[this.patientID]
+        }
+      } catch (e) {
+        console.warn(e)
+      }
+      return false
+    },
     removeNote(d: any, i: any, ind: any) {
       this.drugs[d].notes.splice(ind, 1);
     },
