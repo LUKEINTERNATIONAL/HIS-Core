@@ -24,7 +24,6 @@
                   </ion-row>
                 </th>
               </tr>
-
               <tr>
                 <td class="td-current td-title">
                   <span>Current</span>
@@ -156,13 +155,15 @@ export default defineComponent({
     IonCheckbox,
   },
   watch: {
-    patient: {
-      async handler(patient: any) {
-        this.HTN = new BPManagementService(this.patientID, this.providerID);
-        this.drugs = this.HTN.getDrugs();
-        await this.getCurrentDrugs();
+    ready: {
+      async handler(ready: boolean) {
+        if (ready) {
+          this.HTN = new BPManagementService(this.patientID, this.providerID);
+          this.drugs = this.HTN.getDrugs();
+          await this.getCurrentDrugs();
+        }
       },
-      deep: true,
+      immediate: true
     },
   },
   data: () => {
@@ -206,8 +207,7 @@ export default defineComponent({
           strictNumbers: true,
           onKeyPress: async (data: any) => {
             const adh = await this.HTN.getAdherence(
-              this.drugs[d].drugs[index].drugID,
-              data
+              this.drugs[d].drugs[index].drugID, data
             )
             this.drugs[d].drugs[index].adherence = adh.adherence;
             this.drugs[d].drugs[index].remaining = data;
