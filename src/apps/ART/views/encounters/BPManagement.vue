@@ -24,7 +24,8 @@
       <data-table :config="{showIndex: false}" :columns="columns" :rows="rows"></data-table>
     </ion-content>
     <ion-footer>
-      <ion-toolbar v-if="patientHasHyperTensionObs && isEnrolledInHTN"> 
+      <ion-toolbar v-if="patientHasHyperTensionObs && isEnrolledInHTN || isEnrolledInHTN && patientOnBPDrugs"> 
+        <h1 style="text-align: center">Actions</h1>
         <ion-radio-group v-model="action">
           <ion-grid>
             <ion-row>
@@ -161,7 +162,7 @@ export default defineComponent({
     ] as any,
     bpGradeColorMap: {
       'N/A': '#ffffff',
-      'normal': '#2dd36f',
+      'normal': '#ffffff',
       'grade 1': '#feede2',
       'grade 2': '#fef9df',
       'grade 3': '#fcd4d4'
@@ -197,7 +198,8 @@ export default defineComponent({
         await this.hasHyperTenstion();
         await this.getTreatmentStatus();
         await this.getProgramStatus();
-        if (this.patientHasHyperTensionObs && !this.isEnrolledInHTN) {
+        if ((this.patientHasHyperTensionObs && !this.isEnrolledInHTN)
+          || (!this.isEnrolledInHTN && this.patientOnBPDrugs)) {
           await this.alertHtnEnrollment()
         }
         this.getItems();
@@ -357,7 +359,7 @@ export default defineComponent({
       }
     },
     alertHtnEnrollment() {
-      alertAction("Do you want to enroll this client in the HTN program?", [
+      return alertAction("Do you want to enroll this client in the HTN program?", [
         {
           text: "Yes",
           handler: async () => {
@@ -372,7 +374,7 @@ export default defineComponent({
           handler: async () => {
             await this.setHtnTransferred('No')
             this.nextTask()
-          },
+          }
         }
       ])
     },
