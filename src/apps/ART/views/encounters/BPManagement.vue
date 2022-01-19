@@ -107,6 +107,7 @@ import {
   IonPage,
   IonItem,
   IonLabel,
+  loadingController
 } from "@ionic/vue";
 import { toastWarning, alertAction, toastSuccess } from "@/utils/Alerts";
 import EncounterMixinVue from "./EncounterMixin.vue";
@@ -188,6 +189,12 @@ export default defineComponent({
     ready: {
       async handler(ready: boolean) {
         if (!ready) return
+        const loading = await loadingController.create({
+          message: 'Please wait...',
+          backdropDismiss: false
+        })
+        await loading.present()
+               
         this.htn = new BPManagementService(this.patientID, this.providerID);
         this.trail = await this.htn.getBPTrail();
         this.rows = this.formatBpTrailRows(this.trail);
@@ -203,6 +210,7 @@ export default defineComponent({
           await this.alertHtnEnrollment()
         }
         this.getItems();
+        loadingController.dismiss()
       },
       immediate: true,
     },
