@@ -1,6 +1,10 @@
 import { AppEncounterService } from "@/services/app_encounter_service"
 import { ObservationService } from "@/services/observation_service"
 
+export enum HTN_SESSION_KEY {
+  Prescription = "htnPrescription"
+}
+
 export class BPManagementService extends AppEncounterService {
     constructor(patientID: number, providerID: number) {
       super(patientID, 48, providerID) //TODO: Use encounter type reference name'

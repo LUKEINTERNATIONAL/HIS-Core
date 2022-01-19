@@ -145,10 +145,10 @@ import {
   IonCheckbox,
 } from "@ionic/vue";
 import EncounterMixinVue from "./EncounterMixin.vue";
-import { BPManagementService } from "../../services/htn_service";
+import { BPManagementService, HTN_SESSION_KEY } from "../../services/htn_service";
 import { ProgramService } from "@/services/program_service";
 import { toastWarning } from "@/utils/Alerts";
-import { isEmpty } from "lodash"
+import { isEmpty, find } from "lodash"
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -224,8 +224,14 @@ export default defineComponent({
       this.gotoTreatment()
     },
     gotoTreatment() {
-      const htnDrugs = this.selectedDrugs.map((d: any) => d.drugID).join(',')
-      this.$router.push(`/art/encounters/prescriptions/${this.patientID}?htn_drugs=${htnDrugs}`)
+      const htnDrugs = this.selectedDrugs.map((selected: any) =>  
+        find( BPManagementService.htnDrugReferences(), { 
+          'drug_id': selected.drugID
+        }))
+      const data: any = {}
+      data[this.patientID] = htnDrugs
+      sessionStorage.setItem(HTN_SESSION_KEY.Prescription, JSON.stringify(data))
+      this.$router.push(`/art/encounters/prescriptions/${this.patientID}`)
     },
     async showModal(currentField: Field, onFinish: Function) {
       const modal = await modalController.create({
@@ -237,7 +243,7 @@ export default defineComponent({
           currentField,
           onFinish
         }
-      });
+      })
       modal.present();
     },
     setPreviousBpNotes(notes: Record<string, any>) {
