@@ -1,7 +1,7 @@
 <template>
-  <ion-page>
+  <ion-page style="background: #fff">
+    <information-header :items="patientCardInfo"></information-header>
     <ion-content>
-      <information-header :items="patientCardInfo"></information-header>
       <visit-information
         :items="visitDates"
         @onPrint="printLabel"
@@ -349,19 +349,3 @@ export default defineComponent({
   },
 });
 </script>
-<style scoped>
-.grid-custom {
-  overflow-y: auto;
-  padding: 1%;
-}
-.his-card {
-  height: 100%;
-  padding: 1.8%;
-}
-@media only screen and (width: 1024px) {
-  .grid-custom {
-    height: 99%;
-    overflow: hidden;
-  }
-}
-</style>
