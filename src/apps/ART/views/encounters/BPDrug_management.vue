@@ -85,8 +85,12 @@
                     <td class="date-td today-td">{{ note.date }}</td>
                     <td class="date-td today-td">{{ note.description }}</td>
                     <td>
-                      <ion-button color="danger" @click="removeNote(drug, i)"
-                        >X</ion-button
+                      <ion-button 
+                        v-if="note.isNewNote"
+                        color="danger" 
+                        @click="removeNote(drug, i)">
+                        X
+                      </ion-button
                       >
                     </td>
                   </tr>
