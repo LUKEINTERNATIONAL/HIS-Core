@@ -219,15 +219,13 @@ export default defineComponent({
   },
   computed: {
     selectedDrugs(): any {
-      let drugs: any = [];
-      Object.keys(this.drugs).forEach((d: any) => {
-        const dr = this.drugs[d].drugs.filter((d: any) => d.dispensed);
-        drugs = [...drugs, ...dr];
-      });
-      return drugs;
-    },
+      return Object.values(this.drugs)
+        .map((d: any) => d.drugs)
+        .reduce((accum: any, cur: any) => accum.concat(cur), [])
+        .filter((d: any) => d.dispensed)
+    }
   },
-});
+})
 </script>
 <style scoped>
 ion-checkbox {
