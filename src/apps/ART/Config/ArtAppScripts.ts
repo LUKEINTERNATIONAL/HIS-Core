@@ -140,8 +140,9 @@ export async function getPatientDashboardLabOrderCardItems(patientId: number, da
         return results.map((r: any) => {
             const test = r.tests[0]
             const result = test.result[0]
+            const status = OrderService.isHighViralLoadResult(result) ? '(HIGH)' : ''
             return {
-                label: `Result: ${test.name} ${result.value_modifier} ${result.value}`,
+                label: `Result: ${test.name} ${result.value_modifier} ${result.value} ${status}`,
                 value: t(result.date),
                 other: {
                     tableRow: [
