@@ -178,8 +178,9 @@ export default defineComponent({
     refer: false,
   }),
   watch: {
-    patient: {
-      async handler() {
+    ready: {
+      async handler(ready: boolean) {
+        if (!ready) return
         this.htn = new BPManagementService(this.patientID, this.providerID);
         this.trail = await this.htn.getBPTrail();
         this.rows = this.formatBpTrailRows(this.trail);
@@ -192,7 +193,7 @@ export default defineComponent({
         await this.getProgramStatus();
         this.getItems();
       },
-      deep: true,
+      immediate: true,
     },
   },
   computed: {
