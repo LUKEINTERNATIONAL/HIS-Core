@@ -165,20 +165,21 @@ export default defineComponent({
     IonCheckbox
   },
   watch: {
-    patient: {
-      async handler() {
-        this.HTN = new BPManagementService(this.patientID, this.providerID);
-        this.drugs = this.HTN.getDrugs();
-        const { drugs, notes} = await this.HTN.getCurrentDrugs();
-        this.setPreviousBpDrugs(drugs)
-        this.setPreviousBpNotes(notes)
+    ready: {
+      async handler(ready: boolean) {
+        if (ready) {
+          this.HTN = new BPManagementService(this.patientID, this.providerID);
+          this.drugs = this.HTN.getDrugs();
+          const { drugs, notes} = await this.HTN.getCurrentDrugs();
+          this.setPreviousBpDrugs(drugs)
+          this.setPreviousBpNotes(notes)
+        }
       },
-      deep: true,
+      immediate: true
     },
   },
   data: () => {
     return {
-      input: "",
       HTN: {} as any,
       drugs: null as any,
     };
@@ -271,17 +272,12 @@ export default defineComponent({
   },
   computed: {
     selectedDrugs(): any {
-      let drugs: any[] = [];
-      if (!isEmpty(this.drugs)) {
-        Object.keys(this.drugs).forEach((d: any) => {
-          const drug = this.drugs[d]
-          const dr = drug.drugs.filter((d: any) => d.selected === true)
-            .map((d: any) => ({ ...d, notes: drug.notes }));
-          drugs = [...drugs, ...dr];
-        })
-      }
-      return drugs;
-    },
+      if (this.drugs) return Object.values(this.drugs)
+        .map((d: any) => d.drugs)
+        .reduce((accum: any, cur: any) => accum.concat(cur), [])
+        .filter((d: any) => d.selected)
+      return []
+    }
   },
 });
 </script>
