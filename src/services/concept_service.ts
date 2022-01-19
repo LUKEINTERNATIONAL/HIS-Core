@@ -48,12 +48,12 @@ export class ConceptService extends Service {
     }
 
     static async getConceptIDFromApi(name: string) {
-        const concepts = await super.getJson(`/concepts`, {name})
+        const concepts = await super.getJson(`concepts`, {name})
         return this.resolveConcept(concepts, name)
     }
     
     static async getConceptNameFromApi(conceptId: number) {
-        const concept = await super.getJson(`/concepts/${conceptId}`)
+        const concept = await super.getJson(`concepts/${conceptId}`)
 
        
         if (concept) return concept.concept_names[0].name

@@ -55,8 +55,14 @@ export default defineComponent({
   }),
   watch: {
     clear: {
-        handler(clear: boolean) {
-            if(clear) this.onClear(); this.$emit('onClear');
+        handler() {
+           this.listData = this.listData.filter((item: Option) => {
+                item.other.am = 0
+                item.other.noon = 0
+                item.other.pm = 0
+                item.other.frequency = 'Daily (QOD)'
+                return true
+            })
         },
         immediate: true
     },
@@ -76,15 +82,6 @@ export default defineComponent({
   methods: {
     img(name: string) {
         return `assets/images/prescription/${name}.png`
-    },
-    onClear() {
-        this.listData = this.listData.filter((item: Option) => {
-            item.other.am = 0
-            item.other.noon = 0
-            item.other.pm = 0
-            item.other.frequency = 'Daily (QOD)'
-            return true
-        })
     },
     /*
       * Update existing list with new options while maintaining previously entered items
@@ -109,6 +106,7 @@ export default defineComponent({
             componentProps: {
                 title: item.label,
                 preset: item.other[prop],
+                strictNumbers: true,
                 onKeyPress(val: string){
                     item.other[prop] = val
                 }

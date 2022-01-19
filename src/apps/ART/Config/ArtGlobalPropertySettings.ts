@@ -1,5 +1,8 @@
 import { FolderInterface } from "@/apps/interfaces/AppInterface";
 import { UserService } from "@/services/user_service"
+import { ART_GLOBAL_PROP } from "@/apps/ART/art_global_props"
+import { GLOBAL_PROP } from "@/apps/GLOBAL_APP/global_prop";
+import ART_PROP from "@/apps/ART/art_global_props"
 
 function globalPropConfig(label: string, prop: string) {
     return {
@@ -12,7 +15,7 @@ export const PROPERTIES: FolderInterface[] = [
     {
         name: "Drug Management",
         icon: "drug.png",
-        condition: () => UserService.isAdmin(),
+        condition: async () => UserService.isAdmin() && (await ART_PROP.drugManagementEnabled()),
         files: [
             {
                 name: "Enter Receipts",
@@ -41,46 +44,54 @@ export const PROPERTIES: FolderInterface[] = [
         icon: 'hiv-staging.png',
         condition: () => UserService.isAdmin(),
         files: [
+            {
+                name: "View Systems settings",
+                pathUrl: "/art/preferences"
+            },
             globalPropConfig(
                 'Activate Extended Lab',
-                'extended_labs'
+                ART_GLOBAL_PROP.EXTENDED_LABS
             ),
             globalPropConfig(
                 'Activate VL routine check',
-                'activate_vl_routine_check'
+                ART_GLOBAL_PROP.VL_ROUTINE_CHECK
             ),
             globalPropConfig(
                 "Ask pills remaining at home", 
-                "ask_pills_remaining_at_home"
+                ART_GLOBAL_PROP.PILLS_REMAINING
             ),
             globalPropConfig(
                 "Activate Filing Numbers", 
-                "use.filing.number"
+                ART_GLOBAL_PROP.FILING_NUMBERS
             ),
             globalPropConfig(
                 "Activate drug management", 
-                "activate.drug.management"
+                ART_GLOBAL_PROP.DRUG_MANAGEMENT
             ),
             globalPropConfig(
                 "Activate Hypertension screening", 
-                "activate.htn.enhancement"
+                ART_GLOBAL_PROP.HTN_ENHANCEMENT
             ),
             globalPropConfig(
                 "Activate fast track", 
-                "enable_fast_track"
+                ART_GLOBAL_PROP.FAST_TRACK
             ),
             globalPropConfig(
                 "Activate 3HP auto select",
-                "activate_3hp_auto_select"
+                ART_GLOBAL_PROP.THREE_HP_AUTO_SELECT
             ),
             globalPropConfig(
-                "Filing numbers (activate)",
-                "use.filing.numbers"
+                "Activate CxCa screening",
+                ART_GLOBAL_PROP.CERVICAL_CANCER_SCREENING
             ),
             globalPropConfig(
                 "Is this a military site?",
-                "military_site"
+                GLOBAL_PROP.MILITARY_SITE
             ),
+            {
+                name: "Set Hypertension Thresholds",
+                pathUrl: "/art/preferences/bp_thresholds"
+            },
             {
                 name: "Set Clinic Days",
                 pathUrl: "/art/preferences/clinic_days"
@@ -96,7 +107,11 @@ export const PROPERTIES: FolderInterface[] = [
             {
                 name: "Set Filing Numbers Limit",
                 pathUrl: "/art/preferences/fn/limit"
-            }
+            },
+            {
+                name: "Set Clinic Holidays",
+                pathUrl: "/art/preferences/clinic_holidays"
+            },
         ]
     }
 ]

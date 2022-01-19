@@ -51,11 +51,11 @@ export default {
   },
   methods: {
     renderQuarter() {
-      if(!this.reportparams)
-        return;
-      const quarter = this.reportparams;
-      this.quarterStr = quarter.split(" ")[0];
-      this.quarterYr  = quarter.split(" ")[1];
+      if(this.reportparams) {
+        const [quarter, startPeriod, _, endPeriod] = this.reportparams.split(" ");
+        this.quarterStr = quarter;
+        this.quarterYr  = quarter.match(/custom/i) ? `${startPeriod} - ${endPeriod}` : startPeriod
+      }
     }
   },
   watch: {

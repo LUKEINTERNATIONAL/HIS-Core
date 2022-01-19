@@ -11,28 +11,16 @@
         <ion-title v-if="showtitleOnly"> 
           <span v-html="title"></span> 
         </ion-title>
-        <ion-row v-if="!showtitleOnly">
-          <ion-col size="2" v-if="reportLogo">
-            <img class="logo" :src="reportLogo"/>
-          </ion-col>
-          <ion-col>
-            <!-- DEFAULT HEADER ROWS -->
-            <ion-row>
-              <ion-col size="2">Title</ion-col> 
-              <ion-col> <b>{{ title }}</b> </ion-col>
-            </ion-row>
-            <ion-row v-if="period">
-              <ion-col size="2">Period</ion-col> 
-              <ion-col><b>{{ period }}</b> </ion-col>
-            </ion-row>
-            <!-- DYNAMIC HEADER ROWS -->
-            <ion-row v-for="(info, index) in headerInfoList" :key="index"> 
-              <ion-col size="2">
-                <ion-label>
-                  <span>{{ info.label }}</span> 
-                </ion-label>
-              </ion-col>
-              <ion-col>
+        <ion-item  v-if="!showtitleOnly"> 
+          <ion-thumbnail slot="start"> 
+            <ion-img :src="reportLogo"/>
+          </ion-thumbnail>
+          <ion-label>
+            <ul class="header-text-list"> 
+              <li>Title <b>{{ title }}</b></li>
+              <li>Period <b>{{ period }}</b></li>
+              <li v-for="(info, index) in headerInfoList" :key="index"> 
+                {{ info.label }}
                 <a href="#" v-if="info && info?.other?.onclick"
                   @click.prevent="info.other.onclick()">
                   {{ info.value }}
@@ -40,17 +28,21 @@
                 <ion-label v-if="info && !info?.other?.onclick">
                   <b><span v-html="info.value"></span></b> 
                 </ion-label>
-              </ion-col>
-            </ion-row>
-          </ion-col>
-        </ion-row>
+              </li>
+            </ul>
+          </ion-label>
+        </ion-item>
       </ion-toolbar>
     </ion-header>
     <ion-content>
       <div class="report-content">
         <report-table
           :rows="rows"
-          :columns="columns">
+          :columns="columns"
+          :showFilters="showFilters"
+          @onActiveColumns="onActiveColumns"
+          @onActiveRows="onActiveRows"
+          >
         </report-table>
       </div>
     </ion-content>
@@ -79,13 +71,15 @@ import {
   IonHeader,
   IonContent,
   IonFooter,
-  IonToolbar, 
-  IonRow,
-  IonCol,
+  IonToolbar,
+  IonLabel,
+  IonThumbnail,
+  IonItem,
   IonChip,
+  IonImg,
   loadingController
 } from "@ionic/vue"
-import { toastDanger } from "@/utils/Alerts";
+import { alertConfirmation, toastDanger } from "@/utils/Alerts";
 import Img from "@/utils/Img"
 import { Service } from "@/services/service"
 import dayjs from "dayjs";
@@ -99,11 +93,13 @@ export default defineComponent({
     HisFooter, 
     IonPage, 
     IonContent, 
-    IonToolbar, 
-    IonRow, 
-    IonCol,
+    IonToolbar,
     IonChip,
-    IonFooter
+    IonFooter,
+    IonLabel,
+    IonThumbnail,
+    IonItem,
+    IonImg
   },
   props: {
     headerInfoList: {
@@ -129,6 +125,10 @@ export default defineComponent({
     period: {
       type: String
     },
+    showFilters: {
+      type: Boolean,
+      default: false
+    },
     fields: {
       type: Object as PropType<Field[]>,
       required: true
@@ -144,6 +144,10 @@ export default defineComponent({
     customBtns: {
       type: Array,
       default: () => []
+    },
+    hasServerSideCaching: {
+      type: Boolean,
+      default: false
     },
     canExportPDf: {
       type: Boolean,
@@ -173,13 +177,22 @@ export default defineComponent({
     formData: {} as any,
     btns: [] as Array<any>,
     computeFormData: {} as any,
+    activeColumns: [] as any,
+    activeRows: [] as any,
     isLoadingData: false as boolean,
     canShowReport: false as boolean,
+    siteUUID: Service.getSiteUUID() as string,
     apiVersion: Service.getApiVersion(),
     coreVersion: Service.getCoreVersion(),
     artVersion: Service.getAppVersion(),
   }),
   methods: {
+    onActiveColumns(columns: any) {
+      this.activeColumns = columns
+    },
+    onActiveRows(rows: any) {
+      this.activeRows = rows
+    },
     getFileName() {
       return `${this.reportPrefix} ${Service.getLocationName()} ${this.title} ${this.period}`
     },
@@ -204,14 +217,18 @@ export default defineComponent({
     /**
      * Callback is used when a form has been submitted with report configurations
      */
-    async onFinish(formData: any, computedData: any) {
+    async onFinish(formData: any, computedData: any, shouldRebuildCache=false) {
       this.formData = formData
       this.computeFormData = computedData
       this.canShowReport = true
       await this.presentLoading()
       try {
         this.date = dayjs().format('YYYY-MM-DD:h:m:s')
-        await this.onReportConfiguration(this.formData, this.computeFormData)
+        await this.onReportConfiguration(
+          this.formData, 
+          this.computeFormData, 
+          shouldRebuildCache
+        )
         loadingController.dismiss()
       }catch(e) {
         toastDanger(e)
@@ -220,9 +237,9 @@ export default defineComponent({
       }
     },
     /**Reinitiate the report with default configurations */
-    async reloadReport() {
+    async reloadReport(shouldRebuildCache=false) {
       if (!isEmpty(this.formData) || !isEmpty(this.computeFormData)) {
-        await this.onFinish(this.formData, this.computeFormData)
+        await this.onFinish(this.formData, this.computeFormData, shouldRebuildCache)
       }
       if (this.onDefaultConfiguration) {
         await this.onLoadDefault()
@@ -249,7 +266,7 @@ export default defineComponent({
       color: "primary",
       visible: this.canExportCsv,
       onClick: async () => {
-        const {columns, rows} = toExportableFormat(this.columns, this.rows)
+        const {columns, rows} = toExportableFormat(this.activeColumns, this.activeRows)
         toCsv(
           columns, 
           [
@@ -260,7 +277,8 @@ export default defineComponent({
             [`HIS-Core Version: ${this.coreVersion}`],
             // TODO: Get actial ART Version from a file
             [`ART Version: ${this.artVersion}`],
-            [`API Version: ${this.apiVersion}`]
+            [`API Version: ${this.apiVersion}`],
+            [`Site UUID: ${this.siteUUID}`]
           ],
           this.getFileName()
         )
@@ -273,7 +291,7 @@ export default defineComponent({
       color: "primary",
       visible: this.canExportPDf,
       onClick: async () => {
-        const {columns, rows} = toExportableFormat(this.columns, this.rows)
+        const {columns, rows} = toExportableFormat(this.activeColumns, this.activeRows)
         toTablePDF(columns, rows, this.getFileName(), this.enabledPDFHorizontalPageBreak)
       }
     })
@@ -291,7 +309,14 @@ export default defineComponent({
       slot: "end",
       color: "warning",
       visible: true,
-      onClick: async () => this.reloadReport()
+      onClick: async () => {
+        let shouldRebuildCache = false
+        if (this.hasServerSideCaching) {
+          const ok = await alertConfirmation('Do you want to rebuild report cache?', "Rebuild Report")
+          shouldRebuildCache = ok ? true : false
+        }
+        this.reloadReport(shouldRebuildCache)
+      } 
     })
     this.btns.push({
       name: "Finish",
@@ -312,7 +337,11 @@ export default defineComponent({
 </script>
 <style scoped>
 .logo {
-  width: 100px;
+  width: 60px;
+  margin: auto;
+}
+.header-text-list {
+  list-style: none;
 }
 .report-content {
   margin: auto;

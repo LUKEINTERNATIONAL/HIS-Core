@@ -14,7 +14,9 @@ import { toastWarning, toastSuccess} from "@/utils/Alerts"
 import { VitalsService } from "@/apps/ART/services/vitals_service";
 import { BMIService } from "@/services/bmi_service"
 import { generateDateFields, EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
+import { infoActionSheet } from "@/utils/ActionSheets"
 import HisDate from "@/utils/Date"
+import dayjs from "dayjs";
 
 export default defineComponent({
     mixins: [StagingMixin],
@@ -121,7 +123,7 @@ export default defineComponent({
                     computedValue: ({value}: Option) => ({
                         tag:'reg',
                         obs: this.registration.buildValueCoded(
-                            'Ever registered at ART clinic', value
+                            'Ever received ART', value
                         )
                     }),
                     validation: (v: any) => Validation.required(v),
@@ -233,8 +235,21 @@ export default defineComponent({
                 ...generateDateFields({
                     id: 'date_started_art',
                     helpText: 'Started ART',
-                    condition: (f: any) => f.ever_registered_at_art_clinic.value === 'Yes',
                     required: true,
+                    unload: (d: any, state: string, f: any, computedData: any) => {
+                        if (state === 'next') {
+                            const age = dayjs(computedData.date_started_art.date)
+                                .diff(this.patient.getBirthdate(), 'years')
+                            this.staging.setAge(age)
+                            this.stagingFacts.age = age
+                            this.stagingFacts.ageInMonths = age * 12
+                        } else {
+                            this.staging.setAge(this.patient.getAge())
+                            this.stagingFacts.age = this.patient.getAge()
+                            this.stagingFacts.ageInMonths = this.patient.getAgeInMonths()
+                        }
+                    },
+                    condition: (f: any) => f.ever_registered_at_art_clinic.value === 'Yes',
                     minDate: () => this.patient.getBirthdate(),
                     maxDate: () => this.staging.getDate(),
                     estimation: {
@@ -326,7 +341,12 @@ export default defineComponent({
                     }),
                     condition: (f: any) => f.has_transfer_letter.value === 'Yes',
                     validation: (val: any) => this.validateSeries([
-                        () => this.vitals.isNotEmptyandFloat(val),
+                        () => {
+                            const fullValue = {
+                                ...val, other: { modifier: '.' }
+                            }
+                            return this.vitals.isNotEmptyandFloat(fullValue)
+                        },
                         () => Validation.rangeOf(val, 1, 300)
                     ]),
                     config: {
@@ -391,6 +411,19 @@ export default defineComponent({
                     helpText: 'Confirmatory HIV test',
                     type: FieldType.TT_SELECT,
                     validation: (val: any) => Validation.required(val),
+                    onValue: async (val: Option) => {
+                        if (val.value === 'Not done') {
+                            await infoActionSheet(
+                                'Reminder',
+                                'UNKNOWN HIV CONFIRMATORY TEST',
+                                'Please arrange for a confirmatory test',
+                                [
+                                    { name: 'Agreed', color: 'success', slot: 'start'}
+                                ]
+                            )
+                        }
+                        return true
+                    },
                     computedValue: ({ value }: Option) => ({
                         tag:'reg',
                         obs: this.registration.buildValueCoded(
@@ -424,6 +457,24 @@ export default defineComponent({
                 ...generateDateFields({
                     id: 'date_of_confirmatory_hiv_test',
                     helpText: 'Confirmatory HIV test',
+                    beforeNext: async (date: string, formData: any) => {
+                        if (formData.received_arvs.value != 'Yes') {
+                            const timeElapsed = dayjs(this.staging.getDate()).diff(date, 'days')
+                            if (timeElapsed >= 20) {
+                                const action = await infoActionSheet(
+                                    'Data inconsistency warning',
+                                    `Confirmatory Date for newly initiated ART patient is ${timeElapsed} days ago`,
+                                    'Are you sure this is accurate?',
+                                    [
+                                        { name: 'No, Re-enter date', slot: 'start', color: 'success'},
+                                        { name: 'Yes, its accurate', slot: 'end', color: 'danger'}
+                                    ]
+                                )
+                                return action === 'Yes, its accurate'
+                            }
+                        }
+                        return true
+                    },
                     condition: (f: any) => f.confirmatory_hiv_test_location.value,
                     required: true,
                     minDate: () => this.patient.getBirthdate(),

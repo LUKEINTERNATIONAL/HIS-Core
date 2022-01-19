@@ -157,6 +157,10 @@ export class Service {
         return apiDate && apiDate != sessionDate
     }
 
+    static getSiteUUID() {
+        return sessionStorage.siteUUID || ''
+    }
+
     static getProgramID() {
         const app = this.getActiveApp()
         

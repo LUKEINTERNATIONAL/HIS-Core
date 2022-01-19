@@ -45,11 +45,8 @@ export default defineComponent({
         value(value: number){
             this.$emit('onValue', { label: value, value })
         },
-        clear(val: boolean){
-            if (val) {
-                this.value = ''
-                this.$emit('onClear')
-            }
+        clear() {
+            this.value = ''
         }
     }
 })

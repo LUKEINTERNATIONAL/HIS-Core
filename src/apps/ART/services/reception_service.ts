@@ -1,6 +1,6 @@
 import { AppEncounterService } from "@/services/app_encounter_service"
 import { ProgramService } from "@/services/program_service";
-import { GlobalPropertyService } from "@/services/global_property_service";
+import GLOBAL_PROP from "@/apps/GLOBAL_APP/global_prop";
 
 export class ReceptionService extends AppEncounterService {
     sitePrefix: string
@@ -14,7 +14,7 @@ export class ReceptionService extends AppEncounterService {
     }
 
     async loadSitePrefix() {
-        this.sitePrefix = await GlobalPropertyService.getSitePrefix();
+        this.sitePrefix = await GLOBAL_PROP.sitePrefix();
     }
 
     createArvNumber(identifier: string) {

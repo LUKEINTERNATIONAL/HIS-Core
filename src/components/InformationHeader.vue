@@ -1,23 +1,26 @@
 <template>
-  <ion-grid>
-    <ion-row>
-      <ion-col size="4" v-for="item in items" :key="item" class="data">
-        <ion-row>
-          <ion-col siz="6">
-            <p>{{ item.label }}</p>
-            </ion-col>
-          <ion-col siz="6">
-            <p class="val">{{ item.value }}</p>
-          </ion-col>
-        </ion-row>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+  <div style="padding: .1rem;">
+    <ion-grid>
+      <ion-row style="border: 1px solid #a5a5a599">
+        <ion-col v-for="(item, index) in computedItems" :key="index" :size="4">
+          <ion-list>
+            <ion-item v-for="option in item" :key="option.label">
+              <div :style="{width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '11px'}">
+                <span><b>{{ option.label }}: </b></span>
+                <span><a>{{ option.value }}</a></span>
+              </div>
+            </ion-item>
+          </ion-list>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
 </template>
 <script lang="ts">
-import { defineComponent, PropType } from "vue";
+import { computed, defineComponent, PropType } from "vue";
 import { Option } from "@/components/Forms/FieldInterface";
 import { IonGrid, IonRow, IonCol } from "@ionic/vue";
+import { chunk } from "lodash";
 export default defineComponent({
   name: "HisResultCard",
   components: {
@@ -34,16 +37,10 @@ export default defineComponent({
       required: true,
     },
   },
+  setup (props) {
+    return {
+      computedItems: computed(() => chunk(props.items, Math.ceil(props.items.length / 3)))
+    }
+  } 
 });
 </script>
-<style scoped>
-.data {
-  border-bottom: solid 1px black;
-}
-p {
-  font-size: 13px;
-}
-.val {
-  font-weight: bold;
-}
-</style>

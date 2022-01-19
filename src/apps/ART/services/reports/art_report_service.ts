@@ -1,5 +1,6 @@
 import { Service } from "@/services/service";
 import HisDate from "@/utils/Date"
+import dayjs from "dayjs";
 
 export interface QuarterInterface {
     name: string;
@@ -55,26 +56,30 @@ export class ArtReportService extends Service {
     }
 
     static getQuarterBounds(year: number) {
+        const daysInMonth = (m: string) => dayjs(`${year}-${m}-01`).daysInMonth()
+        const startMonth = (m: string) => `${year}-${m}-01 00:00`
+        const endMonth = (m: string) => `${year}-${m}-${daysInMonth(m)} 00:00`
+
         return {
             'Q1': {
                 qtr: 1,
-                start: `${year}-01-01 00:00`,
-                end: `${year}-03-31 00:00`
+                start: startMonth('01'),
+                end: endMonth('03')
             },
             'Q2': {
                 qtr: 2,
-                start: `${year}-04-01 00:00`,
-                end: `${year}-06-30 00:00`
+                start: startMonth('04'),
+                end: endMonth('06')
             },
             'Q3': {
                 qtr: 3,
-                start: `${year}-07-01 00:00`,
-                end: `${year}-09-31 00:00`
+                start: startMonth('07'),
+                end: endMonth('09')
             },
             'Q4': {
                 qtr: 4,
-                start: `${year}-10-01 00:00`,
-                end: `${year}-12-31 00:00`
+                start: startMonth('10'),
+                end: endMonth('12')
             }
         }
     }
@@ -100,7 +105,7 @@ export class ArtReportService extends Service {
         }
     }
 
-    static getReportQuarters() {
+    static getReportQuarters(maxQuarters=5) {
         const qtrs: QuarterInterface[] = [];
         let currDate = new Date();
         let currYear = currDate.getFullYear();
@@ -111,11 +116,12 @@ export class ArtReportService extends Service {
         let qtr = currentQtr.qtr;
         let i = 0;
 
-        if (qtr === 4) {
-            qtrs.push(this.buildQtrObj('Q1', currYear + 1))
-        }
+        if (qtr === 4) qtrs.push(this.buildQtrObj('Q1', currYear + 1))
 
-        while (i < 5) {
+        while (i < maxQuarters) {
+          // Add following quarter
+          if (i === 0 && qtr < 4) qtrs.push(this.buildQtrObj(`Q${qtr + 1}`, currYear))
+
           qtrs.push(this.buildQtrObj(`Q${qtr}`, currYear))
           qtr = qtr > 0 ? (qtr -= 1) : qtr;
           currYear = qtr == 0 ? currYear - 1 : currYear;

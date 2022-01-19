@@ -110,6 +110,9 @@ import { AppInterface } from "@/apps/interfaces/AppInterface";
 import { GlobalPropertyService } from "@/services/global_property_service"
 import { PatientDemographicsExchangeService } from "@/services/patient_demographics_exchange_service"
 import { IncompleteEntityError, BadRequestError } from "@/services/service"
+import  { ART_GLOBAL_PROP } from "@/apps/ART/art_global_props"
+import  { GLOBAL_PROP } from "@/apps/GLOBAL_APP/global_prop"
+
 export default defineComponent({
   name: "Patient Confirmation",
   components: {
@@ -174,8 +177,8 @@ export default defineComponent({
         birthdate: '' as string,
       } as any,
       globalProperties: {
-        useFilingNumbers: 'use.filing.numbers=true',
-        ddeEnabled: 'dde_enabled=true'
+        useFilingNumbers: `${ART_GLOBAL_PROP.FILING_NUMBERS}=true`,
+        ddeEnabled: `${GLOBAL_PROP.DDE_ENABLED}=true`
       } as any
     }
   }),

@@ -19,8 +19,9 @@ import { VitalsService } from "@/apps/ART/services/vitals_service";
 import { toastSuccess, toastWarning } from "@/utils/Alerts";
 import EncounterMixinVue from "./EncounterMixin.vue";
 import { BMIService } from "@/services/bmi_service";
-import { GlobalPropertyService } from "@/services/global_property_service";
 import { ProgramService } from "@/services/program_service";
+import ART_PROP from "@/apps/ART/art_global_props"
+
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: { HisStandardForm },
@@ -63,12 +64,7 @@ export default defineComponent({
           this.hasHTNObs = data && data.length > 0;
         }
       );
-      await GlobalPropertyService.isHTNEnabled().then((data) => {
-        if (data && data === "true") {
-          this.HTNEnabled = true;
-        }
-      });
-
+      this.HTNEnabled = await ART_PROP.htnEnabled()
       this.fields = this.getFields();
     },
     async onFinish(formData: any) {
@@ -252,6 +248,7 @@ export default defineComponent({
               other: {
                 modifier: "CM",
                 icon: "height",
+                recentHeight: this.recentHeight,
                 visible: showHeight,
                 required: showHeight,
               },

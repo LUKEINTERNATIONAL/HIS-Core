@@ -1,11 +1,13 @@
 <template>
-  <his-standard-form
-    @onIndex="fieldComponent=''"
-    :skipSummary="skipSummary"
-    :activeField="fieldComponent"
-    :fields="fields"
-    :onFinishAction="onFinish"
- />
+  <ion-page>
+    <his-standard-form
+        @onIndex="fieldComponent=''"
+        :skipSummary="skipSummary"
+        :activeField="fieldComponent"
+        :fields="fields"
+        :onFinishAction="onFinish"
+    />
+  </ion-page>
 </template>
 
 <script lang="ts">
@@ -17,7 +19,6 @@ import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
-import { GlobalPropertyService } from "@/services/global_property_service"
 import { WorkflowService } from "@/services/workflow_service"
 import { isPlainObject, isEmpty } from "lodash"
 import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper"
@@ -29,9 +30,12 @@ import { isValueEmpty } from "@/utils/Strs"
 import { PatientDemographicsExchangeService } from "@/services/patient_demographics_exchange_service"
 import { toastWarning } from "@/utils/Alerts"
 import { PatientTypeService } from "@/apps/ART/services/patient_type_service";
+import { IonPage } from "@ionic/vue"
+import { infoActionSheet } from "@/utils/ActionSheets"
+import GLOBAL_PROP from "@/apps/GLOBAL_APP/global_prop";
 
 export default defineComponent({
-  components: { HisStandardForm },
+  components: { HisStandardForm, IonPage },
   data: () => ({
     app: App.getActiveApp() as AppInterface,
     ddeInstance: {} as any,
@@ -73,7 +77,7 @@ export default defineComponent({
                 this.presets = query
             }
             this.fields = this.getFields()
-            this.isMilitarySite = await GlobalPropertyService.isMilitarySite()
+            this.isMilitarySite = await GLOBAL_PROP.militarySiteEnabled()
         },
         immediate: true,
         deep: true
@@ -216,14 +220,30 @@ export default defineComponent({
         const gender: Field = PersonField.getGenderField()
         gender.requireNext = this.isEditMode()
         gender.condition = () => this.editConditionCheck(['gender'])
-        gender.defaultValue = () => {
-            if (this.presets.gender) {
-                if (this.presets.gender === 'M') {
-                    return {label: 'Male', value: 'M'}
-                }
-                return {label: 'Female', value: 'F'}
+        gender.defaultValue = () => this.presets.gender
+        gender.beforeNext = async (data: Option) => {
+            /**
+             * Provide warning when changing gender in edit mode
+            */
+            const newGender = data.value
+            const oldGender = this.presets.gender
+            if (this.isEditMode() && newGender != oldGender) {
+                const action = await infoActionSheet(
+                    'Warning',
+                    `Changing gender from ${oldGender} to ${newGender}`,
+                    "This change will cause data inconsistency and will affect alot of Reports.",
+                    [
+                        {
+                            name: 'Cancel', slot: 'start'
+                        },
+                        {
+                            name: 'Change gender', slot: 'end', color: 'danger'
+                        }
+                    ]
+                )
+                return action === 'Change gender'
             }
-            return ''
+            return true
         }
         return gender
     },

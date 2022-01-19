@@ -1,4 +1,5 @@
 import { FolderInterface } from "@/apps/interfaces/AppInterface"
+import ART_PROP from "../art_global_props"
 
 export const REPORTS: FolderInterface[] = [
     {
@@ -86,7 +87,7 @@ export const REPORTS: FolderInterface[] = [
                 pathName: 'clinic_other_outcome_list'
             },
             {
-                name: 'Regimns and Formulation',
+                name: 'Regimens and Formulation',
                 pathName: 'clinic_regimen_formulation'
             },
             {
@@ -95,7 +96,8 @@ export const REPORTS: FolderInterface[] = [
             },
             {
                 name: 'Stock card report',
-                pathName: 'stock_card_report'
+                pathName: 'stock_card_report',
+                condition: () => ART_PROP.drugManagementEnabled()
             }
         ]
     },

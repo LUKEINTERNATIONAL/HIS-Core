@@ -48,8 +48,8 @@ export class RegimenReportService extends ArtReportService {
         return this.getReport('regimen_report', { type: this.type})
     }
 
-    getRegimenSwitchReport() {
-        return this.getReport('regimen_switch', { type: this.type})
+    getRegimenSwitchReport(isPepfar=false) {
+        return this.getReport('regimen_switch', { pepfar: isPepfar })
     }
 
     getRegimensByWeight() {

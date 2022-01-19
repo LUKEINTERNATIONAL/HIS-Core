@@ -10,7 +10,7 @@
   </ion-footer>
 </template>
 
-<script>
+<script lang="ts">
 
 import {IonButton, IonFooter, IonToolbar} from "@ionic/vue";
 

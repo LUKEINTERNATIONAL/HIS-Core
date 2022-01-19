@@ -27,6 +27,7 @@ import { ProgramService } from "@/services/program_service";
 import { ARTLabService } from "../../services/lab_service";
 import { infoActionSheet } from "@/utils/ActionSheets";
 import SideEffectsModalVue from "@/components/DataViews/SideEffectsModal.vue";
+import ART_PROP from "@/apps/ART/art_global_props";
 
 export default defineComponent({
   mixins: [AdherenceMixinVue],
@@ -424,12 +425,13 @@ export default defineComponent({
       ).map((data) => data.name);
       return this.getOptions([...contraIndications], preValues);
     },
-    getPrescriptionFields(preChecked: Array<Option>) {
+    async getPrescriptionFields(preChecked: Array<Option>) {
+      const is3HPEnabled = await ART_PROP.threeHPAutoSelectEnabled()
       const vals = [
         { label: "ARVs", value: "ARVs", isChecked: true },
         { label: "CPT", value: "CPT", isChecked: true },
-        { label: "3HP (RFP + INH)", value: "3HP (RFP + INH)", isChecked: true },
-        { label: "IPT", value: "IPT" },
+        { label: "3HP (RFP + INH)", value: "3HP (RFP + INH)", isChecked: is3HPEnabled },
+        { label: "IPT", value: "IPT", isChecked: false},
         { label: "NONE OF THE ABOVE", value: "NONE OF THE ABOVE" },
       ];
       const exclusions = [];
@@ -789,28 +791,29 @@ export default defineComponent({
             ]),
           beforeNext: async (data: any) => {
             const reasons = await this.getSideEffectsReasons(data);
-            if (reasons === -1) 
-              return true
-            if (isEmpty(reasons)) 
-              return false
-            const concept = ConceptService.getCachedConceptID("Drug induced");
-            const sides = reasons.map((r: any) => {
-              const c = ConceptService.getCachedConceptID(r.label);
-              if (r.reason === "other" || r.reason === "drug") {
-                return {
-                  'concept_id': concept,
-                  'value_coded': c,
-                  'value_text': "Past medication history",
-                };
-              } else {
-                return {
-                  'concept_id': concept,
-                  'value_coded': c,
-                  'value_drug': r.reason,
-                };
+            if (reasons != -1) {
+              if (reasons === undefined) {
+                return false
               }
-            });
-            this.relatedObs = [...this.relatedObs, ...sides];
+              const concept = ConceptService.getCachedConceptID("Drug induced");
+              const sides = reasons.map((r: any) => {
+                const c = ConceptService.getCachedConceptID(r.label);
+                if (r.reason === "other" || r.reason === "drug") {
+                  return {
+                    'concept_id': concept,
+                    'value_coded': c,
+                    'value_text': "Past medication history",
+                  };
+                } else {
+                  return {
+                    'concept_id': concept,
+                    'value_coded': c,
+                    'value_drug': r.reason,
+                  };
+                }
+              });
+              this.relatedObs = [...this.relatedObs, ...sides];
+            }
             this.sideEffects = await data.map(async (data: Option) => {
               const host = await this.consultation.buildValueCoded(
                 "Malawi ART side effects",
@@ -829,8 +832,7 @@ export default defineComponent({
             });
             return true
           },
-          options: (_: any, checked: Array<Option>) =>
-            this.getContraindications(checked),
+          options: (_: any, checked: Array<Option>) => this.getContraindications(checked)
         },
         {
           id: "other_side_effects",
@@ -978,8 +980,7 @@ export default defineComponent({
           unload: async (data: any) => {
             this.updateCompletedTPT(data);
             this.treatmentStatusObs = this.consultation.buildValueText(
-              "TB Status",
-              data.value
+              "Previous TB treatment history", data.value
             );
           },
           type: FieldType.TT_SELECT,

@@ -91,8 +91,8 @@ export default defineComponent({
           ],
         },
         {
-          id: "adherence_report",
-          helpText: "ART adherence",
+          id: "verification_summary",
+          helpText: "Summary",
           type: FieldType.TT_TABLE_VIEWER,
           options: (d: any) => this.buildResults(d.enter_batches),
           config: {

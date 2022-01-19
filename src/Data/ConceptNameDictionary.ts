@@ -1,6 +1,21 @@
 export default [
    {
       "categories": [],
+      "concept_id": 1588,
+      "name": "Previous TB treatment history"
+   },
+   {
+      "categories": ['bp_measures'],
+      "concept_id": 5085,
+      "name": "Systolic blood pressure"
+   },
+   {
+      "categories": ['bp_measures'],
+      "concept_id": 5086,
+      "name": "Diastolic blood pressure"
+   },
+   {
+      "categories": [],
       "concept_id": 7054,
       "name": "Art clinic location"
    },

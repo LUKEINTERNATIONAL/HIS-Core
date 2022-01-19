@@ -4,14 +4,16 @@ import homeOverviewComponent from "@/apps/ART/Components/ArtOverviewComponent.vu
 import { REPORTS } from "@/apps/ART/Config/ArtProgramReports"
 import {PROPERTIES} from "@/apps/ART/Config/ArtGlobalPropertySettings"
 import { PRIMARY_ACTIVITIES, SECONDARY_ACTIVITIES } from "@/apps/ART/Config/ArtProgramActivities"
-import { GlobalPropertyService } from "@/services/global_property_service"
 import { 
     init, 
     confirmationSummary,
     onRegisterPatient,
     formatPatientProgramSummary,
-    getPatientDashboardAlerts
+    getPatientDashboardAlerts,
+    getPatientDashboardLabOrderCardItems
 } from "@/apps/ART/Config/ArtAppScripts"
+import { ART_GLOBAL_PROP } from "./art_global_props";
+import GLOBAL_PROP from "@/apps/GLOBAL_APP/global_prop"
 
 const ART: AppInterface = {
     init,
@@ -29,16 +31,14 @@ const ART: AppInterface = {
     formatPatientProgramSummary,
     getPatientDashboardAlerts,
     onRegisterPatient,
+    getPatientDashboardLabOrderCardItems,
     programPatientIdentifiers: {
         'ARV Number': {
             id: 4,
             name: 'ARV Number',
             isPrimary: true,
             useForSearch: true,
-            prefix: async () => {
-                const prefix = await GlobalPropertyService.getSitePrefix()
-                return `${prefix}-ARV-`
-            }
+            prefix: async () => `${(await GLOBAL_PROP.sitePrefix())}-ARV-`
         },
         'Archived filing number': {
             id: 18,
@@ -46,7 +46,7 @@ const ART: AppInterface = {
             isPrimary: false,
             useForSearch: false,
             prefix: () => '',
-            globalPropertySetting: 'use.filing.number=true',
+            globalPropertySetting: `${ART_GLOBAL_PROP.FILING_NUMBERS}=true`,
         },
         'Filing number': {
             id: 17,
@@ -54,7 +54,7 @@ const ART: AppInterface = {
             isPrimary: false,
             useForSearch: false,
             prefix: () => '',
-            globalPropertySetting: 'use.filing.number=true',
+            globalPropertySetting: `${ART_GLOBAL_PROP.FILING_NUMBERS}=true`,
         }
     },
 }

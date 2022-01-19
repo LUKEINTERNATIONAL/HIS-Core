@@ -20,6 +20,7 @@ import {
     Target, 
     FlowState 
 } from "@/apps/ART/guidelines/prescription_guidelines"
+import ART_PROPS from "@/apps/ART/art_global_props"
 
 export default defineComponent({
     mixins: [EncounterMixinVue],
@@ -69,9 +70,10 @@ export default defineComponent({
                     toastWarning('Patient is not eligible for treatment Today! Please check HIV Clinic Consultation')
                     return this.gotoPatientDashboard()
                 }
-
+                if ((await ART_PROPS.askPillsRemaining())) {
+                    await this.prescription.loadHangingPills()
+                } 
                 await this.prescription.loadRegimenExtras()
-                await this.prescription.loadHangingPills()
                 await this.prescription.loadTreatmentState()
                 await this.prescription.loadDrugInduced()
                 await this.prescription.loadContraindications()
@@ -278,10 +280,14 @@ export default defineComponent({
             }
         },
         extractRegimenCode(regimen: string): number {
-           if (regimen.match(/n\/a/i))
-               return -1
+          try {
+               if (regimen.match(/n\/a/i)) return -1
 
-           return parseInt(regimen.substring(0, regimen.length))
+               return parseInt(regimen.substring(0, regimen.length))
+           } catch (e) {
+               console.warn(e)
+               return -1
+           }
         },
         getDosageTableOptions(regimen: any) {
             const rowColors: any = [ 

@@ -271,6 +271,7 @@ import {
   modalController
 } from "@ionic/vue";
 import { EncounterService } from '@/services/encounter_service'
+import { ConceptService } from "@/services/concept_service"
 export default defineComponent({
     components: {
         IonSegment,
@@ -327,7 +328,6 @@ export default defineComponent({
         programCardInfo: [] as Array<Option> | [],
         encounters: [] as Array<Encounter>,
         medications: [] as any,
-        labOrders: [] as any,
         visitDates: [] as Array<Option>,
         activeVisitDate: '' as string | number,
         encountersCardItems: [] as Array<Option>,
@@ -370,10 +370,9 @@ export default defineComponent({
             if (!(this.appHasCustomContent)) {
                 this.encounters = await EncounterService.getEncounters(this.patientId, {date})
                 this.medications = await DrugOrderService.getOrderByPatient(this.patientId, {'start_date': date})
-                this.labOrders = await OrderService.getOrders(this.patientId, {date})
                 this.encountersCardItems = this.getActivitiesCardInfo(this.encounters)
                 this.medicationCardItems = this.getMedicationCardInfo(this.medications)
-                this.labOrderCardItems = this.getLabOrderCardInfo(this.labOrders)
+                this.labOrderCardItems = await this.getLabOrderCardInfo(date)
                 this.updateCards()
             }
         }
@@ -433,11 +432,7 @@ export default defineComponent({
                 items: this.labOrderCardItems,
                 onClick: () => {
                     const columns = ['Accession#',  'Specimen', 'Time']
-                    const rows = this.labOrders.map((order: any) => ([
-                        order.accession_number, 
-                        order.specimen.name,
-                        this.toTime(order.order_date)
-                    ]))
+                    const rows = this.labOrderCardItems.map((item: Option) => item.other.tableRow)
                     this.openTableModal(columns, rows, `Lab Orders`)
                 }
             }
@@ -526,8 +521,17 @@ export default defineComponent({
                         const data = []
                         const { observations } = encounter
                         for(const index in observations) {
+                            let concept = '<UNKNOWN CONCEPT>'
                             const obs =  observations[index]
-                            const concept = obs.concept.concept_names[0].name
+                            try {
+                                if (obs?.concept?.concept_names) {
+                                    concept = obs.concept.concept_names[0].name
+                                } else {
+                                    concept = await ConceptService.getConceptName(obs.concept_id)
+                                }
+                            } catch (e) {
+                                console.error(obs, e)
+                            }
                             const value = await ObservationService.resolvePrimaryValue(obs)
                             const time = HisDate.toStandardHisTimeFormat(obs.obs_datetime)
                             data.push([concept, value, time])
@@ -543,10 +547,21 @@ export default defineComponent({
                 value: this.toTime(medication.order.start_date),
             }))
         },
-        getLabOrderCardInfo(labOrders: any) {
-            return labOrders.map((labOrder: any) => ({
-                label: labOrder.specimen.name,
-                value: this.toTime(labOrder.order_date)
+        async getLabOrderCardInfo(date: string) {
+            if (typeof this.app.getPatientDashboardLabOrderCardItems === 'function') {
+                return this.app.getPatientDashboardLabOrderCardItems(this.patientId, date)
+            }
+            const labOrders = await OrderService.getOrders(this.patientId, {date})
+            return labOrders.map((order: any) => ({
+                label: order.specimen.name,
+                value: this.toTime(order.order_date),
+                other: {
+                    tableRow: [
+                        order.accession_number, 
+                        order.specimen.name,
+                        this.toTime(order.order_date)
+                    ]
+                }
             }))
         },
         async getPatientAlertCardInfo(){

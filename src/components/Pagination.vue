@@ -52,10 +52,10 @@ export default defineComponent({
   },
   emits: ['onChangePage'],
   setup(props, { emit }) {
-    const isInFirstPage = computed(() => props.currentPage === 1)
+    const isInFirstPage = computed(() => props.currentPage === 0)
     const isInLastPage = computed(() => props.currentPage === props.totalPages)
     const startPage = computed(() => {
-      if(props.currentPage === 1) return 1
+      if(props.currentPage === 0) return 0
       if(props.currentPage === props.totalPages) return props.totalPages - props.maxVisibleButtons + 1
       return props.currentPage - 1
     })
@@ -67,14 +67,14 @@ export default defineComponent({
         i++
       ) {
         range.push({
-          name: i,
+          name: i + 1,
           isActive: i === props.currentPage
         })
       }
       return range
     })
     const setPage = (page: number) => emit('onChangePage', page)
-    const setFirstPage = () => emit('onChangePage', 1)
+    const setFirstPage = () => emit('onChangePage', 0)
     const setLastPage = () => emit('onChangePage', props.totalPages)
     const prevPage = () => {
       if(props.currentPage  > 1) 

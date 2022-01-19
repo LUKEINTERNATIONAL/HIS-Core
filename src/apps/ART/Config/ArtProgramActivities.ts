@@ -1,6 +1,7 @@
 import { TaskInterface } from "../../interfaces/TaskInterface"
 import { PatientPrintoutService } from "@/services/patient_printout_service"
 import { Patientservice } from "@/services/patient_service"
+import { ART_GLOBAL_PROP } from "../art_global_props"
 
 export const PRIMARY_ACTIVITIES: TaskInterface[] = [
   {
@@ -58,19 +59,29 @@ export const PRIMARY_ACTIVITIES: TaskInterface[] = [
   {
     id: "patient type",
     name: "Patient Type",
-    icon: "patient-type.png"
+    icon: "patient-type.png",
+    availableOnActivitySelection: false
   },
   {
     id: "fast track assesment",
     name: "Fast Track assesment",
-    globalProperty: 'enable_fast_track=true',
-    icon: "fast-track.png"
+    globalProperty: `${ART_GLOBAL_PROP.FAST_TRACK}=true`,
+    icon: "fast-track.png",
+    availableOnActivitySelection: false
   },
   {
-    id: "BP management",
-    name: "BP management",
+    id: "bp_management",
+    name: "bp_management",
     icon: "dispensing.png",
-    globalProperty: 'activate.htn.enhancement=true'
+    globalProperty: `${ART_GLOBAL_PROP.HTN_ENHANCEMENT}=true`,
+    availableOnActivitySelection: false
+  },
+  {
+    id: "bp_alert",
+    name: "bp_alert",
+    icon: "dispensing.png",
+    globalProperty: `${ART_GLOBAL_PROP.HTN_ENHANCEMENT}=true`,
+    availableOnActivitySelection: false
   }
 ]
 
@@ -88,7 +99,7 @@ export const SECONDARY_ACTIVITIES: TaskInterface[] = [
     id: "f_number",
     name: "Filing Number (Print)",
     description: "Print Patient Filing Number",
-    globalProperty: 'use_filing_numbers=true',
+    globalProperty: `${ART_GLOBAL_PROP.FILING_NUMBERS}=true`,
     action({ patient }: any) {
       const lbl = new PatientPrintoutService(patient.patient_id)
       return lbl.printFilingNumberLbl()
@@ -105,7 +116,7 @@ export const SECONDARY_ACTIVITIES: TaskInterface[] = [
     condition: async ({ patient }: any) => {
       return new Patientservice(patient).hasActiveFilingNumber()
     },
-    globalProperty: 'use_filing_numbers=true',
+    globalProperty: `${ART_GLOBAL_PROP.FILING_NUMBERS}=true`,
     icon: "archive.png"
   },
   {
@@ -119,7 +130,7 @@ export const SECONDARY_ACTIVITIES: TaskInterface[] = [
     action: ({ patient }: any, router: any) => {
       router.push(`/art/filing_numbers/${patient.patient_id}?assign=true`)
     },
-    globalProperty: 'use_filing_numbers=true',
+    globalProperty: `${ART_GLOBAL_PROP.FILING_NUMBERS}=true`,
     icon: "archive.png"
   },
   {
@@ -129,16 +140,7 @@ export const SECONDARY_ACTIVITIES: TaskInterface[] = [
     action: ({ patient }: any, router: any) => {
       router.push(`/art/filing_numbers/${patient.patient_id}?trail=true`)
     },
-    globalProperty: 'use_filing_numbers=true',
+    globalProperty: `${ART_GLOBAL_PROP.FILING_NUMBERS}=true`,
     icon: "folder.png"
-  },
-  {
-    id: "change_patient_type",
-    name: "Change patient type",
-    description: "Change patient type",
-    action: ({ patient }: any, router: any) => {
-      router.push(`/art/encounters/patient_type/${patient.patient_id}`)
-    },
-    icon: "patient-type.png"
   }
 ]

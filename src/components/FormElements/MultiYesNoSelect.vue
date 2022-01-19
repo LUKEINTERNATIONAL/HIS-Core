@@ -1,7 +1,7 @@
 <template>
   <div>
     <view-port :showFull="true">
-      <ion-grid>
+      <ion-grid class="view-port-content">
         <ion-row >
           <ion-col :size="getSize" v-for="(item, index) in listData" :key="index">
             <ion-grid>
@@ -57,14 +57,11 @@ export default defineComponent({
   name: "HisMultiYesNo",
   mixins: [SelectMixin],
   watch: {
-    clear(val: boolean) {
-      if (val) {
-        this.listData = this.listData.map(i => {
-          i.value = ''
-          return i
-        })
-        this.$emit('onClear')
-      }
+    clear() {
+      this.listData = this.listData.map(i => {
+        i.value = ''
+        return i
+      })
     }
   },
   computed: {
