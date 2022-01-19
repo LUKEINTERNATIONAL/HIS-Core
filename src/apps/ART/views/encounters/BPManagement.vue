@@ -24,7 +24,7 @@
       <data-table :config="{showIndex: false}" :columns="columns" :rows="rows"></data-table>
     </ion-content>
     <ion-footer>
-      <ion-toolbar v-if="patientHasHyperTensionObs"> 
+      <ion-toolbar v-if="patientHasHyperTensionObs && isEnrolledInHTN"> 
         <ion-radio-group v-model="action">
           <ion-grid>
             <ion-row>
@@ -68,7 +68,14 @@
         >
           Hypertension Diagnosis
         </ion-button>
-
+        <ion-button
+          size="large"
+          slot="end"
+          @click="enrollInHTN"
+          v-if="patientHasHyperTensionObs && !isEnrolledInHTN"
+          > 
+          Enroll in HTN
+        </ion-button>
         <ion-button 
           size="large"
           color="success" 
@@ -83,7 +90,6 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import ViewPort from "@/components/DataViews/ViewPort.vue";
 import {
   IonToolbar,
   IonTitle,
@@ -101,7 +107,7 @@ import {
   IonItem,
   IonLabel,
 } from "@ionic/vue";
-import { toastWarning, alertAction } from "@/utils/Alerts";
+import { toastWarning, alertAction, toastSuccess } from "@/utils/Alerts";
 import EncounterMixinVue from "./EncounterMixin.vue";
 import RiskFactorModal from "@/components/DataViews/RiskFactorModal.vue";
 import { ObservationService } from "@/services/observation_service";
@@ -222,10 +228,11 @@ export default defineComponent({
             this.action.label
           );
 
-          if (!obs) return toastWarning("Unable to create Obs");
+          if (!obs) return toastWarning("Unable to create Obs")
           const patientState = {
             state: this.action.value,
-          };
+          }
+          
           await this.htn.enrollPatient(patientState);
 
           if (typeof this.action?.other?.action === 'function') {
@@ -347,12 +354,19 @@ export default defineComponent({
       }
     },
     async enrollInHTN() {
-      const program  = new PatientProgramService(this.patientID)
-      program.setProgramId(this.HTNProgramID)
-      program.setStateDate(ProgramService.getSessionDate())
-      program.setStateId(this.aliveState)
-      await program.enrollProgram()
-      await program.updateState()
+      try {
+        const program  = new PatientProgramService(this.patientID)
+        program.setProgramId(this.HTNProgramID)
+        program.setStateDate(ProgramService.getSessionDate())
+        program.setStateId(this.aliveState)
+        await program.enrollProgram()
+        await program.updateState()
+        this.isEnrolledInHTN = true
+        toastSuccess('Patient is now enrolled in HTN')
+      } catch (e) {
+        console.error(e)
+        toastWarning(e)
+      }
     },
     async setHtnTransferred(transferred: 'Yes' | 'No'){
       const vitals = new VitalsService(this.patientID, this.providerID)
