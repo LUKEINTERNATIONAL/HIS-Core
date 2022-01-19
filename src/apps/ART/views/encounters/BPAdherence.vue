@@ -111,10 +111,10 @@
           slot="end"
           @click="goToPrescription"
         >
-          Change BP drugs 
+          Change drugs 
         </ion-button>
-        <ion-button size="large" color="success" slot="end" @click="nextTask">
-          continue
+        <ion-button size="large" color="success" slot="end" @click="gotoTreatment">
+          Continue
         </ion-button>
       </ion-toolbar>
     </ion-footer>
@@ -137,8 +137,10 @@ import {
   IonCheckbox,
 } from "@ionic/vue";
 import EncounterMixinVue from "./EncounterMixin.vue";
-import { BPManagementService } from "../../services/htn_service";
+import { BPManagementService, HTN_SESSION_KEY } from "../../services/htn_service";
 import HisKeypadVue from "@/components/Keyboard/HisKeypad.vue";
+import { find } from "lodash"
+
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
@@ -175,6 +177,16 @@ export default defineComponent({
   methods: {
     goToPrescription() {
       this.$router.push(`/art/encounters/bp_prescription/${this.patientID}`);
+    },
+    gotoTreatment() {
+      console.log(this.selectedDrugs)
+      const htnDrugs = this.selectedDrugs.map((selected: any) =>  
+        find( BPManagementService.htnDrugReferences(), { 'drug_id': selected.drugID})
+      )
+      const data: any = {}
+      data[this.patientID] = htnDrugs
+      sessionStorage.setItem(HTN_SESSION_KEY.Prescription, JSON.stringify(data))
+      this.$router.push(`/art/encounters/prescriptions/${this.patientID}`)
     },
     async getCurrentDrugs() {
       const drugs = await this.HTN.getCurrentDrugs();
