@@ -12,174 +12,33 @@
     <ion-content>
       <view-port>
         <div class="view-port-content" v-if="drugs">
-          <ion-content>
-            <table id="main-table">
+            <table id="main-table" style="width: 100%">
               <tr>
                 <th>&nbsp;</th>
-                <th>
-                  HCZ
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="
-                          width: 100%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>25mg</span>
-                      </td>
-                    </tr>
-                  </table>
-                </th>
-
-                <th>
-                  Enalapril
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="
-                          width: 50%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>5mg</span>
-                      </td>
-                      <td
-                        style="
-                          width: 50%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>10mg</span>
-                      </td>
-                    </tr>
-                  </table>
-                </th>
-
-                <th>
-                  Amlodipine
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="
-                          width: 50%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>5mg</span>
-                      </td>
-                      <td
-                        style="
-                          width: 50%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>10mg</span>
-                      </td>
-                    </tr>
-                  </table>
-                </th>
-
-                <th>
-                  Atenolol
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="
-                          width: 50%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>50mg</span>
-                      </td>
-                      <td
-                        style="
-                          width: 50%;
-                          border: 1px dotted lightgray;
-                          border-radius: 3px;
-                        "
-                      >
-                        <span>100mg</span>
-                      </td>
-                    </tr>
-                  </table>
+                <th v-for="(item, itemIndex) in drugs" :key="itemIndex"> 
+                  {{ itemIndex }}
+                  <ion-row> 
+                    <ion-col class="col-borders" v-for="(drug, drugIndex) in item.drugs" :key="drugIndex"> 
+                      {{drug.amount || '0mg'}}
+                    </ion-col>
+                  </ion-row>
                 </th>
               </tr>
 
               <tr>
-                <td class="td-current td-title"><span>Current</span></td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="width: 100%"
-                        v-for="(drug, i) in drugs['HCZ'].drugs"
-                        :key="i"
-                      >
-                        <ion-checkbox
-                          :checked="drug.current"
-                          disabled
-                        ></ion-checkbox>
-                      </td>
-                    </tr>
-                  </table>
+                <td class="td-current td-title">
+                  <span>Current</span>
                 </td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <td
-                      style="width: 50%"
-                      v-for="(drug, i) in drugs['Enalapril'].drugs"
-                      :key="i"
-                    >
+                <td class="td-current td-value" v-for="(item, itemIndex) in drugs" :key="itemIndex">
+                  <ion-row> 
+                    <ion-col v-for="(drug, i) in item.drugs" :key="i"> 
                       <ion-checkbox
                         :checked="drug.current"
                         disabled
+                        v-if="drug.current"
                       ></ion-checkbox>
-                    </td>
-                    <tr></tr>
-                  </table>
-                </td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="width: 50%"
-                        v-for="(drug, i) in drugs['Amlodipine'].drugs"
-                        :key="i"
-                      >
-                        <ion-checkbox
-                          :checked="drug.current"
-                          disabled
-                        ></ion-checkbox>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="width: 50%"
-                        v-for="(drug, i) in drugs['Atenolol'].drugs"
-                        :key="i"
-                      >
-                        <ion-checkbox
-                          :checked="drug.current"
-                          disabled
-                        ></ion-checkbox>
-                      </td>
-                    </tr>
-                  </table>
+                    </ion-col>
+                  </ion-row>
                 </td>
               </tr>
 
@@ -187,82 +46,21 @@
                 <td class="td-remaining td-title">
                   <span>Pills remaining</span>
                 </td>
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="width: 100%"
-                        v-for="(drug, i) in drugs['HCZ'].drugs"
-                        :key="i"
-                      >
-                        <ion-input
-                          :disabled="!drug.dispensed"
-                          v-model="drug.remaining"
-                          @click="launchKeyPad('HCZ', i)"
-                          type="number"
-                        ></ion-input>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <td
-                      style="width: 50%"
-                      v-for="(drug, i) in drugs['Enalapril'].drugs"
-                      :key="i"
-                    >
+                <td v-for="(item, itemIndex) in drugs" :key="itemIndex"  class="td-current td-value">
+                  <ion-row> 
+                    <ion-col v-for="(drug, i) in item.drugs" :key="i"> 
                       <ion-input
-                        :disabled="!drug.dispensed"
-                        v-model="drug.remaining"
-                        @click="launchKeyPad('Enalapril', i)"
                         type="number"
+                        v-model="drug.remaining"
+                        v-if="drug.dispensed"
+                        @click="launchKeyPad(itemIndex, i)"
                       ></ion-input>
-                    </td>
-                    <tr></tr>
-                  </table>
-                </td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="width: 50%"
-                        v-for="(drug, i) in drugs['Amlodipine'].drugs"
-                        :key="i"
-                      >
-                        <ion-input
-                          :disabled="!drug.dispensed"
-                          v-model="drug.remaining"
-                          @click="launchKeyPad('Amlodipine', i)"
-                          type="number"
-                        ></ion-input>
-                      </td>
-                    </tr>
-                  </table>
-                </td>
-
-                <td class="td-current td-value">
-                  <table style="width: 100%">
-                    <tr>
-                      <td
-                        style="width: 50%"
-                        v-for="(drug, i) in drugs['Atenolol'].drugs"
-                        @click="launchKeyPad('Atenolol', i)"
-                        :key="i"
-                      >
-                        <ion-input
-                          :disabled="!drug.dispensed"
-                          v-model="drug.remaining"
-                          type="number"
-                        ></ion-input>
-                      </td>
-                    </tr>
-                  </table>
+                    </ion-col>
+                  </ion-row>
                 </td>
               </tr>
             </table>
+
             <table id="table-notes">
               <caption style="font-size: 1.6em">
                 Adherence summary
@@ -294,12 +92,11 @@
                 </td>
               </tr>
             </table>
-          </ion-content>
         </div>
       </view-port>
     </ion-content>
     <ion-footer>
-      <ion-toolbar color="black">
+      <ion-toolbar color="dark">
         <ion-button
           size="large"
           color="danger"
@@ -309,16 +106,16 @@
           cancel
         </ion-button>
         <ion-button
-          size="default"
+          size="large"
           color="primary"
           slot="end"
           @click="goToPrescription"
         >
           Change BP drugs </ion-button
-        ><ion-button color="success" slot="end" @click="nextTask">
+        ><ion-button size="large" color="success" slot="end" @click="nextTask">
           Continue without prescribing
         </ion-button>
-        <ion-button color="success" slot="end" @click="onFinish">
+        <ion-button size="large" color="success" slot="end" @click="onFinish">
           continue
         </ion-button>
       </ion-toolbar>
@@ -435,10 +232,15 @@ ion-checkbox {
   --size: 30px;
 }
 ion-input {
-  background-color: white;
-  border: solid 1px black;
+  border-radius: 9px;
+  background-color: rgb(247, 248, 198);
+  border: solid 2px rgb(117, 117, 117);
 }
-
+.col-borders {
+  border: 1px dotted lightgray;
+  border-radius: 3px;
+  padding: 0.6em;
+}
 .holder {
   width: 99%;
   padding: 1.5%;
