@@ -139,6 +139,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "HCZ (25mg tablet)",
               drugID: 275,
+              amount: '25mg',
               current: false,
               selected: false,
               isChecked: false,
@@ -155,6 +156,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "Enalapril (5mg tablet)",
               drugID: 942,
+              amount: '5mg',
               current: false,
               selected: false,
               isChecked: false,
@@ -166,6 +168,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "Enalapril (10mg tablet)",
               drugID: 943,
+              amount: '10mg',
               current: false,
               selected: false,
               isChecked: false,
@@ -183,6 +186,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "Amlodipine (5mg tablet)",
               drugID: 558,
+              amount: '5mg',
               current: false,
               selected: false,
               isChecked: false,
@@ -194,6 +198,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "Amlodipine (10mg tablet)",
               drugID: 559,
+              amount: '10mg',
               current: false,
               selected: false,
               isChecked: false,
@@ -211,6 +216,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "Atenolol (50mg tablet)",
               drugID: 117,
+              amount: '50mg',
               current: false,
               selected: false,
               isChecked: false,
@@ -222,6 +228,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "Atenolol(100mg tablet)",
               drugID: 11,
+              amount: '100mg',
               current: false,
               selected: false,
               isChecked: false,
