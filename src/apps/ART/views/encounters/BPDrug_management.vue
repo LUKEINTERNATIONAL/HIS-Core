@@ -191,7 +191,8 @@ export default defineComponent({
         if (data) this.drugs[drugIndex].notes.push({
           date: ProgramService.getSessionDate(),
           description: data.value || '',
-          drugID: this.drugs[drugIndex].drugs[0].drugID
+          drugID: this.drugs[drugIndex].drugs[0].drugID,
+          isNewNote: true
         })
       })
     },
@@ -200,6 +201,7 @@ export default defineComponent({
         .filter((d: any) => !isEmpty(d.notes))
         .map((d: any) => d.notes)
         .reduce((accum: any, cur: any) => accum.concat(cur), [])
+        .filter((n: any) => n.isNewNote)
         .map((note: any) => this.HTN.buildObs('Clinician notes', {
           'value_text': note.description, 
           'value_drug': note.drugID
@@ -232,8 +234,18 @@ export default defineComponent({
       modal.present();
     },
     async getCurrentDrugs() {
-      const drugs = await this.HTN.getCurrentDrugs();
-      drugs.drugs.forEach((drug: any) => {
+      const { drugs, notes} = await this.HTN.getCurrentDrugs();
+      // build notes
+      for (const drugIndex in notes) {
+        this.drugs[drugIndex].notes = Object.keys(notes[drugIndex])
+          .map((date: string) => notes[drugIndex][date].map(
+            (description: string) => ({ date, description }))
+          ).reduce(
+            (accum: any[], cur: any[]) => accum.concat(cur), []
+          )
+      }
+      // activate drug selection
+      drugs.forEach((drug: any) => {
         for (const key in this.drugs) {
           this.drugs[key].drugs.forEach((element: any, index: any) => {
             if (drug.drug_id === element.drugID) {
