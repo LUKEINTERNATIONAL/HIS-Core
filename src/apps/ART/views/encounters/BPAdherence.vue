@@ -59,10 +59,12 @@
                 </td>
               </tr>
             </table>
-            <table id="table-notes">
-              <caption style="font-size: 1.6em">
+            <p/>
+            <table id="table-notes" style="width: 100%">
+              <caption style="font-size: 1.4em">
                 Adherence summary
               </caption>
+              <p/>
               <tr>
                 <th style="width: 25%">
                   <span>Drug</span>
@@ -109,11 +111,9 @@
           slot="end"
           @click="goToPrescription"
         >
-          Change BP drugs </ion-button
-        ><ion-button size="large" color="success" slot="end" @click="nextTask">
-          Continue without prescribing
+          Change BP drugs 
         </ion-button>
-        <ion-button size="large" color="success" slot="end" @click="onFinish">
+        <ion-button size="large" color="success" slot="end" @click="nextTask">
           continue
         </ion-button>
       </ion-toolbar>
