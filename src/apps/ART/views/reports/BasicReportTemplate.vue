@@ -88,6 +88,10 @@ export default defineComponent({
       type: String,
       default: 'dark'
     },
+    customFileName: {
+      type: String,
+      default: ''
+    },
     onFinish: {
       type: Function
     }
@@ -105,6 +109,9 @@ export default defineComponent({
     },
     onActiveRows(rows: any) {
       this.activeRows = rows
+    },
+    getFileName(){
+      return this.customFileName ? this.customFileName : this.title
     }
   },
   created() {
@@ -118,7 +125,7 @@ export default defineComponent({
         visible: true,
         onClick: () => {
           const {columns, rows} = toExportableFormat(this.activeColumns, this.activeRows)
-          toCsv(columns, rows, this.title)
+          toCsv(columns, rows, this.getFileName())
         }
       },
       {
@@ -129,7 +136,7 @@ export default defineComponent({
         visible: true,
         onClick: () => {
           const {columns, rows} = toExportableFormat(this.activeColumns, this.activeRows)
-          toTablePDF(columns, rows, this.title)
+          toTablePDF(columns, rows, this.getFileName())
         }
       },
       {
