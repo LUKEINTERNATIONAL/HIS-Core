@@ -93,7 +93,7 @@ export default defineComponent({
     }),
     methods: {
         recaptureBp() {
-            this.$router.push(`/art/encounters/vitals/${this.patientID}`)
+            this.$router.push(`/art/encounters/vitals/${this.patientID}?vital_options=BP`)
         }
     },
     watch: {
