@@ -29,8 +29,13 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue'
 import { caretBack, caretForward } from "ionicons/icons";
+import { IonIcon, IonButton } from "@ionic/vue"
 
 export default defineComponent({
+   components: { 
+    IonIcon,
+    IonButton,
+   },
    props: {
     maxVisibleButtons: {
       type: Number,

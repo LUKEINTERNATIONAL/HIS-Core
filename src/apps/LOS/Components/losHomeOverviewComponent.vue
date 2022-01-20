@@ -26,8 +26,8 @@ export default defineComponent({
             ] as ColumnInterface[]
         ]
     }),
-    async created() {
-        await this.setRows()
+     created() {
+        this.setRows()
     },
     methods: {
         async setRows() {

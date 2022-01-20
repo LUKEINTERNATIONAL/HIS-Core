@@ -130,6 +130,7 @@ import {
     IonToolbar,
     IonHeader,
     IonCol,
+    IonRow,
     IonContent,
     modalController
 } from "@ionic/vue"
@@ -148,6 +149,7 @@ export default defineComponent({
     IonSkeletonText, 
     IonToolbar,
     IonHeader,
+    IonRow,
     IonCol
   },
   props: {
