@@ -205,12 +205,12 @@ export default defineComponent({
         await this.hasHyperTenstion();
         await this.getTreatmentStatus();
         await this.getProgramStatus();
+        loadingController.dismiss()
         if ((this.patientHasHyperTensionObs && !this.isEnrolledInHTN)
           || (!this.isEnrolledInHTN && this.patientOnBPDrugs)) {
           await this.alertHtnEnrollment()
         }
         this.getItems();
-        loadingController.dismiss()
       },
       immediate: true,
     },
