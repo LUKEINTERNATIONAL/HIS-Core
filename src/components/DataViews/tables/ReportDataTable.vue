@@ -285,6 +285,7 @@ export default defineComponent({
     async setPage(index: number) {
         this.activeRows = []
         const pageRows = this.paginatedRows[index]
+        if (!pageRows) return
         try {
             this.activeRows = typeof this.rowParser === 'function'
                 ? await Promise.all(this.rowParser(pageRows))
