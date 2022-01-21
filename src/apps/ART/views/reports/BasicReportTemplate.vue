@@ -31,6 +31,7 @@
           :newPage="currentPage"
           :searchFilter="searchFilter"
           :rowsPerPage="itemsPerPage"
+          @onIsLoading="(l) => isTableLoading = l"
           @onTableRows="(r) => tableRows = r"
           @onPagination="(p) => totalPages = p.length"
           @onActiveColumns="(c) => activeColumns = c"
