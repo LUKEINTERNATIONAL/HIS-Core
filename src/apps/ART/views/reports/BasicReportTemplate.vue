@@ -127,6 +127,10 @@ export default defineComponent({
       type: String,
       default: 'dark'
     },
+    customFileName: {
+      type: String,
+      default: ''
+    },
     onFinish: {
       type: Function
     }
@@ -144,6 +148,11 @@ export default defineComponent({
     date: HisDate.toStandardHisDisplayFormat(Service.getSessionDate()),
     apiVersion: Service.getApiVersion(),
   }),
+  methods: {
+    getFileName(){
+      return this.customFileName ? this.customFileName : this.title
+    }
+  },
   created() {
     this.btns = [
       ...this.customBtns,
@@ -155,7 +164,7 @@ export default defineComponent({
         visible: true,
         onClick: () => {
           const {columns, rows} = toExportableFormat(this.activeColumns, this.activeRows)
-          toCsv(columns, rows, this.title)
+          toCsv(columns, rows, this.getFileName())
         }
       },
       {
@@ -166,7 +175,7 @@ export default defineComponent({
         visible: true,
         onClick: () => {
           const {columns, rows} = toExportableFormat(this.activeColumns, this.activeRows)
-          toTablePDF(columns, rows, this.title)
+          toTablePDF(columns, rows, this.getFileName())
         }
       },
       {
