@@ -19,7 +19,20 @@ export default defineComponent({
   setup(props) {
     const options = ref({
       chart: {
-        height: 'auto'
+        height: 'auto',
+        animations: {
+          enabled: true,
+          easing: 'easeinout',
+          speed: 800,
+          animateGradually: {
+            enabled: true,
+            delay: 150
+          },
+          dynamicAnimation: {
+            enabled: true,
+            speed: 350
+          }
+        }
       },
       title: {
         text: 'New registered , Returning and Referred clients',
@@ -44,6 +57,18 @@ export default defineComponent({
           text: 'Number of clients'
         }
       },
+      noData: {  
+        text: "Loading...",  
+        align: 'center',  
+        verticalAlign: 'middle',  
+        offsetX: 0,  
+        offsetY: 0,  
+        style: {  
+          color: "#000000",  
+          fontSize: '30px',  
+          fontFamily: "Helvetica"
+        }  
+      }
     })
 
     return {
