@@ -45,11 +45,7 @@ export default defineComponent({
     totalPages: {
       type: Number,
       required: true
-    },
-    perPage: {
-      type: Number,
-      required: true
-    },
+    }
   },
   emits: ['onChangePage'],
   setup(props, { emit }) {
@@ -80,6 +76,14 @@ export default defineComponent({
       }
       return range
     })
+
+    watch(props, ({totalPages}) => { 
+      if (typeof totalPages === 'number') currentPage.value = 0
+    }, 
+    { 
+      immediate: true,
+      deep: true
+    }) 
 
     watch(currentPage, (page) => setPage(page))
 
