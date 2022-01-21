@@ -1,118 +1,77 @@
 <template>
-    <ion-page>
-        <ion-header v-show="showFilters"> 
-            <ion-toolbar>
-                <ion-row>
-                    <ion-col v-if="paginated">
-                        <br/>
-                        <select class="input_display" v-model="itemsPerPage" :disabled="isLoading">
-                            <option :selected="itemsPerPage === 5" value="5">5 rows/page</option>
-                            <option :selected="itemsPerPage === 10" value="10">10 rows/page</option>
-                            <option :selected="itemsPerPage === 20" value="20">20 rows/page</option>
-                            <option :selected="itemsPerPage === 50" value="50">50 rows/page</option>
-                            <option :selected="itemsPerPage === 100" value="100">100 rows/page</option>
-                            <option :selected="itemsPerPage === 1000" value="1000">1000 rows/page</option>
-                            <option :selected="itemsPerPage === tableRows.length" :value="tableRows.length">Show all rows</option>
-                        </select>
-                    </ion-col>
-                    <ion-col>
-                        <ion-input
-                            class="input_display"
-                            :value="searchFilter"
-                            @click="launchSearcher"
-                            placeholder="Search here...">
-                        </ion-input>
-                    </ion-col>
-                </ion-row>
-            </ion-toolbar>
-        </ion-header>
-        <ion-content scrollY scrollX>
-            <table class="report-table">
-                <thead class='stick-report-header' v-if="tableColumns">
-                    <tr v-for="(columns, colIndex) in tableColumns" :key="colIndex">
-                        <th v-for="(column, columnIndex) in columns" 
-                            :key="columnIndex"
-                            :colspan="column.colspan || 0"
-                            @click="sort(columnIndex, column)"
-                            :style="column.style" 
-                            :class="column.cssClass">
-                            {{column.th}}
-                            <ion-icon
-                                v-if="sortedIndex === columnIndex && column.sortable && colIndex+1 === tableColumns.length"
-                                :icon="sortOrder==='ascSort' ? arrowUp : arrowDown"
-                            ></ion-icon>
-                        </th>
-                    </tr>
-                </thead>
-                <!-- Skeleton Rows -->
-                <tbody v-if="isLoading"> 
-                    <tr v-for="(skeletonRow, skeletonIndex) in skeletonRows" :key="skeletonIndex">
-                        <td :colspan="columnLength">
-                            <ion-skeleton-text animated style="width: 100%; height: 30px;"></ion-skeleton-text>
-                        </td>
-                    </tr>
-                </tbody>
-                <!-- End skeleton rows --->
-                <tbody v-if="!noData">
-                    <tr v-for="(row, rowIndex) in activeRows" :key="rowIndex">
-                        <td v-for="(item, itemIndex) in row" :key="itemIndex"
-                            :colspan="item.colspan || 0"
-                            :class="item.cssClass" 
+    <table class="report-table">
+        <thead class='stick-report-header' v-if="tableColumns">
+            <tr v-for="(columns, colIndex) in tableColumns" :key="colIndex">
+                <th v-for="(column, columnIndex) in columns" 
+                    :key="columnIndex"
+                    :colspan="column.colspan || 0"
+                    @click="sort(columnIndex, column)"
+                    :style="column.style" 
+                    :class="column.cssClass">
+                    {{column.th}}
+                    <ion-icon
+                        v-if="sortedIndex === columnIndex && column.sortable && colIndex+1 === tableColumns.length"
+                        :icon="sortOrder==='ascSort' ? arrowUp : arrowDown"
+                    ></ion-icon>
+                </th>
+            </tr>
+        </thead>
+        <!-- Skeleton Rows -->
+        <tbody v-if="isLoading"> 
+            <tr v-for="(skeletonRow, skeletonIndex) in skeletonRows" :key="skeletonIndex">
+                <td :colspan="columnLength">
+                    <ion-skeleton-text animated style="width: 100%; height: 30px;"></ion-skeleton-text>
+                </td>
+            </tr>
+        </tbody>
+        <!-- End skeleton rows --->
+        <tbody v-if="!noData">
+            <tr v-for="(row, rowIndex) in activeRows" :key="rowIndex">
+                <td v-for="(item, itemIndex) in row" :key="itemIndex"
+                    :colspan="item.colspan || 0"
+                    :class="item.cssClass" 
+                    :style="item.style"
+                    > 
+                    <div v-if="item.event"> 
+                        <a href="#" :style="item.style" :class="item.cssClass"
+                            v-if="item?.event?.obj === 'link'"
+                            @click.prevent="item.event.click()">
+                            {{ item.td }}
+                        </a>
+                        <ion-button
+                            :color="item?.event?.color || ''"
+                            :class="item.cssClass"
                             :style="item.style"
-                            > 
-                            <div v-if="item.event"> 
-                                <a href="#" :style="item.style" :class="item.cssClass"
-                                    v-if="item?.event?.obj === 'link'"
-                                    @click.prevent="item.event.click()">
-                                    {{ item.td }}
-                                </a>
-                                <ion-button
-                                    :color="item?.event?.color || ''"
-                                    :class="item.cssClass"
-                                    :style="item.style"
-                                    :disabled="item?.event?.disabled != undefined
-                                        ? item.event.disabled === true
-                                        : false"
-                                    v-if="item.event.obj === 'button'"
-                                    @click="item.event.click()">
-                                    {{ item.td }}
-                                </ion-button>
-                            </div>
-                            <div v-else> 
-                                <span v-html="item.td"></span>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            <h1 v-if="noData" class="no-data-section vertically-align"> 
-                <span v-if="errorMessage"> 
-                    {{ errorMessage }}
-                </span> 
-                <span v-else> 
-                    No data available in table
-                </span>
-            </h1>
-            <pagination 
-                v-if="!searchFilter"
-                v-show="showPagination"
-                :perPage="itemsPerPage"
-                :maxVisibleButtons="10"
-                :currentPage="currentPage"
-                :totalPages="totalPages"
-                @onChangePage="onChangePage"
-            />
-        </ion-content>
-    </ion-page>
+                            :disabled="item?.event?.disabled != undefined
+                                ? item.event.disabled === true
+                                : false"
+                            v-if="item.event.obj === 'button'"
+                            @click="item.event.click()">
+                            {{ item.td }}
+                        </ion-button>
+                    </div>
+                    <div v-else> 
+                        <span v-html="item.td"></span>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <h1 v-if="noData" class="no-data-section vertically-align"> 
+        <span v-if="errorMessage"> 
+            {{ errorMessage }}
+        </span> 
+        <span v-else> 
+            No data available in table
+        </span>
+    </h1>
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
-import { FieldType } from "../../Forms/BaseFormElements";
 import { arrowUp, arrowDown, caretBack, caretForward } from "ionicons/icons";
 import table from "@/components/DataViews/tables/ReportDataTable"
 import { isEmpty } from "lodash";
-import Pagination from "@/components/Pagination.vue";
 import { chunk } from "lodash"
 import { delayPromise } from "@/utils/Timers"
 import { toastDanger } from "@/utils/Alerts";
@@ -122,35 +81,16 @@ import {
     TableInterface
 } from "@/components/DataViews/tables/ReportDataTable"
 import { 
-    IonInput,
-    IonPage,
     IonButton, 
     IonIcon, 
     IonSkeletonText,
-    IonToolbar,
-    IonHeader,
-    IonCol,
-    IonRow,
-    IonContent,
-    modalController
 } from "@ionic/vue"
-import TouchField from "@/components/Forms/SIngleTouchField.vue"
-import { Field } from "../../Forms/FieldInterface";
-
 export default defineComponent({
-  emits: ['onActiveRows', 'onActiveColumns'],
+  emits: ['onActiveRows', 'onActiveColumns', 'onPagination', 'onIsLoading', 'onTableRows'],
   components: {
-    IonInput,
-    IonContent,
-    IonPage,
     IonButton, 
     IonIcon, 
-    Pagination, 
-    IonSkeletonText, 
-    IonToolbar,
-    IonHeader,
-    IonRow,
-    IonCol
+    IonSkeletonText
   },
   props: {
     config: {
@@ -165,6 +105,9 @@ export default defineComponent({
       type: Object as PropType<Array<any[]>>,
       default: () => []
     },
+    newPage: {
+        type: Number
+    },
     rowsPerPage: {
         type: Number
     },
@@ -173,6 +116,9 @@ export default defineComponent({
     },
     rowParser: {
         type: Function
+    },
+    searchFilter: {
+        type: String
     },
     showFilters: {
         type: Boolean,
@@ -188,7 +134,6 @@ export default defineComponent({
     arrowDown: arrowDown,
     caretBack, 
     caretForward,
-    searchFilter: '' as string,
     sortedIndex: -1 as number,
     sortOrder: 'descSort' as 'ascSort' | 'descSort',
     tableColumns: [] as Array<ColumnInterface[]>,
@@ -201,9 +146,22 @@ export default defineComponent({
     errorMessage: '' as string
   }),
   watch: {
+    isLoading: {
+        handler(isLoading: boolean) {
+           if (typeof isLoading === 'boolean') this.$emit('onIsLoading', isLoading)
+        },
+        immediate: true
+    },
+    newPage: {
+        handler(newPage: number) {
+            console.log(newPage)
+            if (typeof newPage === 'number') this.onChangePage(newPage)
+        },
+        immediate: true
+    },
     rowsPerPage: {
         handler(perPage: number) {
-            if (perPage) this.itemsPerPage = perPage
+            if (typeof perPage === 'number') this.itemsPerPage = perPage
         },
         immediate: true
     },
@@ -216,6 +174,13 @@ export default defineComponent({
             await this.setPage(this.currentPage)
             this.isLoading = false
         }
+    },
+    tableRows: {
+        handler(tableRows: any) {
+            if (!isEmpty(tableRows)) this.$emit('onTableRows', tableRows)
+        },
+        immediate: true,
+        deep: true
     },
     searchFilter(searchTerm: string) {
         if (!searchTerm) {
@@ -315,6 +280,7 @@ export default defineComponent({
     },
     paginateTableRows(perPage=0) {
         this.paginatedRows = chunk(this.tableRows ,perPage ? perPage : this.itemsPerPage)
+        this.$emit('onPagination', this.paginatedRows)
     },
     async setPage(index: number) {
         this.activeRows = []
@@ -367,29 +333,6 @@ export default defineComponent({
             return !isEmpty(found)
         })
     },
-    launchSearcher() {
-        this.launchKeyboard({
-            id: 'search',
-            helpText: 'Search table data',
-            defaultValue: () => this.searchFilter,
-            type: FieldType.TT_TEXT,
-        }, (data: any) => {
-            this.searchFilter = data ? data.value : ''
-        })
-    },
-    async launchKeyboard(currentField: Field, onFinish: Function) {
-      const modal = await modalController.create({
-        component: TouchField,
-        backdropDismiss: false,
-        cssClass: "full-modal",
-        componentProps: {
-          dismissType: 'modal',
-          currentField,
-          onFinish
-        }
-      });
-      modal.present();
-    },
     async onChangePage(page: number) {
         this.currentPage = page
         this.isLoading = true
@@ -411,16 +354,10 @@ export default defineComponent({
     },
     skeletonRows(): Array<number> {
         const rows = []
-        for(let i=0; i < this.itemsPerPage; ++i) {
+        for(let i=0; i < 10; ++i) {
             rows.push(i)
         }
         return rows
-    },
-    totalPages(): number {
-        return this.paginatedRows.length - 1
-    },
-    showPagination(): boolean {
-       return this.paginated && this.totalPages > 1
     }
   }
 })
@@ -477,29 +414,5 @@ export default defineComponent({
     }
     tr:nth-child(even) {
         background-color: #f7f3f3;
-    }
-
-    .pagination {
-        display: flex;
-        justify-content: space-between;
-        justify-items: center;
-    }
-    .pagination .btn-group {
-        margin: .5rem;
-        display: flex;
-        justify-content: start;
-    }
-
-    .pagination ion-button {
-        margin: .1rem;
-    }
-
-    h6 {
-        margin-right: .5rem;
-    }
-
-    .pagination .active {
-        background-color: blue;
-        color: white;
     }
 </style>

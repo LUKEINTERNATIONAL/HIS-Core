@@ -9,10 +9,10 @@
       </ion-button>
       <ion-button
         v-for="page in pages"
-        @click="setPage(page.name)"
+        @click="page.show()"
         :color="page.isActive ? 'primary' : 'light'"
-        :key="page"
-      >
+        :key="page.index"
+        >
         {{ page.name }}
       </ion-button>
       <ion-button color="light" @click="nextPage">
@@ -22,12 +22,12 @@
         Last
       </ion-button>
     </div>
-    <h6>Page {{ currentPage }} of {{ totalPages }}</h6>
+    <h6>Page {{ currentPage + 1 }} of {{ totalPages }}</h6>
   </div>
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue'
+import { computed, defineComponent, ref, watch } from 'vue'
 import { caretBack, caretForward } from "ionicons/icons";
 import { IonIcon, IonButton } from "@ionic/vue"
 
@@ -50,46 +50,46 @@ export default defineComponent({
       type: Number,
       required: true
     },
-    currentPage: {
-      type: Number,
-      required: true
-    }
   },
   emits: ['onChangePage'],
   setup(props, { emit }) {
-    const isInFirstPage = computed(() => props.currentPage === 0)
-    const isInLastPage = computed(() => props.currentPage === props.totalPages)
+    const currentPage = ref(0)
+    const isInFirstPage = computed(() => currentPage.value === 0)
+    const isInLastPage = computed(() => currentPage.value === props.totalPages)
     const startPage = computed(() => {
-      if(props.currentPage === 0) return 0
-      if(props.currentPage === props.totalPages) return props.totalPages - props.maxVisibleButtons + 1
-      return props.currentPage - 1
+      if(currentPage.value === 0) return 0
+      if(currentPage.value === props.totalPages) return props.totalPages - props.maxVisibleButtons
+      return currentPage.value - 1
     })
+
+    const setPage = (page: number) => emit('onChangePage', page)
+
     const pages = computed(() => {
       const range = []
       for (
-        let i = startPage.value; 
-        i <= Math.min(startPage.value + props.maxVisibleButtons - 1, props.totalPages); 
+        let i = startPage.value;
+        i <= Math.min(startPage.value + props.maxVisibleButtons - 1, props.totalPages - 1);
         i++
       ) {
         range.push({
+          index: i,
           name: i + 1,
-          isActive: i === props.currentPage
+          show: () => currentPage.value = i,
+          isActive: i === currentPage.value
         })
       }
       return range
     })
-    const setPage = (page: number) => emit('onChangePage', page)
-    const setFirstPage = () => emit('onChangePage', 0)
-    const setLastPage = () => emit('onChangePage', props.totalPages)
-    const prevPage = () => {
-      if(props.currentPage  > 1) 
-        emit('onChangePage', props.currentPage - 1)
-    }
-    const nextPage = () => {
-      if((props.currentPage + 1) <= props.totalPages) 
-        emit('onChangePage', props.currentPage + 1)
-    }
+
+    watch(currentPage, (page) => setPage(page))
+
+    const setFirstPage = () => currentPage.value = 0
+    const setLastPage = () => currentPage.value = props.totalPages - 1
+    const prevPage = () => { if(currentPage.value > 0) currentPage.value -= 1 }
+    const nextPage = () => { if((currentPage.value + 1) < props.totalPages) currentPage.value += 1 }
+
     return {
+      currentPage,
       caretBack,
       caretForward,
       startPage,
