@@ -42,7 +42,7 @@
     <ion-footer>
       <ion-toolbar>
         <pagination
-          v-if="!searchFilter && paginated || totalPages > 0 && paginated"
+          v-if="!searchFilter && paginated || !searchFilter && totalPages > 0 && paginated"
           :perPage="itemsPerPage"
           :maxVisibleButtons="10"
           :totalPages="totalPages"
