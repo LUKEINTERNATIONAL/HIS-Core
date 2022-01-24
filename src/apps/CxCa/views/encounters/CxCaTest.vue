@@ -86,7 +86,10 @@ export default defineComponent({
           ],
           unload: async (value: any) => {
             this.obs.push(
-              this.socialHistory.buildValueCoded("SMOKE_HIS", value.value)
+              this.socialHistory.buildValueCoded(
+                "Reason for visit",
+                value.value
+              )
             );
           },
         },
@@ -95,10 +98,10 @@ export default defineComponent({
           helpText: "HIV status",
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
-          condition(formData: any) {
-            //check current HIV status
-            return true;
-          },
+          // condition(formData: any) {
+          //   //check current HIV status
+          //   return true;
+          // },
           options: () => [
             {
               label: "Positive on ART",
@@ -121,9 +124,11 @@ export default defineComponent({
               value: "Prefers Not to disclose",
             },
           ],
-          //   unload: async (value: any) => {
-          //     this.obs.push(this.socialHistory.buildValueText('Smoking duration', value.value));
-          //   }
+          unload: async (value: any) => {
+            this.obs.push(
+              this.socialHistory.buildValueCoded("HIV status", value.value)
+            );
+          },
         },
         ...generateDateFields(
           {
@@ -149,56 +154,17 @@ export default defineComponent({
         {
           id: "offer_screening",
           helpText: "Offer CxCa screening today",
-          type: FieldType.TT_MULTIPLE_YES_NO,
-          validation: (val: any) =>
-            Validation.required(val) || Validation.anyEmpty(val),
-          //   computedValue: (d: Array<Option>) => {
-          //     return {
-          //       tag: 'obs',
-          //       obs: d.map(({ other, value }: Option) => this.reception.buildValueCoded(other.concept, value))
-          //     }
-          //   },
-          options: (form: any) => {
-            if (form.who_is_present) return form.who_is_present;
-            return [
-              {
-                label: "Offer CxCa screening?",
-                value: "",
-                other: {
-                  concept: "Patient Present",
-                  property: "patient_present",
-                  values: this.yesNoOptions(),
-                },
-              },
-            ];
-          },
+          type: FieldType.TT_SELECT,
+          options: () => this.yesNoOptions(),
+          validation: (val: any) => Validation.required(val),
         },
         {
           id: "results_available",
-          helpText: "Results available",
-          type: FieldType.TT_MULTIPLE_YES_NO,
+          helpText: "Results available?",
+          type: FieldType.TT_SELECT,
           validation: (val: any) =>
-            Validation.required(val) || Validation.anyEmpty(val),
-          //   computedValue: (d: Array<Option>) => {
-          //     return {
-          //       tag: 'obs',
-          //       obs: d.map(({ other, value }: Option) => this.reception.buildValueCoded(other.concept, value))
-          //     }
-          //   },
-          options: (form: any) => {
-            if (form.who_is_present) return form.who_is_present;
-            return [
-              {
-                label: "Offer CxCa screening?",
-                value: "",
-                other: {
-                  concept: "Patient Present",
-                  property: "patient_present",
-                  values: this.yesNoOptions(),
-                },
-              },
-            ];
-          },
+            Validation.required(val) ,
+          options: (form: any) => this.yesNoOptions(),
         },
         ...generateDateFields(
           {
@@ -226,9 +192,6 @@ export default defineComponent({
           helpText: "Previous screening method",
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
-          //   condition(formData: any) {
-          //     return formData.smoking_history.value === "Yes"
-          //   },
           options: () => [
             {
               label: "VIA",
@@ -247,46 +210,29 @@ export default defineComponent({
               value: "Speculum Exam",
             },
           ],
-          //   unload: async (value: any) => {
-          //     this.obs.push(this.socialHistory.buildValueText('Smoking duration', value.value));
-          //   }
+          unload: async (value: any) => {
+            this.obs.push(
+              this.socialHistory.buildValueText(
+                "Previous CxCa screening method",
+                value.value
+              )
+            );
+          },
         },
         {
           id: "waiting_for_lab_tests",
           helpText: "Screening method being offered today",
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
-          //   computedValue: (d: Array<Option>) => {
-          //     return {
-          //       tag: 'obs',
-          //       obs: d.map(({ other, value }: Option) => this.reception.buildValueCoded(other.concept, value))
-          //     }
-          //   },
-          options: (form: any) => this.yesNoOptions(),
-        },
-        {
-          id: "current_smoker",
-          helpText: "Do you still smoke?",
-          type: FieldType.TT_SELECT,
-          validation: (val: any) => Validation.required(val),
-          condition(formData: any) {
-            return formData.smoking_history.value === "Yes";
-          },
-          options: () => [
-            {
-              label: "Yes",
-              value: "Yes",
-            },
-            {
-              label: "No",
-              value: "No",
-            },
-          ],
           unload: async (value: any) => {
             this.obs.push(
-              this.socialHistory.buildValueCoded("Current smoker", value.value)
+              this.socialHistory.buildValueText(
+                "Waiting for test results",
+                value.value
+              )
             );
           },
+          options: (form: any) => this.yesNoOptions(),
         },
         {
           id: "reason_for_no_cxca",
@@ -306,7 +252,7 @@ export default defineComponent({
           unload: async (value: any) => {
             this.obs.push(
               this.socialHistory.buildValueCoded(
-                "Does the patient drink alcohol?",
+                "Reason for NOT offering CxCa",
                 value.value
               )
             );
