@@ -3,8 +3,6 @@
     <report-table
       :rows="rows"
       :columns="columns"
-      :paginated="true"
-      :itemPerPage="5"
       :config="{ showIndex: false }"
     ></report-table>
   </div>

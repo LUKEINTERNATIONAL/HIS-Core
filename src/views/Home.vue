@@ -163,6 +163,7 @@ import {
   settings
 } from 'ionicons/icons';
 import {
+  IonThumbnail,
   IonContent,
   IonHeader,
   IonFooter,
@@ -176,11 +177,14 @@ import {
   IonButtons,
   IonSegmentButton,
   IonLabel,
+  IonTitle,
   isPlatform
 } from "@ionic/vue";
 export default defineComponent({
   name: "Home",
   components: {
+    IonTitle,
+    IonThumbnail,
     IonIcon,
     ProgramIcon,
     HomeFolder,

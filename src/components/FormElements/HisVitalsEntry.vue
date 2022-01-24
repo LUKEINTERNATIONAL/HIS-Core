@@ -2,8 +2,8 @@
   <view-port>
     <div class="view-port-content">
       <ion-grid>
-        <ion-row class="mobile-component-view" :style="{width: '100%', 'background-color': BMI.color, color: 'white', padding:'10px', textAlign: 'center'}"> 
-          {{BMI.result}}
+        <ion-row v-if="vitalsStatus" class="mobile-component-view" :style="{width: '100%', 'background-color': vitalsStatus.color, color: 'white', padding:'10px', textAlign: 'center'}"> 
+          {{ vitalsStatus.status }}
           <p/>
         </ion-row>
         <ion-row>
@@ -53,19 +53,19 @@
                   {{ key.other.modifier }} 
                 </ion-label>
               </ion-item>
-              <ion-item> 
+              <ion-item v-if="vitalsStatus && vitalsStatus.value">
                 <ion-label>
-                  <b>BMI</b>
+                  <b>{{ vitalsStatus.label }}</b>
                 </ion-label>
-                <ion-label slot="end"> 
+                <ion-label slot="end">
                   <span class='value-highlight'>
-                    {{ BMI.index }}
+                    {{ vitalsStatus.value }}
                   </span>
                 </ion-label>
               </ion-item>
               <ion-item> 
-                  <ion-label :style="{'background-color': BMI.color, color: 'white', padding:'10px', 'text-align': 'center'}"> 
-                    {{BMI.result}}
+                  <ion-label v-if="vitalsStatus" :style="{'background-color': vitalsStatus.color, color: 'white', padding:'10px', 'text-align': 'center'}"> 
+                    {{ vitalsStatus.status }}
                   </ion-label>
               </ion-item>
             </ion-list>
@@ -75,6 +75,7 @@
     </div>
   </view-port>
 </template>
+
 <script lang="ts">
 import { defineComponent } from "vue";
 import ViewPort from "../DataViews/ViewPort.vue";
@@ -85,13 +86,12 @@ import {
   isPlatform
 } from "@ionic/vue";
 import { VITALS_KEYPAD } from "../Keyboard/KbLayouts";
-import { BMIService } from "@/services/bmi_service";
 import OptionButton from "@/components/Buttons/ActionSideButton.vue"
 import FieldMixinVue from "./FieldMixin.vue";
-import { VitalsService } from "@/apps/ART/services/vitals_service";
 import { toastWarning } from "@/utils/Alerts";
 import { Option } from "../Forms/FieldInterface";
-
+import Img from "@/utils/Img"
+import { isPlainObject } from "lodash";
 export default defineComponent({
   components: {
     ViewPort,
@@ -103,17 +103,9 @@ export default defineComponent({
   mixins: [FieldMixinVue],
   data: () => ({
     keys: [] as Option[],
-    patientID: "" as any,
+    vitalsStatus: {} as Record<string, any>,
     activeField: 0,
-    vitalService: {} as any,
-    age: null as any,
-    gender: null as any,
     keyboard: VITALS_KEYPAD,
-    BMI: {
-      index: 0,
-      result: "Normal",
-      color: "",
-    },
     isPlatform,
   }),
   activated(){
@@ -128,21 +120,12 @@ export default defineComponent({
       immediate: true,
     },
   },
+  async mounted() {
+    this.keys = await this.options(this.fdata);
+  },
   methods: {
     img(name: string) {
-      return `assets/images/vitals/${name}.png`;
-    },
-    async getBMI(): Promise<any> {
-      const height = this.getHeight()
-      const weight = this.getWeight()
-      if(height <= 0 || weight <= 0) {
-        this.BMI.color = ''
-        return
-      }
-      const BMI = await BMIService.getBMI(weight, height, this.gender, this.getAge());
-      this.BMI.index = BMI.index;
-      this.BMI.result = BMI.result;
-      this.BMI.color = BMI.color;
+      return Img(`vitals/${name}.png`);
     },
     async onKeyPress(key: any) {
       const currentValue = this.keys[this.activeField].value.toString();
@@ -156,41 +139,24 @@ export default defineComponent({
       } else {
         this.keys[this.activeField].value += key;
       }
-      this.getBMI();
-    },
-    getWeight(): number {
-      const weight = this.keys.filter((key: any) => key.label === "Weight");
-      return weight[0].value === "" ? 0 : parseFloat(`${weight[0].value}`);
-    },
-    getHeight(): number {
-      const height = this.keys.filter((key: any) => key.label === "Height");
-      return height[0].value === "" ? 0 : parseFloat(`${height[0].value}`);
-    },
-    getAge(): number {
-      const age = this.keys.filter((key: any) => key.label === "Age");
-      return age[0].value === "" ? 0 : parseFloat(`${age[0].value}`);
-    },
-    async init() {
-      this.keys = await this.options(this.fdata);
-      this.vitalService = new VitalsService(this.config.patientId, this.config.providerID)
+      if (typeof this.config.onUpdateAlertStatus === 'function') {
+        const statusUpdate = await this.config.onUpdateAlertStatus(this.keys)
+        if (isPlainObject(statusUpdate) && Object.keys(statusUpdate).includes('status')) {
+          this.vitalsStatus = statusUpdate || null
+        }
+      }
     },
     async setActiveField(index: number) {
-      const vital = this.keys[this.activeField]
-      if(!vital.value && !vital.other.required) {
-        this.activeField = index
-      } else {
-        const errs = this.vitalService.validator(vital)
-        if(errs && errs.length) toastWarning(errs)
-        else this.activeField = index
+      if (typeof this.config.onChangeOption === 'function') {
+        try {
+          await this.config.onChangeOption(this.keys[this.activeField])
+          this.activeField = index
+        } catch (e) {
+          toastWarning(e)
+        }
       }
     }
-  },
-  mounted() {
-    this.init();
-    if (this.preset) {
-      this.gender = this.preset.value;
-    }
-  },
+  }
 });
 </script>
 <style scoped>

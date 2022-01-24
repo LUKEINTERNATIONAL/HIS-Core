@@ -4,8 +4,8 @@
       <ion-toolbar>
         <ion-title> 
           <span>BP management screening on {{ date }}</span>
-          <span v-if="patientOnBPDrugs" style="color: green">
-            Patient already on BP drugs</span>
+          <small v-if="patientOnBPDrugs" style="color: green">
+            (Patient already on BP drugs)</small>
         </ion-title>
         <span slot="end">
           <ion-button
@@ -21,21 +21,11 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <view-port>
-        <div class="view-port-content">
-          <ion-header> </ion-header>
-          <ion-content>
-            <div style="height: 100%;">
-              <ion-grid style="height: 100%;">
-                <ion-row style="max-height: 80%; overflow: scroll; ">
-                  <his-table :columns="columns" :rows="rows"></his-table>
-                </ion-row>
-              </ion-grid>
-            </div>
-          </ion-content>
-        </div>
-      </view-port>
-      <div class="his-floating-keyboard"> 
+      <data-table :config="{showIndex: false}" :columns="columns" :rows="rows"></data-table>
+    </ion-content>
+    <ion-footer>
+      <ion-toolbar v-if="patientHasHyperTensionObs && isEnrolledInHTN || isEnrolledInHTN && patientOnBPDrugs"> 
+        <h1 style="text-align: center">Actions</h1>
         <ion-radio-group v-model="action">
           <ion-grid>
             <ion-row>
@@ -52,10 +42,8 @@
             </ion-row>
           </ion-grid>
         </ion-radio-group>
-      </div>
-    </ion-content>
-    <ion-footer>
-      <ion-toolbar color="black">
+      </ion-toolbar>
+      <ion-toolbar color="dark">
         <ion-button
           size="large"
           color="danger"
@@ -75,14 +63,26 @@
         </ion-button>
         <ion-button
           size="large"
-          slot="start"
+          slot="end"
           @click="goToDiagnosis"
           v-if="!patientHasHyperTensionObs"
         >
           Hypertension Diagnosis
         </ion-button>
-
-        <ion-button size="large" color="success" slot="end" @click="onFinish">
+        <ion-button
+          size="large"
+          slot="end"
+          @click="enrollInHTN"
+          v-if="patientHasHyperTensionObs && !isEnrolledInHTN"
+          > 
+          Enroll in HTN
+        </ion-button>
+        <ion-button 
+          size="large"
+          color="success" 
+          slot="end"
+          v-if="patientHasHyperTensionObs"
+          @click="onFinish">
           Finish
         </ion-button>
       </ion-toolbar>
@@ -91,8 +91,6 @@
 </template>
 <script lang="ts">
 import { defineComponent } from "vue";
-import ViewPort from "@/components/DataViews/ViewPort.vue";
-import HisTable from "@/components/DataViews/HisBasicTable.vue";
 import {
   IonToolbar,
   IonTitle,
@@ -109,8 +107,9 @@ import {
   IonPage,
   IonItem,
   IonLabel,
+  loadingController
 } from "@ionic/vue";
-import { toastWarning, alertAction } from "@/utils/Alerts";
+import { toastWarning, alertAction, toastSuccess } from "@/utils/Alerts";
 import EncounterMixinVue from "./EncounterMixin.vue";
 import RiskFactorModal from "@/components/DataViews/RiskFactorModal.vue";
 import { ObservationService } from "@/services/observation_service";
@@ -121,11 +120,19 @@ import { isEmpty } from "lodash";
 import { BPManagementService } from "../../services/htn_service";
 import { UserService } from "@/services/user_service";
 import { ProgramService } from "@/services/program_service";
+import { VitalsService } from "@/apps/ART/services/vitals_service"
+import { toastDanger } from "@/utils/Alerts";
+import { PatientProgramService } from "@/services/patient_program_service";
+import DataTable from "@/components/DataViews/tables/ReportDataTable.vue"
+import table from "@/components/DataViews/tables/ReportDataTable"
+
+const HEADER_STYLE = {
+  background: '#444444',
+}
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: {
-    ViewPort,
-    HisTable,
+    DataTable,
     IonTitle,
     IonToolbar,
     IonHeader,
@@ -146,16 +153,22 @@ export default defineComponent({
     hasARVNumber: true,
     suggestedNumber: "" as any,
     columns: [
-      "Date",
-      "Systolic",
-      "Diastolic",
-      "BP Drugs",
-      "Action / Note",
-    ] as Array<string>,
-    rows: [] as Array<string>,
-    rowColors: [] as Array<any>,
-    cellColors: [] as Array<any>,
-    styles: [] as Array<string>,
+      [
+        table.thTxt("Date", { style: HEADER_STYLE }),
+        table.thTxt("Systolic", { style: HEADER_STYLE }),
+        table.thTxt("Diastolic", { style: HEADER_STYLE }),
+        table.thTxt("BP Drugs", { style: HEADER_STYLE }),
+        table.thTxt("Action / Note", { style: HEADER_STYLE })
+      ]
+    ] as any,
+    bpGradeColorMap: {
+      'N/A': '#ffffff',
+      'normal': '#ffffff',
+      'grade 1': '#feede2',
+      'grade 2': '#fef9df',
+      'grade 3': '#fcd4d4'
+    } as any,
+    rows: [] as any,
     riskFactors: [] as any,
     action: null as any,
     trail: [] as any,
@@ -173,21 +186,33 @@ export default defineComponent({
     refer: false,
   }),
   watch: {
-    patient: {
-      async handler(patient: any) {
+    ready: {
+      async handler(ready: boolean) {
+        if (!ready) return
+        const loading = await loadingController.create({
+          message: 'Please wait...',
+          backdropDismiss: false
+        })
+        await loading.present()
+               
         this.htn = new BPManagementService(this.patientID, this.providerID);
+        this.trail = await this.htn.getBPTrail();
+        this.rows = this.formatBpTrailRows(this.trail);
+        this.normatensive = BPManagementService.isBpNormotensive(this.trail)
         this.riskFactors = await this.getRiskFactors();
-        this.rows = await this.formatTrail();
-        this.date = HisDate.toStandardHisDisplayFormat(
-          Service.getSessionDate()
-        );
+        this.date = HisDate.toStandardHisDisplayFormat(Service.getSessionDate());
         await this.isTransfered();
         await this.hasHyperTenstion();
         await this.getTreatmentStatus();
         await this.getProgramStatus();
+        loadingController.dismiss()
+        if ((this.patientHasHyperTensionObs && !this.isEnrolledInHTN)
+          || (!this.isEnrolledInHTN && this.patientOnBPDrugs)) {
+          await this.alertHtnEnrollment()
+        }
         this.getItems();
       },
-      deep: true,
+      immediate: true,
     },
   },
   computed: {
@@ -216,12 +241,18 @@ export default defineComponent({
             this.action.label
           );
 
-          if (!obs) return toastWarning("Unable to create Obs");
+          if (!obs) return toastWarning("Unable to create Obs")
           const patientState = {
             state: this.action.value,
-          };
+          }
+          
           await this.htn.enrollPatient(patientState);
-          this.nextAction(this.action.value);
+
+          if (typeof this.action?.other?.action === 'function') {
+            return this.action.other.action()
+          } else {
+            this.nextTask()
+          }
         }
       } else {
         toastWarning("Please select an action");
@@ -234,34 +265,8 @@ export default defineComponent({
     goToDiagnosis() {
       return this.$router.push({
         path: `/art/encounters/hypertension_diagnosis/${this.patientID}`,
-      });
+      })
     },
-    nextAction(state: string) {
-      switch (state) {
-        case "Start anti-hypertensives":
-          this.$router.push(
-            `/art/encounters/bp_prescription/${this.patientID}`
-          );
-          break;
-        case "Review Drugs":
-          this.$router.push(
-            `/art/encounters/bp_adherence/${this.patientID}?review=true`
-          );
-          this.nextTask();
-          break;
-        case "Continue Drugs":
-          this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`);
-          this.nextTask();
-          break;
-        case "Did not take prescribed BP drugs today":
-          this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`);
-          break;
-        default:
-          this.nextTask();
-          break;
-      }
-    },
-
     async hasHyperTenstion() {
       const ob = await ObservationService.getFirstValueCoded(
         this.patientID,
@@ -313,23 +318,33 @@ export default defineComponent({
         return {
           concept: concept.name,
           value: val,
-        };
-      });
+        }
+      })
       return Promise.all(j);
     },
-    async formatTrail() {
-      const trail = await this.htn.getBPTrail();
-      return Object.keys(trail).map((m) => {
+    formatBpTrailRows(trail: any) {
+      return Object.keys(trail).map(m => {
         const date = HisDate.toStandardHisDisplayFormat(m);
         this.currentDrugs = trail[m]["drugs"];
-        return {
-          ...trail[m],
-          date: date,
-          drugs: trail[m]["drugs"].join(""),
-        };
-      });
+        const colorGrade = () => {
+          const grade: string = BPManagementService.getBpGrade(
+            parseInt(trail[m].sbp),
+            parseInt(trail[m].dbp)
+          )
+          return this.bpGradeColorMap[grade]
+        }
+        const style = {
+          background: colorGrade()
+        }
+        return [
+          table.tdDate(date, { style }),
+          table.td(trail[m].sbp, { style }),
+          table.td(trail[m].dbp, { style }),
+          table.td(trail[m]["drugs"].join(", "), { style }),
+          table.td(trail[m].notes, { style })
+        ]
+      })
     },
-
     async showRiskFactors() {
       const modal = await modalController.create({
         component: RiskFactorModal,
@@ -351,82 +366,112 @@ export default defineComponent({
         });
       }
     },
-    async enrollInHTN() {
-      const sessionDate = ProgramService.getSessionDate();
-      await ProgramService.enrollProgram(
-        this.patientID,
-        this.HTNProgramID,
-        sessionDate
-      );
-      await ProgramService.createState(this.patientID, this.HTNProgramID, {
-        state: this.aliveState,
-      });
-    },
-    async getItems() {
-      if (this.patientOnBPDrugs && this.patientFirstVisit) {
-        if (!this.isEnrolledInHTN) {
-          alertAction("Do you want to enroll this client in the HTN program?", [
-            {
-              text: "Yes",
-              handler: async () => {
-                await this.enrollInHTN();
-                this.patientFirstVisit = false;
-                await this.getItems();
-              },
-            },
-            {
-              text: "No",
-              handler: () => this.nextTask(),
-            },
-          ]);
-        } else {
-          this.patientFirstVisit = false;
-          await this.getItems();
-        }
-      } else {
-        if (this.currentDrugs.length > 0) {
-          this.items = [
-            {
-              label: "Did not take prescribed drugs",
-              value: "on treatment",
-            },
-            {
-              label: "Continue drugs",
-              value: "on treatment",
-            },
-            {
-              label: "Review drugs",
-              value: "on treatment",
-            },
-          ];
-        } else {
-          this.items = [
-            {
-              label: "Lifestyle advice given",
-              value: "Lifestyle changes only",
-            },
-            {
-              label: "Not yet stable on ART",
-              value: "Symptomatic but not in treatment",
-            },
-            {
-              label: "Patient declining BP drugs ",
-              value: "Symptomatic but not in treatment",
-            },
-          ];
-          if (this.normatensive) {
-            this.items.push({
-              label: "Return to annual screening",
-              value: "Alive",
-            });
+    alertHtnEnrollment() {
+      return alertAction("Do you want to enroll this client in the HTN program?", [
+        {
+          text: "Yes",
+          handler: async () => {
+            await this.enrollInHTN();
+            await this.setHtnTransferred('Yes')
+            this.patientFirstVisit = false;
+            await this.getItems();
+          },
+        },
+        {
+          text: "No",
+          handler: async () => {
+            await this.setHtnTransferred('No')
+            this.nextTask()
           }
-          this.items.push({
-            label: "Start anti hypertensives",
-            value: "On treatment",
-          });
+        }
+      ])
+    },
+    async enrollInHTN() {
+      try {
+        const program  = new PatientProgramService(this.patientID)
+        program.setProgramId(this.HTNProgramID)
+        program.setStateDate(ProgramService.getSessionDate())
+        program.setStateId(this.aliveState)
+        await program.enrollProgram()
+        await program.updateState()
+        this.isEnrolledInHTN = true
+        toastSuccess('Patient is now enrolled in HTN')
+      } catch (e) {
+        console.error(e)
+        toastWarning(e)
+      }
+    },
+    async setHtnTransferred(transferred: 'Yes' | 'No'){
+      const vitals = new VitalsService(this.patientID, this.providerID)
+      const encounter = await vitals.createEncounter()
+      if (!encounter) {
+        toastDanger('Unable to create patient transferr encounter')
+      } else {
+        const obs = await vitals.saveValueCodedObs('Transferred', transferred)
+        if (!obs) {
+          toastDanger('Unable to create observation Transferred for patient')
         }
       }
     },
-  },
-});
+    async getItems() {
+      if (this.currentDrugs.length > 0) {
+        this.items = [
+          {
+            label: "Did not take prescribed drugs",
+            value: "on treatment",
+            other: {
+              action: () => this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`)
+            }
+          },
+          {
+            label: "Continue drugs",
+            value: "on treatment",
+            other: {
+              action: () => this.$router.push(`/art/encounters/bp_adherence/${this.patientID}`)
+            }
+          },
+          {
+            label: "Review drugs",
+            value: "on treatment",
+            other: {
+              action: () => this.$router.push(
+                `/art/encounters/bp_adherence/${this.patientID}?review=true`
+              )
+            }
+          },
+        ];
+      } else {
+        this.items = [
+          {
+            label: "Lifestyle advice given",
+            value: "Lifestyle changes only",
+          },
+          {
+            label: "Not yet stable on ART",
+            value: "Symptomatic but not in treatment",
+          },
+          {
+            label: "Patient declining BP drugs ",
+            value: "Symptomatic but not in treatment",
+          },
+        ]
+        if (this.normatensive) {
+          this.items.push({
+            label: "Return to annual screening",
+            value: "Alive",
+          })
+        }
+        this.items.push({
+          label: "Start anti hypertensives",
+          value: "On treatment",
+          other: {
+            action: () => this.$router.push(
+              `/art/encounters/bp_prescription/${this.patientID}`
+            )
+          }
+        })
+      }
+    }
+  }
+})
 </script>

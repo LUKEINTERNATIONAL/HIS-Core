@@ -31,15 +31,14 @@ export default defineComponent({
     activeField: '' as string,
   }),
   watch: {
-    patient: {
-      async handler(patient: any) {
-        this.init(patient);
+    ready: {
+      handler(ready: boolean) {
+        if (ready) this.init();
       },
       immediate: true,
     },
   },
   methods: {
-    
     async onFinish(formData: any, computedData: any) {
       const encounter = await this.consultation.createEncounter();
       const val = formData.has_hypertension.value;
@@ -59,16 +58,15 @@ export default defineComponent({
           enc.push(dateOb);
         }
         const observations = await this.consultation.saveObservationList(enc);
-        if (!observations)
-          return toastWarning("Unable to save patient observations");
 
+        if (!observations) return toastWarning("Unable to save patient observations")
         toastSuccess("Observations and encounter created!");
-        this.nextTask();
+        this.$router.back()
       } else {
-        return toastWarning("Unable to create fast track encounter");
+        return toastWarning("Unable to create consultation encounter");
       }
     },
-    async init(patient: any) {
+    async init() {
       this.consultation = new ConsultationService(
         this.patientID,
         this.providerID

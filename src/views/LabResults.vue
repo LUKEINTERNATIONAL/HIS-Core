@@ -76,11 +76,28 @@ export default defineComponent({
                    ...this.buildTestIndicatorFields(
                        i.indicatorId,
                        i.indicatorName,
+                       i.specimen,
                        i.testId
                     )
                 ]
             })
             return fields
+        },
+        validateVLresults(name: string, specimen: string, result: Option){
+            if (name !== 'HIV viral load') return null
+            const r = result.value.toString()
+            const modifier = r.substring(0, 1)
+            const value = r.substring(1, r.length)
+            if(
+                (specimen.match(/DBS/i) && (
+                    (modifier.match(/</) && !value.match(/ldl|400|550|839/i)) ||
+                    (modifier.match(/=/) && !(parseFloat(value) >= 400)) ||
+                    (modifier == '>')
+                )) || 
+                (modifier.match(/</) && !value.match(/ldl|20|40|150/i)) || 
+                (modifier.match(/=/) && !(parseFloat(value) >= 20))
+            ) return [`Invalid results for ${specimen} HIV viral load`];
+            return null;
         },
         alphaValueIsValid(value: string) {
             try {
@@ -96,7 +113,7 @@ export default defineComponent({
                 return false
             }
         },
-        buildTestIndicatorFields(id: number, name: string, test: number): Array<Field> {
+        buildTestIndicatorFields(id: number, name: string, specimen: string, test: number): Array<Field> {
             const condition = (f: any) => [
                 this.selectedTest.value === test, 
                 find(f.result_indicators, { label: name}) ? true : false
@@ -156,7 +173,10 @@ export default defineComponent({
                         }
                         return true
                     },
-                    validation: (v: Option) => Validation.required(v),
+                    validation: (v: Option) => Validation.validateSeries([
+                        () => Validation.required(v),
+                        () => this.validateVLresults(name, specimen, v)
+                    ]),
                     condition: (f: any) => condition(f) && f[`type_${id}`].value === 'numeric',
                     config: {
                         customKeyboard: [
@@ -185,7 +205,10 @@ export default defineComponent({
                         return true
                     },
                     computedValue,
-                    validation: (v: Option) => Validation.required(v),
+                    validation: (v: Option) => Validation.validateSeries([
+                        () => Validation.required(v),
+                        () => this.validateVLresults(name, specimen, v)
+                    ]),
                     condition: (f: any) => condition(f) && f[`type_${id}`].value === 'text'
                 }
             ]
@@ -204,7 +227,8 @@ export default defineComponent({
                     const testIndicators = indicators.map((i: any) =>({
                         testId: test.id,
                         indicatorName: i.name,
-                        indicatorId: i.concept_id
+                        indicatorId: i.concept_id,
+                        specimen: orderData.specimen.name,
                     }))
                     this.testIndicators = [...this.testIndicators, ...testIndicators]
                     this.testOptions.push({

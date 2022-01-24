@@ -21,6 +21,7 @@ export default defineComponent({
         period: '' as string,
         startDate: '' as string,
         endDate: '' as string,
+        customFileName: '' as string,
         drillDownCache: {} as Record<number, Array<any>>
     }),
     methods: {

@@ -20,6 +20,7 @@
 import { computed, defineComponent, PropType } from "vue";
 import { Option } from "@/components/Forms/FieldInterface";
 import { IonGrid, IonRow, IonCol } from "@ionic/vue";
+import { chunk } from "lodash";
 export default defineComponent({
   name: "HisResultCard",
   components: {
@@ -37,16 +38,8 @@ export default defineComponent({
     },
   },
   setup (props) {
-    const computedItems = computed(() => {
-      const result = []
-      const arr = props.items
-      for (let i = 3; i > 0; i--) {
-        result.push(arr.splice(0, Math.ceil(props.items.length / i)));
-     }
-     return result;
-    })
     return {
-      computedItems
+      computedItems: computed(() => chunk(props.items, Math.ceil(props.items.length / 3)))
     }
   } 
 });

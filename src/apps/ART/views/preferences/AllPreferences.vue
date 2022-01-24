@@ -79,9 +79,9 @@ export default defineComponent({
   methods: {
     async getClinicHolidays() {
       const holidays: string = await ART_PROP.clinicHolidays()
-      return holidays.split(',')
-                     .map(day => HisDate.toStandardHisDisplayFormat(day))
-                     .join(', ')
+      return holidays && holidays.split(',')
+                                 .map(day => HisDate.toStandardHisDisplayFormat(day))
+                                 .join(', ')
     },
     async buildRows() {
       const fillingNumberLimit = await ART_PROP.filingNumberLimit()
