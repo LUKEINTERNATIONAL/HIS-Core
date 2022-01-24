@@ -93,9 +93,9 @@ export default defineComponent({
   methods: {
     async init() {
       this.patient = await this.fetchPatient(this.patientId);
+      this.guardians = await this.getGuardian();
       this.patientCardInfo = await this.getPatientCardInfo(this.patient);
       this.visitDates = await this.getPatientVisitDates(this.patientId);
-      this.guardians = await this.getGuardian();
       this.btns.push(this.getCancelBtn())
       this.btns.push(this.getDemographicsBtn())
       if(!this.guardians) this.btns.push(this.getGuardianBtn())
