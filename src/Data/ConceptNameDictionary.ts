@@ -1,6 +1,26 @@
 export default [
    {
       "categories": [],
+      "concept_id": 10030,
+      "name": "Large Lesion (Greater than 75 percent)"
+   },
+   {
+      "categories": [],
+      "concept_id": 1739,
+      "name": "Referral reason"
+   },
+   {
+      "categories": [],
+      "concept_id": 9514,
+      "name": "VIA Results"
+   },
+   {
+      "categories": [],
+      "concept_id": 9522,
+      "name": "Patient went for VIA?"
+   },
+   {
+      "categories": [],
       "concept_id": 2592,
       "name": "Clinician notes"
    },
