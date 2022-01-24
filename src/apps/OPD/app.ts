@@ -1,10 +1,14 @@
-import { AppInterface } from '@/apps/interfaces/AppInterface';
+import { AppInterface, GeneralDataInterface } from '@/apps/interfaces/AppInterface';
 import HomeOverview from "@/apps/OPD/components/HomeOverview.vue";
 import { PRIMARY_ACTIVITIES } from '@/apps/OPD/config/programActivities';
 import { REPORTS } from '@/apps/OPD/config/programReports';
 import opdRoutes  from '@/apps/OPD/config/routes';
 import { PatientProgramService } from '@/services/patient_program_service';
 import { AppEncounterService } from "@/services/app_encounter_service"
+import PatientAlerts from "@/services/patient_alerts"
+import { Observation } from '@/interfaces/observation';
+import { OrderService } from '@/services/order_service';
+import { RelationshipService } from '@/services/relationship_service';
 
 async function onRegisterPatient(patientId: number){
   const program = new PatientProgramService(patientId)
@@ -31,6 +35,64 @@ async function formatPatientProgramSummary(data: any) {
   ]
 }
 
+async function getPatientDashboardAlerts(patient: any): Promise<GeneralDataInterface[]>{
+  const sideEffects: Observation[] 
+  = await PatientAlerts.alertSideEffects(
+      patient.getID()
+  )
+  return [
+      {
+          label: "Side effects",
+          value: `${sideEffects.length}`,
+      }
+  ]
+}
+
+function confirmationSummary(patient: any, program: any) {
+  return {
+    'PATIENT IDENTIFIERS': () => ([
+      {
+        label: "NPID",
+        value: patient.getNationalID(),
+      }
+    ]),
+    'ALERTS': () => getPatientDashboardAlerts(patient),
+    'LAB ORDERS': async () => {
+      const data: any = []
+      await OrderService.getOrders(patient.getID())
+        .then((orders) => {
+          const VLOrders = OrderService.getViralLoadOrders(orders);
+          VLOrders.forEach((element) => {
+            data.push({
+              value: OrderService.formatOrders(element),
+              label: ``,
+            });
+          });
+        });
+      return data
+    },
+    'OUTCOME': () => ([
+      { 
+        label: 'Current Outcome', 
+        value: program.outcome || 'N/A'
+      }
+    ]),
+    'GUARDIAN': async () => {
+      const req = await RelationshipService
+        .getGuardianDetails(
+            patient.getID()
+        )
+      if (req) {
+        return req.map((r: any) => ({
+          label: r.name,
+          value: r.relationshipType,
+        }))
+      } 
+      return []
+    }
+  }
+}
+
 const OPD: AppInterface = {
   programID: 14,
   applicationName: 'OPD',
@@ -43,6 +105,7 @@ const OPD: AppInterface = {
   homeOverviewComponent: HomeOverview,
   onRegisterPatient,
   formatPatientProgramSummary,
+  confirmationSummary,
   programPatientIdentifiers: {
     'National ID': {
       id: 28,
