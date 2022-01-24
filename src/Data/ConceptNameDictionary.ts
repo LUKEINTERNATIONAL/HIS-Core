@@ -1,6 +1,11 @@
 export default [
    {
       "categories": [],
+      "concept_id": 9066,
+      "name": "Cancer of cervix"
+   },
+   {
+      "categories": [],
       "concept_id": 10030,
       "name": "Large Lesion (Greater than 75 percent)"
    },
