@@ -30,6 +30,61 @@ export default [
       "name": "Art clinic location"
    },
    {
+      "categories": [],
+      "concept_id": 8677,
+      "name": 'Specific presenting complaint'
+   },
+   {
+      "categories": [],
+      "concept_id": 8578,
+      "name": 'Presenting complaint'
+   },
+   {
+      "categories": [],
+      "concept_id": 10319,
+      "name": 'Presenting complaint group'
+   },
+   {
+      "categories": [],
+      "concept_id": 6266,
+      "name": 'Trauma'
+   },
+   {
+      "categories": [],
+      "concept_id": 7027,
+      "name": 'General'
+   },
+   {
+      "categories": [],
+      "concept_id": 7411,
+      "name": 'ILI'
+   },
+   {
+      "categories": [],
+      "concept_id": 7644,
+      "name": 'Respiratory'
+   },
+   {
+      "categories": [],
+      "concept_id": 7661,
+      "name": 'Gastrointestinal'
+   },
+   {
+      "categories": [],
+      "concept_id": 9546,
+      "name": 'Haema'
+   },
+   {
+      "categories": [],
+      "concept_id": 9551,
+      "name": 'Nephro'
+   },
+   {
+      "categories": [],
+      "concept_id": 9560,
+      "name": 'Cardiovascular'
+   },
+   {
       "categories": [
          'art_patient_type'
       ],
@@ -65,9 +120,114 @@ export default [
       "name": "patient smokes"
    },
    {
+      "categories": ['risk factors'],
+      "concept_id": 2318,
+      "name": "Patient drinks alcohol"
+   },
+   {
+      "categories": [],
+      "concept_id": 9675,
+      "name": "Referral"
+   },
+   {
+      "categories": [],
+      "concept_id": 1054,
+      "name": "Marital status"
+   },
+   {
+      "categories": [],
+      "concept_id": 8366,
+      "name": "Religion"
+   },
+   {
+      "categories": [],
+      "concept_id": 6541,
+      "name": "Referred"
+   },
+   {
+      "categories": [],
+      "concept_id": 8717,
+      "name": "Specialist clinic"
+   },
+   {
+      "categories": [],
+      "concept_id": 6734,
+      "name": "Admit to ward"
+   },
+   {
+      "categories": [],
+      "concept_id": 9674,
+      "name": "Re-visiting"
+   },
+   {
+      "categories": [],
+      "concept_id": 3753,
+      "name": "HIV status"
+   },
+   {
+      "categories": [],
+      "concept_id": 7878,
+      "name": "HIV test location"
+   },
+   {
+      "categories": [],
+      "concept_id": 7409,
+      "name": "Qech outpatient diagnosis list"
+   },
+   {
+      "categories": [],
+      "concept_id": 123,
+      "name": "Malaria"
+   },
+   {
+      "categories": [],
+      "concept_id": 9227,
+      "name": "Malaria Test Result"
+   },
+   {
+      "categories": [],
+      "concept_id": 703,
+      "name": "Positive"
+   },
+   {
+      "categories": [],
+      "concept_id": 64,
+      "name": "Negative"
+   },
+   {
+      "categories": [],
+      "concept_id": 6542,
+      "name": "Primary diagnosis"
+   },
+   {
+      "categories": [],
+      "concept_id": 6543,
+      "name": "Secondary diagnosis"
+   },
+   {
+      "categories": [],
+      "concept_id": 2688,
+      "name": "Clinical notes construct"
+   },
+   {
+      "categories": [],
+      "concept_id": 1837,
+      "name": "HIV test date"
+   },
+   {
+      "categories": [],
+      "concept_id": 6189,
+      "name": "Type of visit"
+   },
+   {
       "categories": [],
       "concept_id": 3003,
       "name": "Transfer to"
+   },
+   {
+      "categories": [],
+      "concept_id": 7414,
+      "name": "Transfer from"
    },
    {
       "categories": [],
