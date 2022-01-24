@@ -5,6 +5,7 @@ export const REPORTS: FolderInterface[] = [
         name: 'MoH',
         icon: 'login-logos/Malawi-Coat_of_arms_of_arms.png',
         defaultFilesIcon: 'reports.png',
+        condition: () => false,
         files: [
             {
                 name: 'LA report',
@@ -28,6 +29,7 @@ export const REPORTS: FolderInterface[] = [
         name: 'PEPFAR',
         icon: 'login-logos/PEPFAR.png',
         defaultFilesIcon: 'reports.png',
+        condition: () => false,
         files: [
             {
                 name: 'IDSR report',
