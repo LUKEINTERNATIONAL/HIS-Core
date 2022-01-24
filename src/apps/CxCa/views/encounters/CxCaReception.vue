@@ -13,25 +13,22 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import EncounterMixinVue from "./EncounterMixin.vue";
-import { PatientTypeService } from "@/apps/ART/services/patient_type_service";
+import {ReceptionService} from "@/apps/CxCa/services/CxCaReceptionService"
 import { toastSuccess, toastWarning } from "@/utils/Alerts";
-import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper";
-import { Field } from "@/components/Forms/FieldInterface";
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: { HisStandardForm },
   data: () => ({
-    patientType: {} as any,
+    reception: {} as any,
   }),
   watch: {
     patient: {
       async handler() {
-        this.patientType = new PatientTypeService(
+        this.reception = new ReceptionService(
           this.patientID,
           this.providerID
         );
-        await this.patientType.loadPatientType();
         this.fields = this.getFields();
       },
       deep: true,
@@ -39,16 +36,15 @@ export default defineComponent({
   },
   methods: {
     async onFinish(formData: any) {
-//       const encounter = await this.patientType.createEncounter();
+      const encounter = await this.reception.createEncounter();
 
-//       if (!encounter) return toastWarning("Unable to create encounter");
+      if (!encounter) return toastWarning("Unable to create encounter");
+      const data = formData['reason_for_visit'];
+      const receptionObs = await this.reception.buildValueCoded('Reason for visit', data.value);
 
-//       this.patientType.setLocationName(formData?.location?.label);
-//       this.patientType.setPatientType(formData?.patient_type?.value);
-
-//       await this.patientType.save();
-//       toastSuccess("Observations and encounter created!");
-//       this.nextTask();
+      const obs = await this.reception.saveObs(receptionObs)
+      toastSuccess("Observations and encounter created!");
+      this.nextTask();
     },
     
     getFields(): any {
@@ -58,37 +54,10 @@ export default defineComponent({
           helpText: "Reason for visit",
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
-          options: () => [
-            {
-              label: "Initial screening",
-              value: "Initial screening",
-            },
-            {
-              label: "Postponed treatmment",
-              value: "Postponed treatment",
-            },
-            {
-              label: "One year subsequent check-up after treatmen",
-              value: "One year subsequent check-up after treatmen",
-            },
-            {
-              label: "Subsequent screening",
-              value: "Subsequent screening",
-            },
-            {
-              label: "Problem visit after treatment",
-              value: "Problem visit after treatment",
-            },
-            {
-              label: "Referral",
-              value: "Referral",
-            },
-          ],
-          // unload: async (value: any) => {
-          //   this.obs.push(
-          //     this.socialHistory.buildValueCoded("SMOKE_HIS", value.value)
-          //   );
-          // },
+          options: () => this.mapOptions([
+            "Initial screening","Postponed treatment","One year subsequent check-up after treatment",
+            "Subsequent screening","Problem visit after treatment","Referral"
+          ])
         },
       ];
     },
