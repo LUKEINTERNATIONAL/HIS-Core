@@ -45,8 +45,8 @@ export class OrderService extends Service {
     static formatOrders(order: Order) {
         const test = order.tests[0];
         const result = test.result[0];
-        const resultDate = HisDate.toStandardHisFormat(result.date);
-        const status = this.isHighViralLoadResult(result) ? "(High)" : ""
+        const resultDate = HisDate.toStandardHisDisplayFormat(result.date);
+        const status = this.isHighViralLoadResult(result) ? '<span style="color: #d9534f;">High</span>' : ""
         return `${test.name} ${result.value_modifier}${result.value} ${status} ${resultDate}`;
     }
 

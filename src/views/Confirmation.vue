@@ -38,7 +38,7 @@
               <ul class="card-content"> 
                 <li class='li-item' v-for="(info, id) in card.data" :key="id"> 
                   <span v-if="info.label"> {{ info.label }} &nbsp;</span>
-                  <strong>{{ info.value }} </strong>
+                  <strong v-html="info.value"></strong>
                 </li>
               </ul>
             </ion-card-content>
@@ -596,6 +596,7 @@ ul {
   margin: 0;
   padding: 0;
   line-height: 30px;
+  border-bottom: .1rem solid #cecece;
 }
 ion-card-header {
   padding: 0.3em;
