@@ -13,52 +13,86 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import EncounterMixinVue from "./EncounterMixin.vue";
-import { PatientTypeService } from "@/apps/ART/services/patient_type_service";
+import {ScreeningResultService} from "@/apps/CxCa/services/CxCaScreeningResultService"
 import { toastSuccess, toastWarning } from "@/utils/Alerts";
-import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper";
-import { Field } from "@/components/Forms/FieldInterface";
 import { getFacilities } from "@/utils/HisFormHelpers/LocationFieldOptions";
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: { HisStandardForm },
   data: () => ({
-    patientType: {} as any,
+    screeningResult: {} as any,
+    obs: [] as any,
+    currentMethod: ''
   }),
   watch: {
     patient: {
       async handler() {
-        this.patientType = new PatientTypeService(
+        this.screeningResult = new ScreeningResultService(
           this.patientID,
           this.providerID
         );
-        await this.patientType.loadPatientType();
+        this.currentMethod = await this.getTreatmentOptions(); 
         this.fields = this.getFields();
+        
       },
       deep: true,
     },
   },
   methods: {
     async onFinish(formData: any) {
-      //       const encounter = await this.patientType.createEncounter();
-      //       if (!encounter) return toastWarning("Unable to create encounter");
-      //       this.patientType.setLocationName(formData?.location?.label);
-      //       this.patientType.setPatientType(formData?.patient_type?.value);
-      //       await this.patientType.save();
-      //       toastSuccess("Observations and encounter created!");
-      //       this.nextTask();
+      const encounter = await this.screeningResult.createEncounter();
+      if (!encounter) return toastWarning("Unable to create encounter");
+      if(formData.treatment_option.value === "Referral") {
+        this.obs.push(this.screeningResult.buildValueText('Referral location', formData['location'].label))
+      }
+      const data = await Promise.all([...this.obs]);
+      await this.screeningResult.saveObservationList(data);
+      toastSuccess("Observations and encounter created!");
+      this.nextTask();
     },
     getFacilities(filter = "") {
       return getFacilities(filter);
     },
+    async getTreatmentOptions() {
+      return await this.screeningResult.getFirstValueCoded('CxCa screening method');
+    },
+    getOptions(method: string) {
+      if(method.match(/via/i)){
+        return ["VIA Negative","VIA Positive","Suspect Cancer"];
+      }else if(method.match(/smear/i)){
+        return ["PAP Smear Normal","PAP Smear Abnormal"];
+      }else if(method.match(/HPV DNA/i)){
+        return ["HPV positive","HPV negative"];
+      }else if(method.match(/Speculum/i)){
+        return ["Visible Lesion","No visible Lesion","Other Gynae"];
+      }
+      return []
+    },
     getFields(): any {
       return [
+        {
+          id: "screening_result",
+          helpText: "Screening Result",
+          type: FieldType.TT_SELECT,
+          validation: (val: any) => Validation.required(val),
+          options: () => this.mapOptions([...this.getOptions(this.currentMethod)]),
+          unload: (data: any) => {
+            this.obs.push(this.screeningResult.buildValueCoded('Patient went for VIA?', data.value))
+          }
+        },
         {
           id: "offer_via",
           helpText: "Offer VIA",
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
           options: () => this.yesNoOptions(),
+          unload: (data: any) => {
+            this.obs.push(this.screeningResult.buildValueCoded('Patient went for VIA?', data.value))
+          },
+          condition(formData: any) {
+            return formData.screening_result.value === "HPV positive";
+          },
         },
         {
           id: "via_screening_results",
@@ -69,9 +103,15 @@ export default defineComponent({
             return this.mapOptions([
               "VIA negative",
               "VIA positive",
-              "Suspected Cancer",
+              "Suspect cancer",
             ]);
           },
+          condition(formData: any) {
+            return formData.offer_via.value === "Yes";
+          },
+          unload: (data: any) => {
+            this.obs.push(this.screeningResult.buildValueCoded('VIA Results', data.value))
+          }
         },
         {
           id: "reason_for_not_offering_via",
@@ -85,6 +125,12 @@ export default defineComponent({
               "Other conditions",
             ]);
           },
+          condition(formData: any) {
+            return formData.offer_via.value === "No";
+          },
+          unload: (data: any) => {
+            this.obs.push(this.screeningResult.buildValueCoded('Other reason for not seeking services', data.value))
+          }
         },
         {
           id: "treatment_option",
@@ -98,6 +144,10 @@ export default defineComponent({
               "Referral",
             ]);
           },
+          
+          unload: (data: any) => {
+            this.obs.push(this.screeningResult.buildValueCoded('Directly observed treatment option', data.value))
+          }
         },
         {
           id: "postponed_reason",
@@ -111,6 +161,12 @@ export default defineComponent({
               "Other conditions",
             ]);
           },
+          condition(formData: any) {
+            return formData.treatment_option.value === "Postponed treatment";
+          },
+          unload: (data: any) => {
+            this.obs.push(this.screeningResult.buildValueCoded('Postponed reason', data.value))
+          }
         },
         {
           id: "referral_rreason",
@@ -127,20 +183,25 @@ export default defineComponent({
               "Other conditions",
             ]);
           },
+          condition(formData: any) {
+            return formData.treatment_option.value === "Referral";
+          },
+          unload: (data: any) => {
+            this.obs.push(this.screeningResult.buildValueCoded('Referral reason', data.value))
+          }
         },
         {
           id: "location",
           helpText: "CD4 Location",
           type: FieldType.TT_SELECT,
-          // computedValue: ({ label }: Option) => ({
-          //     tag: 'staging',
-          //     obs: this.staging.buildValueText('Cd4 count location', label)
-          // }),
           validation: (val: any) => Validation.required(val),
           options: (_: any, filter = "") => this.getFacilities(filter),
           config: {
             showKeyboard: true,
             isFilterDataViaApi: true,
+          },
+          condition(formData: any) {
+            return formData.treatment_option.value === "Referral";
           },
         },
       ];
