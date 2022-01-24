@@ -42,13 +42,6 @@ export class OrderService extends Service {
 
         });
     }
-    static formatOrders(order: Order) {
-        const test = order.tests[0];
-        const result = test.result[0];
-        const resultDate = HisDate.toStandardHisDisplayFormat(result.date);
-        const status = this.isHighViralLoadResult(result) ? '<span style="color: #d9534f;">High</span>' : ""
-        return `${test.name} ${result.value_modifier}${result.value} ${status} ${resultDate}`;
-    }
 
     static isHighViralLoadResult(result: any) {
         if(result.value_modifier === '=' && parseFloat(result.value) >= 1000) return true
