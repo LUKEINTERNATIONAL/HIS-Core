@@ -1,5 +1,7 @@
 <template>
-  <his-standard-form :cancelDestinationPath="cancelDestination" :fields="fields" :onFinishAction="onSubmit"/>
+  <ion-page>
+    <his-standard-form :cancelDestinationPath="cancelDestination" :fields="fields" :onFinishAction="onSubmit"/>
+  </ion-page>
 </template>
 
 <script lang="ts">
@@ -7,12 +9,14 @@ import { defineComponent } from 'vue'
 import HisStandardForm from "@/components/Forms/TouchScreenForm.vue";
 import EncounterMixinVue from '@/apps/ART/views/encounters/EncounterMixin.vue';
 import { PatientComplaintsService } from "@/apps/OPD/services/patient_complaints_service";
+import LabOrderModal from "@/components/DataViews/LabOrderModal.vue"
 import Validation from '@/components/Forms/validations/StandardValidations';
 import { Field, Option } from '@/components/Forms/FieldInterface';
 import { FieldType } from '@/components/Forms/BaseFormElements';
+import { modalController, IonPage } from '@ionic/vue';
 
 export default defineComponent({
-  components: { HisStandardForm },
+  components: { HisStandardForm, IonPage },
   mixins: [EncounterMixinVue],
   data: () => ({
     complaintsService: {} as any,
@@ -36,6 +40,15 @@ export default defineComponent({
       await this.complaintsService.saveObservationList(data)
       this.nextTask()        
     },
+    async launchOrderSelection() {
+      const modal = await modalController.create({
+        component: LabOrderModal,
+        backdropDismiss: false,
+        cssClass: 'large-modal'
+      })
+      modal.present()
+      await modal.onDidDismiss()
+    },
     getFields(): Array<Field>{
       return [
         {
@@ -51,6 +64,21 @@ export default defineComponent({
             })
             return obs.flat(1)
           },
+          config: {
+            footerBtns: [
+              {
+                name: "Lab Order",
+                size: "large",
+                slot: "end",
+                color: "primary",
+                visible: true,
+                onClick: async () => await this.launchOrderSelection(),
+                visibleOnStateChange: (state: Record<string, any>) => {
+                  return state.index === 1;
+                },
+              },
+            ],
+          }
         },
       ]
     }

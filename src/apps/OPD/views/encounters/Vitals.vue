@@ -19,7 +19,7 @@ import { VitalsService } from "@/apps/OPD/services/vitals_service";
 import { toastSuccess, toastWarning } from "@/utils/Alerts";
 import EncounterMixinVue from "@/apps/ART/views/encounters/EncounterMixin.vue";
 import { BMIService } from "@/services/bmi_service";
-import { GlobalPropertyService } from "@/services/global_property_service";
+import ART_PROP from "@/apps/ART/art_global_props"
 import { ProgramService } from "@/services/program_service";
 
 export default defineComponent({
@@ -64,12 +64,7 @@ export default defineComponent({
           this.hasHTNObs = data && data.length > 0;
         }
       );
-      await GlobalPropertyService.isHTNEnabled().then((data) => {
-        if (data && data === "true") {
-          this.HTNEnabled = true;
-        }
-      });
-
+      this.HTNEnabled = await ART_PROP.htnEnabled()
       this.fields = this.getFields();
     },
     async onFinish(formData: any) {

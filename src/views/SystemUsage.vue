@@ -7,6 +7,7 @@
             :fields="fields"
             :columns="columns"
             :showtitleOnly="true"
+            :customFileName="customFileName"
             :onReportConfiguration="onPeriod"
             > 
         </report-template>
@@ -47,6 +48,7 @@ export default defineComponent({
             const data = await UserService.getSystemUsageByUsers(config.start_date, config.end_date)
             this.period = `${HisDate.toStandardHisDisplayFormat(config.start_date)}-${HisDate.toStandardHisDisplayFormat(config.end_date)}`
             this.title = `User system usage <b>${this.period}</b>`
+            this.customFileName = `${UserService.getLocationName()} User system usage ${this.period}` 
             this.setRows(data)
         },
         async setRows(data: Array<any>) {

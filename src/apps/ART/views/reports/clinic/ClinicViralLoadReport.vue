@@ -8,6 +8,7 @@
             :columns="columns"
             :canExportPDf="false"
             :showtitleOnly="true"
+            :customFileName="customFileName"
             :onReportConfiguration="onPeriod"
             > 
         </report-template>
@@ -80,6 +81,7 @@ export default defineComponent({
             this.report.setEndDate(config.end_date)
             this.period = this.report.getDateIntervalPeriod()
             this.title = `${resultType.label} Report <small><b>(between the period of (${this.period})</b></small>`
+            this.customFileName = `${PatientReportService.getLocationName()} ${resultType.label} ${this.period}`
             this.setRows((await this.report.getViralLoadResults(resultType.value.toLowerCase())))
         },
         async setRows(data: Array<any>) {
