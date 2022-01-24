@@ -125,15 +125,12 @@ export default defineComponent({
     }
   },
   watch: {
-    clear(isClear: boolean){
-      if (isClear) {
-        for (const group in this.complaintsList) {
-          this.complaintsList[group] = this.complaintsList[group].map(option => {
-            option.isChecked = false
-            return option
-          })
-        }
-        this.$emit('onClear')
+    clear(){
+      for (const group in this.complaintsList) {
+        this.complaintsList[group] = this.complaintsList[group].map(option => {
+          option.isChecked = false
+          return option
+        })
       }
     }
   },
