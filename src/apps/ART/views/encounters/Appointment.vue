@@ -14,7 +14,7 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import { toastWarning, toastSuccess } from "@/utils/Alerts"
-import EncounterMixinVue from './EncounterMixin.vue';
+import EncounterMixinVue from '../../../../views/EncounterMixin.vue';
 import {AppointmentService} from '@/apps/ART/services/appointment_service'
 import { PatientPrintoutService } from "@/services/patient_printout_service";
 

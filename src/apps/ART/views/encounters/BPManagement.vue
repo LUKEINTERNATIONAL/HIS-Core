@@ -110,7 +110,7 @@ import {
   loadingController
 } from "@ionic/vue";
 import { toastWarning, alertAction, toastSuccess } from "@/utils/Alerts";
-import EncounterMixinVue from "./EncounterMixin.vue";
+import EncounterMixinVue from "../../../../views/EncounterMixin.vue";
 import RiskFactorModal from "@/components/DataViews/RiskFactorModal.vue";
 import { ObservationService } from "@/services/observation_service";
 import { ConceptService } from "@/services/concept_service";

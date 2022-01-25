@@ -9,7 +9,7 @@
 import { defineComponent } from 'vue'
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Field, Option } from "@/components/Forms/FieldInterface"
-import EncounterMixinVue from '@/apps/ART/views/encounters/EncounterMixin.vue'
+import EncounterMixinVue from '@/views/EncounterMixin.vue'
 import {getFacilities} from "@/utils/HisFormHelpers/LocationFieldOptions"
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { PatientLabService } from "@/apps/LOS/services/patient_lab_service"
