@@ -108,7 +108,6 @@ export async function onRegisterPatient(patientID: number, person: any, attr: an
 export async function getPatientDashboardAlerts(patient: any): Promise<GeneralDataInterface[]>{
     const sideEffects: Observation[] = await PatientAlerts.alertSideEffects(patient.getID())
     const bmi = await patient.getBMI()
-    console.log(bmi)
     return [
         {
             label: "Side effects",
