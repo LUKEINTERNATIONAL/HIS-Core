@@ -13,7 +13,7 @@ import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
-import EncounterMixinVue from "./EncounterMixin.vue";
+import EncounterMixinVue from "../../../../views/EncounterMixin.vue";
 import { ConsultationService } from "@/apps/ART/services/consultation_service";
 import { toastSuccess, toastWarning } from "@/utils/Alerts";
 import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper";

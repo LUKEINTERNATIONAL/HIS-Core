@@ -151,7 +151,7 @@ import {
   IonPage,
   IonCheckbox,
 } from "@ionic/vue";
-import EncounterMixinVue from "./EncounterMixin.vue";
+import EncounterMixinVue from "../../../../views/EncounterMixin.vue";
 import { BPManagementService, HTN_SESSION_KEY } from "../../services/htn_service";
 import { ProgramService } from "@/services/program_service";
 import { toastWarning } from "@/utils/Alerts";

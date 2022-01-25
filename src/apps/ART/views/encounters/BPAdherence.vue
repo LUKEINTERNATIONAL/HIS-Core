@@ -136,7 +136,7 @@ import {
   IonPage,
   IonCheckbox,
 } from "@ionic/vue";
-import EncounterMixinVue from "./EncounterMixin.vue";
+import EncounterMixinVue from "../../../../views/EncounterMixin.vue";
 import { BPManagementService, HTN_SESSION_KEY } from "../../services/htn_service";
 import HisKeypadVue from "@/components/Keyboard/HisKeypad.vue";
 import { optionsActionSheet } from "@/utils/ActionSheets"
