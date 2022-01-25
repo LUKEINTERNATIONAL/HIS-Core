@@ -1,4 +1,5 @@
-import { toastController, alertController, actionSheetController } from "@ionic/vue";
+import { toastController, alertController, actionSheetController, modalController } from "@ionic/vue";
+import ConfimationSheet from "@/components/DataViews/actionsheet/ConfirmationSheet.vue"
 
 async function toast(message: string, color="primary", duration=10000) {
     const toast = await toastController.create({
@@ -58,26 +59,36 @@ export async function actionSheet(header: string, subHeader: string, buttons: Ar
     return role
 }
 export async function alertConfirmation(message: string, header="Confirmation") {
-    const alert = await alertController.create({
-        cssClass: 'my-custom-class',
-        mode: 'ios',
-        header,
-        message,
+    const modal = await modalController.create({
+        component: ConfimationSheet,
         backdropDismiss: false,
-        buttons: [
-            {
-                text: 'Cancel',
-                role: 'cancel',
-            },
-            {
-                text: 'Confirm'
-            }
-        ]
+        cssClass: "small-modal",
+        componentProps: {
+            subtitle: header,
+            body: message,
+            actionButtons: [
+                {
+                    name: 'Cancel',
+                    size: 'large',
+                    slot: 'start',
+                    color: 'danger',
+                    visible: true,
+                    role: 'Cancel',
+                    onClick: ({role}: any) => modalController.dismiss(role)
+                },
+                {
+                    name: 'Confirm',
+                    size: 'large',
+                    slot: 'end',
+                    color: 'success',
+                    visible: true,
+                    role: 'Confirm',
+                    onClick: ({role}: any) => modalController.dismiss(role)
+                },
+            ],
+        }
     })
-
-   alert.present();
-
-   const { role } = await alert.onDidDismiss()
-
-   return role != 'cancel' 
+    modal.present()
+    const { data } = await modal.onDidDismiss()
+    return data === 'Confirm' 
 }
