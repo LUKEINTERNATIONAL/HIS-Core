@@ -170,6 +170,10 @@ export default defineComponent({
     },
     onDefaultConfiguration: {
       type: Function
+    },
+    customFileName: {
+      type: String,
+      default: ''
     }
   },
   data: () => ({
@@ -194,7 +198,9 @@ export default defineComponent({
       this.activeRows = rows
     },
     getFileName() {
-      return `${this.reportPrefix} ${Service.getLocationName()} ${this.title} ${this.period}`
+      return this.customFileName 
+        ? this.customFileName
+        : `${this.reportPrefix} ${Service.getLocationName()} ${this.title} ${this.period}`
     },
     /**
      * Loads report without depending on Field configurations

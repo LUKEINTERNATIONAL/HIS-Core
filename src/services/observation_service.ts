@@ -51,6 +51,15 @@ export class ObservationService extends ConceptService {
         }
     }
 
+    static async buildValueCodedFromConceptId(conceptName: string, valueCoded: number, date=this.getSessionDate()) {
+        const concept = await ConceptService.getConceptID(conceptName, true)
+        return {
+            'concept_id': concept,
+            'value_coded': valueCoded,
+            'obs_datetime': date
+        }
+    }
+
     static async buildValueText(conceptName: string, valueText: string, date=this.getSessionDate()) {
         const concept = await ConceptService.getConceptID(conceptName, true)
         return {

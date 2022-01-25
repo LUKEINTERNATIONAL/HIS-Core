@@ -100,7 +100,7 @@ export default defineComponent({
                 type: FieldType.TT_SELECT,
                 validation: (val: Option) => Validation.required(val),
                 computedValue: (val: any) => ConceptService.getCachedConceptID(
-                    val.value
+                    val.value, true
                 ),
                 options: () => [
                     {label: 'Routine', value: 'Routine'},

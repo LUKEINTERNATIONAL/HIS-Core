@@ -11,7 +11,7 @@ import { PrescriptionService } from "@/apps/ART/services/prescription_service"
 import { toastWarning, toastSuccess } from "@/utils/Alerts"
 import HisDate from "@/utils/Date"
 import { matchToGuidelines } from "@/utils/GuidelineEngine"
-import { isEmpty } from "lodash"
+import { isEmpty, isPlainObject } from "lodash"
 import EncounterMixinVue from './EncounterMixin.vue'
 import { 
     PRESCRIPTION_GUIDELINES,
@@ -21,6 +21,7 @@ import {
     FlowState 
 } from "@/apps/ART/guidelines/prescription_guidelines"
 import ART_PROPS from "@/apps/ART/art_global_props"
+import { HTN_SESSION_KEY } from '../../services/htn_service'
 
 export default defineComponent({
     mixins: [EncounterMixinVue],
@@ -29,6 +30,7 @@ export default defineComponent({
         prescription: {} as any,
         patientToolbar: [] as Array<Option>,
         fieldComponent: '' as string,
+        regimenExtras: [] as Array<any>,
         facts: {
             age: -1 as number,
             gender: '' as string,
@@ -81,15 +83,22 @@ export default defineComponent({
 
                 await this.initFacts(patient)
 
+                if (this.prescription.shouldPrescribeExtras()) {
+                    this.regimenExtras = this.prescription.getRegimenExtras()
+                }
+
+                const htnDrugs = this.resolveHtnDrugs()
+
+                if (!isEmpty(htnDrugs)) this.regimenExtras = [...this.regimenExtras, ...htnDrugs]
+
                 if (this.prescription.isFastTrack()) {
                     await this.prescription.loadFastTrackMedications()
                     this.drugs = this.prescription.getFastTrackMedications()
                     this.fieldComponent = 'next_visit_interval'
 
-                } else if (!this.prescription.shouldPrescribeArvs() && this.prescription.shouldPrescribeExtras()) {
-                    this.drugs = this.prescription.getRegimenExtras()
+                } else if (!this.prescription.shouldPrescribeArvs() && !isEmpty(this.regimenExtras)) {
+                    this.drugs = this.regimenExtras
                 }
-
                 this.patientToolbar = await this.getPatientToolBar()
                 this.fields = this.getFields()
             },
@@ -193,15 +202,27 @@ export default defineComponent({
             } else {
                 drugs = this.facts.regimenDrugs
             }
-
-            this.drugs = [...this.prescription.getRegimenExtras(), ...drugs]
-
+            this.drugs = [...this.regimenExtras, ...drugs]
             return true
         },
         getLpvDrugs() {
             return this.prescription.getLvpDrugsByType(
                 this.facts.lpvType, this.facts.regimenCode
             ) 
+        },
+        resolveHtnDrugs() {
+            try {
+                const sessionData = sessionStorage.getItem(HTN_SESSION_KEY.Prescription)
+                if (typeof sessionData === 'string') {
+                    const data = JSON.parse(sessionData)
+                    if (isPlainObject(data) && data[this.patientID]) {
+                        return data[this.patientID]
+                    }
+                }
+            } catch (e) {
+                console.warn(e)
+            }
+            return []
         },
         getStarterPackDrugs() {
             return this.prescription.getRegimenStarterpack(

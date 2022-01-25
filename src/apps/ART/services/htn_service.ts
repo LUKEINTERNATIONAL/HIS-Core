@@ -1,9 +1,41 @@
 import { AppEncounterService } from "@/services/app_encounter_service"
 import { ObservationService } from "@/services/observation_service"
 
+export enum HTN_SESSION_KEY {
+  Prescription = "htnPrescription"
+}
+
 export class BPManagementService extends AppEncounterService {
     constructor(patientID: number, providerID: number) {
       super(patientID, 48, providerID) //TODO: Use encounter type reference name'
+    }
+
+    static getBpGrade(sbp: number, dbp: number) {
+      if ((sbp < 140) && (dbp < 90)) {
+        return "normal"
+      }
+      else if ((sbp >= 140 && sbp < 160) || (dbp >= 100 && dbp < 110)) {
+        return "grade 1"
+      }
+      else if ((sbp >= 180 && dbp > 110) || sbp >= 180) {
+        return "grade 3"
+      }
+      else if ((sbp >= 160 && sbp < 180) || (dbp >= 110)) {
+        return "grade 2"
+      }
+      return 'N/A'
+    }
+
+    /**
+     * BP is normointensive if two most recent consecutive tests are normal
+     * @param bpTrail 
+     * @returns
+    */
+    static isBpNormotensive(bpTrail: any) {
+      const [ firstRecentGrade, secondRecentGrade ] = Object.values(bpTrail)
+        .sort((a: any, b: any) => a.date < b.date ? 1 : 0)
+        .map((bp: any) => this.getBpGrade(bp.sbp, bp.dbp))
+      return firstRecentGrade === 'normal' && secondRecentGrade === 'normal'
     }
 
     getSystolicBp() {
@@ -37,6 +69,73 @@ export class BPManagementService extends AppEncounterService {
     async enrollPatient(state: any) {
       return await AppEncounterService.postJson(`/patients/${this.patientID}/update_or_create_htn_state`, state);
     }
+    static htnDrugReferences() {
+      return [
+        { 
+          'drug_id': 275,
+          'drug_name': "HCZ (25mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        },
+        {
+          'drug_id': 942,
+          'drug_name': "Enalapril (5mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        },
+        {
+          'drug_id': 943,
+          'drug_name': "Enalapril (10mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        },
+        {
+          'drug_id': 558,
+          'drug_name': "Amlodipine (5mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        },
+        {
+          'drug_id': 559,
+          'drug_name': "Amlodipine (10mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        },
+        {
+          'drug_id': 117,
+          'drug_name': "Atenolol (50mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        },
+        {
+          'drug_id': 11,
+          'drug_name': "Atenolol(100mg tablet)",
+          'units': 'tab(s)',
+          'am': 0,
+          'noon': 0,
+          'pm': 1,
+          'frequency': 'Daily (QOD)'
+        }
+      ]
+    }
     getDrugs() {
         return {
         HCZ: {
@@ -44,6 +143,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "HCZ (25mg tablet)",
               drugID: 275,
+              amount: '25mg',
               current: false,
               selected: false,
               isChecked: false,
@@ -60,6 +160,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "Enalapril (5mg tablet)",
               drugID: 942,
+              amount: '5mg',
               current: false,
               selected: false,
               isChecked: false,
@@ -71,6 +172,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "Enalapril (10mg tablet)",
               drugID: 943,
+              amount: '10mg',
               current: false,
               selected: false,
               isChecked: false,
@@ -88,6 +190,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "Amlodipine (5mg tablet)",
               drugID: 558,
+              amount: '5mg',
               current: false,
               selected: false,
               isChecked: false,
@@ -99,6 +202,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "Amlodipine (10mg tablet)",
               drugID: 559,
+              amount: '10mg',
               current: false,
               selected: false,
               isChecked: false,
@@ -116,6 +220,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "Atenolol (50mg tablet)",
               drugID: 117,
+              amount: '50mg',
               current: false,
               selected: false,
               isChecked: false,
@@ -127,6 +232,7 @@ export class BPManagementService extends AppEncounterService {
             {
               drugName: "Atenolol(100mg tablet)",
               drugID: 11,
+              amount: '100mg',
               current: false,
               selected: false,
               isChecked: false,

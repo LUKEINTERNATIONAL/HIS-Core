@@ -62,6 +62,10 @@ export class AppEncounterService extends ObservationService {
         return AppEncounterService.buildValueCoded(conceptName, value, this.date)
     }
 
+    buildValueCodedFromConceptId(conceptName: string, value: number) {
+        return AppEncounterService.buildValueCodedFromConceptId(conceptName, value, this.date)
+    }
+
     buildValueNumber(conceptName: string, value: number, modifier=null, orderId: number | null = null) {
         return AppEncounterService.buildValueNumber(conceptName, value, modifier, orderId, this.date)
     }
