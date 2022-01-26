@@ -3,7 +3,7 @@
     <div class="view-port-content">
       <ion-grid>
         <ion-row>
-          <ion-col size="9">
+          <ion-col size="8">
             <Calendar
               color="blue"
               ref="calendar"
@@ -31,53 +31,41 @@
               </template>
             </Calendar>
           </ion-col>
-          <ion-col size="3">
-            <table>
-              <tr>
-                <td>
-                  <tr>
-                    <td><b>Medication Run out Date</b></td>
-                  </tr>
-                  <tr>
-                    <td>{{ rDate }}</td>
-                  </tr>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <tr>
-                    <td>
-                      <b>
-                        User set appointment date
-                      </b>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>{{ aDate }}</td>
-                  </tr>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <tr>
-                    <td><b>Appointment(s)</b></td>
-                  </tr>
-                  <tr>
-                    <td>{{ appointments.length }}</td>
-                  </tr>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <tr>
-                    <td><b>Appointment limit (per/day)</b></td>
-                  </tr>
-                  <tr>
-                    <td>{{ appointmentLimit }}</td>
-                  </tr>
-                </td>
-              </tr>
-            </table>
+          <ion-col size="4" class="his-card">
+            <ion-list>
+              <ion-item>
+                <ion-label>
+                  <b>Medication Run out Date</b>
+                  <br>
+                  <br>
+                  <span>{{ rDate }}</span>
+                </ion-label>
+              </ion-item>
+              <ion-item>
+                <ion-label>
+                  <b>User set appointment date</b>
+                  <br>
+                  <br>
+                  <span>{{ rDate }}</span>
+                </ion-label>
+              </ion-item>
+              <ion-item>
+                <ion-label>
+                  <b>Appointment(s)</b>
+                  <br>
+                  <br>
+                  <span>{{ appointments.length }}</span>
+                </ion-label>
+              </ion-item>
+              <ion-item>
+                <ion-label>
+                  <b>Appointment limit (per/day)</b>
+                  <br>
+                  <br>
+                  <span>{{ appointmentLimit }}</span>
+                </ion-label>
+              </ion-item>
+            </ion-list>
           </ion-col>
         </ion-row>
       </ion-grid>
@@ -201,7 +189,7 @@ export default defineComponent({
   z-index: 1;
   text-align: center;
   font-size: 3vh;
-  height: 80px;
+  height: 70px;
 }
 .vc-highlight {
   width: 100%;
@@ -209,9 +197,9 @@ export default defineComponent({
   border-radius: 0%;
 }
 .selected {
-  font-size: 4vh;
+  font-size: 3vh;
   height: 100%;
-  margin-top: 15%;
+  margin-top: 9%;
   color: white;
 }
 .isDisabled {
