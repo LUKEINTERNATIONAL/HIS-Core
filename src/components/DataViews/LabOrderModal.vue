@@ -165,9 +165,8 @@ export default defineComponent({
             cancel: 'No'
           }
         )
-
         if(canPrintOrders) await this.printOrders(d)
-        this.closeModal(d)
+        else await this.closeModal(d)
       }
     },
     async closeModal(orders: []) {
@@ -179,6 +178,7 @@ export default defineComponent({
         const url = `lab/labels/order?order_id=${element.order_id}`
         await p.printLbl(url);
       });
+      await modalController.dismiss(orders)
     },
   },
   computed: {
