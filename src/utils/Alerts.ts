@@ -58,7 +58,11 @@ export async function actionSheet(header: string, subHeader: string, buttons: Ar
     const { role } = await action.onDidDismiss();
     return role
 }
-export async function alertConfirmation(message: string, header="Confirmation") {
+export async function alertConfirmation(message: string, header="Confirmation", buttonLabels = {
+    cancel: 'Cancel',
+    confirm: 'Confirm'
+}) 
+{
     const modal = await modalController.create({
         component: ConfimationSheet,
         backdropDismiss: false,
@@ -68,7 +72,7 @@ export async function alertConfirmation(message: string, header="Confirmation") 
             body: message,
             actionButtons: [
                 {
-                    name: 'Cancel',
+                    name: buttonLabels.cancel,
                     size: 'large',
                     slot: 'start',
                     color: 'danger',
@@ -77,7 +81,7 @@ export async function alertConfirmation(message: string, header="Confirmation") 
                     onClick: ({role}: any) => modalController.dismiss(role)
                 },
                 {
-                    name: 'Confirm',
+                    name: buttonLabels.confirm,
                     size: 'large',
                     slot: 'end',
                     color: 'success',
