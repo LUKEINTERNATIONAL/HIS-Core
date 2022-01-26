@@ -17,7 +17,7 @@ import Validation from "@/components/Forms/validations/StandardValidations";
 import { ReceptionService } from "@/apps/ART/services/reception_service"
 import { ProgramService } from "@/services/program_service";
 import { toastWarning, toastSuccess } from "@/utils/Alerts"
-import EncounterMixinVue from './EncounterMixin.vue'
+import EncounterMixinVue from '../../../../views/EncounterMixin.vue'
 import HisApp from "@/apps/app_lib"
 import { isEmpty } from "lodash";
 

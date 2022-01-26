@@ -5,7 +5,7 @@
 <script lang="ts">
 import { defineComponent} from 'vue'
 import HisStandardForm from "@/components/Forms/TouchScreenForm.vue";
-import EncounterMixinVue from '@/apps/ART/views/encounters/EncounterMixin.vue';
+import EncounterMixinVue from '@/views/EncounterMixin.vue';
 import { PatientVisitRegistrationService } from "@/apps/OPD/services/patient_registration_service"
 import { PatientIdentifierService } from "@/services/patient_identifier_service";
 import Validation from '@/components/Forms/validations/StandardValidations';

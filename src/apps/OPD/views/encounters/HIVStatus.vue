@@ -5,7 +5,7 @@
 <script lang="ts">
 import { defineComponent} from 'vue'
 import HisStandardForm from "@/components/Forms/TouchScreenForm.vue";
-import EncounterMixinVue from '@/apps/ART/views/encounters/EncounterMixin.vue';
+import EncounterMixinVue from '@/views/EncounterMixin.vue';
 import Validation from '@/components/Forms/validations/StandardValidations';
 import { Field, Option } from '@/components/Forms/FieldInterface';
 import { FieldType } from '@/components/Forms/BaseFormElements';

@@ -63,7 +63,7 @@
 </template>
 <script lang="ts">
 import { defineComponent } from 'vue'
-import EncounterMixinVue from './EncounterMixin.vue'
+import EncounterMixinVue from '../../../../views/EncounterMixin.vue'
 import {
     IonFooter,
     IonContent,

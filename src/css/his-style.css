@@ -129,6 +129,11 @@ body {
  -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
+.small-modal .modal-wrapper {
+    width: 65%;
+    height: 45%;
+}
+
 .keypad-modal .modal-wrapper {
     width: 340px;
     height: 500px;

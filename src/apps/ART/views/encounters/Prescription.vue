@@ -12,7 +12,7 @@ import { toastWarning, toastSuccess } from "@/utils/Alerts"
 import HisDate from "@/utils/Date"
 import { matchToGuidelines } from "@/utils/GuidelineEngine"
 import { isEmpty, isPlainObject } from "lodash"
-import EncounterMixinVue from './EncounterMixin.vue'
+import EncounterMixinVue from '../../../../views/EncounterMixin.vue'
 import { 
     PRESCRIPTION_GUIDELINES,
     DRUG_FREQUENCY_GUIDELINE,
@@ -22,6 +22,7 @@ import {
 } from "@/apps/ART/guidelines/prescription_guidelines"
 import ART_PROPS from "@/apps/ART/art_global_props"
 import { HTN_SESSION_KEY } from '../../services/htn_service'
+import { ProgramService } from '@/services/program_service'
 
 export default defineComponent({
     mixins: [EncounterMixinVue],
@@ -31,6 +32,7 @@ export default defineComponent({
         patientToolbar: [] as Array<Option>,
         fieldComponent: '' as string,
         regimenExtras: [] as Array<any>,
+        programInfo: [] as any,
         facts: {
             age: -1 as number,
             gender: '' as string,
@@ -114,6 +116,7 @@ export default defineComponent({
     },
     methods: {
         async initFacts(patient: any) {
+            this.programInfo = await ProgramService.getProgramInformation(patient.getID())
             this.facts.age = patient.getAge()
             this.facts.gender = patient.getGender()
             this.facts.weight = await patient.getRecentWeight()
