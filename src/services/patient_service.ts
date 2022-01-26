@@ -82,8 +82,13 @@ export class Patientservice extends Service {
     }
 
     async isPregnant() {
-        const query = await ObservationService.getFirstValueCoded(this.getID(), 'Is patient pregnant')
-        return query ? query === 'Yes' : false
+        const pregnant = await ObservationService.getFirstValueCoded(this.getID(), 'Is patient pregnant')
+        return pregnant && pregnant === 'Yes'
+    }
+
+    async hasPregnancyObsToday() {
+        const date = await ObservationService.getFirstObsDatetime(this.getID(), 'Is patient pregnant')
+        return date && date === Service.getSessionDate()
     }
 
     isChildBearing() {
