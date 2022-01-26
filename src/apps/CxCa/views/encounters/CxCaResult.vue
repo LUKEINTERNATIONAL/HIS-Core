@@ -12,7 +12,7 @@ import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
-import EncounterMixinVue from "./EncounterMixin.vue";
+import EncounterMixinVue from "../../../../views/EncounterMixin.vue";
 import { PatientTypeService } from "@/apps/ART/services/patient_type_service";
 import { getFacilities } from "@/utils/HisFormHelpers/LocationFieldOptions";
 

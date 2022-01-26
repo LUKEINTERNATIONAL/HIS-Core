@@ -12,7 +12,7 @@ import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
-import EncounterMixinVue from "./EncounterMixin.vue";
+import EncounterMixinVue from "../../../../views/EncounterMixin.vue";
 import { toastSuccess, toastWarning } from "@/utils/Alerts";
 import { ProgramService } from "@/services/program_service";
 import {ProgramWorkflow} from "@/interfaces/program_workflow"
