@@ -4,12 +4,12 @@
       <ion-title>Select Module</ion-title>
     </ion-toolbar>
   </ion-header>
-  <ion-content class="ion-padding">
+  <ion-content>
     <ion-row>
        <ion-col 
           v-for="app, index in apps" 
           :key="index"
-          size-md="3" 
+          size-md="4" 
           size-sm="12">
         <application-card 
           @click="setApplication(app)" 
