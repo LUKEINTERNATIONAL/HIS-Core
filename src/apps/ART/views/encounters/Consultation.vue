@@ -532,12 +532,9 @@ export default defineComponent({
                   if (!isEmpty(this.labOrderFieldContext)) {
                     await this.labOrderFieldContext.launchOrderSelection();
                   }
-                },
-                visibleOnStateChange: (state: Record<string, any>) => {
-                  return state.index === 1;
-                },
-              },
-            ],
+                }
+              }
+            ]
           },
         },
         {
