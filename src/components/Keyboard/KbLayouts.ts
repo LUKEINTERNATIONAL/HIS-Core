@@ -12,7 +12,13 @@ export const VITALS_KEYPAD = [
     ['.', '0', 'Del'],
     ['Clear',  '%', '/']
 ]
-
+export const DRUG_DISPENSER_KEYPAD = [
+    ['1', '2', '3'],
+    ['4', '5', '6'],
+    ['7', '8', '9'],
+    ['Del.', '0', 'Clear'],
+    // ['Reset',  'Close', 'Dispense']
+]
 export const CD4_COUNT_PAD_LO = [
     ['1', '2', '3', '<'],
     ['4', '5', '6', '>'],

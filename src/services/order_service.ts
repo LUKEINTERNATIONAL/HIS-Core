@@ -42,11 +42,19 @@ export class OrderService extends Service {
 
         });
     }
-    static formatOrders(order: Order) {
-        const test = order.tests[0];
-        const result = test.result[0];
-        const resultDate = HisDate.toStandardHisFormat(result.date);
-        return `${test.name} ${result.value_modifier}${result.value} ${resultDate}`;
+
+    static isHighViralLoadResult(result: any) {
+        if(result.value_modifier === '=' && parseFloat(result.value) >= 1000) return true
+
+        if((result.value_modifier  === '<' || result.value_modifier  === '&lt') 
+            && parseFloat(result.value) > 1000
+        )  return true
+
+        if((result.value_modifier  === '>' || result.value_modifier  === '&gt') 
+            && (parseFloat(result.value) >= 1000 || result.value.toUpperCase().replace(/\s+/g, '') == 'LDL')
+        )  return true
+
+        return false
     }
 
     static formatLabs(orders: Order[]) {

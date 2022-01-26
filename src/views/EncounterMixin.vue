@@ -1,5 +1,4 @@
 <script lang="ts">
-import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import { defineComponent } from 'vue'
 import { Field, Option } from '@/components/Forms/FieldInterface'
 import { Patientservice } from "@/services/patient_service"
@@ -8,20 +7,18 @@ import { PatientProgramService } from "@/services/patient_program_service"
 import { UserService } from "@/services/user_service"
 import { find } from "lodash"
 import { nextTask } from "@/utils/WorkflowTaskHelper"
-import { ENCOUNTER_GUIDELINES, FlowState } from "@/apps/ART/guidelines/encounter_guidelines"
+import { ENCOUNTER_GUIDELINES, FlowState } from "@/guidelines/encounter_guidelines"
 import { matchToGuidelines } from "@/utils/GuidelineEngine"
+import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 
 export default defineComponent({
     components: { HisStandardForm },
     data: () => ({
         patient: {} as any,
-        programInfo: {} as any,
         fields: [] as Array<Field>,
-        form: {} as Record<string, Option> | Record<string, null>,
         patientID: '' as any,
         providerID: -1 as number,
         providers: [] as any,
-        verified: false as boolean,
         facts: {
             sessionDate: '' as string,
             apiDate: '' as string,
@@ -43,7 +40,6 @@ export default defineComponent({
                     this.patient = new Patientservice(response);
                     await this.setEncounterFacts()
                     await this.checkEncounterGuidelines()
-                    this.programInfo = await ProgramService.getProgramInformation(this.patientID)
                     this.ready = true;
                 }
             },
@@ -113,7 +109,7 @@ export default defineComponent({
                 )
             }
         },
-        patientDashboardUrl() {
+        patientDashboardUrl(): string {
             return `/patient/dashboard/${this.patientID}`
         },
         gotoPatientDashboard() {
@@ -122,13 +118,13 @@ export default defineComponent({
         nextTask() {
             return nextTask(this.patientID, this.$router)
         },
-        yesNoOptions() {
+        yesNoOptions(): Option[] {
             return [
                 { label: "Yes", value: "Yes" },
                 { label: "No", value: "No" }
             ]
         },
-        yesNoUnknownOptions() {
+        yesNoUnknownOptions(): Option[] {
             return [
                 { label: "Yes", value: "Yes" },
                 { label: "No", value: "No" },
@@ -136,16 +132,16 @@ export default defineComponent({
             ]
         },
         resolveObs(obs: any, tag='') {
-            let values: Array<any> = []
-            Object.values(obs)
-                  .filter((d: any) => d && (d.tag === tag || tag === ''))
-                  .forEach((data: any) => {
-                    if (Array.isArray(data.obs)) {
-                        values = [...values, ...data.obs]
+            const values: any = Object.values(obs)
+                .filter((d: any) => d && (d.tag === tag || tag === ''))
+                .reduce((accum: any, cur: any) => { 
+                    if (Array.isArray(cur.obs)) {
+                        accum = accum.concat(cur.obs)
                     } else {
-                        values.push(data.obs)
+                        accum.push(cur.obs)
                     }
-                })
+                    return accum
+                    }, [])
             return Promise.all(values)
         },
         validateSeries(conditions: Array<any>){

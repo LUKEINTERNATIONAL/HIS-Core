@@ -38,7 +38,7 @@
               <ul class="card-content"> 
                 <li class='li-item' v-for="(info, id) in card.data" :key="id"> 
                   <span v-if="info.label"> {{ info.label }} &nbsp;</span>
-                  <strong>{{ info.value }} </strong>
+                  <strong v-html="info.value"></strong>
                 </li>
               </ul>
             </ion-card-content>
@@ -112,6 +112,7 @@ import { PatientDemographicsExchangeService } from "@/services/patient_demograph
 import { IncompleteEntityError, BadRequestError } from "@/services/service"
 import  { ART_GLOBAL_PROP } from "@/apps/ART/art_global_props"
 import  { GLOBAL_PROP } from "@/apps/GLOBAL_APP/global_prop"
+import { OrderService } from "@/services/order_service";
 
 export default defineComponent({
   name: "Patient Confirmation",
@@ -137,6 +138,7 @@ export default defineComponent({
     ddeInstance: {} as any,
     useDDE: false as boolean,
     facts: {
+      hasHighViralLoad: false as boolean,
       patientFound: false as boolean,
       npidHasDuplicates: false as boolean,
       userRoles: [] as string[],
@@ -220,6 +222,15 @@ export default defineComponent({
     }
   },
   methods: {
+    async setViralLoadStatus() {
+      const orders = await OrderService.getOrders(this.patient.getID())      
+      if(!isEmpty(orders)){
+        const vlOrders = OrderService.getViralLoadOrders(orders)
+        if(!isEmpty(vlOrders)){
+          this.facts.hasHighViralLoad = OrderService.isHighViralLoadResult(vlOrders[0].tests[0].result[0])
+        }
+      }      
+    },
     /**
      * Resolve patient by either patient ID or NpID.
      * Note: 
@@ -284,6 +295,7 @@ export default defineComponent({
         this.setPatientFacts()
         await this.setProgramFacts()
         await this.drawPatientCards()
+        await this.setViralLoadStatus()
         this.facts.currentNpid = this.patient.getNationalID()
         this.facts.npidHasDuplicates = Array.isArray(results) && results.length > 1
       } else {
@@ -596,6 +608,7 @@ ul {
   margin: 0;
   padding: 0;
   line-height: 30px;
+  border-bottom: .1rem solid #cecece;
 }
 ion-card-header {
   padding: 0.3em;

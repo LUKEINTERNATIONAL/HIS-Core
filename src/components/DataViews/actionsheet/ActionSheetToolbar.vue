@@ -2,8 +2,8 @@
     <ion-header>
         <ion-toolbar>
             <ion-title class="ion-text-center">
-                <h4 :class="color">  {{ title }} </h4>
-                <b v-if="subtitle"> {{ subtitle }} </b>
+                <h4 :class="color">  {{ title }}  </h4>
+                <h2><b v-if="subtitle"> {{ subtitle }} </b></h2>
             </ion-title>
         </ion-toolbar>
   </ion-header>
@@ -33,3 +33,8 @@ export default defineComponent({
     }
 })
 </script>
+<style scoped>
+h2 {
+    padding-bottom: .2em;
+}
+</style>

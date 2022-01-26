@@ -12,6 +12,16 @@ export class ConceptService extends Service {
         })
     }
 
+    static async getConceptSet(conceptName: string, filter = '') {
+        const conceptId = await this.getConceptID(conceptName)
+        const concepts = super.getJson('concept_set', {
+            id: conceptId,
+            name: filter
+        })
+
+        if (concepts) return concepts
+    }
+
     static async getConceptName(conceptId: number) {
         const concept = this.getCachedConceptName(conceptId)
 

@@ -31,7 +31,8 @@ export default defineComponent({
 </script>
 <style scoped>
 .his-card {
-  height: 35vh;
+  width: 20vw;
+  height: 33vh;
   overflow: 'hidden';
 }
 ion-img {

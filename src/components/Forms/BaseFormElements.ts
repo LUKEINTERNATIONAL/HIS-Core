@@ -14,6 +14,7 @@ import MultiYesNo from "@/components/FormElements/MultiYesNoSelect.vue"
 import WeightChart from "@/components/FormElements/HisWeightChart.vue"
 import VitalsEntry from "@/components/FormElements/HisVitalsEntry.vue"
 import AppointmentsEntry from "@/components/FormElements/HisAppointments.vue"
+import ComplaintsPicker from "@/components/FormElements/HisComplaintsPicker.vue";
 import ClinicHolidayPicker from "@/components/FormElements/HisClinicHolidayPicker.vue"
 import SummaryPage from "@/components/FormElements/HisSummary.vue"
 import ArtStagingSummary from "@/components/FormElements/ArtStagingSummary.vue"
@@ -32,6 +33,7 @@ import BatchVerification from "@/components/FormElements/HisBatchVerification.vu
 import BatchMovement from "@/components/FormElements/HisBatchMovement.vue"
 import IPAddressInput from "@/components/FormElements/HisIPAddress.vue"
 import TextBanner from "@/components/FormElements/HisTextBanner.vue"
+import DrugDispenser from "@/components/FormElements/GeneralDrugDispenser.vue"
 
 // Reference names for BaseFormComponents
 export enum FieldType {
@@ -67,8 +69,10 @@ export enum FieldType {
     TT_BATCH_ENTRY = 'batch-entry',
     TT_BATCH_VERIFICATION = 'batch-verification',
     TT_BATCH_MOVEMENT = 'batch-movement',
+    TT_COMPLAINTS_PICKER = 'complaints-picker',
     TT_IP_ADDRESS = 'IPAddressInput',
     TT_TEXT_BANNER = 'text-banner',
+    TT_DRUG_DISPENSER = 'drug-dispenser',
     TT_CLINIC_HOLIDAY_PICKER = 'clinic-holiday-picker'
 }
 
@@ -105,7 +109,9 @@ export const BaseFormComponents = {
     BatchEntry,
     BatchVerification,
     BatchMovement,
+    ComplaintsPicker,
     IPAddressInput,
     TextBanner,
+    DrugDispenser,
     ClinicHolidayPicker
 }

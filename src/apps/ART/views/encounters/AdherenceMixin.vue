@@ -4,7 +4,7 @@ import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Field, Option } from "@/components/Forms/FieldInterface"
 import { toastWarning } from "@/utils/Alerts"
 import { AdherenceService } from "@/apps/ART/services/adherence_service"
-import EncounterMixinVue from './EncounterMixin.vue'
+import EncounterMixinVue from '../../../../views/EncounterMixin.vue'
 import Validation from "@/components/Forms/validations/StandardValidations"
 import HisDate from "@/utils/Date"
 export default defineComponent({

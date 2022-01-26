@@ -8,7 +8,7 @@ import { Field, Option } from "@/components/Forms/FieldInterface"
 import { toastWarning, alertConfirmation } from "@/utils/Alerts"
 import { DispensationService } from "@/apps/ART/services/dispensation_service"
 import { isEmpty } from 'lodash'
-import EncounterMixinVue from './EncounterMixin.vue'
+import EncounterMixinVue from '../../../../views/EncounterMixin.vue'
 import HisDate from "@/utils/Date"
 
 export default defineComponent({
@@ -78,7 +78,7 @@ export default defineComponent({
         getPackSizesRows(drugId: number, availableStock: number) {
             const packs = this.dispensation.getDrugPackSizes(drugId)
             return packs.map((packSize: number) => {
-                const packs = availableStock > 0 ? (availableStock / packSize) : '-'
+                const packs = availableStock > 0 ? (Math.floor(availableStock / packSize)) : '-'
                 return [packSize, packs, 0, 0]
             })
         },

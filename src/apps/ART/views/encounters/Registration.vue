@@ -480,7 +480,8 @@ export default defineComponent({
                     minDate: () => this.patient.getBirthdate(),
                     maxDate: () => this.staging.getDate(),
                     estimation: {
-                        allowUnknown: true
+                        allowUnknown: true,
+                        estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
                     },
                     computeValue: (date: string, isEstimate: boolean) => {
                         return {

@@ -3,7 +3,7 @@ import { defineComponent } from 'vue'
 import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Field, Option } from "@/components/Forms/FieldInterface"
 import { StagingService } from "@/apps/ART/services/staging_service"
-import EncounterMixinVue from './EncounterMixin.vue'
+import EncounterMixinVue from '../../../../views/EncounterMixin.vue'
 import Validation from "@/components/Forms/validations/StandardValidations"
 import { generateDateFields } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import HisDate from "@/utils/Date"
