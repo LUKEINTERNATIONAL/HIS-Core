@@ -62,7 +62,7 @@ export async function alertConfirmation(message: string, header="Confirmation") 
     const modal = await modalController.create({
         component: ConfimationSheet,
         backdropDismiss: false,
-        cssClass: "small-modal",
+        cssClass: "small-modal custom-modal-backdrop",
         componentProps: {
             subtitle: header,
             body: message,
