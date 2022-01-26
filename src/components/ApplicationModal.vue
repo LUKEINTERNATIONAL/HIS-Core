@@ -9,7 +9,7 @@
        <ion-col 
           v-for="app, index in apps" 
           :key="index"
-          size-md="6" 
+          size-md="3" 
           size-sm="12">
         <application-card 
           @click="setApplication(app)" 

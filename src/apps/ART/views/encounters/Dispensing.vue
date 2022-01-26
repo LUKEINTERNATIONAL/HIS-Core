@@ -78,7 +78,7 @@ export default defineComponent({
         getPackSizesRows(drugId: number, availableStock: number) {
             const packs = this.dispensation.getDrugPackSizes(drugId)
             return packs.map((packSize: number) => {
-                const packs = availableStock > 0 ? (availableStock / packSize) : '-'
+                const packs = availableStock > 0 ? (Math.floor(availableStock / packSize)) : '-'
                 return [packSize, packs, 0, 0]
             })
         },

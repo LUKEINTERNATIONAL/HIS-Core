@@ -41,9 +41,6 @@ export default defineComponent({
             required: true
         }
     },
-    mounted() {
-        this.activeLabel = this.list[0]
-    },
     methods: {
         onclick(label: string){
             this.activeLabel = label
