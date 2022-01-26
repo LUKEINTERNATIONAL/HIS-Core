@@ -503,5 +503,30 @@ export const CONFIRMATION_PAGE_GUIDELINES: Record<string, GuideLineInterface> = 
                 return patientIsComplete === false
             }
         }
-    }
+    },
+    "Warn the user when patient has high viral load": {
+        priority: 6,
+        targetEvent: TargetEvent.ONLOAD,
+        actions: {
+            alert: async () => {
+                await infoActionSheet(
+                    'High Viral Load',
+                    'Patient has a high viral load, please take immediate action!',
+                    '',
+                    [
+                        { 
+                            name: 'OK',  
+                            slot: 'end', 
+                            color: 'danger'
+                        }
+                    ],
+                    'his-danger-color'
+                )
+                return FlowState.CONTINUE
+            }
+        },
+        conditions: {
+            hasHighViralLoad: (isHigh: boolean)  => isHigh === true
+        }
+    },
 }

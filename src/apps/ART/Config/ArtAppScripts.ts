@@ -17,6 +17,7 @@ import { PatientTypeService } from "@/apps/ART/services/patient_type_service"
 import DrugModalVue from "@/apps/ART/Components/DrugModal.vue";
 import ART_GLOBAL_PROP from "../art_global_props";
 import { isEmpty } from "lodash";
+import { Order } from "@/interfaces/order";
 
 async function enrollInArtProgram(patientID: number, patientType: string, clinic: string) {
     const program = new PatientProgramService(patientID)
@@ -77,6 +78,13 @@ async function showStockManagementChart() {
     }
 }
 
+function orderToString(order: Order) {
+    const test = order.tests[0];
+    const result = test.result[0];
+    const status = OrderService.isHighViralLoadResult(result) ? '(<b style="color: #eb445a;">High</b>)' : ''
+    return `${test.name} ${result.value_modifier}${result.value} ${status}`;
+}
+
 export async function init(context='') {
     await showArtActivities()
     if (context === 'HomePage') {
@@ -98,14 +106,16 @@ export async function onRegisterPatient(patientID: number, person: any, attr: an
 }
 
 export async function getPatientDashboardAlerts(patient: any): Promise<GeneralDataInterface[]>{
-    const sideEffects: Observation[] 
-    = await PatientAlerts.alertSideEffects(
-        patient.getID()
-    )
+    const sideEffects: Observation[] = await PatientAlerts.alertSideEffects(patient.getID())
+    const bmi = await patient.getBMI()
     return [
         {
             label: "Side effects",
             value: `${sideEffects.length}`,
+        },
+        {
+            label: "Patient BMI is",
+            value: `${bmi.result}`
         }
     ]
 }
@@ -129,25 +139,25 @@ export async function getPatientDashboardLabOrderCardItems(patientId: number, da
     const d = (date: string) => HisDate.toStandardHisFormat(date)
     const t = (date: string) => HisDate.toStandardHisTimeFormat(date)
     // filter All viral load results on visit date
-    const results = orders.filter((o: any) => {
+    const vlOrders = orders.filter((o: any) => {
         try {
             return o.tests[0].name.match(/HIV/i) && d(o.tests[0].result[0].date) === d(date) 
         } catch(e) {
             return false
         }
     })
-    if (!isEmpty(results)) {
-        return results.map((r: any) => {
-            const test = r.tests[0]
+    if (!isEmpty(vlOrders)) {
+        return vlOrders.map((order: any) => {
+            const test = order.tests[0]
             const result = test.result[0]
             return {
-                label: `Result: ${test.name} ${result.value_modifier} ${result.value}`,
+                label: orderToString(order),
                 value: t(result.date),
                 other: {
                     tableRow: [
-                        r.accession_number, 
-                        r.specimen.name,
-                        t(r.order_date)
+                        order.accession_number, 
+                        order.specimen.name,
+                        t(order.order_date)
                     ]
                 }
             }
@@ -226,9 +236,9 @@ export function confirmationSummary(patient: any, program: any) {
             await OrderService.getOrders(patient.getID())
                 .then((orders) => {
                     const VLOrders = OrderService.getViralLoadOrders(orders);
-                    VLOrders.forEach((element) => {
+                    VLOrders.forEach((order) => {
                         data.push({
-                            value: OrderService.formatOrders(element),
+                            value: orderToString(order),
                             label: ``,
                         });
                     });

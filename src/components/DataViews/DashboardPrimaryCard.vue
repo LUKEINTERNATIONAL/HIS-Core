@@ -6,7 +6,7 @@
         </div>
         <ion-list>
             <ion-item v-for="(item, index) in items" :key="index" :style="{fontSize: '0.8em'}">
-                <ion-label> {{ item.label }} </ion-label>
+                <ion-label v-html="item.label"></ion-label>
                 <ion-chip v-if="item.value" slot='end'>
                   <ion-icon :icon="icon"></ion-icon>
                     <ion-label>{{ item.value }}</ion-label>
