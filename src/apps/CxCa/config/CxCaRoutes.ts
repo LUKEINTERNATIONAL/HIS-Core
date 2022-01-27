@@ -29,4 +29,9 @@ export default [
         path: "/cxca/encounters/cancer_result/:patient_id",
         component: () => import('@/apps/CxCa/views/encounters/CxCaResult.vue')
     },
+    // {
+    //     name: "order tests",
+    //     path: "/los/forms/order/:patient_id",
+    //     component: () => import('@/apps/LOS/views/OrderTests.vue')
+    // },
 ]
