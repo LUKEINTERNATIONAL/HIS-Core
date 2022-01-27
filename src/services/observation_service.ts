@@ -106,6 +106,23 @@ export class ObservationService extends ConceptService {
         return super.getJson('/observations', params)
     }
 
+    static async getFirstObs(patientID: number, conceptName: string, date=this.getSessionDate(), conceptStrictMode=true) {
+        const concept = await ConceptService.getConceptID(conceptName, conceptStrictMode)
+        const obs = await ObservationService.getObs({
+            'person_id': patientID, 
+            'concept_id': concept, 
+            'date': date,
+            'page_size': 1
+        })
+        if (!isEmpty(obs)) {
+            const [firstObs] = obs
+            if (typeof firstObs.value_coded === 'number') {
+                firstObs.value_coded = await ConceptService.getConceptName(firstObs.value_coded)
+            }
+            return firstObs
+        }
+    }
+
     static async getFirstObsValue(
         patientID: number, 
         conceptName: string, 
@@ -119,14 +136,8 @@ export class ObservationService extends ConceptService {
             | 'obs_datetime', 
         date=this.getSessionDate(),
         conceptStrictMode=true) {
-            const concept = await ConceptService.getConceptID(conceptName, conceptStrictMode)
-            const obs = await this.getObs({
-                'person_id':  patientID, 
-                'concept_id': concept,
-                'date': date,
-                'page_size': 1
-            })
-            if (!isEmpty(obs)) return obs[0][obsAttr]
+            const obs = await this.getFirstObs(patientID, conceptName, date, conceptStrictMode) 
+            if (!isEmpty(obs)) return obs[obsAttr]
         }
     
     static async getAll(patientID: number, conceptName: string, date=this.getSessionDate(), strictMode=true){
@@ -143,9 +154,8 @@ export class ObservationService extends ConceptService {
         return this.getFirstObsValue(patientID, conceptName, 'value_text', date, strictMode)
     }
 
-    static async getFirstValueCoded(patientID: number, conceptName: string, date=this.getSessionDate(), strictMode=true) {
-        const value = await this.getFirstObsValue(patientID, conceptName, 'value_coded', date, strictMode)
-        if (value) return ConceptService.getConceptName(value)
+    static getFirstValueCoded(patientID: number, conceptName: string, date=this.getSessionDate(), strictMode=true) {
+        return this.getFirstObsValue(patientID, conceptName, 'value_coded', date, strictMode)
     }
 
     static getFirstValueNumber(patientID: number, conceptName: string, date=this.getSessionDate(), strictMode=true) {
