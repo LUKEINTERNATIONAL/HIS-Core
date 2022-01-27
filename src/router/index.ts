@@ -180,7 +180,8 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  if (!sessionStorage.getItem('apiKey') && to.path !== '/login') {
+  const whitelistedUri = ['/login', '/settings/host']
+  if (!sessionStorage.getItem('apiKey') && !whitelistedUri.includes(to.path)) {
     next('/login')
   }
   next()
