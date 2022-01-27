@@ -316,13 +316,6 @@ export default defineComponent({
       if (!formData.offer_cxca) return false;
       return formData.offer_cxca.value === "No";
     },
-    updateAllergicToSulphur(formData: any) {
-      if (formData.value === "Yes") {
-        this.allergicToSulphur = true;
-      } else if (formData.value === "No" || formData.value === "Unknown") {
-        this.allergicToSulphur = false;
-      }
-    },
     updateCompletedTPT(formData: any) {
       if (formData.value.match(/Complete/gi)) {
         this.hasTBTherapyObs = true;
@@ -1078,7 +1071,7 @@ export default defineComponent({
           type: FieldType.TT_SELECT,
           validation: (data: any) => Validation.required(data),
           unload: async (data: any) => {
-            this.updateAllergicToSulphur(data);
+            this.allergicToSulphur = data.value.match(/yes/i)
             this.sulphurObs = this.consultation.buildValueCoded(
               "Allergic to sulphur",
               data.value
