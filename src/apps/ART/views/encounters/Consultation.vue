@@ -34,6 +34,7 @@ export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     fields: [] as any,
+    autoSelect3HP: false as boolean,
     labOrderFieldContext: {} as any,
     prescriptionContext: {} as any,
     consultation: {} as any,
@@ -68,13 +69,11 @@ export default defineComponent({
     ready: {
       async handler(value: boolean) {
         if (value) {
-          this.consultation = new ConsultationService(
-            this.patientID,
-            this.providerID
-          );
+          this.consultation = new ConsultationService(this.patientID, this.providerID)
           await this.initAdherence(this.patient, this.providerID);
           await this.getSideEffectsHistory();
           await this.guardianOnlyVisit();
+          this.autoSelect3HP = await ART_PROP.threeHPAutoSelectEnabled()
           this.hasTbHistoryObs = await this.consultation.hasTreatmentHistoryObs()
           if (this.hasTbHistoryObs) this.completed3HP = await this.consultation.patientCompleted3HP()
           this.askAdherence = this.adherence.receivedDrugsBefore();
@@ -408,7 +407,8 @@ export default defineComponent({
       ).map((data) => data.name);
       return this.getOptions([...contraIndications], preValues);
     },
-    runAppendOptionParams(options: Option[]) {
+    runAppendOptionParams(options: Option[], prechecked: Option[]) {
+      const checkedOptions = prechecked.filter(o => o.isChecked).map(o => o.label)
       return options.map(o => {
         if (typeof o?.other?.appendOptionParams === 'function') {
           const appendedOptions = o?.other?.appendOptionParams()
@@ -422,7 +422,7 @@ export default defineComponent({
               option.isChecked = appendedOptions.isChecked
               delete appendedOptions.isChecked
             } else {
-              option.isChecked = o.isChecked || false
+              option.isChecked = checkedOptions.includes(o.label)
             }
             return { ...option, ...appendedOptions}
           }
@@ -430,32 +430,37 @@ export default defineComponent({
         return o
       })
     },
-    getPrescriptionFields(d: any): Option[] {
+    getPrescriptionFields(d: any, prechecked=[] as Option[]): Option[] {
       const completed3HP = !this.completed3HP 
-        ? d.routine_tb_therapy && d.routine_tb_therapy.value.match(/complete/i) ? true : false
+        ? d.routine_tb_therapy 
+        && d.routine_tb_therapy.value.match(/complete/i) ? true : false
         : true
+      const autoSelect3HP = this.autoSelect3HP && !completed3HP
+      const disableOption = (text: string) => ({
+        disabled: true,
+        isChecked: false,
+        description: {
+          danger: true,
+          show: "always",
+          text
+        }
+      })
       return this.runAppendOptionParams([
         {
           label: "ARVs", 
-          value: "ARVs", 
+          value: "ARVs",
+          other: {
+            appendOptionParams: () => ({ isChecked: autoSelect3HP })
+          }
         },
         {
           label: "CPT", 
           value: "CPT",
           other: {
             appendOptionParams: () => {
-              if (this.allergicToSulphur) {
-                return {
-                  disabled: true,
-                  isChecked: false,
-                  description: {
-                    show: "always",
-                    text: "Allergic to CPT",
-                    color: "danger"
-                  }
-                }
-              }
-              return { disabled: false }
+              return this.allergicToSulphur 
+                ? disableOption('Allergic to CPT')
+                : { disabled: false }
             }
           }
         },
@@ -463,27 +468,12 @@ export default defineComponent({
           label: "3HP (RFP + INH)", 
           value: "3HP (RFP + INH)", 
           other: {
-            appendOptionParams: () => {
-              if (completed3HP) {
-                return {
-                  disabled: true,
-                  description: {
-                    show: 'always',
-                    color: 'danger',
-                    text: 'Completed TPT',
-                  }
-                }
-              }
-              if (this.TBSuspected) {
-                return { 
-                  disabled: true, 
-                  description: {
-                    show: "always", 
-                    text: 'TB Suspect',
-                    color: 'danger'
-                  }
-                }
-              }
+            appendOptionParams: () => { 
+              if (completed3HP) return disableOption('Completed 3HP')
+
+              if (this.TBSuspected) return disableOption('TB Suspect')
+
+              return { isChecked : autoSelect3HP }
             }
           }
         },
@@ -492,34 +482,19 @@ export default defineComponent({
           value: "IPT", 
           other: {
             appendOptionParams: () => {
-              if (completed3HP) {
-                return { 
-                  disabled: true, 
-                  description: {
-                    show: 'always',
-                    color: 'danger',
-                    text: 'Completed TPT',
-                  }
-                }
-              }
-              if (this.TBSuspected) {
-                return { 
-                  disabled: true, 
-                  description: { 
-                    show: "always", 
-                    text: 'TB Suspect',
-                    color: 'danger'
-                  } 
-                }
-              }
+              if (completed3HP) return disableOption('Completed 3HP')
+
+              if (this.TBSuspected) return disableOption('TB Suspect')
+
+              return { isChecked : autoSelect3HP }
             }
           }
         },
-        { 
+        {
           label: "NONE OF THE ABOVE", 
           value: "NONE OF THE ABOVE" 
         }
-      ])
+      ], prechecked)
     },
     getFields(): any {
       return [
@@ -1082,7 +1057,7 @@ export default defineComponent({
           options: () => this.getYesNo(),
         },
         {
-          id: "prescription",
+          id: "medication_to_prescribe",
           helpText: "Medication to prescribe during this visit",
           type: FieldType.TT_MULTIPLE_SELECT,
           validation: (data: any) => Validation.required(data),
@@ -1092,14 +1067,17 @@ export default defineComponent({
           onValueUpdate: (listData: Array<Option>, value: Option) => {
             return this.disablePrescriptions(listData, value);
           },
+          options: (formData: any, c: Array<Option>, cd: any, currentOptions: any) => {
+            return this.getPrescriptionFields(formData, currentOptions)
+          },
           config: {
             footerBtns: [
               {
                 name: "Update allergic to CPT",
                 onClickComponentEvents: {
-                  refreshOptions: (btnEvent: FooterBtnEvent, options: Option[]): Option[] => {
+                  refreshOptions: (btnEvent: FooterBtnEvent, options: Option[], formData: any): Option[] => {
                     this.allergicToSulphur = btnEvent.btnOutput === 'Allergic'
-                    return this.runAppendOptionParams(options)
+                    return this.getPrescriptionFields(formData, options)
                   }
                 },
                 onClick: () => {
@@ -1115,9 +1093,6 @@ export default defineComponent({
                 }
               }
             ]
-          },
-          options: (formData: any, c: Array<Option>, cd: any, l: any) => {
-            return !isEmpty(l) ? l :  this.getPrescriptionFields(formData)
           }
         }
       ]
