@@ -25,7 +25,7 @@ import { modalController } from "@ionic/vue";
 import VLReminderModal from "@/components/DataViews/VLReminderModal.vue";
 import { ProgramService } from "@/services/program_service";
 import { ARTLabService } from "../../services/lab_service";
-import { infoActionSheet } from "@/utils/ActionSheets";
+import { infoActionSheet, optionsActionSheet } from "@/utils/ActionSheets";
 import SideEffectsModalVue from "@/components/DataViews/SideEffectsModal.vue";
 import ART_PROP from "@/apps/ART/art_global_props";
 
@@ -34,6 +34,7 @@ export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     fields: [] as any,
+    threeHpWasSelected: false as boolean,
     autoSelect3HP: false as boolean,
     labOrderFieldContext: {} as any,
     prescriptionContext: {} as any,
@@ -57,6 +58,7 @@ export default defineComponent({
     treatmentStatusObs: {} as any,
     sulphurObs: {} as any,
     referObs: {} as any,
+    reasonForDecliningTPTObs: {} as any,
     medicationObs: [] as any,
     relatedObs: [] as any,
     askAdherence: false as boolean,
@@ -93,7 +95,7 @@ export default defineComponent({
 
       if (!encounter) return toastWarning("Unable to create encounter");
 
-      const data = await Promise.all([
+      const data = await Promise.all([ 
         ...this.pregnancy,
         ...this.currentFPM,
         ...this.newFPM,
@@ -108,6 +110,7 @@ export default defineComponent({
         this.treatmentStatusObs,
         this.sulphurObs,
         this.referObs,
+        this.reasonForDecliningTPTObs,
         ...this.medicationObs,
         ...this.relatedObs,
       ]);
@@ -466,8 +469,31 @@ export default defineComponent({
         },
         { 
           label: "3HP (RFP + INH)", 
-          value: "3HP (RFP + INH)", 
+          value: "3HP (RFP + INH)",
           other: {
+            onEvent: async (isChecked: boolean) =>  {
+              if (!isChecked) {
+                const modal = await optionsActionSheet(
+                  'Reasons for declining TPT', 
+                  '',
+                  [
+                    'Patient declined',
+                    'Side-effects (previous or current)',
+                    'Stock-out',
+                    'Starting TB treatment',
+                    'Other'
+                  ],
+                  [
+                    { name : 'Done', slot: 'start', role: 'action'}
+                  ]
+                )
+                this.reasonForDecliningTPTObs = this.consultation.buildValueText(
+                  'Other reason for not seeking services', modal.selection
+                )
+              } else {
+                this.reasonForDecliningTPTObs = {}
+              }
+            },
             appendOptionParams: () => { 
               if (completed3HP) return disableOption('Completed 3HP')
 
@@ -499,7 +525,8 @@ export default defineComponent({
     getFields(): any {
       return [
         {
-          id: "prescription",
+          id: "guardina_prescription",
+          proxyID: "prescription",
           helpText: "Medication to prescribe during this visit",
           type: FieldType.TT_MULTIPLE_SELECT,
           validation: (data: any) => Validation.required(data),
@@ -1058,9 +1085,10 @@ export default defineComponent({
         },
         {
           id: "medication_to_prescribe",
+          proxyID: "prescription",
           helpText: "Medication to prescribe during this visit",
           type: FieldType.TT_MULTIPLE_SELECT,
-          validation: (data: any) => Validation.required(data),
+          validation: (data: Option) => Validation.required(data),
           onload: (context: any) => {
             this.prescriptionContext = context;
           },

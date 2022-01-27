@@ -1,6 +1,11 @@
 export default [
    {
       "categories": [],
+      "concept_id": 2431,
+      "name": "Other reason for not seeking services"
+   },
+   {
+      "categories": [],
       "concept_id": 2592,
       "name": "Clinician notes"
    },
