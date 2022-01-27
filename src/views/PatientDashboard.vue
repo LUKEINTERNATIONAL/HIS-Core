@@ -469,7 +469,7 @@ export default defineComponent({
             return patient ? new Patientservice(patient): {}
         },
         async getPatientVisitDates(patientId: number) {
-            const dates = await Patientservice.getPatientVisits(patientId)
+            const dates = await Patientservice.getPatientVisits(patientId, false)
             return dates.map((date: string) => ({
                 label: this.toDate(date), value: date
             }))
