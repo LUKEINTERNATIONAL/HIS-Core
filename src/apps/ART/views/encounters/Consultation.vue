@@ -34,6 +34,7 @@ export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     fields: [] as any,
+    patientHitMenopause: false as boolean,
     hasPregnancyObsToday: false as boolean,
     autoSelect3HP: false as boolean,
     labOrderFieldContext: {} as any,
@@ -75,7 +76,12 @@ export default defineComponent({
           await this.initAdherence(this.patient, this.providerID);
           await this.getSideEffectsHistory();
           await this.guardianOnlyVisit();
-          if (this.patient.isChildBearing()) this.hasPregnancyObsToday = await this.patient.hasPregnancyObsToday()
+          if (this.patient.isChildBearing()) {
+            this.hasPregnancyObsToday = await this.patient.hasPregnancyObsToday()
+          } 
+          if (this.patient.isFemale()) {
+            this.patientHitMenopause = await this.consultation.patientHitMenopause()
+          }
           this.autoSelect3HP = await ART_PROP.threeHPAutoSelectEnabled()
           this.hasTbHistoryObs = await this.consultation.hasTreatmentHistoryObs()
           if (this.hasTbHistoryObs) this.completed3HP = await this.consultation.patientCompleted3HP()
@@ -199,7 +205,9 @@ export default defineComponent({
       );
     },
     showCurrentContraceptionMethods(formData: any) {
-      return this.showPregnancyQuestions() && !this.isPregnant(formData);
+      return !this.patientHitMenopause 
+        && this.showPregnancyQuestions() 
+        && !this.isPregnant(formData);
     },
     showNewContraceptionMethods(formData: any) {
       return (

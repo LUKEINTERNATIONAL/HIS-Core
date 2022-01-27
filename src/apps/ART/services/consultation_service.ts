@@ -20,6 +20,16 @@ export class ConsultationService extends AppEncounterService {
     ];
   }
 
+  async patientHitMenopause() {
+    const obs = await ObservationService.getFirstObs(
+      this.patientID, 'Why does the woman not use birth control', 
+    )
+    return typeof obs?.value_text === 'string'
+      ? (obs.value_text.match(/menopause/i) ? true : false)
+      && this.date > HisDate.toStandardHisFormat(obs.obs_datetime)
+      : false
+  }
+
   async hasTreatmentHistoryObs() {
     const obsDate = await ObservationService.getFirstObsDatetime(this.patientID, 'Previous TB treatment history')
     return obsDate && this.date >= HisDate.toStandardHisFormat(obsDate)
