@@ -46,7 +46,12 @@ export default defineComponent({
       const encounter = await this.assessment.createEncounter();
 
       if (!encounter) return toastWarning("Unable to create encounter");
-
+      if(computed.hiv_test_date) {
+             this.obs.push(this.assessment.buildValueDate("HIV test date", computed.hiv_test_date.date));
+      }
+      if(computed.cxca_date) {
+             this.obs.push(this.assessment.buildValueDate("HIV test date", computed.cxca_date.date));
+      }
       const data = await Promise.all([...this.obs, ]);
 
       const obs = await this.assessment.saveObservationList(data);
