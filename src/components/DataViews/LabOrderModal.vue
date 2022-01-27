@@ -7,8 +7,8 @@
   <ion-content :style="{ overflowY: 'hidden', background: 'grey' }" >
   <ion-grid>
   <ion-row>
-  <ion-col size="4">
-  <ion-list :style="{overflowY: 'auto', height:'78vh'}"> 
+  <ion-col size="6">
+    <ion-list :style="{overflowY: 'auto', height:'78vh'}"> 
       <ion-item
         v-for="(data, index) in testTypes" :key="data"
         @click="getSpecimens(data.name, index)"
