@@ -44,8 +44,12 @@ export default defineComponent({
         const option = {...entry}
         option.isChecked = event.target.checked
 
+        if (typeof option?.other?.onEvent === 'function') {
+          await option.other.onEvent(option.isChecked, event)
+        } 
+
         if (this.onValue && option.isChecked) {
-          const ok = await this.onValue(option)
+          const ok = await this.onValue(option, this.fdata, this.cdata)
           if (!ok) {
             return event.target.checked = false
           }
