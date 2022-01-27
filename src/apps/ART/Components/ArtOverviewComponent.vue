@@ -181,6 +181,8 @@ table {
   font-family: arial, sans-serif;
   border-collapse: collapse;
   width: 100%;
+  height: 49vh;
+  font-size: 15px;
 }
 
 td,

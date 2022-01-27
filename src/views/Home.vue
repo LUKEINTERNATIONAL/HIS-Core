@@ -369,8 +369,10 @@ ion-col p {
   width: 100%;
 }
 .overview {
-  min-height: 65vh;
+  max-height: 63vh;
+  min-height: 63vh;
   margin: 0.5em;
+  overflow: auto;
 }
 
 .barcode-input{
