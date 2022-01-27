@@ -6,5 +6,6 @@
 		{ "name": "ART", "available": true },
 		{ "name": "LOS", "available": true },
 		{ "name": "OPD", "available": true }
+		{ "name": "CxCa", "available": true}
 	]
 }
