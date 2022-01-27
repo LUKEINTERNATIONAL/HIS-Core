@@ -440,7 +440,7 @@ export default defineComponent({
         disabled: true,
         isChecked: false,
         description: {
-          danger: true,
+          color: "danger",
           show: "always",
           text
         }
