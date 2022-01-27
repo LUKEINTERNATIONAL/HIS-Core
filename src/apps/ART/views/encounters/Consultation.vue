@@ -985,6 +985,23 @@ export default defineComponent({
               data.value
             );
           },
+          beforeNext: async (data: Option) => {
+            if (`${data.value}`.match(/suspected/i)) {
+              const action = await infoActionSheet(
+                "Lab Order",
+                "The patient is a TB suspect. Do you want to take lab orders?",
+                "",
+                [
+                  { name: "Order now", slot: "start", color: "success" },
+                  { name: "NOT now", slot: "end", color: "danger" },
+                ]
+              )
+              if (action === 'Order now') {
+                this.$router.push(`/art/encounters/lab/${this.patientID}`)
+              }
+            }
+            return true
+          },
           options: () => {
             return [
               { label: "TB NOT suspected", value: "TB NOT suspected" },
