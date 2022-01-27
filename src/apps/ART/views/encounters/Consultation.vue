@@ -890,26 +890,31 @@ export default defineComponent({
           helpText:
             "Other Contraindications / Side effects (select either 'Yes' or 'No')",
           type: FieldType.TT_MULTIPLE_YES_NO,
-          unload: async (data: any) => {
+          beforeNext: async (data: Option[]) => {
             const reasons = await this.getSideEffectsReasons(data);
-            const concept = ConceptService.getCachedConceptID("Drug induced");
-            const sides = reasons.map((r: any) => {
-              const c = ConceptService.getCachedConceptID(r.label);
-              if (r.reason === "other" || r.reason === "drug") {
-                return {
-                  'concept_id': concept,
-                  'value_coded': c,
-                  'value_text': "Past medication history",
-                };
-              } else {
-                return {
-                  'concept_id': concept,
-                  'value_coded': c,
-                  'value_drug': r.reason,
-                };
+            if (reasons != -1) {
+              if (reasons === undefined) {
+                return false
               }
-            });
-            this.relatedObs = [...this.relatedObs, ...sides];
+              const concept = ConceptService.getCachedConceptID("Drug induced");
+              const sides = reasons.map((r: any) => {
+                const c = ConceptService.getCachedConceptID(r.label);
+                if (r.reason === "other" || r.reason === "drug") {
+                  return {
+                    'concept_id': concept,
+                    'value_coded': c,
+                    'value_text': "Past medication history",
+                  };
+                } else {
+                  return {
+                    'concept_id': concept,
+                    'value_coded': c,
+                    'value_drug': r.reason,
+                  };
+                }
+              });
+              this.relatedObs = [...this.relatedObs, ...sides];   
+            }
             const filtered = data.filter((d: any) => {
               return d.label !== "Other (Specify)";
             });
@@ -929,6 +934,7 @@ export default defineComponent({
                 },
               };
             });
+            return true
           },
           options: (_: any, checked: Array<Option>) =>
             this.getOtherContraindications(checked),
