@@ -298,22 +298,7 @@ export default defineComponent({
       );
     },
     riskOfUnplannedPregnancy(formData: any) {
-      if (!formData.reason_for_no_fpm) return false;
-      return (
-        formData.reason_for_no_fpm.value === "At risk of unplanned pregnancy"
-      );
-    },
-    acceptedIntervention(formData: any) {
-      if (!formData.offer_contraceptives) return false;
-      return formData.offer_contraceptives.value === "Accepted";
-    },
-    notOnTBTreatment(formData: any) {
-      if (!formData.on_tb_treatment) return false;
-      return formData.on_tb_treatment.value === "No";
-    },
-    declinedCxCa(formData: any) {
-      if (!formData.offer_cxca) return false;
-      return formData.offer_cxca.value === "No";
+      return formData.reason_for_no_fpm.value === "At risk of unplanned pregnancy"
     },
     showOtherSideEffects(formData: any) {
       return (
@@ -785,7 +770,7 @@ export default defineComponent({
           helpText: "Offered intervention",
           //show when the previous one is accepted
           validation: (data: any) => Validation.required(data),
-          condition: (formData: any) => this.acceptedIntervention(formData),
+          condition: (formData: any) => formData.offer_contraceptives.value === "Accepted",
           type: FieldType.TT_MULTIPLE_SELECT,
           unload: (data: any) => {
             this.newFPM = data.map((data: Option) => {
