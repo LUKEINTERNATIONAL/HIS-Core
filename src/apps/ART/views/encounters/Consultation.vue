@@ -10,7 +10,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements";
-import { Option } from "@/components/Forms/FieldInterface";
+import { FooterBtnEvent, Option } from "@/components/Forms/FieldInterface";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
 import { alertAction, toastSuccess, toastWarning } from "@/utils/Alerts";
@@ -425,63 +425,115 @@ export default defineComponent({
       ).map((data) => data.name);
       return this.getOptions([...contraIndications], preValues);
     },
-    async getPrescriptionFields(preChecked: Array<Option>) {
-      const is3HPEnabled = await ART_PROP.threeHPAutoSelectEnabled()
-      const vals = [
-        { label: "ARVs", value: "ARVs", isChecked: true },
-        { label: "CPT", value: "CPT", isChecked: true },
-        { label: "3HP (RFP + INH)", value: "3HP (RFP + INH)", isChecked: is3HPEnabled },
-        { label: "IPT", value: "IPT", isChecked: false},
-        { label: "NONE OF THE ABOVE", value: "NONE OF THE ABOVE" },
-      ];
-      const exclusions = [];
-      if (this.allergicToSulphur) {
-        exclusions.push({ value: "CPT", description: "Allergic to CPT" });
-      }
-      if (this.TBSuspected) {
-        exclusions.push(
-          { value: "IPT", description: "TB Suspect" },
-          { value: "3HP (RFP + INH)", description: "TB Suspect" }
-        );
-      }
-      if (this.hasTBTherapyObs) {
-        exclusions.push(
-          { value: "IPT", description: "Completed TPT" },
-          { value: "3HP (RFP + INH)", description: "Completed TPT" }
-        );
-      }
-      const data = vals.map((v) => {
-        if (!isEmpty(preChecked)) {
-          v.isChecked = preChecked.map((v) => v.value).includes(v.value);
+    runAppendOptionParams(options: Option[]) {
+      return options.map(o => {
+        if (typeof o?.other?.appendOptionParams === 'function') {
+          const appendedOptions = o?.other?.appendOptionParams()
+          if (typeof appendedOptions === 'object')  {
+            const option: Option = {
+              label: o.label,
+              value: o.value,
+              other: o.other
+            }
+            if (appendedOptions.isChecked) {
+              option.isChecked = appendedOptions.isChecked
+              delete appendedOptions.isChecked
+            } else {
+              option.isChecked = o.isChecked || false
+            }
+            return { ...option, ...appendedOptions}
+          }
         }
-        return v;
-      });
-      return [...this.removeAndDisable(data, exclusions)];
+        return o
+      })
     },
-    removeAndDisable(initialFields: any[], exclusionList: any[]) {
-      return initialFields.map((data) => {
-        const isAvailable = exclusionList.filter(
-          (val) => val.value === data.value
-        );
-        const checked = isAvailable.length > 0 ? false : data.isChecked;
-        const disabled = isAvailable.length > 0 ? true : false;
-        const vals = {
-          label: data.label,
-          value: data.value,
-          isChecked: checked,
-          disabled: disabled,
-        };
-        if (disabled) {
-          Object.assign(vals, {
-            description: {
-              show: "always",
-              text: isAvailable[0].description,
-              color: "danger",
-            },
-          });
+    getPrescriptionFields(): Option[] {
+      return this.runAppendOptionParams([
+        { 
+          label: "ARVs", 
+          value: "ARVs", 
+        },
+        {
+          label: "CPT", 
+          value: "CPT",
+          other: {
+            appendOptionParams: () => {
+              if (this.allergicToSulphur) {
+                return {
+                  disabled: true,
+                  isChecked: false,
+                  description: {
+                    show: "always",
+                    text: "Allergic to CPT",
+                    color: "danger"
+                  }
+                }
+              }
+              return { disabled: false }
+            }
+          }
+        },
+        { 
+          label: "3HP (RFP + INH)", 
+          value: "3HP (RFP + INH)", 
+          other: {
+            appendOptionParams: () => {
+              if (this.hasTBTherapyObs) {
+                return {
+                  disabled: true,
+                  description: {
+                    show: 'always',
+                    color: 'danger',
+                    text: 'Completed TPT',
+                  }
+                }
+              }
+              if (this.TBSuspected) {
+                return { 
+                  disabled: true, 
+                  description: {
+                    show: "always", 
+                    text: 'TB Suspect',
+                    color: 'danger'
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          label: "IPT", 
+          value: "IPT", 
+          other: {
+            appendOptionParams: () => {
+              if (this.hasTBTherapyObs) {
+                return { 
+                  disabled: true, 
+                  description: {
+                    show: 'always',
+                    color: 'danger',
+                    text: 'Completed TPT',
+                  }
+                }
+              }
+              if (this.TBSuspected) {
+                return { 
+                  disabled: true, 
+                  description: { 
+                    show: "always", 
+                    text: 'TB Suspect',
+                    color: 'danger'
+                  } 
+                }
+              }
+            }
+          }
+        },
+        { 
+          label: "NONE OF THE ABOVE", 
+          value: "NONE OF THE ABOVE" 
         }
-        return vals;
-      });
+      ])
     },
     getFields(): any {
       return [
@@ -493,8 +545,9 @@ export default defineComponent({
           onValueUpdate: (listData: Array<Option>, value: Option) => {
             return this.disablePrescriptions(listData, value);
           },
-          options: (_: any, checked: Array<Option>) =>
-            this.getPrescriptionFields(checked),
+          options: (_: any, c: Array<Option>, cd: any, l: any) => {
+            return !isEmpty(l) ? l : this.getPrescriptionFields()
+          },
           unload: (data: any, state: any, formData: any) => this.onFinish(formData),
           condition: () => this.guardianVisit, 
         },
@@ -1065,8 +1118,14 @@ export default defineComponent({
             footerBtns: [
               {
                 name: "Update allergic to CPT",
-                onClick: async () => {
-                  const action = await infoActionSheet(
+                onClickComponentEvents: {
+                  refreshOptions: (btnEvent: FooterBtnEvent, options: Option[]): Option[] => {
+                    this.allergicToSulphur = btnEvent.btnOutput === 'Allergic'
+                    return this.runAppendOptionParams(options)
+                  }
+                },
+                onClick: () => {
+                  return infoActionSheet(
                     "Allergic to Cotrimoxazole update",
                     `Is the patient allergic to cotrimoxazole.`,
                     "",
@@ -1074,25 +1133,16 @@ export default defineComponent({
                       { name: "Allergic", slot: "start", color: "success" },
                       { name: "NOT Allergic", slot: "end" },
                     ]
-                  );
-
-                  if (action === "Allergic") {
-                    this.allergicToSulphur = true;
-                    this.prescriptionContext.listData =
-                      this.getPrescriptionFields([]);
-                  } else {
-                    this.allergicToSulphur = false;
-                    this.prescriptionContext.listData =
-                      this.getPrescriptionFields([]);
-                  }
-                },
-              },
-            ],
+                  )
+                }
+              }
+            ]
           },
-          options: (_: any, checked: Array<Option>) =>
-            this.getPrescriptionFields(checked),
-        },
-      ];
+          options: (_: any, c: Array<Option>, cd: any, l: any) => {
+            return !isEmpty(l) ? l :  this.getPrescriptionFields()
+          }
+        }
+      ]
     },
   },
 });
