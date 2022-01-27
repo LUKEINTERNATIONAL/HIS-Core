@@ -34,6 +34,7 @@ export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     fields: [] as any,
+    currentlyPregnant: false as boolean,
     patientHitMenopause: false as boolean,
     hasPregnancyObsToday: false as boolean,
     autoSelect3HP: false as boolean,
@@ -78,6 +79,7 @@ export default defineComponent({
           await this.guardianOnlyVisit();
           if (this.patient.isChildBearing()) {
             this.hasPregnancyObsToday = await this.patient.hasPregnancyObsToday()
+            this.currentlyPregnant = await this.patient.isPregnant()
           } 
           if (this.patient.isFemale()) {
             this.patientHitMenopause = await this.consultation.patientHitMenopause()
@@ -205,8 +207,10 @@ export default defineComponent({
       );
     },
     showCurrentContraceptionMethods(formData: any) {
-      return !this.patientHitMenopause 
-        && this.showPregnancyQuestions() 
+      return this.patient.isFemale() 
+        && this.patient.isChildBearing()
+        && !this.onPermanentFPMethods
+        && !this.patientHitMenopause 
         && !this.isPregnant(formData);
     },
     showNewContraceptionMethods(formData: any) {
@@ -217,11 +221,9 @@ export default defineComponent({
       );
     },
     isPregnant(formData: any) {
-      return (
-        formData.pregnant_breastfeeding.filter(
-          (data: any) => data.value === "Yes"
-        ).length > 0
-      );
+      return this.currentlyPregnant || formData.pregnant_breastfeeding && formData.pregnant_breastfeeding
+        .map((d: Option) => `${d.value}`.match(/yes/i))
+        .some(Boolean)
     },
     isOnTubalLigation(formData: any) {
       return (
@@ -670,8 +672,7 @@ export default defineComponent({
             });
           },
           validation: (data: any) => Validation.required(data),
-          condition: (formData: any) =>
-            this.showCurrentContraceptionMethods(formData),
+          condition: (formData: any) => this.showCurrentContraceptionMethods(formData),
           type: FieldType.TT_MULTIPLE_SELECT,
           options: (_: any, checked: Array<Option>) =>
             this.getFPMethods([], checked),

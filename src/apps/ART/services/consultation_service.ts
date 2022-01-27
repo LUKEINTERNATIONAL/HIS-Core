@@ -24,20 +24,22 @@ export class ConsultationService extends AppEncounterService {
     const obs = await ObservationService.getFirstObs(
       this.patientID, 'Why does the woman not use birth control', 
     )
-    return typeof obs?.value_text === 'string'
+    return obs && typeof obs?.value_text === 'string'
       ? (obs.value_text.match(/menopause/i) ? true : false)
-      && this.date > HisDate.toStandardHisFormat(obs.obs_datetime)
+      && AppEncounterService.obsInValidPeriod(obs)
       : false
   }
 
   async hasTreatmentHistoryObs() {
-    const obsDate = await ObservationService.getFirstObsDatetime(this.patientID, 'Previous TB treatment history')
-    return obsDate && this.date >= HisDate.toStandardHisFormat(obsDate)
+    const obs = await ObservationService.getFirstObs(this.patientID, 'Previous TB treatment history')
+    return obs && AppEncounterService.obsInValidPeriod(obs)
   }
 
   async patientCompleted3HP() {
-    const threeHpHistory = await ObservationService.getFirstValueText(this.patientID, 'Previous TB treatment history')
-    return threeHpHistory && threeHpHistory.match(/complete/i) ? true : false
+    const obs = await ObservationService.getFirstObs(this.patientID, 'Previous TB treatment history')
+    return obs && typeof obs.value_text === 'string' 
+      && AppEncounterService.obsInValidPeriod(obs)
+      && obs.value_text.match(/complete/i) ? true : false
   }
 
   getDrugSideEffects() {
@@ -50,27 +52,14 @@ export class ConsultationService extends AppEncounterService {
   }
 
   async getTLObs() {
-    const TLConcept = await AppEncounterService.getConceptID('Tubal ligation');
-    const FPConcept = await AppEncounterService.getConceptID('Family planning method');
-    const obs = await AppEncounterService.getObs({
-      'person_id': this.patientID,
-      'concept_id': FPConcept,
-      'value_coded': TLConcept
-    })
-    if (obs.length > 0) {
-      return true
-    } else {
-      const FPBackupConcept = await AppEncounterService.getConceptID('Family planning, action to take');
-      const backupObs = await AppEncounterService.getObs({
-        'person_id': this.patientID,
-        'concept_id': FPBackupConcept,
-        'value_coded': TLConcept
-      })
-      if (backupObs.length > 0) {
-        return true
-      }
+    const isTL = ((obs: any) => obs && obs.value_coded === 'Tubal ligation' && AppEncounterService.obsInValidPeriod(obs))
+    const tlObs = await AppEncounterService.getFirstObs(this.patientID, 'Family planning')
+    if (isTL(tlObs)) {
+      return isTL(tlObs)
+    } else  {
+      const fpObs = await AppEncounterService.getFirstObs(this.patientID, 'Method of family planning')
+      return isTL(fpObs)
     }
-    return false
   }
   async getPreviousDrugs() {
 

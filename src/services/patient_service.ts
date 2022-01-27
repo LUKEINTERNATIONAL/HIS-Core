@@ -82,8 +82,9 @@ export class Patientservice extends Service {
     }
 
     async isPregnant() {
-        const pregnant = await ObservationService.getFirstValueCoded(this.getID(), 'Is patient pregnant')
-        return pregnant && pregnant === 'Yes'
+        const obs = await ObservationService.getFirstObs(this.getID(), 'Is patient pregnant')
+        return obs && (obs.value_coded.match(/Yes/i) ? true : false) 
+            && ObservationService.obsInValidPeriod(obs)
     }
 
     async hasPregnancyObsToday() {
