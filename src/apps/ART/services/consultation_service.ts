@@ -1,6 +1,8 @@
 import { DrugInterface } from "@/interfaces/Drug";
 import { AppEncounterService } from "@/services/app_encounter_service";
 import { ObservationService } from "@/services/observation_service";
+import HisDate from "@/utils/Date"
+
 export class ConsultationService extends AppEncounterService {
   constructor(patientID: number, providerID: number) {
     super(patientID, 53, providerID);
@@ -20,16 +22,23 @@ export class ConsultationService extends AppEncounterService {
 
   async hasTreatmentHistoryObs() {
     const obsDate = await ObservationService.getFirstObsDatetime(this.patientID, 'Previous TB treatment history')
-    return obsDate && this.date > obsDate
+    return obsDate && this.date >= HisDate.toStandardHisFormat(obsDate)
+  }
+
+  async patientCompleted3HP() {
+    const threeHpHistory = await ObservationService.getFirstValueText(this.patientID, 'Previous TB treatment history')
+    return threeHpHistory && threeHpHistory.match(/complete/i) ? true : false
   }
 
   getDrugSideEffects() {
     const sessionDate = AppEncounterService.getSessionDate();
     return AppEncounterService.getJson(`/programs/1/patients/${this.patientID}/medication_side_effects`, { date: sessionDate });
   }
+
   getClient() {
     return AppEncounterService.getFirstValueCoded(this.patientID, 'Patient Present');
   }
+
   async getTLObs() {
     const TLConcept = await AppEncounterService.getConceptID('Tubal ligation');
     const FPConcept = await AppEncounterService.getConceptID('Family planning method');

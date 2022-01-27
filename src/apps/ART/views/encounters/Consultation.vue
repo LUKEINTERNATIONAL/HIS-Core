@@ -37,6 +37,7 @@ export default defineComponent({
     labOrderFieldContext: {} as any,
     prescriptionContext: {} as any,
     consultation: {} as any,
+    completed3HP: false as boolean,
     hasTbHistoryObs: false,
     allergicToSulphur: false,
     TBSuspected: false,
@@ -75,6 +76,7 @@ export default defineComponent({
           await this.getSideEffectsHistory();
           await this.guardianOnlyVisit();
           this.hasTbHistoryObs = await this.consultation.hasTreatmentHistoryObs()
+          if (this.hasTbHistoryObs) this.completed3HP = await this.consultation.patientCompleted3HP()
           this.askAdherence = this.adherence.receivedDrugsBefore();
           this.fields = this.getFields();
           this.onPermanentFPMethods = await this.consultation.getTLObs();
@@ -428,10 +430,12 @@ export default defineComponent({
         return o
       })
     },
-    getPrescriptionFields(formData: any): Option[] {
-      const completed3HP = formData.routine_tb_therapy.value.match(/complete/i)
+    getPrescriptionFields(d: any): Option[] {
+      const completed3HP = !this.completed3HP 
+        ? d.routine_tb_therapy && d.routine_tb_therapy.value.match(/complete/i) ? true : false
+        : true
       return this.runAppendOptionParams([
-        { 
+        {
           label: "ARVs", 
           value: "ARVs", 
         },
