@@ -1,6 +1,21 @@
 export default [
    {
       "categories": [],
+      "concept_id": 1719,
+      "name": "Tubal ligation"
+   },
+   {
+      "categories": [],
+      "concept_id": 1618,
+      "name": "Family planning"
+   },
+   {
+      "categories": [],
+      "concept_id": 374,
+      "name": "Method of family planning"
+   },
+   {
+      "categories": [],
       "concept_id": 2431,
       "name": "Other reason for not seeking services"
    },
