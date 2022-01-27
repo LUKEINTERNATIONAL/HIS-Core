@@ -584,24 +584,29 @@ export default defineComponent({
               });
             }
           },
-          options: () => [
-            {
-              label: "Pregnant",
-              value: "",
-              other: {
-                values: this.getYesNo(),
-                concept: "Is patient pregnant",
+          options: (formData: any) => {
+            const options = [
+              {
+                label: "Pregnant",
+                value: "",
+                other: {
+                  values: this.getYesNo(),
+                  concept: "Is patient pregnant",
+                },
               },
-            },
-            {
-              label: "Breastfeeding",
-              value: "",
-              other: {
-                values: this.getYesNo(),
-                concept: "Is patient breast feeding",
+              {
+                label: "Breastfeeding",
+                value: "",
+                other: {
+                  values: this.getYesNo(),
+                  concept: "Is patient breast feeding",
+                },
               },
-            },
-          ],
+            ]
+            return formData.pregnant_breastfeeding 
+              ? formData.pregnant_breastfeeding
+              : options
+          }
         },
         {
           id: "patient_weight_chart",
