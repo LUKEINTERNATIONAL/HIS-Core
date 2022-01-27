@@ -37,7 +37,7 @@ export default defineComponent({
     labOrderFieldContext: {} as any,
     prescriptionContext: {} as any,
     consultation: {} as any,
-    hasTBTherapyObs: false,
+    hasTbHistoryObs: false,
     allergicToSulphur: false,
     TBSuspected: false,
     presentedTBSymptoms: false,
@@ -74,12 +74,11 @@ export default defineComponent({
           await this.initAdherence(this.patient, this.providerID);
           await this.getSideEffectsHistory();
           await this.guardianOnlyVisit();
+          this.hasTbHistoryObs = await this.consultation.hasTreatmentHistoryObs()
           this.askAdherence = this.adherence.receivedDrugsBefore();
           this.fields = this.getFields();
           this.onPermanentFPMethods = await this.consultation.getTLObs();
           this.lastDrugsReceived = await this.consultation.getPreviousDrugs();
-
-          this.completedTBTherapy();
         }
       },
       deep: true,
@@ -179,10 +178,6 @@ export default defineComponent({
         rows.push([date, rowData.join('\n')]);
       }
       this.sideEffectsHistory = rows;
-    },
-    async completedTBTherapy() {
-      const obs = await this.patient.getCompleteTBTherapyHistory();
-      this.hasTBTherapyObs = obs.length > 0;
     },
     isOfChildBearingAge() {
       const age = this.patient.getAge();
@@ -316,13 +311,6 @@ export default defineComponent({
       if (!formData.offer_cxca) return false;
       return formData.offer_cxca.value === "No";
     },
-    updateCompletedTPT(formData: any) {
-      if (formData.value.match(/Complete/gi)) {
-        this.hasTBTherapyObs = true;
-      } else {
-        this.hasTBTherapyObs = false;
-      }
-    },
     showOtherSideEffects(formData: any) {
       return (
         formData.side_effects.filter((data: any) => {
@@ -440,7 +428,8 @@ export default defineComponent({
         return o
       })
     },
-    getPrescriptionFields(): Option[] {
+    getPrescriptionFields(formData: any): Option[] {
+      const completed3HP = formData.routine_tb_therapy.value.match(/complete/i)
       return this.runAppendOptionParams([
         { 
           label: "ARVs", 
@@ -471,7 +460,7 @@ export default defineComponent({
           value: "3HP (RFP + INH)", 
           other: {
             appendOptionParams: () => {
-              if (this.hasTBTherapyObs) {
+              if (completed3HP) {
                 return {
                   disabled: true,
                   description: {
@@ -499,7 +488,7 @@ export default defineComponent({
           value: "IPT", 
           other: {
             appendOptionParams: () => {
-              if (this.hasTBTherapyObs) {
+              if (completed3HP) {
                 return { 
                   disabled: true, 
                   description: {
@@ -538,8 +527,8 @@ export default defineComponent({
           onValueUpdate: (listData: Array<Option>, value: Option) => {
             return this.disablePrescriptions(listData, value);
           },
-          options: (_: any, c: Array<Option>, cd: any, l: any) => {
-            return !isEmpty(l) ? l : this.getPrescriptionFields()
+          options: (formData: any, c: Array<Option>, cd: any, l: any) => {
+            return !isEmpty(l) ? l : this.getPrescriptionFields(formData)
           },
           unload: (data: any, state: any, formData: any) => this.onFinish(formData),
           condition: () => this.guardianVisit, 
@@ -1019,12 +1008,11 @@ export default defineComponent({
           id: "routine_tb_therapy",
           helpText: "TB preventive therapy (TPT) history",
           validation: (data: any) => Validation.required(data),
-          condition: () => !this.hasTBTherapyObs,
+          condition: () => !this.hasTbHistoryObs,
           unload: async (data: any) => {
-            this.updateCompletedTPT(data);
             this.treatmentStatusObs = this.consultation.buildValueText(
               "Previous TB treatment history", data.value
-            );
+            )
           },
           type: FieldType.TT_SELECT,
           options: () => {
@@ -1131,8 +1119,8 @@ export default defineComponent({
               }
             ]
           },
-          options: (_: any, c: Array<Option>, cd: any, l: any) => {
-            return !isEmpty(l) ? l :  this.getPrescriptionFields()
+          options: (formData: any, c: Array<Option>, cd: any, l: any) => {
+            return !isEmpty(l) ? l :  this.getPrescriptionFields(formData)
           }
         }
       ]

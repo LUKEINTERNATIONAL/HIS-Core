@@ -1,5 +1,6 @@
 import { DrugInterface } from "@/interfaces/Drug";
 import { AppEncounterService } from "@/services/app_encounter_service";
+import { ObservationService } from "@/services/observation_service";
 export class ConsultationService extends AppEncounterService {
   constructor(patientID: number, providerID: number) {
     super(patientID, 53, providerID);
@@ -16,6 +17,12 @@ export class ConsultationService extends AppEncounterService {
       "NONE",
     ];
   }
+
+  async hasTreatmentHistoryObs() {
+    const obsDate = await ObservationService.getFirstObsDatetime(this.patientID, 'Previous TB treatment history')
+    return obsDate && this.date > obsDate
+  }
+
   getDrugSideEffects() {
     const sessionDate = AppEncounterService.getSessionDate();
     return AppEncounterService.getJson(`/programs/1/patients/${this.patientID}/medication_side_effects`, { date: sessionDate });
