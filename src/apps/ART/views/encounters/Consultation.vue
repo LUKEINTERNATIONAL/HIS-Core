@@ -700,7 +700,10 @@ export default defineComponent({
           type: FieldType.TT_SELECT,
           options: () => {
             return [
-              { label: "Not Sexually active", value: "Not Sexually active" },
+              { 
+                label: "Not Sexually active", 
+                value: "Not Sexually active" 
+              },
               {
                 label: "Patient want to get pregnant",
                 value: "Patient want to get pregnant",
@@ -713,6 +716,10 @@ export default defineComponent({
                 label: "At risk of unplanned pregnancy",
                 value: "At risk of unplanned pregnancy",
               },
+              {
+                label: "Menopause",
+                value: "Menopause"
+              }
             ];
           },
         },
