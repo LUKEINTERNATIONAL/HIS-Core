@@ -34,7 +34,7 @@ export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     fields: [] as any,
-    threeHpWasSelected: false as boolean,
+    hasPregnancyObsToday: false as boolean,
     autoSelect3HP: false as boolean,
     labOrderFieldContext: {} as any,
     prescriptionContext: {} as any,
@@ -75,6 +75,7 @@ export default defineComponent({
           await this.initAdherence(this.patient, this.providerID);
           await this.getSideEffectsHistory();
           await this.guardianOnlyVisit();
+          if (this.patient.isChildBearing()) this.hasPregnancyObsToday = await this.patient.hasPregnancyObsToday()
           this.autoSelect3HP = await ART_PROP.threeHPAutoSelectEnabled()
           this.hasTbHistoryObs = await this.consultation.hasTreatmentHistoryObs()
           if (this.hasTbHistoryObs) this.completed3HP = await this.consultation.patientCompleted3HP()
@@ -566,7 +567,7 @@ export default defineComponent({
         {
           id: "pregnant_breastfeeding",
           helpText: `Patient Pregnant or breastfeeding?`,
-          condition: () => this.showPregnancyQuestions(),
+          condition: () => !this.hasPregnancyObsToday && this.showPregnancyQuestions(),
           type: FieldType.TT_MULTIPLE_YES_NO,
           validation: (data: any) =>
             this.validateSeries([

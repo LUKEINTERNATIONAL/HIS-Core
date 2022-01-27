@@ -88,7 +88,7 @@ export class Patientservice extends Service {
 
     async hasPregnancyObsToday() {
         const date = await ObservationService.getFirstObsDatetime(this.getID(), 'Is patient pregnant')
-        return date && date === Service.getSessionDate()
+        return date && HisDate.toStandardHisFormat(date) === Service.getSessionDate() && this.isFemale()
     }
 
     isChildBearing() {
