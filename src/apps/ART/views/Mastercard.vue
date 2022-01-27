@@ -96,9 +96,9 @@ export default defineComponent({
       this.guardians = await this.getGuardian();
       this.patientCardInfo = await this.getPatientCardInfo(this.patient);
       this.visitDates = await this.getPatientVisitDates(this.patientId);
-      this.btns.push(this.getCancelBtn())
       this.btns.push(this.getDemographicsBtn())
       if(!this.guardians) this.btns.push(this.getGuardianBtn())
+      this.btns.push(this.getCancelBtn())
     },
     async getGuardian(){
       const relationship = await RelationshipService.getGuardianDetails(this.patientId);
@@ -123,13 +123,13 @@ export default defineComponent({
     },
     getCancelBtn(): NavBtnInterface {
       return {
-        name: "Cancel",
-        color: "danger",
+        name: "Finish",
+        color: "success",
         size: "large",
-        slot: "start",
+        slot: "end",
         visible: true,
         onClick: async () => {
-          const confirmation = await alertConfirmation("Are you sure you want to cancel?");
+          const confirmation = await alertConfirmation("Are you sure you want to exit?");
           if (confirmation) return this.$router.back();
         }
       }
