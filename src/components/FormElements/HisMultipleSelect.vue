@@ -29,7 +29,7 @@
     </div>
 </template>
 <script lang="ts">
-import { Option, OptionDescriptionInterface } from "../Forms/FieldInterface";
+import { FooterBtnEvent, Option, OptionDescriptionInterface } from "../Forms/FieldInterface";
 import { defineComponent } from "vue";
 import { IonCheckbox, IonText, IonChip,  } from "@ionic/vue";
 import SelectMixin from "@/components/FormElements/SelectMixin.vue"
@@ -85,12 +85,23 @@ export default defineComponent({
         item.isChecked = false
         return item
       })
+    },
+    footerButtonEvent: {
+      async handler(event: FooterBtnEvent) {
+        if (event && typeof event.onClickComponentEvents?.refreshOptions === 'function') {
+          this.listData = await event.onClickComponentEvents?.refreshOptions(
+            event, this.listData, this.fdata, this.cdata
+          )
+          this.$emit('onValue', this.getChecked(this.listData))
+        }
+      },
+      deep: true,
+      immediate: true
     }
   },
   async activated() {
     this.$emit('onFieldActivated', this)
-    const data = await this.options(this.fdata, this.getChecked(this.listData), this.cdata)
-    this.listData = data
+    this.listData = await this.options(this.fdata, this.getChecked(this.listData), this.cdata, this.listData)
     this.$emit('onValue', this.getChecked(this.listData))
   }
 });

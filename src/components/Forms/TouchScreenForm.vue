@@ -34,6 +34,7 @@
           :onValue="currentField.onValue"
           :defaultValue="currentField.defaultValue"
           :onValueUpdate="currentField.onValueUpdate"
+          :footerButtonEvent="ftBtnEvent"
           @onValue="onFieldValue"
           @onFieldActivated="onFieldActivated"
         />
@@ -46,7 +47,7 @@
             :key="index"
             :slot="btn.slot || 'start'"
             :class="btn.styleClass"
-            @click="btn.onClick(formData, computedFormData)"
+            @click="onFtButtonClicked(btn)"
             :color="btn.color || 'primary'"
             :size="btn.size || 'large'"
             :disabled="onDisabledBtnState(btn, 'disabled', false)"
@@ -66,7 +67,8 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import { 
   Field, 
   Option,
-  FormFooterBtns
+  FormFooterBtns,
+  FooterBtnEvent
 } from "./FieldInterface";
 import {
   IonPage,
@@ -124,6 +126,11 @@ export default defineComponent({
     },
   },
   data: () => ({
+    ftBtnEvent: {
+      eventIndex: 0,
+      btnName: '',
+      btnOutput: null as any,
+    } as FooterBtnEvent,
     valueClearIndex: 0 as number,
     currentIndex: 0,
     currentField: {} as Field,
@@ -190,6 +197,16 @@ export default defineComponent({
     clearValue() {
       this.valueClearIndex += 1
       this.setActiveFieldValue(null)
+    },
+    async onFtButtonClicked(btn: FormFooterBtns) {
+      this.ftBtnEvent.eventIndex += 1
+      this.ftBtnEvent.btnName = btn.name
+      this.ftBtnEvent.btnOutput = await btn.onClick(this.formData, this.computedFormData)
+      if (btn.onClickComponentEvents) {
+        this.ftBtnEvent.onClickComponentEvents = btn.onClickComponentEvents
+      } else {
+        if (this.ftBtnEvent.onClickComponentEvents) delete this.ftBtnEvent.onClickComponentEvents
+      }
     },
     async mountField(name: string) {
       if (name === '_NEXT_FIELD_') {

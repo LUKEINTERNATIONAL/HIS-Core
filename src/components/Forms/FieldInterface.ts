@@ -11,14 +11,33 @@ export interface BtnStates {
     disabled?: Record<string, (formData: any, computedData: any) => boolean>;
 }
 
+export interface ComponentActionsInterface {
+    refreshOptions: (
+        btnEvent: FooterBtnEvent, 
+        currentOptionData: Option | Option[], 
+        formData: any, computedData: any
+    ) => Option[];
+}
+
+/**
+ * This event is sent to Form components to update their internal
+ * state if applicable
+ */
+export interface FooterBtnEvent {
+    eventIndex: number;
+    btnName: string;
+    btnOutput: any;
+    onClickComponentEvents?: ComponentActionsInterface;
+}
+
 export interface FormFooterBtns {
     name: string;
     size?: 'large' | 'small';
     slot?: 'start' | 'end';
     color?: 'success' | 'primary' | 'warning' | 'secondary' | 'danger';
     state?: BtnStates;
-    onClick: (btn: FormFooterBtns, formData: any) => void;
-
+    onClickComponentEvents?: ComponentActionsInterface;
+    onClick: (formData: any, computedData: any) => any;
 }
 export interface Option {
     label: string;
