@@ -12,24 +12,26 @@ import { defineComponent } from "vue";
 import { FieldType } from "@/components/Forms/BaseFormElements";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
-import EncounterMixinVue from "../../../../views/EncounterMixin.vue";
+import EncounterMixinVue from "./EncounterMixin.vue";
+import { PatientTypeService } from "@/apps/ART/services/patient_type_service";
 import { toastSuccess, toastWarning } from "@/utils/Alerts";
-import { ProgramService } from "@/services/program_service";
-import {ProgramWorkflow} from "@/interfaces/program_workflow"
-import {OutcomeService} from "@/apps/CxCa/services/CxCaOutcomeService"
+import PersonField from "@/utils/HisFormHelpers/PersonFieldHelper";
+import { Field } from "@/components/Forms/FieldInterface";
+
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: { HisStandardForm },
   data: () => ({
-    outcome: {} as any,
+    patientType: {} as any,
   }),
   watch: {
     patient: {
       async handler() {
-        this.outcome = new OutcomeService(
+        this.patientType = new PatientTypeService(
           this.patientID,
           this.providerID
         );
+        await this.patientType.loadPatientType();
         this.fields = this.getFields();
       },
       deep: true,
@@ -37,39 +39,13 @@ export default defineComponent({
   },
   methods: {
     async onFinish(formData: any) {
-      const encounter = await this.outcome.createEncounter();
-
-      if (!encounter) return toastWarning("Unable to create encounter");
-      const programID = ProgramService.getProgramID();
-      const workflows: ProgramWorkflow[] = await ProgramService.getProgramWorkflows(ProgramService.getProgramID());
-      const outcome = formData.select_referral_outcome.value;
-      const flows = {} as any;
-      workflows.forEach(w => {
-        w.states.forEach(f => {
-          const conceptID = f.program_workflow_state_id;
-          const conceptName = f.concept.concept_names[0].name;
-          flows[conceptName] = conceptID;
-        })
-      })
-      const state = {
-        'location_id': ProgramService.getLocationName(),
-        state: flows[outcome],
-        date: ProgramService.getSessionDate()
-      }
-      const saveState = await ProgramService.createState(this.patientID, programID, state);
-      if(!saveState) return toastWarning('Unable to update state')
-      const referralObs = formData.select_referral_outcome.value;
-      const cancerObs = formData.select_cancer_treatment.value;
-      const rOb = await this.outcome.buildValueCoded('Outcome', referralObs);
-      const obList = [rOb];
-      if(cancerObs.match(/cancer/)) {
-        const cOb = await this.outcome.buildValueCoded('Cancer treatment', cancerObs);
-        obList.push(cOb);
-      }
-
-      const obs = await this.outcome.saveObservationList(obList);
-      toastSuccess("Observations and encounter created!");
-      this.nextTask();
+      //       const encounter = await this.patientType.createEncounter();
+      //       if (!encounter) return toastWarning("Unable to create encounter");
+      //       this.patientType.setLocationName(formData?.location?.label);
+      //       this.patientType.setPatientType(formData?.patient_type?.value);
+      //       await this.patientType.save();
+      //       toastSuccess("Observations and encounter created!");
+      //       this.nextTask();
     },
 
     getFields(): any {
