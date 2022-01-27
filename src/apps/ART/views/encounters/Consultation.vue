@@ -1020,12 +1020,6 @@ export default defineComponent({
           },
           type: FieldType.TT_SELECT,
           options: () => {
-            const hasDrug = (drugName: string) => 
-              Object.values(this.lastDrugsReceived)
-                .map((d: any) => d.drug.name.match(new RegExp(drugName, 'i')))
-                .some(Boolean)
-            const prescribedInh = hasDrug('inh')
-            const prescribed3hp = hasDrug('Rifapentine')
             return [
               { 
                 label: "Currently on IPT", 
@@ -1052,10 +1046,9 @@ export default defineComponent({
               {
                 label: "Never taken IPT or 3HP",
                 value: "Never taken IPT or 3HP",
-                disabled: (prescribedInh || prescribed3hp)
-              },
-            ];
-          },
+              }
+            ]
+          }
         },
         {
           id: "allergic_to_sulphur",
