@@ -952,7 +952,7 @@ export default defineComponent({
               () => Validation.required(data),
               () => Validation.anyEmpty(data),
             ]),
-          condition: (formData: any) => this.notOnTBTreatment(formData),
+          condition: (formData: any) => formData.on_tb_treatment.value.match(/no/i),
           unload: async (vals: any) => {
             const val =
               vals.filter((data: any) => {
@@ -988,6 +988,7 @@ export default defineComponent({
           preset: this.getFieldPreset(),
           validation: (data: any) => Validation.required(data),
           condition: (formData: any) => this.hasTBSymptoms(formData),
+          defaultValue: () => 'TB Suspected',
           unload: async (data: any) => {
             if (data.value === "TB Suspected") {
               this.TBSuspected = true;
