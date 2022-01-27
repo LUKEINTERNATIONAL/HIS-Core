@@ -123,6 +123,10 @@ export class ObservationService extends ConceptService {
         }
     }
 
+    static obsInValidPeriod(obsObj: any) {
+        return obsObj && ConceptService.getSessionDate() >= HisDate.toStandardHisFormat(obsObj.obs_datetime) 
+    }
+
     static async getFirstObsValue(
         patientID: number, 
         conceptName: string, 
