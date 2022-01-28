@@ -93,7 +93,7 @@ export function getAgeEstimateField(id: string, name: string): Field {
         id,
         helpText: `${name} Age Estimate`,
         type: FieldType.TT_NUMBER,
-        appearInSummary: () => false
+        appearInSummary: () => false,
     }
 }
 
