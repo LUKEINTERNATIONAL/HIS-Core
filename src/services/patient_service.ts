@@ -92,11 +92,16 @@ export class Patientservice extends Service {
     }
 
     async getInitialObs(concept: string) {
-        const obs = await ObservationService.getAll(
-            this.getID(),
-            concept
-        )
-        return obs.length >= 1 ? obs[obs.length-1].value_numeric : -1
+        try {
+            const initialObs = await ObservationService.getAll(
+              this.getID(),
+              concept
+            );
+            const lastIndex = initialObs.length - 1;
+            return initialObs[lastIndex].value_numeric;
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     async getInitialWeight() {
