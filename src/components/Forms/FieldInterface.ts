@@ -78,6 +78,10 @@ export interface Field {
      * the field fails to pass a condition
     */
     defaultComputedOutput?: (fdata?: any, cdata?: any, other?: any) => any;
+    /**
+     * Hook is called when the field is false. This is helpful for cleanup jobs
+     */
+    onConditionFalse?: Function;
     condition?: Function;
     validation?: Function;
     beforeNext?: Function;

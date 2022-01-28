@@ -539,6 +539,9 @@ export default defineComponent({
        if (field.condition && !(await field.condition(
           this.formData, this.computedFormData
         ))) {
+        if (typeof field.onConditionFalse === 'function') {
+          field.onConditionFalse()
+        }
         // Normal form value to be used when condition is false
         this.formData[field.id] = field.defaultOutput 
           ? field.defaultOutput(this.formData, this.computedFormData) 
