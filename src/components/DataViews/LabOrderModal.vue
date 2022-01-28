@@ -5,71 +5,71 @@
     </ion-toolbar>
   </ion-header>
   <ion-content :style="{ overflowY: 'hidden', background: 'grey' }" >
-  <ion-grid>
-  <ion-row>
-  <ion-col size="4">
-  <ion-list :style="{overflowY: 'auto', height:'78vh'}"> 
-      <ion-item
-        v-for="(data, index) in testTypes" :key="data"
-        @click="getSpecimens(data.name, index)"
-        :detail="true"
-      > 
-        <ion-label> {{ data.name }} </ion-label>
-        <ion-checkbox v-model="data.isChecked" slot="start"/>
-      </ion-item>
-    </ion-list>
-    </ion-col>
-    <ion-col 
-      :style="{overflowY: 'auto', height:'78vh'}"
-      v-if="activeIndex != null && selectedOrders.length > 0">
-    <div style="">
-    <ion-list v-if="!extendedLabsEnabled">   
-      <ion-radio-group v-model="testTypes[activeIndex]['specimen']">
-        <div class="side-title">
-          Select specimen
-        </div>
-          <!-- :color="isActive(item) ? 'primary' : ''" -->
-          <ion-item v-for="data in specimens" :key="data" > 
-        <ion-label>{{data.name}}</ion-label>
-          <ion-radio slot="start" :value="data.name" @click="addSpecimen(data)"></ion-radio>
-        </ion-item>
-      </ion-radio-group>
-    </ion-list>
-    <ion-radio-group v-model="testTypes[activeIndex]['reason']">
-      <div class="side-title">
-        Main test(s) reason
-      </div>
-        <!-- :color="isActive(item) ? 'primary' : ''" -->
-        <ion-item v-for="data in reasons" :key="data"> 
-      <ion-label>{{data}}</ion-label>
-        <ion-radio slot="start" :value="data" ></ion-radio>
-      </ion-item>
-    </ion-radio-group>
-      </div>
-      <p/>
-       <div :style="{background: 'lightyellow', height: '200px'}">
-         <table>
-           <thead>
-             <tr>
-               <td>Test</td>
-               <td>Specimen</td>
-               <td>Reason</td>
-               <td>Action</td>
-             </tr>
-           </thead>
-           <tbody>
-             <tr v-for="(data, index) in finalOrders" :key="index">
-               <td>{{data.name}}</td>
-               <td>{{data.specimen || 'N/A'}}</td>
-               <td>{{data.reason}}</td>
-               <td><ion-button @click="removeOrder(data.currentIndex)" slot="end" color="danger">X</ion-button></td>
-             </tr>
-           </tbody>
-         </table>
-      </div>
-    </ion-col>
-  </ion-row>
-</ion-grid> 
+    <ion-grid>
+      <ion-row>
+        <ion-col size="6">
+          <ion-list :style="{overflowY: 'auto', height:'78vh'}"> 
+            <ion-item 
+              v-for="(data, index) in testTypes" 
+              :key="data"
+              :disabled="activeIndex !== null && activeIndex !== index && !isOrderComplete" 
+              detail
+            > 
+              <ion-label> {{ data.name }} </ion-label>
+              <ion-checkbox 
+                v-model="data.isChecked" 
+                slot="start" 
+                @ionChange="(e) => onSelectTest(data.name, index, e)"
+              />
+            </ion-item>
+          </ion-list>
+        </ion-col>
+        <ion-col :style="{overflowY: 'auto', height:'78vh'}" v-if="activeIndex != null && selectedOrders.length > 0">
+          <div class="ion-margin-bottom">
+            <ion-list v-if="!extendedLabsEnabled">   
+              <ion-radio-group v-model="testTypes[activeIndex]['specimen']">
+                <div class="side-title">
+                  Select specimen
+                </div>
+                  <ion-item v-for="data in specimens" :key="data" > 
+                <ion-label>{{data.name}}</ion-label>
+                  <ion-radio slot="start" :value="data.name" @click="addSpecimen(data)"></ion-radio>
+                </ion-item>
+              </ion-radio-group>
+            </ion-list>
+            <ion-radio-group v-model="testTypes[activeIndex]['reason']">
+              <div class="side-title">
+                Main test(s) reason
+              </div>
+              <ion-item v-for="data in reasons" :key="data"> 
+                <ion-label>{{data}}</ion-label>
+                <ion-radio slot="start" :value="data" ></ion-radio>
+              </ion-item>
+            </ion-radio-group>
+          </div>
+          <div :style="{background: 'lightyellow', height: '200px'}">
+            <table>
+              <thead>
+                <tr>
+                  <td>Test</td>
+                  <td>Specimen</td>
+                  <td>Reason</td>
+                  <td>Action</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(data, index) in finalOrders" :key="index">
+                  <td>{{data.name}}</td>
+                  <td>{{data.specimen || 'N/A'}}</td>
+                  <td>{{data.reason}}</td>
+                  <td><ion-button @click="removeOrder(data.currentIndex)" slot="end" color="danger">X</ion-button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid> 
   </ion-content>
   <ion-footer>
     <ion-toolbar> 
@@ -129,6 +129,20 @@ export default defineComponent({
     this.extendedLabsEnabled = await ART_GLOBAL_PROP.extendedLabEnabled()
   },
   methods: {
+    async onSelectTest(testName: string, index: number, event: any) {
+      this.$nextTick(async () => {
+        this.testTypes[index]['isChecked'] = event.target.checked;
+        if(this.testTypes[index]['isChecked']){
+          this.specimens = await OrderService.getSpecimens(testName);
+          this.testTypes[index]['currentIndex'] = index;
+          this.activeIndex = index;
+        } else {
+          this.specimens = [];
+          this.activeIndex = null;
+        }
+        
+      })
+    },
     async getActivities() {
      const tests = await OrderService.getTestTypes();
      this.testTypes = tests.map((t: any, i: any) => {
@@ -136,13 +150,12 @@ export default defineComponent({
         return t
      }).sort((a: any, b: any) => a.index < b.index ? 0 : 1)
     },
-    async getSpecimens(testName: string, index: number) {
-     this.specimens = await OrderService.getSpecimens(testName);
-     this.testTypes[index]['currentIndex'] = index;
-     this.activeIndex = index;
-    },
     removeOrder(index: number) {
       this.testTypes[index]['isChecked'] = false;
+      this.testTypes[index]['reason'] = null;
+      this.testTypes[index]['specimen'] = null;
+      this.activeIndex = null
+      this.specimens = []
     },
     addSpecimen(data: any) {
       this.testTypes[this.activeIndex]['specimenConcept'] = data.concept_id;
@@ -183,6 +196,10 @@ export default defineComponent({
     },
   },
   computed: {
+    isOrderComplete(): boolean {
+      return (this.testTypes[this.activeIndex]['specimenConcept'] || this.testTypes[this.activeIndex]['specimen']) 
+        && this.testTypes[this.activeIndex]['reason'] 
+    },
     selectedOrders(): any {
       return this.testTypes.filter((data: any) => data.isChecked === true);
     },
