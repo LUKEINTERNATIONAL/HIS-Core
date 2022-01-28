@@ -1,6 +1,10 @@
 <template>
   <ion-page style="background: #fff">
-    <information-header :items="patientCardInfo"></information-header>
+    <information-header 
+      :items="patientCardInfo"
+      @addGuardian="addGuardian"
+      @update="updateDemographics"
+    ></information-header>
     <ion-content>
       <visit-information
         :items="visitDates"
@@ -24,7 +28,7 @@ import InformationHeader from "@/components/InformationHeader.vue";
 import VisitInformation from "@/components/VisitInformation.vue";
 import MastercardDetails from "@/components/MastercardDetails.vue";
 import HisFooter from "@/components/HisDynamicNavFooter.vue";
-import _, { isArray, isEmpty } from "lodash";
+import { isArray, isEmpty } from "lodash";
 import {
   IonPage,
   IonContent,
@@ -96,9 +100,7 @@ export default defineComponent({
       this.guardians = await this.getGuardian();
       this.patientCardInfo = await this.getPatientCardInfo(this.patient);
       this.visitDates = await this.getPatientVisitDates(this.patientId);
-      this.btns.push(this.getDemographicsBtn())
-      if(!this.guardians) this.btns.push(this.getGuardianBtn())
-      this.btns.push(this.getCancelBtn())
+      this.btns.push(this.getFinishBtn())
     },
     async getGuardian(){
       const relationship = await RelationshipService.getGuardianDetails(this.patientId);
@@ -106,22 +108,19 @@ export default defineComponent({
         return ` ${r.name} (${r.relationshipType})`;
       }).join(" ");
     },
-    getDemographicsBtn(): NavBtnInterface{
-     return {
-        name: "Edit Demographics",
-        color: "primary",
-        size: "large",
-        slot: "end",
-        visible: true,
-        onClick: () => {
-          return this.$router.push({
-            path: '/patient/registration', 
-            query: { 'edit_person': this.patientId }
-          })
+    updateDemographics(attribute: string) {
+      this.$router.push({
+        path: '/patient/registration', 
+        query: { 
+          'edit_person': this.patientId,
+          'person_attribute': attribute
         }
-      }
+      })
     },
-    getCancelBtn(): NavBtnInterface {
+    addGuardian() {
+      this.$router.push(`/guardian/registration/${this.patientId}`)
+    },
+    getFinishBtn(): NavBtnInterface {
       return {
         name: "Finish",
         color: "success",
@@ -131,18 +130,6 @@ export default defineComponent({
         onClick: async () => {
           const confirmation = await alertConfirmation("Are you sure you want to exit?");
           if (confirmation) return this.$router.back();
-        }
-      }
-    },
-    getGuardianBtn(): NavBtnInterface {
-      return {
-        name: "Add Guardian",
-        color: "primary",
-        size: "large",
-        slot: "end",
-        visible: true,
-        onClick: () => {
-          return this.$router.push(`/guardian/registration/${this.patientId}`);
         }
       }
     },
@@ -179,13 +166,6 @@ export default defineComponent({
 
     async getPatientCardInfo(patient: Patientservice) {
       const { toStandardHisDisplayFormat } = HisDate;
-      const age = patient.getAge();
-      const ARVNumber = patient.getPatientIdentifier(4);
-      const IDNumber = patient.getPatientIdentifier(3);
-      const fullName = this.getProp(patient, "getFullName");
-      const gender = patient.getGender();
-      const currentVillage = patient.getCurrentVillage();
-      const closestLandMark = patient.getAttribute(19);
       let dateOfTest = await ObservationService.getAll(
         this.patientId,
         "Confirmatory HIV test date"
@@ -207,9 +187,6 @@ export default defineComponent({
         ? toStandardHisDisplayFormat(startDate[0].value_datetime)
         : 'N/A'
       
-      const initialWeight = await this.getInitial("weight");
-      const initialHeight = await this.getInitial("Height");
-      const initialBMI = await this.getInitial("BMI");
       const TI = await ObservationService.getFirstValueCoded(
         this.patientId,
         "Ever received ART"
@@ -222,57 +199,101 @@ export default defineComponent({
         this.patientId,
         "Reason for ART eligibility"
       );
-
-      const tb = await this.getTBStats()
       
-      const obj: Option[] = [
-        { label: "ARV #", value: ARVNumber },
-        { label: "National Patient ID", value: IDNumber },
-        { label: "Name", value: fullName },
-        { label: "Age", value: age },
-        { label: "Sex", value: gender },
-        { label: "Location", value: currentVillage },
-        { label: "Landmark", value: closestLandMark },
-        { label: "Guardian", value: this.guardians },
-        { label: "Init W(KG)", value: initialWeight },
-        { label: "Init H(CM)", value: initialHeight },
-        { label: "BMI(CM)", value: initialBMI },
+      return [
+        { label: "ARV Number", value: this.patient.getArvNumber() },
+        { label: "National Patient ID", value: patient.getNationalID() },
+        { 
+          label: "Given Name", 
+          value: patient.getGivenName(),
+          other: {
+            editable: true,
+            attribute: 'given_name',
+            category: 'demographics'
+          }
+        },
+        { 
+          label: "Family Name", 
+          value: patient.getFamilyName(),
+          other: {
+            editable: true,
+            attribute: 'family_name',
+            category: 'demographics'
+          }
+        },
+        { 
+          label: "Age", 
+          value: patient.getAge(),
+          other: {
+            editable: true,
+            attribute: 'year_birth_date',
+            category: 'demographics'
+          }
+        },
+        { 
+          label: "Sex", 
+          value: patient.getGender(),
+          other: {
+            editable: true,
+            attribute: 'gender',
+            category: 'demographics'
+          }
+        },
+        { label: "Occupation", value: 'Unknown' },
+        { 
+          label: "Location",
+          value:  patient.getCurrentVillage(),
+          other: {
+            editable: true,
+            attribute: 'home_region',
+            category: 'demographics'
+          }
+        },
+        { label: "Landmark", value: patient.getAttribute(19) },
+        { 
+          label: "Guardian", 
+          value: this.guardians ? this.guardians : 'add',
+          other: {
+            editable: !this.guardians,
+            attribute: '',
+            category: 'guardian'
+          }
+        },
+        { label: "Init W(KG)", value: await patient.getInitialWeight() },
+        { label: "Init H(CM)", value: await patient.getInitialHeight() },
+        { label: "BMI(CM)", value: await patient.getInitialBMI() },
         { label: "TI", value: TI },
         { label: "Agrees to follow up", value: agreesToFollowUp },
         { label: "Reason for starting ART", value: reasonForStarting },
         { label: "HIV test date", value: `${dateOfTest ? dateOfTest  : ''}`},
-        { label: "HIV test place", value: ` ${placeOfTest? placeOfTest : ''}`},
+        { label: "HIV test place", value: `${placeOfTest? placeOfTest : ''}`},
         { label: "Date of starting first line ART", value: startDate },
-        { label: "Pulmonary TB within the last 2 years", value: tb.lastTwoYears},
-        { label: "Extra pulmonary TB (EPTB)", value: tb.eptb},
-        { label: "Pulmonary TB (current)", value: tb.currentTB},
-        { label: "Kaposi's sarcoma:", value: tb.ks}
-      ];
-      return obj;
+        ...await this.getTBStats()
+      ] as Option[]
     },
-
-    async getTBStats(){
+    
+    async getTBStats(): Promise<Option[]> {
       const stats = await ObservationService.getFirstValueCoded(this.patientId, 'Who stages criteria present')
-      return {
-        lastTwoYears: stats && stats.match(/last/i) ? "Yes" : "N/A",
-        eptb: stats && stats.match(/eptb/i) ? "Yes" : "N/A",
-        currentTB: stats && stats.match(/current/i) ? "Yes" : "N/A",
-        ks: stats && stats.match(/kepos/i) ? "Yes" : "N/A",
-      }
+      return [
+        { 
+          label: "Pulmonary TB within the last 2 years", 
+          value: stats && stats.match(/last/i) ? "Yes" : "N/A",
+        },
+        { 
+          label: "Extra pulmonary TB (EPTB)", 
+          value: stats && stats.match(/eptb/i) ? "Yes" : "N/A",
+        },
+        { 
+          label: "Pulmonary TB (current)", 
+          value: stats && stats.match(/current/i) ? "Yes" : "N/A",
+        },
+        { 
+          label: "Kaposi's sarcoma:", 
+          value: stats && stats.match(/kepos/i) ? "Yes" : "N/A",
+        }
+      ]
     },
 
-    async getInitial(concept: string) {
-      try {
-        const initialObs = await ObservationService.getAll(
-          this.patientId,
-          concept
-        );
-        const lastIndex = initialObs.length - 1;
-        return initialObs[lastIndex].value_numeric;
-      } catch (e) {
-        console.error(e)
-      }
-    },
     async openModal(items: any, title: string, component: any) {
       const date = HisDate.toStandardHisDisplayFormat(
         this.activeVisitDate.toString()

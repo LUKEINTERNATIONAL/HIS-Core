@@ -91,6 +91,18 @@ export class Patientservice extends Service {
         return this.isFemale() && age >= 12 && age <= 50
     }
 
+    async getInitialObs(concept: string) {
+        const obs = await ObservationService.getAll(
+            this.getID(),
+            concept
+        )
+        return obs.length >= 1 ? obs[obs.length-1].value_numeric : -1
+    }
+
+    async getInitialWeight() {
+        return this.getInitialObs('weight')
+    }
+
     async getRecentWeight() {
         const concept = await ConceptService.getConceptID('weight', true)
         const obs = await ObservationService.getObs({
@@ -100,6 +112,11 @@ export class Patientservice extends Service {
         })
         return obs.length >= 1 ? obs[0].value_numeric: -1
     }
+    
+    async getInitialHeight() {
+        return this.getInitialObs("Height")
+    }
+
     async getRecentHeight() {
         const concept = await ConceptService.getConceptID('Height', true)
         const obs = await ObservationService.getObs({
@@ -121,6 +138,11 @@ export class Patientservice extends Service {
          return data.value_text.match(/Complete/i);
         });
     }
+
+    async getInitialBMI() {
+        return this.getInitialObs('BMI')
+    }
+
     async getBMI() {
         //TODO: weight and height should have optional parameters to get weight and height
         const weight = await this.getRecentWeight()
