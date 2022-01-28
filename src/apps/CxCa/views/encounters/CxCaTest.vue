@@ -153,7 +153,7 @@ export default defineComponent({
             },
             {
               label: "Prefers Not to disclose",
-              value: "Prefers Not to disclose",
+              value: "Undisclosed",
             },
           ],
           unload: async (value: any) => {
@@ -361,7 +361,7 @@ export default defineComponent({
           helpText: "Reason for NOT offering CxCa screening",
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
-          condition: (formData: any) => !formData.screening_method.value.match(/VIA|EXAM/i),
+          condition: (formData: any) => formData.offer_CxCa.value === "No",
           options: () => [
             {
               label: "Client preferred counselling",

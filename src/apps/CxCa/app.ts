@@ -5,7 +5,9 @@ import Routes from "@/apps/CxCa/config/CxCaRoutes"
 import HisDate from "@/utils/Date"
 import { WorkflowService } from "@/services/workflow_service";
 import { ObservationService } from "@/services/observation_service";
-
+import { 
+    onRegisterPatient,
+} from "@/apps/CxCa/config/CxCaAppScripts"
 const CXCA: AppInterface = {
     programID: 24,
     applicationName: 'CxCa',
@@ -15,6 +17,7 @@ const CXCA: AppInterface = {
     primaryPatientActivites: PRIMARY_ACTIVITIES,
     secondaryPatientActivites: [],
     globalPropertySettings: [],
+    onRegisterPatient,
     homeOverviewComponent,
     confirmationSummary: (patient: any, program: any) => ({
         'PATIENT IDENTIFIERS': () => {
@@ -56,10 +59,7 @@ const CXCA: AppInterface = {
             icon: 'reports.png',
             defaultFilesIcon: 'reports.png',
             files: [
-                // {
-                //     name: 'Test requested',
-                //     pathUrl: '/los/report/tests/requests'
-                // },
+               //placeholder for reports to be integrated 
                 
             ]
         }
