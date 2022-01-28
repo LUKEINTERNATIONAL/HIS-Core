@@ -51,25 +51,26 @@ export default defineComponent({
   mixins: [SelectMixin],
   watch: {
     clear() {
-      this.clearSelection();
+      this.value = ''
     },
-    value(value: any) {
-      this.$emit('onValue', { label: this.filtered[0].label, value: value })
+    value : {
+      handler(value: any) {
+        this.$emit('onValue', value)
+      },
+      immediate: true
     }
   },
-  data() {
-    return {
-      value: null as any,
-    };
-  },
+  data: () => ({
+    value: '' as string,
+  }),
   async activated() {
     this.$emit('onFieldActivated', this)
     this.listData = await this.options(this.fdata);
   },
   async mounted() {
-    this.listData = await this.options(this.fdata);
-    if(this.preset) {
-      this.value = this.preset;
+    if (typeof this.defaultValue === 'function') {
+      const value = await this.defaultValue(this.fdata, this.cdata)
+      if (value != null || value != undefined) this.value = `${value}`
     }
   },
   methods: {
@@ -78,7 +79,7 @@ export default defineComponent({
     },
     segmentChanged(ev: CustomEvent) {
       this.onselect(ev.detail.value);
-    },
+    }
   }
 });
 </script>
