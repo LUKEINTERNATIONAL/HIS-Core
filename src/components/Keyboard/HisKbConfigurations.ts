@@ -27,6 +27,14 @@ export const NUMBERS_ONLY = [
         ['Unknown', 'Delete']
     ]
 ]
+
+export const NUMBERS_WITHOUT_NA_UNKNOWN = [
+    NUMBER_PAD_LO,
+    [
+        ['Delete']
+    ]
+]
+
 export const NUMBERS = [
     NUMBER_PAD_LO,
     [

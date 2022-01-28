@@ -4,7 +4,7 @@ import { Field, Option } from "@/components/Forms/FieldInterface"
 import HisDate from "@/utils/Date"
 import StandardValidations from "@/components/Forms/validations/StandardValidations"
 import { NUMBER_PAD_LO } from "@/components/Keyboard/KbLayouts"
-import { Service } from "@/services/service"
+import { NUMBERS_WITHOUT_NA_UNKNOWN } from '../../components/Keyboard/HisKbConfigurations';
 
 export enum EstimationFieldType {
     AGE_ESTIMATE_FIELD = "age-estimate-field",
@@ -93,7 +93,10 @@ export function getAgeEstimateField(id: string, name: string): Field {
         id,
         helpText: `${name} Age Estimate`,
         type: FieldType.TT_NUMBER,
-        appearInSummary: () => false
+        appearInSummary: () => false,
+        config: {
+            keypad: NUMBERS_WITHOUT_NA_UNKNOWN
+        }
     }
 }
 
