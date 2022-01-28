@@ -101,6 +101,7 @@ import { LabOrderService } from "@/apps/ART/services/lab_order_service";
 import { alertAction } from "@/utils/Alerts"
 import { PrintoutService } from "@/services/printout_service";
 import ART_GLOBAL_PROP from "@/apps/ART/art_global_props"
+import { isEmpty } from "lodash";
 
 export default defineComponent({
   name: "Modal",
@@ -108,6 +109,9 @@ export default defineComponent({
     activities: {
       type: Object as PropType<ActivityInterface[]>,
       required: true
+    },
+    testFilters: {
+      type: Array    
     },
     title: {
       type: String, 
@@ -134,7 +138,9 @@ export default defineComponent({
      this.testTypes = tests.map((t: any, i: any) => {
         t.index = t.name === 'HIV viral load' ? (t.index = 0) : (t.index = i + 1)
         return t
-     }).sort((a: any, b: any) => a.index < b.index ? 0 : 1)
+     })
+     .sort((a: any, b: any) => a.index < b.index ? 0 : 1)
+     .filter((t: any) => Array.isArray(this.testFilters) ? this.testFilters.includes(t.name) : true)
     },
     async getSpecimens(testName: string, index: number) {
      this.specimens = await OrderService.getSpecimens(testName);

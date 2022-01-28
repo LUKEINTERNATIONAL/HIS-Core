@@ -904,7 +904,12 @@ export default defineComponent({
                   { name: "NOT now", slot: "end", color: "danger" },
                 ]
               )
-              if (action === 'Order now') this.labOrderFieldContext.launchOrderSelection()
+              if (action === 'Order now') this.labOrderFieldContext.launchOrderSelection([
+                'TB Microscopic Exam', 
+                'GeneXpert', 
+                'Culture & Sensitivity', 
+                'TB Tests'
+              ])
             }
             return true
           },

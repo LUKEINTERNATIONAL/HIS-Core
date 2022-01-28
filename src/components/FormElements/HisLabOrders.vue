@@ -51,11 +51,14 @@ export default defineComponent({
           'release': ''
       }))
     },
-    async launchOrderSelection() {
+    async launchOrderSelection(filters=null) {
       const modal = await modalController.create({
         component: LabOrderModal,
         backdropDismiss: false,
-        cssClass: 'large-modal'
+        cssClass: 'large-modal',
+        componentProps: {
+          testFilters: filters
+        }
       })
       modal.present()
       const { data } = await modal.onDidDismiss()
