@@ -201,21 +201,28 @@ export default defineComponent({
       return this.patient.isChildBearing() && !this.onPermanentFPMethods
     },
     showCurrentContraceptionMethods(formData: any) {
-      return this.pregnancyEligible()
+      return (this.pregnancyEligible()
         && !this.patientHitMenopause 
-        && !this.isPregnant(formData);
+        && !this.isPregnant(formData))
     },
     showNewContraceptionMethods(formData: any) {
       return (
         this.pregnancyEligible() &&
+        !this.patientHitMenopause &&
         !this.isPregnant(formData) &&
         !this.isOnTubalLigation(formData)
       )
     },
     isPregnant(formData: any) {
-      return this.currentlyPregnant || formData.pregnant_breastfeeding && formData.pregnant_breastfeeding
-        .map((d: Option) => `${d.value}`.match(/yes/i))
-        .some(Boolean)
+      try {
+        return this.currentlyPregnant
+          || this.inArray(formData.pregnant_breastfeeding, 
+            p => p.label === 'Pregnant' && p.value === 'Yes'
+          )
+      } catch (e) {
+        alert(e)
+        return false
+      }
     },
     isOnTubalLigation(formData: any) {
       return this.inArray(formData.current_fp_methods, d => d.value === "TUBAL LIGATION")
@@ -294,9 +301,8 @@ export default defineComponent({
       return this.inArray(formData.side_effects, d => d.label === "Other" && d.value === "Yes")
     },
     hasTBSymptoms(formData: any) {
-      const val = this.inArray(formData.tb_side_effects, d => d.value === "Yes")
-      this.presentedTBSymptoms = val
-      return val
+      this.presentedTBSymptoms = this.inArray(formData.tb_side_effects, d => d.value === "Yes")
+      return this.presentedTBSymptoms
     },
     async buildSideEffectObs(data: Option[], sideEffectType: 'malawiSideEffectObs' | 'otherSideEffectObs'): Promise<boolean> {
       const sideEffectReasons  = await this.getSideEffectsReasons(data)
@@ -340,7 +346,7 @@ export default defineComponent({
     },
     async getSideEffectsReasons(sideEffects: Option[]) {
       const allYes = sideEffects.filter(s => !(`${s.label}`.match(/other/i)) && s.value==='Yes')
-      if (allYes) {
+      if (allYes.length > 0) {
         const modal = await modalController.create({
           component: SideEffectsModalVue,
           backdropDismiss: false,
@@ -874,24 +880,16 @@ export default defineComponent({
           onConditionFalse: () => this.tbSideEffectsObs = [],
           condition: (formData: any) => formData.on_tb_treatment.value.match(/no/i),
           unload: async (vals: Option[]) => {
-            const val = this.inArray(vals, d => d.value === "Yes")
-            this.presentedTBSymptoms = val;
+            this.presentedTBSymptoms = this.inArray(vals, d => d.value === "Yes")
             this.tbSideEffectsObs = await vals.map(async (data: Option) => {
               const host = await this.consultation.buildValueCoded(
-                "Routine TB Screening",
-                data.label
+                "Routine TB Screening", data.label
               );
               const child = await this.consultation.buildValueCoded(
-                data.label,
-                data.value
-              );
-              return {
-                ...host,
-                child: {
-                  ...child,
-                },
-              };
-            });
+                data.label, data.value
+              )
+              return { ...host, child: { ...child } }
+            })
           },
           options: (_: any, checked: Array<Option>) => this.getTBSymptoms(checked)
         },
