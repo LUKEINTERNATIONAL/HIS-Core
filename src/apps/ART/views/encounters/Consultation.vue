@@ -28,12 +28,17 @@ import { ARTLabService } from "../../services/lab_service";
 import { infoActionSheet, optionsActionSheet } from "@/utils/ActionSheets";
 import SideEffectsModalVue from "@/components/DataViews/SideEffectsModal.vue";
 import ART_PROP from "@/apps/ART/art_global_props";
+import { generateDateFields, EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 
 export default defineComponent({
   mixins: [AdherenceMixinVue],
   components: { HisStandardForm },
   data: () => ({
     fields: [] as any,
+    CxCaEnabled: false as boolean,
+    CxCaStartAge: -1 as number,
+    CxCaMaxAge: -1 as number,
+    DueForCxCa: false as boolean,
     currentlyPregnant: false as boolean,
     patientHitMenopause: false as boolean,
     hasPregnancyObsToday: false as boolean,
@@ -65,6 +70,9 @@ export default defineComponent({
     otherSideEffectObs: [] as any,
     malawiSideEffectReasonObs: [] as any,
     otherSideEffectReasonObs: [] as any,
+    offerCxCaObs: {} as any,
+    reasonForCxCaObs: {} as any,
+    CxCaTestDateObs: {} as any,
     relatedObs: [] as any,
     askAdherence: false as boolean,
     lastDrugsReceived: [] as any,
@@ -82,17 +90,28 @@ export default defineComponent({
           await this.guardianOnlyVisit();
 
           this.hasTbHistoryObs = await this.consultation.hasTreatmentHistoryObs()
+          this.CxCaEnabled = await ART_PROP.cervicalCancerScreeningEnabled()
+
+          if (this.CxCaEnabled) {
+            const { start, end } = await ART_PROP.cervicalCancerScreeningAgeBounds()
+            this.CxCaMaxAge = end
+            this.CxCaStartAge = start
+            this.DueForCxCa = await this.consultation.clientDueForCxCa()
+          }
 
           if (this.patient.isChildBearing()) {
             this.hasPregnancyObsToday = await this.patient.hasPregnancyObsToday()
             this.currentlyPregnant = await this.patient.isPregnant()
           } 
+
           if (this.patient.isFemale()) {
             this.patientHitMenopause = await this.consultation.patientHitMenopause()
           }
+          
           if (this.hasTbHistoryObs) {
             this.completed3HP = await this.consultation.patientCompleted3HP()
           } 
+          
           this.autoSelect3HP = await ART_PROP.threeHPAutoSelectEnabled()
           this.askAdherence = this.adherence.receivedDrugsBefore();
           this.fields = this.getFields();
@@ -124,6 +143,9 @@ export default defineComponent({
         this.offerContraceptives,
         this.tbObs,
         this.otherSpecifySideEffect,
+        this.CxCaTestDateObs,
+        this.reasonForCxCaObs,
+        this.offerCxCaObs,
         ...this.tbSideEffectsObs,
         this.tbStatusObs,
         this.treatmentStatusObs,
@@ -196,6 +218,13 @@ export default defineComponent({
         rows.push([date, rowData.join('\n')]);
       }
       this.sideEffectsHistory = rows;
+    },
+    canScreenCxCa() {
+      const age = this.patient.getAge()
+      return this.patient.isFemale() 
+        && this.DueForCxCa
+        && this.CxCaEnabled 
+        && age >= this.CxCaStartAge && age <= this.CxCaMaxAge
     },
     pregnancyEligible() {
       return this.patient.isChildBearing() && !this.onPermanentFPMethods
@@ -404,6 +433,16 @@ export default defineComponent({
         "tb_symptom", true
       ).map((data) => data.name)
       return this.getOptions([...contraIndications], preValues);
+    },
+    getReasonsForNoCxcaOptions() {
+      return ConceptService.getConceptsByCategory("reason_for_no_cxca")
+        .map((c: any) => ({
+          label: c.name,
+          value: c.name,
+          other: {
+            c
+          }
+        }))
     },
     runAppendOptionParams(options: Option[], prechecked: Option[]) {
       const checkedOptions = prechecked.filter(o => o.isChecked).map(o => o.label)
@@ -756,6 +795,61 @@ export default defineComponent({
             ];
           },
         },
+        {
+          id: "offer_cxca",
+          helpText: "Refer client for CxCa screening",
+          type: FieldType.TT_SELECT,
+          validation: (v: Option) => Validation.required(v),
+          onConditionFalse: () => this.offerCxCaObs = {}, 
+          condition: () => this.canScreenCxCa(),
+          unload: (v: Option) => {
+            this.offerCxCaObs = this.consultation.buildValueCoded(
+              'Offer CxCa', v.value
+            )
+          },
+          options: () => this.yesNoOptions()
+        },
+        {
+          id: "reason_for_no_cxca",
+          helpText: "Reason for NOT offering CxCa",
+          type: FieldType.TT_SELECT,
+          validation: (v: Option) => Validation.required(v),
+          onConditionFalse: () => this.reasonForCxCaObs = {},
+          condition: (f: any) => f.offer_cxca.value === 'No',
+          unload: (v: Option) => {
+            this.reasonForCxCaObs = this.consultation.buildValueCoded(
+              "Reason for NOT offering CxCa", v.value
+            )
+          }, 
+          options: () => this.getReasonsForNoCxcaOptions(),
+        },
+        ...generateDateFields({
+          id: 'previous_cxca_test_date',
+          helpText: 'Previous CxCa test',
+          required: true,
+          minDate: () => this.patient.getBirthdate(),
+          maxDate: () => ConsultationService.getSessionDate(),
+          condition: (f: any) => {
+            const condition = f.reason_for_no_cxca.value === 'Not due for screening'
+            if (!condition) this.CxCaTestDateObs = {}
+            return condition
+          },
+          computeValue: (date: string, isEstimate: boolean) => {
+            if (isEstimate) {
+              this.CxCaTestDateObs = this.consultation.buildValueDateEstimated(
+                'CxCa test date', date
+              )
+            } else {
+              this.CxCaTestDateObs = this.consultation.buildValueDate(
+                'CxCa test date', date
+              )
+            }
+          },
+          estimation: {
+            allowUnknown: true,
+            estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
+          }
+        }),
         {
           id: "offer_contraceptives",
           helpText: "Offer contraceptives",

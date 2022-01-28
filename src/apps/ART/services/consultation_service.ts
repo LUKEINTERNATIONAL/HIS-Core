@@ -1,7 +1,8 @@
 import { DrugInterface } from "@/interfaces/Drug";
 import { AppEncounterService } from "@/services/app_encounter_service";
 import { ObservationService } from "@/services/observation_service";
-import HisDate from "@/utils/Date"
+import dayjs from "dayjs";
+import { isEmpty } from "lodash";
 
 export class ConsultationService extends AppEncounterService {
   constructor(patientID: number, providerID: number) {
@@ -49,6 +50,18 @@ export class ConsultationService extends AppEncounterService {
 
   getClient() {
     return AppEncounterService.getFirstValueCoded(this.patientID, 'Patient Present');
+  }
+
+  async clientDueForCxCa() {
+    const req: any = await AppEncounterService.getJson(`last_cxca_screening_details`, {
+      id: this.patientID, date: this.date
+    })
+    if (!isEmpty(req)) {
+      const lastScreened = req['date_screened']
+      const duration = dayjs(this.date).diff(lastScreened, 'years')
+      return duration >= 1
+    }
+    return true
   }
 
   async getTLObs() {

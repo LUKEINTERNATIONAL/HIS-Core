@@ -1,6 +1,41 @@
 export default [
    {
       "categories": [],
+      "concept_id": 9994,
+      "name": "CxCa test date"
+   },
+   {
+      "categories": [],
+      "concept_id": 10008,
+      "name": "Reason for NOT offering CxCa"
+   },
+   {
+      "categories": [],
+      "concept_id": 9992,
+      "name": "Offer CxCa"
+   },
+   {
+      "categories": ["reason_for_no_cxca"],
+      "concept_id": 8387,
+      "name": "Not due for screening"
+   },
+   {
+      "categories": ["reason_for_no_cxca"],
+      "concept_id": 10007,
+      "name": "Client preferred counseling",
+   },
+   {
+      "categories": ["reason_for_no_cxca"],
+      "concept_id": 1175,
+      "name": "Not applicable"
+   },
+   {
+      "categories": ["reason_for_no_cxca"],
+      "concept_id": 3580,
+      "name": "Patient refused"
+   },
+   {
+      "categories": [],
       "concept_id": 7215,
       "name": "Other (Specify)"
    },
