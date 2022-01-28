@@ -40,7 +40,7 @@ export default defineComponent({
 
         await this.reception.loadSitePrefix()
 
-        const ARVNumber = patient.getPatientIdentifier(4);
+        const ARVNumber = patient.getArvNumber();
   
         if (ARVNumber === "") {
           this.hasARVNumber = false;
@@ -95,6 +95,12 @@ export default defineComponent({
               tag: 'obs',
               obs: d.map(({ other, value }: Option) => this.reception.buildValueCoded(other.concept, value))
             }
+          },
+          onValueUpdate: async (options: Option[]) => {
+            const values = [...options]
+            if(values[0].value === 'No') values[1].value = "Yes"
+            if(values[1].value === 'No') values[0].value = "Yes"
+            return values
           },
           options: (form: any) => {
             if (form.who_is_present) return form.who_is_present as Option[]

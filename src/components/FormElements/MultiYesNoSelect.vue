@@ -76,8 +76,11 @@ export default defineComponent({
   },
   methods: {
     onChange(): void {
-      this.$nextTick(() => {
+      this.$nextTick(async () => {
         const values = this.listData.map(i => i.value!='')
+        if(this.onValueUpdate) {
+          this.listData = await this.onValueUpdate(this.listData)
+        }
         if (values.every(Boolean)) this.$emit("onValue", this.listData)
       })
     }
