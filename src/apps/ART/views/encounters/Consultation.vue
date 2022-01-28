@@ -377,19 +377,19 @@ export default defineComponent({
     },
     getContraindications(preValues: Array<Option>) {
       const contraIndications = ConceptService.getConceptsByCategory(
-        "contraindication"
+        "contraindication", true
       ).map((data) => data.name);
       return this.getOptions([...contraIndications, "Other"], preValues);
     },
     getOtherContraindications(preValues: Array<Option>) {
       const contraIndications = ConceptService.getConceptsByCategory(
-        "side_effect"
+        "side_effect", true
       ).map((data) => data.name);
       return this.getOptions([...contraIndications, "Other (Specify)"], preValues)
     },
     getTBSymptoms(preValues: Array<Option>) {
       const contraIndications = ConceptService.getConceptsByCategory(
-        "tb_symptom"
+        "tb_symptom", true
       ).map((data) => data.name);
       return this.getOptions([...contraIndications], preValues);
     },
