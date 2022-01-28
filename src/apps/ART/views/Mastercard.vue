@@ -118,7 +118,12 @@ export default defineComponent({
       })
     },
     addGuardian() {
-      this.$router.push(`/guardian/registration/${this.patientId}`)
+      this.$router.push({
+        path: `/guardian/registration/${this.patientId}`,
+        query: {
+          source: this.$route.name?.toString()
+        }
+      })
     },
     getFinishBtn(): NavBtnInterface {
       return {
@@ -129,7 +134,7 @@ export default defineComponent({
         visible: true,
         onClick: async () => {
           const confirmation = await alertConfirmation("Are you sure you want to exit?");
-          if (confirmation) return this.$router.back();
+          if (confirmation) return this.$router.push(`/patient/dashboard/${this.patientId}`);
         }
       }
     },
