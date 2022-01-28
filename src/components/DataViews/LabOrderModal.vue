@@ -94,11 +94,10 @@ import {
   IonRow,
 } from "@ionic/vue";
 import { defineComponent, PropType } from "vue";
-import { toastWarning } from "@/utils/Alerts"
+import { alertConfirmation, toastWarning } from "@/utils/Alerts"
 import { ActivityInterface } from "@/apps/interfaces/AppInterface"
 import { OrderService } from "@/services/order_service";
 import { LabOrderService } from "@/apps/ART/services/lab_order_service";
-import { alertAction } from "@/utils/Alerts"
 import { PrintoutService } from "@/services/printout_service";
 import ART_GLOBAL_PROP from "@/apps/ART/art_global_props"
 
@@ -171,16 +170,16 @@ export default defineComponent({
         
         if(!d) return toastWarning('Unable to save lab orders')
 
-        alertAction('Lab orders and encounter created!, print out your last orders?', [
-            {
-                text: 'Yes',
-                 handler: () => this.printOrders(d)
-            },
-            {
-                text: 'No',
-                handler: () => this.closeModal(d)
-            }
-        ])
+        const canPrintOrders = await alertConfirmation(
+          'Lab orders and encounter created!, print out your last orders?', 
+          'Confirmation',
+          { 
+            confirm: 'Yes',
+            cancel: 'No'
+          }
+        )
+        if(canPrintOrders) await this.printOrders(d)
+        else await this.closeModal(d)
       }
     },
     async closeModal(orders: []) {
