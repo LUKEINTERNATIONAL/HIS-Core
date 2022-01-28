@@ -2,7 +2,7 @@
     <view-port>
         <div class="view-port-content">
             <ion-row class='parent-row'>
-                <ion-col size="8"> 
+                <ion-col size="7"> 
                     <apexchart
                         :width="width"
                         :height="height"
@@ -11,7 +11,7 @@
                         :series="series"
                     ></apexchart>
                 </ion-col>
-                <ion-col size="4">
+                <ion-col size="5">
                     <ion-list >
                         <ion-item> 
                             <ion-label class='title'>Previous weight</ion-label>
