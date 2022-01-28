@@ -91,7 +91,7 @@ export default defineComponent({
             this.obs.push(this.screeningResult.buildValueCoded('Patient went for VIA?', data.value))
           },
           condition(formData: any) {
-            return formData.screening_result.value === "HPV positive";
+            return formData.screening_result.value === "VIA Positive";
           },
         },
         {
@@ -144,9 +144,6 @@ export default defineComponent({
               "Referral",
             ]);
           },
-          condition(formData: any) {
-            return formData.screening_result.value === "HPV positive";
-          },
           unload: (data: any) => {
             this.obs.push(this.screeningResult.buildValueCoded('Directly observed treatment option', data.value))
           }
@@ -194,7 +191,7 @@ export default defineComponent({
         },
         {
           id: "location",
-          helpText: "CD4 Location",
+          helpText: "Location reffered from",
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
           options: (_: any, filter = "") => this.getFacilities(filter),
