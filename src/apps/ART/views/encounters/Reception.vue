@@ -40,13 +40,13 @@ export default defineComponent({
 
         await this.reception.loadSitePrefix()
 
-        const ARVNumber = patient.getArvNumber();
+        const ARVNumber = patient.getPatientIdentifier(4);
   
         if (ARVNumber === "") {
           this.hasARVNumber = false;
 
           const j = await ProgramService.getNextSuggestedARVNumber();
-          this.suggestedNumber = j.arv_number.replace(/^\D+/g, "");
+          this.suggestedNumber = j.arv_number.replace(/^\D+|\s/g, "");
         }
         this.fields = this.getFields();
       },
