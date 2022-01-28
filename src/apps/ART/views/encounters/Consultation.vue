@@ -385,12 +385,17 @@ export default defineComponent({
       const contraIndications = ConceptService.getConceptsByCategory(
         "side_effect", true
       ).map((data) => data.name);
-      return this.getOptions([...contraIndications, "Other (Specify)"], preValues)
+      /**
+       * HACK ALERT!!!
+       * Dont want to show Other (Specify) as a last element
+       */
+      const lastElement = contraIndications.pop()
+      return this.getOptions([...contraIndications, "Other (Specify)", `${lastElement}`], preValues)
     },
     getTBSymptoms(preValues: Array<Option>) {
       const contraIndications = ConceptService.getConceptsByCategory(
         "tb_symptom", true
-      ).map((data) => data.name);
+      ).map((data) => data.name)
       return this.getOptions([...contraIndications], preValues);
     },
     runAppendOptionParams(options: Option[], prechecked: Option[]) {
