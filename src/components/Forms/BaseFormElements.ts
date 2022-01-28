@@ -1,4 +1,5 @@
 import BarcodeInput from "@/components/FormElements/HisBarcodeInput.vue"
+import NoteInput from "@/components/FormElements/HisNote.vue"
 import SingleSelect from "@/components/FormElements/HisSelect.vue";
 import SingleSelectCards from "@/components/FormElements/HisCardSelector.vue";
 import MultipleSelect from "@/components/FormElements/HisMultipleSelect.vue";
@@ -37,6 +38,7 @@ import DrugDispenser from "@/components/FormElements/GeneralDrugDispenser.vue"
 
 // Reference names for BaseFormComponents
 export enum FieldType {
+    TT_NOTE = 'NoteInput',
     TT_BARCODE = 'BarcodeInput',
     TT_MONTHLY_DAYS="monthly-days",
     TT_TEXT="text-input",
@@ -113,5 +115,6 @@ export const BaseFormComponents = {
     IPAddressInput,
     TextBanner,
     DrugDispenser,
-    ClinicHolidayPicker
+    ClinicHolidayPicker,
+    NoteInput
 }

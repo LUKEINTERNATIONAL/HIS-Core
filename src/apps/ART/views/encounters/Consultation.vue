@@ -845,7 +845,7 @@ export default defineComponent({
         {
           id: 'other_side_effect_specify',
           helpText: "Other Contraindications / Side effects (specify)",
-          type: FieldType.TT_TEXT,
+          type: FieldType.TT_NOTE,
           unload: (v: Option) => {
             this.otherSpecifySideEffect = this.consultation.buildValueText(
               'Other (Specify)', v.value 
