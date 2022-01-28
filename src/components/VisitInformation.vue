@@ -23,7 +23,7 @@ export default defineComponent({
   },
   data: () => ({
     columns: [[
-      table.thTxt('Date', largeText),
+      table.thTxt('Visit Date', largeText),
       table.thTxt('Weight', largeText),
       table.thTxt('Reg', largeText),
       table.thTxt('ADH', largeText),
