@@ -349,20 +349,26 @@ export default defineComponent({
     },
     async buildSideEffectObs(data: Option[], sideEffectType: 'malawiSideEffectObs' | 'otherSideEffectObs'): Promise<boolean> {
       const sideEffectReasons  = await this.getSideEffectsReasons(data)
-      const sideEffectReasonAttrRef: Record<string, 'malawiSideEffectReasonObs' | 'otherSideEffectReasonObs'> = {
-        'malawiSideEffectObs': 'malawiSideEffectReasonObs',
-        'otherSideEffectObs': 'otherSideEffectReasonObs'
+      const typeRefs: any = {
+        'malawiSideEffectObs': {
+          conceptRef: 'Malawi ART side effects',
+          reasonRef: 'malawiSideEffectReasonObs' 
+        } ,
+        'otherSideEffectObs': {
+          conceptRef: 'Other side effect',
+          reasonRef: 'otherSideEffectReasonObs'
+        }
       }
-      const reasonRef: 'malawiSideEffectReasonObs' | 'otherSideEffectReasonObs' = sideEffectReasonAttrRef[sideEffectType]
-
-      this[reasonRef] = [] //Clear this incase side effects no longer exist
+      const attr: any = typeRefs[sideEffectType]
+     
+      this[attr.reasonRef as 'malawiSideEffectReasonObs' | 'otherSideEffectReasonObs'] = [] //Clear this incase side effects no longer exist
   
       if (sideEffectReasons === undefined) return false
 
       if (sideEffectReasons != -1) {
         const drugInducedConcept = ConceptService.getCachedConceptID('Drug induced')
         const isOtherReason = (reason: string) => `${reason}`.match(/other|drug/i) ? true : false
-        this[reasonRef] = sideEffectReasons.map(
+        this[attr.reasonRef as 'malawiSideEffectReasonObs' | 'otherSideEffectReasonObs'] = sideEffectReasons.map(
           (r: any) => ({
             'concept_id': drugInducedConcept,
             'value_coded': ConceptService.getCachedConceptID(r.label),
@@ -370,14 +376,10 @@ export default defineComponent({
             'value_drug': !isOtherReason(r.reason) ? r.reason : null //Reason is drug ID number if caused by specific drug
           }))
       }
-      const sideEffectTypeConcepts: Record<string, string> = {
-        'malawiSideEffectObs': 'Malawi ART side effects',
-        'otherSideEffectObs': 'Other side effect'
-      }
       this[sideEffectType] = await data.filter(d => d.label != 'Other (Specify)')
         .map(async (d) => {
           const host = await this.consultation.buildValueCoded(
-            sideEffectTypeConcepts[sideEffectType], d.label
+            attr.conceptRef, d.label
           )
           const child = await this.consultation.buildValueCoded(d.label, d.value)
           return { ...host, child: { ...child } }
