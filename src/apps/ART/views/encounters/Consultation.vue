@@ -59,6 +59,7 @@ export default defineComponent({
     sulphurObs: {} as any,
     referObs: {} as any,
     reasonForDecliningTPTObs: {} as any,
+    otherSpecifySideEffect: {} as any,
     medicationObs: [] as any,
     malawiSideEffectObs: [] as any,
     otherSideEffectObs: [] as any,
@@ -122,6 +123,7 @@ export default defineComponent({
         this.specificReasonForNoFPM,
         this.offerContraceptives,
         this.tbObs,
+        this.otherSpecifySideEffect,
         ...this.tbSideEffectsObs,
         this.tbStatusObs,
         this.treatmentStatusObs,
@@ -337,14 +339,13 @@ export default defineComponent({
       return true
     },
     async getSideEffectsReasons(sideEffects: Option[]) {
-      const lastDrugs: any = this.lastDrugsReceived
-      const allYes = this.inArray(sideEffects, s => s.value === 'Yes' && s.label !== 'Other')
+      const allYes = sideEffects.map(s => !(`${s.label}`.match(/other/i)) && s.value==='Yes').some(Boolean)
       if (allYes) {
         const modal = await modalController.create({
           component: SideEffectsModalVue,
           backdropDismiss: false,
           cssClass: "large-modal",
-          componentProps: { sideEffects: allYes, drugs: lastDrugs },
+          componentProps: { sideEffects: allYes, drugs: this.lastDrugsReceived },
         });
         modal.present();
         const { data } = await modal.onDidDismiss();
@@ -836,6 +837,19 @@ export default defineComponent({
           options: (_: any, checked: Array<Option>) => this.getOtherContraindications(checked),
         },
         {
+          id: 'other_side_effect_specify',
+          helpText: "Other Contraindications / Side effects (specify)",
+          type: FieldType.TT_TEXT,
+          unload: (v: Option) => {
+            this.otherSpecifySideEffect = this.consultation.buildValueText(
+              'Other (Specify)', v.value 
+            )
+          },
+          onConditionFalse: () => this.otherSpecifySideEffect = {},
+          condition: (f: any) => this.inArray(f.other_side_effects, d => d.label === 'Other (Specify)'),
+          validation: (v: Option) => Validation.required(v)
+        },
+        {
           id: "on_tb_treatment",
           helpText: "On TB Treatment?",
           validation: (data: any) => Validation.required(data),
@@ -921,7 +935,7 @@ export default defineComponent({
           options: () => [
             { 
               label: "TB NOT suspected", 
-              value: "TB NOT suspected" 
+              value: "TB NOT suspected"
             },
             { 
               label: "TB Suspected", 
