@@ -978,7 +978,7 @@ export default defineComponent({
                 ]
               )
               if (action === 'Order now') {
-                this.$router.push(`/art/encounters/lab/${this.patientID}`)
+                this.labOrderFieldContext.launchOrderSelection();
               }
             }
             return true
