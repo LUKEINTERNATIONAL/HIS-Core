@@ -2,7 +2,7 @@
   <his-standard-form
     :fields="fields"
     :onFinishAction="onFinish"
-    :skipSummary="false"
+    :skipSummary="true"
     :cancelDestinationPath="cancelDestination"
   >
   </his-standard-form>
@@ -43,7 +43,7 @@ export default defineComponent({
     async onFinish(formData: any) {
       const encounter = await this.screeningResult.createEncounter();
       if (!encounter) return toastWarning("Unable to create encounter");
-      if(formData.treatment_option && formData.treatment_option.value === "Referral") {
+      if(formData.treatment_option.value === "Referral") {
         this.obs.push(this.screeningResult.buildValueText('Referral location', formData['location'].label))
       }
       const data = await Promise.all([...this.obs]);
