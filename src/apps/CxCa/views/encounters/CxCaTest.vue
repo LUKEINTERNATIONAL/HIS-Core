@@ -73,6 +73,9 @@ export default defineComponent({
 
       const data = await this.assessment.getFirstValueCoded('Offer CxCa');
       this.offerCxCa = data && data === "Yes";
+      if(!this.offerCxCa) {
+        this.obs.push(this.assessment.buildValueCoded("Ever had CxCa","No"));
+      }
       return true
     },
     enterPreviousCxCaData(formData: any) {
@@ -191,7 +194,7 @@ export default defineComponent({
           unload: async (value: any) => {
             this.obs.push(
               this.assessment.buildValueCoded(
-                "Offer CxCa",
+                "Ever had CxCA",
                 value.value
               )
             );
@@ -301,7 +304,7 @@ export default defineComponent({
           helpText: "Screening method being offered",
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
-          condition: (formData: any) => this.offerCxCa,
+          condition: (formData: any) => formData.offer_CxCa.value === "Yes",
           options: () => [
             {
               label: "VIA",
@@ -327,6 +330,14 @@ export default defineComponent({
                 value.value
               )
             );
+            if(value.value === "VIA") {
+             this.obs.push(
+              this.assessment.buildValueCoded(
+                "Waiting for test results",
+                "No"
+              )
+            ); 
+            }
           },
         },
         {
