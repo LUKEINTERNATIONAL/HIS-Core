@@ -52,8 +52,6 @@ export default defineComponent({
     reasonForNoFPM: {} as any,
     specificReasonForNoFPM: {} as any,
     offerContraceptives: {} as any,
-    sideEffects: [] as any,
-    otherSideEffects: [] as any,
     tbObs: {} as any,
     tbSideEffectsObs: [] as any,
     tbStatusObs: {} as any,
@@ -62,6 +60,10 @@ export default defineComponent({
     referObs: {} as any,
     reasonForDecliningTPTObs: {} as any,
     medicationObs: [] as any,
+    malawiSideEffectObs: [] as any,
+    otherSideEffectObs: [] as any,
+    malawiSideEffectReasonObs: [] as any,
+    otherSideEffectReasonObs: [] as any,
     relatedObs: [] as any,
     askAdherence: false as boolean,
     lastDrugsReceived: [] as any,
@@ -105,14 +107,16 @@ export default defineComponent({
       if (!encounter) return toastWarning("Unable to create encounter");
 
       const data = await Promise.all([ 
+        ...this.malawiSideEffectObs,
+        ...this.otherSideEffectObs,
+        ...this.malawiSideEffectReasonObs,
+        ...this.otherSideEffectReasonObs,
         ...this.pregnancy,
         ...this.currentFPM,
         ...this.newFPM,
         this.reasonForNoFPM,
         this.specificReasonForNoFPM,
         this.offerContraceptives,
-        ...this.sideEffects,
-        ...this.otherSideEffects,
         this.tbObs,
         ...this.tbSideEffectsObs,
         this.tbStatusObs,
@@ -120,9 +124,8 @@ export default defineComponent({
         this.sulphurObs,
         this.referObs,
         this.reasonForDecliningTPTObs,
-        ...this.medicationObs,
-        ...this.relatedObs,
-      ]);
+        ...this.medicationObs
+      ])
 
       const filtered = data.filter((d) => !isEmpty(d));
 
@@ -343,6 +346,43 @@ export default defineComponent({
           value: "No",
         },
       ];
+    },
+    async buildSideEffectObs(data: Option[], sideEffectType: 'malawiSideEffectObs' | 'otherSideEffectObs'): Promise<boolean> {
+      const sideEffectReasons  = await this.getSideEffectsReasons(data)
+      const sideEffectReasonAttrRef: Record<string, 'malawiSideEffectReasonObs' | 'otherSideEffectReasonObs'> = {
+        'malawiSideEffectObs': 'malawiSideEffectReasonObs',
+        'otherSideEffectObs': 'otherSideEffectReasonObs'
+      }
+      const reasonRef: 'malawiSideEffectReasonObs' | 'otherSideEffectReasonObs' = sideEffectReasonAttrRef[sideEffectType]
+
+      this[reasonRef] = [] //Clear this incase side effects no longer exist
+  
+      if (sideEffectReasons === undefined) return false
+
+      if (sideEffectReasons != -1) {
+        const drugInducedConcept = ConceptService.getCachedConceptID('Drug induced')
+        const isOtherReason = (reason: string) => `${reason}`.match(/other|drug/i) ? true : false
+        this[reasonRef] = sideEffectReasons.map(
+          (r: any) => ({
+            'concept_id': drugInducedConcept,
+            'value_coded': ConceptService.getCachedConceptID(r.label),
+            'value_text': isOtherReason(r.reason) ? 'Past medication history' : null,
+            'value_drug': !isOtherReason(r.reason) ? r.reason : null //Reason is drug ID number if caused by specific drug
+          }))
+      }
+      const sideEffectTypeConcepts: Record<string, string> = {
+        'malawiSideEffectObs': 'Malawi ART side effects',
+        'otherSideEffectObs': 'Other side effect'
+      }
+      this[sideEffectType] = await data.filter(d => d.label != 'Other (Specify)')
+        .map(async (d) => {
+          const host = await this.consultation.buildValueCoded(
+            sideEffectTypeConcepts[sideEffectType], d.label
+          )
+          const child = await this.consultation.buildValueCoded(d.label, d.value)
+          return { ...host, child: { ...child } }
+        })
+      return true
     },
     async getSideEffectsReasons(sideEffects: Option[]) {
       const lastDrugs: any = this.lastDrugsReceived
@@ -826,116 +866,27 @@ export default defineComponent({
         },
         {
           id: "side_effects",
-          helpText:
-            "Contraindications / Side effects (select either 'Yes' or 'No')",
+          helpText: "Contraindications / Side effects (select either 'Yes' or 'No')",
           type: FieldType.TT_MULTIPLE_YES_NO,
           validation: (data: any) =>
             this.validateSeries([
               () => Validation.required(data),
               () => Validation.anyEmpty(data),
             ]),
-          beforeNext: async (data: any) => {
-            const reasons = await this.getSideEffectsReasons(data);
-            if (reasons != -1) {
-              if (reasons === undefined) {
-                return false
-              }
-              const concept = ConceptService.getCachedConceptID("Drug induced");
-              const sides = reasons.map((r: any) => {
-                const c = ConceptService.getCachedConceptID(r.label);
-                if (r.reason === "other" || r.reason === "drug") {
-                  return {
-                    'concept_id': concept,
-                    'value_coded': c,
-                    'value_text': "Past medication history",
-                  };
-                } else {
-                  return {
-                    'concept_id': concept,
-                    'value_coded': c,
-                    'value_drug': r.reason,
-                  };
-                }
-              });
-              this.relatedObs = [...this.relatedObs, ...sides];
-            }
-            this.sideEffects = await data.map(async (data: Option) => {
-              const host = await this.consultation.buildValueCoded(
-                "Malawi ART side effects",
-                data.label
-              );
-              const child = await this.consultation.buildValueCoded(
-                data.label,
-                data.value
-              );
-              return {
-                ...host,
-                child: {
-                  ...child,
-                },
-              };
-            });
-            return true
-          },
+          beforeNext: (data: Option[]) => this.buildSideEffectObs(data, 'malawiSideEffectObs'),
           options: (_: any, checked: Array<Option>) => this.getContraindications(checked)
         },
         {
           id: "other_side_effects",
+          helpText: "Other Contraindications / Side effects (select either 'Yes' or 'No')",
           condition: (formData: any) => this.showOtherSideEffects(formData),
           validation: (data: any) =>
             this.validateSeries([
               () => Validation.required(data),
               () => Validation.anyEmpty(data),
             ]),
-          helpText:
-            "Other Contraindications / Side effects (select either 'Yes' or 'No')",
           type: FieldType.TT_MULTIPLE_YES_NO,
-          beforeNext: async (data: Option[]) => {
-            const reasons = await this.getSideEffectsReasons(data);
-            if (reasons != -1) {
-              if (reasons === undefined) {
-                return false
-              }
-              const concept = ConceptService.getCachedConceptID("Drug induced");
-              const sides = reasons.map((r: any) => {
-                const c = ConceptService.getCachedConceptID(r.label);
-                if (r.reason === "other" || r.reason === "drug") {
-                  return {
-                    'concept_id': concept,
-                    'value_coded': c,
-                    'value_text': "Past medication history",
-                  };
-                } else {
-                  return {
-                    'concept_id': concept,
-                    'value_coded': c,
-                    'value_drug': r.reason,
-                  };
-                }
-              });
-              this.relatedObs = [...this.relatedObs, ...sides];   
-            }
-            const filtered = data.filter((d: any) => {
-              return d.label !== "Other (Specify)";
-            });
-            this.otherSideEffects = await filtered.map(async (data: Option) => {
-              const host = await this.consultation.buildValueCoded(
-                "Other side effect",
-                data.label
-              );
-              const child = await this.consultation.buildValueCoded(
-                data.label,
-                data.value
-              );
-              return {
-                ...host,
-                child: {
-                  ...child,
-                },
-              };
-            });
-            return true
-          },
+          beforeNext: (data: Option[]) => this.buildSideEffectObs(data, 'otherSideEffectObs'),
           options: (_: any, checked: Array<Option>) =>
             this.getOtherContraindications(checked),
         },

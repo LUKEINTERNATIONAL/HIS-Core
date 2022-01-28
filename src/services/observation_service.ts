@@ -116,8 +116,8 @@ export class ObservationService extends ConceptService {
         })
         if (!isEmpty(obs)) {
             const [firstObs] = obs
-            if (typeof firstObs.value_coded === 'number') {
-                firstObs.value_coded = await ConceptService.getConceptName(firstObs.value_coded)
+            if (typeof firstObs['value_coded'] === 'number') {
+                firstObs['value_coded'] = await ConceptService.getConceptName(firstObs['value_coded'])
             }
             return firstObs
         }
