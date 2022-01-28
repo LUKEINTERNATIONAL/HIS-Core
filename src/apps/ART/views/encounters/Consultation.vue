@@ -339,7 +339,7 @@ export default defineComponent({
       return true
     },
     async getSideEffectsReasons(sideEffects: Option[]) {
-      const allYes = sideEffects.map(s => !(`${s.label}`.match(/other/i)) && s.value==='Yes').some(Boolean)
+      const allYes = sideEffects.filter(s => !(`${s.label}`.match(/other/i)) && s.value==='Yes')
       if (allYes) {
         const modal = await modalController.create({
           component: SideEffectsModalVue,
