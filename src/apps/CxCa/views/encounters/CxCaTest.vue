@@ -34,7 +34,6 @@ export default defineComponent({
           this.patientID,
           this.providerID
         );
-        await this.hasHIVDetails();
         await this.setOfferCxCa();
         this.fields = await this.getFields();
       },
@@ -61,13 +60,6 @@ export default defineComponent({
       toastSuccess("Observations and encounter created!");
 
       this.nextTask();
-    },
-    hasHIVDetails() {
-      return true
-    },
-    showResultsAvailable(formData: any) {
-      //return true if had via before
-      return true
     },
     async setOfferCxCa() {
 
