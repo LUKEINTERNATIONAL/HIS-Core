@@ -10,7 +10,7 @@
                 <span v-if="option.other && option.other.editable" @click="onClick(option)">
                   <a><b>{{ option.value }}</b></a>
                 </span>
-                <span v-else><b>{{ option.value }}</b></span>
+                <span v-else><b>{{ option.value || 'N/A'}}</b></span>
               </div>
             </ion-item>
           </ion-list>
