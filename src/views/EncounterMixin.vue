@@ -144,6 +144,13 @@ export default defineComponent({
                     }, [])
             return Promise.all(values)
         },
+        inArray(arr: Array<any>, expression: (i: any) => boolean): boolean {
+            try {
+                return arr.filter((i: any) => expression(i)).length > 0
+            } catch (e) {
+                return false
+            }
+        },
         validateSeries(conditions: Array<any>){
             try {
                 for(const i in conditions) {
