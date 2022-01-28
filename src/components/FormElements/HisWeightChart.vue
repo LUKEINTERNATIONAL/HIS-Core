@@ -131,7 +131,7 @@ export default defineComponent({
             this.stats.bmi = data.bmi
 
             if (curWeight > 0 && prevWeight > 0) {
-                this.stats.curWeightChange = (((curWeight/prevWeight)*100)-100).toFixed(2)+' %'
+                this.stats.curWeightChange = Math.abs((((curWeight/prevWeight)*100)-100)).toFixed(2) +' %'
                 const increased = '/assets/images/drop-up-arrow.svg'
                 const decreased = '/assets/images/drop-down-arrow.svg'
                 this.stats.weightState = curWeight > prevWeight ? increased : decreased
