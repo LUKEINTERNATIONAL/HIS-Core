@@ -1,6 +1,6 @@
 <template>
   <view-port>
-    <div class="view-port-content">
+    <div class='view-port-content'>
       <ion-grid>
         <ion-row>
           <ion-col size="8">
@@ -8,10 +8,12 @@
               color="blue"
               ref="calendar"
               is-expanded
-              class="custom-calendar max-w-full"
+              class="custom-calendar"
               :min-date="sessionDate"
               :max-date="runOutDate"
               :attributes="attributes"
+              :masks="masks"
+              disable-page-swipe
             >
               <template v-slot:day-content="{ day }">
                 <div
@@ -102,7 +104,10 @@ export default defineComponent({
     appointments: [],
     clinicHolidays: [] as Array<string>,
     appointmentLimit: 0 as any,
-    sessionDate: null as any
+    sessionDate: null as any,
+    masks: {
+      weekdays: 'WWW',
+    }
   }),
   activated(){
     this.$emit('onFieldActivated', this)
@@ -183,49 +188,67 @@ export default defineComponent({
 });
 </script>
 <style>
-.vc-day {
-  position: relative;
-  min-height: 32px;
-  z-index: 1;
-  text-align: center;
-  font-size: 3vh;
-  height: 70px;
+::-webkit-scrollbar {
+  width: 0px;
 }
-.vc-highlight {
+::-webkit-scrollbar-track {
+  display: none;
+}
+
+.custom-calendar.vc-container {
+  --day-border: 1px solid #b8c2cc;
+  --day-border-highlight: 1px solid #b8c2cc;
+  --day-width: 80px;
+  --day-height: 82px;
+  --weekday-bg: #f8fafc;
+  --weekday-border: 1px solid #eaeaea;
+  border-radius: 0;
   width: 100%;
-  height: 100%;
-  border-radius: 0%;
 }
-.selected {
+.custom-calendar.vc-container .vc-header {
+    background-color: #f1f5f8;
+    padding: 10px 0;
+  }
+.custom-calendar.vc-container .vc-weeks {
+    padding: 0;
+  }
+.custom-calendar.vc-container .vc-weekday {
+    background-color: var(--weekday-bg);
+    border-bottom: var(--weekday-border);
+    border-top: var(--weekday-border);
+    padding: 5px 0;
+  }
+.custom-calendar.vc-container .vc-day {
+    padding: 0 5px 3px 5px;
+    text-align: left;
+    height: var(--day-height);
+    min-width: var(--day-width);
+    background-color: white;
+  }
+.custom-calendar.vc-container .vc-day.weekday-1,
+    .custom-calendar.vc-container .vc-day.weekday-7 {
+      background-color: #eff8ff;
+    }
+.custom-calendar.vc-container .vc-day:not(.on-bottom) {
+      border-bottom: var(--day-border);
+    }
+.custom-calendar.vc-container .vc-day:not(.on-bottom).weekday-1 {
+        border-bottom: var(--day-border-highlight);
+      }
+.custom-calendar.vc-container .vc-day:not(.on-right) {
+      border-right: var(--day-border);
+    }
+.custom-calendar.vc-container .vc-day-dots {
+    margin-bottom: 5px;
+  }
+.selected{
   font-size: 3vh;
   height: 100%;
-  margin-top: 9%;
+  margin-top: 5%;
   color: white;
-}
-.isDisabled {
-  color: #00000040;
-}
-</style>
-<style scoped>
-.view-port-content {
-  background-color: white;
-}
-table {
-  font-family: arial, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
-td,
-th {
-  text-align: left;
-  padding: 8px;
-}
-.appointments {
-  font-size: 3vh;
-  color: rgb(0, 255, 115);
-}
-.custom-calendar .vc-day {
-  height: 50px;
   text-align: center;
+}
+.vs-highlight{
+  border-radius: 0px !important;
 }
 </style>
