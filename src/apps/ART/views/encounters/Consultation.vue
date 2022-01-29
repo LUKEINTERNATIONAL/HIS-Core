@@ -137,6 +137,22 @@ export default defineComponent({
 
       this.nextTask();
     },
+    async checkIfWeightLossIsControlled(val: any) {
+      if (this.lostTenPercentBodyWeight
+        && `${val.label}`.match(/malnutrition/i)
+        && `${val.value}`.match(/no/i)) {
+        const action = await infoActionSheet(
+          'Recommendation',
+          `Patient's weight has dropped by ${this.weightLossPercentageNum}% , is this controlled weight loss??`,
+          'Please verify',
+          [
+            { name: 'Confirm weight loss', slot: 'start', color: 'success'},
+            { name: 'Confirm controlled', slot: 'end', color: 'primary'}
+          ]
+        )
+        val.value = action === 'Confirm weight loss' ? 'Yes' : 'No'
+      }
+    },
     async guardianOnlyVisit() {
       const val = await this.consultation.getClient();
       this.guardianVisit = val === "No";
@@ -777,6 +793,10 @@ export default defineComponent({
           id: "other_side_effects",
           helpText: "Other Contraindications / Side effects (select either 'Yes' or 'No')",
           type: FieldType.TT_MULTIPLE_YES_NO,
+          onValue: async (val: any) => {
+            await this.checkIfWeightLossIsControlled(val)
+            return true
+          },
           condition: (formData: any) => this.showOtherSideEffects(formData),
           onConditionFalse: () => this.otherSideEffectReasonObs = [],
           validation: (data: any) =>
@@ -820,20 +840,7 @@ export default defineComponent({
           helpText: "TB Associated symptoms",
           type: FieldType.TT_MULTIPLE_YES_NO,
           onValue: async (val: any) => {
-            if (this.lostTenPercentBodyWeight 
-              && `${val.label}`.match(/malnutrition/i) 
-              && `${val.value}`.match(/no/i)) {
-              const action = await infoActionSheet(
-                'Recommendation',
-                `Patient's weight has dropped by ${this.weightLossPercentageNum}% , is this controlled weight loss??`,
-                'Please verify',
-                [
-                  { name: 'Confirm weight loss', slot: 'start', color: 'success'},
-                  { name: 'Confirm controlled', slot: 'end', color: 'primary'}
-                ]
-              )
-              val.value = action === 'Confirm weight loss' ? 'Yes' : 'No'
-            }
+            await this.checkIfWeightLossIsControlled(val)
             return true
           },
           validation: (data: any) =>
