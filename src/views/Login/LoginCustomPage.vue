@@ -32,6 +32,7 @@
       </div>
     </div>
   </div>
+  <center>
   <div id="keyboard" :style="btnStyles"  class="keyboard">
     <span v-bind:key="k" v-for="k in LOGIN_KEYBOARD">
       <div class="rows">
@@ -63,6 +64,7 @@
       </div>
     </span>
   </div>
+  </center>
 </template>
 
 <script lang="ts">
@@ -179,7 +181,7 @@ export default defineComponent({
   },
   computed: {
     btnStyles(): string {
-      return `display: ${this.display}; left: ${this.keyboardLeft} top: ${this.keyboardTop}`;
+      return `display: ${this.display}; top: ${this.keyboardTop}`;
     },
   },
 });
@@ -193,7 +195,7 @@ export default defineComponent({
 
   border: 1px solid #ccc;
   border-radius: 5px;
-  width: calc(100% - 500px);
+  width: 50%;
   font-family: Nimbus Sans L, Arial Narrow, sans-serif;
   font-size: 2.2em;
   background-color: #dcdcdc;
@@ -202,7 +204,7 @@ export default defineComponent({
 }
 
 .main {
-  width: 96.5%;
+  width: 100%;
   text-align: center;
   margin-top: 5%;
   display: table;
@@ -216,6 +218,12 @@ export default defineComponent({
   margin: auto;
   background-color: rgba(255, 255, 255, 0.9);
   border: 1px solid rgb(204, 204, 204);
+  word-wrap: normal !important;
+  left: 0; 
+  right: 0; 
+  margin-left: auto; 
+  margin-right: auto; 
+  max-width: 300px;
 }
 
 .rows {
@@ -232,9 +240,9 @@ export default defineComponent({
   -webkit-border-radius: 3px;
   -moz-border-radius: 3px;
   border-radius: 5px !important;
-  font-size: 25px !important;
+  font-size: 1.6vw !important;
   font-family: arial, helvetica, sans-serif;
-  padding: 10px 10px 10px 10px;
+  /* padding: 10px 10px 10px 10px; */
   text-decoration: none;
   display: inline-block;
   text-shadow: -1px -1px 0 rgba(0, 0, 0, 0.3);
@@ -254,13 +262,24 @@ export default defineComponent({
   background-image: -o-linear-gradient(top, #a7cfdf, #23538a);
   background-image: linear-gradient(to bottom, #a7cfdf, #23538a);
   filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr=#a7cfdf, endColorstr=#23538a);
-  min-width: 85px;
-  min-height: 85px;
+  max-width: 85px;
+  max-height: 85px;
   cursor: pointer;
   /*width: 84px;
   height: 35px; */
   text-align: center;
   margin: 3px;
+  width: 8vw;
+  height: 8vw;
+  /* text-overflow: ellipsis; */
+  overflow: hidden;
+  white-space: nowrap;
+
+}
+@media screen and (min-width: 1020px){
+    .keyboard-btn {
+        font-size: 25px !important;
+    }
 }
 .login-btn {
   background-image: -webkit-gradient(
