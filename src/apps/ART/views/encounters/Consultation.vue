@@ -29,6 +29,7 @@ import { infoActionSheet, optionsActionSheet } from "@/utils/ActionSheets";
 import SideEffectsModalVue from "@/components/DataViews/SideEffectsModal.vue";
 import ART_PROP from "@/apps/ART/art_global_props";
 import { generateDateFields, EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
+import table from "@/components/DataViews/tables/ReportDataTable"
 
 export default defineComponent({
   mixins: [AdherenceMixinVue],
@@ -55,7 +56,7 @@ export default defineComponent({
     presentedTBSymptoms: false,
     askAdherence: false as boolean,
     lastDrugsReceived: [] as any,
-    sideEffectsHistory: [] as any,
+    sideEffectsHistory: {} as any,
     onPermanentFPMethods: false,
     guardianVisit: false,
     reasonForDecliningTPTObs: {} as any,
@@ -70,9 +71,7 @@ export default defineComponent({
           await this.initAdherence(this.patient, this.providerID);
           await this.guardianOnlyVisit();
 
-          const pastSideEffectsData = await this.consultation.getDrugSideEffects()
-
-          this.setPastHistoryRows(pastSideEffectsData)
+          this.sideEffectsHistory = await this.consultation.getDrugSideEffects()
 
           this.hasTbHistoryObs = await this.consultation.hasTreatmentHistoryObs()
 
@@ -192,17 +191,6 @@ export default defineComponent({
       const observations = await orderService.buildDefferedOrder(milestone);
       if (!encounter) return toastWarning("Unable to create encounter");
       await orderService.saveObservationList(observations);
-    },
-    setPastHistoryRows(history: any) {
-      this.sideEffectsHistory = Object.keys(history)
-        .map((k: string) =>
-          Object.values(history[k]).map((d: any) => [
-            HisDate.toStandardHisDisplayFormat(k),
-            d.name,
-            d.drug_induced ? 'Yes' : 'No',
-            d.drug
-        ]))
-        .reduce((accum, cur) => accum.concat(cur), [])
     },
     canScreenCxCa() {
       const age = this.patient.getAge()
@@ -753,24 +741,28 @@ export default defineComponent({
         {
           id: 'previous_side_effects',
           helpText: 'Side effects / Contraindications history',
-          type: FieldType.TT_TABLE_VIEWER,
-          options: () => {
-            let columns = ['Date', 'Condition', 'Drug Induced', 'Drug'] as string[]
-            let rows = [];
-            if(this.sideEffectsHistory.length === 0) {
-              columns = [''];
-              rows = [['<h1 style="text-align:center">No Past side effects / contraindications</h1>']];
-            }else {
-              rows = this.sideEffectsHistory;
+          type: FieldType.TT_DATA_TABLE,
+          config: {
+            columns: () => [
+              [
+                table.thTxt('Date'),
+                table.thTxt('Condition'),
+                table.thTxt('Drug induced'),
+                table.thTxt('Drug')
+              ]
+            ],
+            rows: () => {
+              return Object.keys(this.sideEffectsHistory)
+              .map((k: string) =>
+                Object.values(this.sideEffectsHistory[k]).map((d: any) => [
+                  table.tdDate(k),
+                  table.td(d.name),
+                  table.td(d.drug_induced ? 'Yes' : 'No'),
+                  table.td(d.drug)
+              ]))
+              .reduce((accum, cur) => accum.concat(cur), [])
             }
-            return [{
-              label: 'Side effects / Contraindications history',
-              value: 'trail',
-              other: {
-                columns, rows
-              }
-            }]
-          },
+          }
         },
         {
           id: "side_effects",

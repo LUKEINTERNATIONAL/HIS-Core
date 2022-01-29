@@ -35,9 +35,11 @@ import BatchMovement from "@/components/FormElements/HisBatchMovement.vue"
 import IPAddressInput from "@/components/FormElements/HisIPAddress.vue"
 import TextBanner from "@/components/FormElements/HisTextBanner.vue"
 import DrugDispenser from "@/components/FormElements/GeneralDrugDispenser.vue"
+import HisDataTable from "@/components/FormElements/HisDataTable.vue"
 
 // Reference names for BaseFormComponents
 export enum FieldType {
+    TT_DATA_TABLE = 'HisDataTable',
     TT_NOTE = 'NoteInput',
     TT_BARCODE = 'BarcodeInput',
     TT_MONTHLY_DAYS="monthly-days",
@@ -80,6 +82,7 @@ export enum FieldType {
 
 // Components to be rendered
 export const BaseFormComponents = {
+    HisDataTable,
     TextInput,
     SingleSelect,
     MultipleSelect,
