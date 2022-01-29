@@ -2,10 +2,20 @@
     <view-port>
         <div class="view-port-content"> 
             <ion-list>
-                <ion-item v-for="(item, index) in listData" :key="index">
-                    <ion-label> {{item.label}} </ion-label>
-                    <ion-label slot="end"> {{item.value}} </ion-label>
-                </ion-item>
+                <ion-row>
+                    <ion-col width-50>
+                        <ion-item v-for="(item, index) in leftLs" :key="index">
+                            <ion-label> {{item.label}} </ion-label>
+                            <ion-label class="lb-value" slot="end"> {{item.value}} </ion-label>
+                            </ion-item>
+                        </ion-col>
+                    <ion-col width-50>
+                        <ion-item v-for="(item, index) in rightLs" :key="index">
+                            <ion-label> {{item.label}} </ion-label>
+                            <ion-label class="lb-value" slot="end"> {{item.value}} </ion-label>
+                        </ion-item>
+                    </ion-col>
+                </ion-row>
             </ion-list>
         </div>
   </view-port>
@@ -35,11 +45,22 @@ export default defineComponent({
     async activated() {
         this.$emit('onFieldActivated', this)
         this.listData = this.options(this.fdata, this.cdata)
-    }
+    },
+    computed: {
+        leftLs(): any {
+        return this.listData.filter( (element, index) => index < 11)
+        },
+        rightLs(): any {
+        return this.listData.filter( (element, index) => index > 11)
+        }
+    },
 })
 </script>
 <style scoped>
     .view-port-content {
         height: 100%;
+    }
+    .lb-value {
+        font-weight: bold;
     }
 </style>
