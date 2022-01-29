@@ -36,6 +36,7 @@ export default defineComponent({
   data: () => ({
     fields: [] as any,
     weightTrail: [] as any,
+    weightLossPercentageNum: 0 as number,
     lostTenPercentBodyWeight: false as boolean,
     CxCaEnabled: false as boolean,
     CxCaStartAge: -1 as number,
@@ -75,7 +76,9 @@ export default defineComponent({
 
           this.weightTrail = await this.patient.getWeightHistory()
 
-          this.lostTenPercentBodyWeight = this.isTenPercentWeightLoss()
+          this.weightLossPercentageNum = this.patient.getWeightLossPercentageFromTrail(this.weightTrail)
+
+          this.lostTenPercentBodyWeight = this.weightLossPercentageNum >= 10
 
           if (this.CxCaEnabled) {
             const { start, end } = await ART_PROP.cervicalCancerScreeningAgeBounds()
@@ -133,9 +136,6 @@ export default defineComponent({
       toastSuccess("Observations and encounter created!");
 
       this.nextTask();
-    },
-    isTenPercentWeightLoss() {
-     return this.patient.getWeightLossPercentageFromTrail(this.weightTrail) >= 10
     },
     async guardianOnlyVisit() {
       const val = await this.consultation.getClient();
@@ -874,8 +874,8 @@ export default defineComponent({
               && `${val.value}`.match(/no/i)) {
               const action = await infoActionSheet(
                 'Recommendation',
-                `Patient's weight has dropped by 10% or more is this controlled weight loss??`,
-                '',
+                `Patient's weight has dropped by ${this.weightLossPercentageNum}% , is this controlled weight loss??`,
+                'Please verify',
                 [
                   { name: 'Confirm weight loss', slot: 'start', color: 'success'},
                   { name: 'Confirm controlled', slot: 'end', color: 'primary'}
