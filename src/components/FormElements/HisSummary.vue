@@ -63,4 +63,7 @@ export default defineComponent({
     .lb-value {
         font-weight: bold;
     }
+    .item .sc-ion-label-md-h {
+        white-space: normal;
+    }
 </style>
