@@ -426,7 +426,7 @@ export default defineComponent({
       return this.runAppendOptionParams([
         this.toOption('ARVs', {
           appendOptionParams: () => ({ 
-            isChecked: autoSelect3HP 
+            isChecked: autoSelect3HP && !this.TBSuspected
           })
         }),
         this.toOption('CPT', {
