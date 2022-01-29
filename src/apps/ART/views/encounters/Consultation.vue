@@ -35,6 +35,8 @@ export default defineComponent({
   components: { HisStandardForm },
   data: () => ({
     fields: [] as any,
+    weightTrail: [] as any,
+    lostTenPercentBodyWeight: false as boolean,
     CxCaEnabled: false as boolean,
     CxCaStartAge: -1 as number,
     CxCaMaxAge: -1 as number,
@@ -70,6 +72,10 @@ export default defineComponent({
 
           this.hasTbHistoryObs = await this.consultation.hasTreatmentHistoryObs()
           this.CxCaEnabled = await ART_PROP.cervicalCancerScreeningEnabled()
+
+          this.weightTrail = await this.patient.getWeightHistory()
+
+          this.lostTenPercentBodyWeight = this.isTenPercentWeightLoss()
 
           if (this.CxCaEnabled) {
             const { start, end } = await ART_PROP.cervicalCancerScreeningAgeBounds()
@@ -109,11 +115,13 @@ export default defineComponent({
       if (!encounter) return toastWarning("Unable to create encounter");
 
       const computedObs = await this.resolveObs(computedData)
+
       const secondaryObs = (await Promise.all([
         ...this.malawiSideEffectReasonObs,
         ...this.otherSideEffectReasonObs,
         this.reasonForDecliningTPTObs
       ])).filter((d) => !isEmpty(d))
+
       const savedObs = await this.consultation.saveObservationList([
         ...computedObs, ...secondaryObs
       ]);
@@ -125,6 +133,9 @@ export default defineComponent({
       toastSuccess("Observations and encounter created!");
 
       this.nextTask();
+    },
+    isTenPercentWeightLoss() {
+     return this.patient.getWeightLossPercentageFromTrail(this.weightTrail) >= 10
     },
     async guardianOnlyVisit() {
       const val = await this.consultation.getClient();
@@ -581,7 +592,7 @@ export default defineComponent({
           type: FieldType.TT_WEIGHT_CHART,
           options: async () => {
             const bmi = await this.patient.getBMI();
-            const values = await this.patient.getWeightHistory();
+            const values = this.weightTrail;
             return [
               {
                 label: "Weight for patient",
@@ -857,11 +868,28 @@ export default defineComponent({
           id: "tb_side_effects",
           helpText: "TB Associated symptoms",
           type: FieldType.TT_MULTIPLE_YES_NO,
+          onValue: async (val: any) => {
+            if (this.lostTenPercentBodyWeight 
+              && `${val.label}`.match(/malnutrition/i) 
+              && `${val.value}`.match(/no/i)) {
+              const action = await infoActionSheet(
+                'Recommendation',
+                `Patient's weight has dropped by 10% or more is this controlled weight loss??`,
+                '',
+                [
+                  { name: 'Confirm weight loss', slot: 'start', color: 'success'},
+                  { name: 'Confirm controlled', slot: 'end', color: 'primary'}
+                ]
+              )
+              val.value = action === 'Confirm weight loss' ? 'Yes' : 'No'
+            }
+            return true
+          },
           validation: (data: any) =>
             this.validateSeries([
               () => Validation.required(data),
-              () => Validation.anyEmpty(data),
-          ]),
+              () => Validation.anyEmpty(data)
+          ]), 
           condition: (formData: any) => formData.on_tb_treatment.value.match(/no/i),
           computedValue: (vals: Option[]) => {
             this.presentedTBSymptoms = this.inArray(vals, d => d.value === "Yes")

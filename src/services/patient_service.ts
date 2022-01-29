@@ -65,6 +65,14 @@ export class Patientservice extends Service {
         return []
     }
 
+    getWeightLossPercentageFromTrail(trail: any) {
+      const [curWeight, prevWeight] = trail.map((w: any) => w.weight)
+      if (!(curWeight && prevWeight)) return false
+      const decrease = parseFloat(prevWeight) - parseFloat(curWeight)
+      const weightLossPercent = (decrease / prevWeight) * 100
+      return Math.round(weightLossPercent)
+    }
+
     getGuardian() {
         return Patientservice.getJson(`people/${this.getID()}/relationships`)
     }
