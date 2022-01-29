@@ -824,7 +824,7 @@ export default defineComponent({
           computedValue: (data: any) => {
             this.TBSuspected = data.value === "Yes"
             return this.consultation.buildValueCoded(
-              data.label, data.value
+              "TB treatment", data.value
             )
           },
           options: () => this.yesNoOptions()

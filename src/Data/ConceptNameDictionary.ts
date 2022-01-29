@@ -1,6 +1,21 @@
 export default [
    {
       "categories": [],
+      "concept_id": 2690,
+      "name": "TB treatment"
+   },
+   {
+      "categories": [],
+      "concept_id": 7458,
+      "name": "Confirmed TB on treatment"
+   },
+   {
+      "categories": [],
+      "concept_id": 7456,
+      "name": "Confirmed TB NOT on treatment"
+   },
+   {
+      "categories": [],
       "concept_id": 9195,
       "name": "Discuss with spouse"
    },
