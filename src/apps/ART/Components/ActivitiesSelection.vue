@@ -6,12 +6,22 @@
   </ion-header>
   <ion-content class="ion-padding">
     <ion-list style="height: 90%; overflow-x: auto;">
-      <ion-item v-for="(entry, index) in appActivities" :key="index" color="light">
-        <ion-label> {{ entry.value }} </ion-label>
-        <ion-checkbox v-model="entry.selected" slot="start"/>
-      </ion-item>
+      <ion-row>
+        <ion-col width-50>
+          <ion-item v-for="(entry, index) in leftLs" :key="index" color="light">
+            <ion-label> {{ entry.value }} </ion-label>
+            <ion-checkbox v-model="entry.selected" slot="start"/>
+          </ion-item>
+        </ion-col>
+        <ion-col width-50>
+          <ion-item v-for="(entry, index) in rightLs" :key="index" color="light">
+            <ion-label> {{ entry.value }} </ion-label>
+            <ion-checkbox v-model="entry.selected" slot="start"/>
+          </ion-item>
+        </ion-col>
+      </ion-row>
     </ion-list>
-    <ion-button @click="postActivities" :disabled="selectedActivities.length == 0">finish</ion-button>
+    <ion-button @click="postActivities" :disabled="selectedActivities.length == 0" style="float: right">finish</ion-button>
   </ion-content>
 </template>
 <script lang="ts">
@@ -98,6 +108,12 @@ export default defineComponent({
         .filter((element) => element.selected == true)
         .map((el) => el.value )
         .join(",");
+    },
+    leftLs(): any {
+      return this.appActivities.filter( (element, index) => index < 5)
+    },
+    rightLs(): any {
+      return this.appActivities.filter( (element, index) => index > 5)
     }
   },
   data() {
