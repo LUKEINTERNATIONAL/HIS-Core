@@ -109,6 +109,16 @@ export default defineComponent({
                 )
             }
         },
+        toOption(label: string, other={}) {
+            return {
+                label,
+                value: label,
+                other
+            }
+        },
+        mapStrToOptions(items: string[]) {
+            return items.map(i => ({label: i, value: i}))
+        },
         patientDashboardUrl(): string {
             return `/patient/dashboard/${this.patientID}`
         },

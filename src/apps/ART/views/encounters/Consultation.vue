@@ -405,7 +405,7 @@ export default defineComponent({
         return o
       })
     },
-    getPrescriptionFields(d: any, prechecked=[] as Option[]): Option[] {
+    medicationOrderOptions(d: any, prechecked=[] as Option[]): Option[] {
       const completed3HP = !this.completed3HP 
         ? d.routine_tb_therapy 
         && d.routine_tb_therapy.value.match(/complete/i) ? true : false
@@ -421,77 +421,58 @@ export default defineComponent({
         }
       })
       return this.runAppendOptionParams([
-        {
-          label: "ARVs", 
-          value: "ARVs",
-          other: {
-            appendOptionParams: () => ({ isChecked: autoSelect3HP })
+        this.toOption('ARVs', {
+          appendOptionParams: () => ({ 
+            isChecked: autoSelect3HP 
+          })
+        }),
+        this.toOption('CPT', {
+          appendOptionParams: () => {
+            return this.allergicToSulphur 
+              ? disableOption('Allergic to CPT')
+              : { disabled: false }
           }
-        },
-        {
-          label: "CPT", 
-          value: "CPT",
-          other: {
-            appendOptionParams: () => {
-              return this.allergicToSulphur 
-                ? disableOption('Allergic to CPT')
-                : { disabled: false }
+        }),
+        this.toOption('3HP (RFP + INH)', {
+          onEvent: async (isChecked: boolean) =>  {
+            if (!isChecked) {
+              const modal = await optionsActionSheet(
+                'Reasons for declining TPT', 
+                '',
+                [
+                  'Patient declined',
+                  'Side-effects (previous or current)',
+                  'Stock-out',
+                  'Starting TB treatment',
+                  'Other'
+                ],
+                [
+                  { name : 'Done', slot: 'start', role: 'action'}
+                ]
+              )
+              this.reasonForDecliningTPTObs = this.consultation.buildValueText(
+                'Other reason for not seeking services', modal.selection
+              )
+            } else {
+              this.reasonForDecliningTPTObs = {}
             }
+          },
+          appendOptionParams: () => { 
+            if (completed3HP) return disableOption('Completed 3HP')
+
+            if (this.TBSuspected) return disableOption('TB Suspect')
+
+            return { isChecked : autoSelect3HP }
           }
-        },
-        { 
-          label: "3HP (RFP + INH)", 
-          value: "3HP (RFP + INH)",
-          other: {
-            onEvent: async (isChecked: boolean) =>  {
-              if (!isChecked) {
-                const modal = await optionsActionSheet(
-                  'Reasons for declining TPT', 
-                  '',
-                  [
-                    'Patient declined',
-                    'Side-effects (previous or current)',
-                    'Stock-out',
-                    'Starting TB treatment',
-                    'Other'
-                  ],
-                  [
-                    { name : 'Done', slot: 'start', role: 'action'}
-                  ]
-                )
-                this.reasonForDecliningTPTObs = this.consultation.buildValueText(
-                  'Other reason for not seeking services', modal.selection
-                )
-              } else {
-                this.reasonForDecliningTPTObs = {}
-              }
-            },
-            appendOptionParams: () => { 
-              if (completed3HP) return disableOption('Completed 3HP')
-
-              if (this.TBSuspected) return disableOption('TB Suspect')
-
-              return { isChecked : autoSelect3HP }
-            }
+        }),
+        this.toOption('IPT', {
+          appendOptionParams: () => {
+            if (completed3HP) return disableOption('Completed 3HP')
+            if (this.TBSuspected) return disableOption('TB Suspect')
+            return { isChecked : autoSelect3HP }
           }
-        },
-        {
-          label: "IPT", 
-          value: "IPT", 
-          other: {
-            appendOptionParams: () => {
-              if (completed3HP) return disableOption('Completed 3HP')
-
-              if (this.TBSuspected) return disableOption('TB Suspect')
-
-              return { isChecked : autoSelect3HP }
-            }
-          }
-        },
-        {
-          label: "NONE OF THE ABOVE", 
-          value: "NONE OF THE ABOVE" 
-        }
+        }),
+        this.toOption('NONE OF THE ABOVE')
       ], prechecked)
     },
     getFields(): any {
@@ -507,7 +488,7 @@ export default defineComponent({
             return this.disablePrescriptions(listData, value);
           },
           options: (formData: any, c: Array<Option>, cd: any, l: any) => {
-            return !isEmpty(l) ? l : this.getPrescriptionFields(formData)
+            return !isEmpty(l) ? l : this.medicationOrderOptions(formData)
           },
           unload: (d: any, s: any, formData: any, computedData: any) => this.onFinish(formData, computedData),
           condition: () => this.guardianVisit
@@ -617,12 +598,9 @@ export default defineComponent({
           helpText: "",
           type: FieldType.TT_TEXT_BANNER,
           condition: () => this.onPermanentFPMethods,
-          options: () => [
-            {
-              label: "Patient is on Tubal ligation method",
-              value: "Patient is on Tubal ligation method"
-            }
-          ]
+          options: () => this.mapStrToOptions([
+            "Patient is on Tubal ligation method"
+          ])
         },
         {
           id: "current_fp_methods",
@@ -661,28 +639,13 @@ export default defineComponent({
           computedValue: (v: Option) => this.consultation.buildValueText(
             "Why does the woman not use birth control", v.value
           ),
-          options: () => [
-            { 
-              label: "Not Sexually active", 
-              value: "Not Sexually active" 
-            },
-            {
-              label: "Patient want to get pregnant",
-              value: "Patient want to get pregnant",
-            },
-            {
-              label: "Not needed for medical reasons",
-              value: "Not needed for medical reasons",
-            },
-            {
-              label: "At risk of unplanned pregnancy",
-              value: "At risk of unplanned pregnancy",
-            },
-            {
-              label: "Menopause",
-              value: "Menopause"
-            }
-          ]
+          options: () => this.mapStrToOptions([
+            "Not Sexually active",
+            "Patient want to get pregnant",
+            "Not needed for medical reasons",
+            "At risk of unplanned pregnancy",
+            "Menopause"
+          ])
         },
         {
           id: "specific_reason_for_no_fpm",
@@ -693,25 +656,13 @@ export default defineComponent({
             "Reason for not using contraceptives", v.value
           ),
           condition: (formData: any) => this.riskOfUnplannedPregnancy(formData),
-          options: () => [
-            {
-              label: "Following wishes of spouse",
-              value: "Following wishes of spouse",
-            },
-            { label: "Religious reasons", value: "Religious reasons" },
-            {
-              label: "Afraid of side effects",
-              value: "Afraid of side effects",
-            },
-            {
-              label: "Never though about it",
-              value: "Never though about it",
-            },
-            {
-              label: "Indifferent (does not mind getting pregnant)",
-              value: "Indifferent (does not mind getting pregnant)",
-            }
-          ]
+          options: () => this.mapStrToOptions([
+            "Following wishes of spouse",
+            "Religious reasons",
+            "Afraid of side effects",
+            "Never though about it",
+            "Indifferent (does not mind getting pregnant)"
+          ])
         },
         {
           id: "offer_cxca",
@@ -934,20 +885,11 @@ export default defineComponent({
             }
             return true
           },
-          options: () => [
-            { 
-              label: "TB NOT suspected", 
-              value: "TB NOT suspected"
-            },
-            { 
-              label: "TB Suspected", 
-              value: "TB Suspected" 
-            },
-            {
-              label: "Confirmed TB Not on treatment",
-              value: "Confirmed TB Not on treatment",
-            }
-          ]
+          options: () => this.mapStrToOptions([
+            "TB NOT suspected",
+            "TB Suspected",
+            "Confirmed TB Not on treatment",
+          ])
         },
         {
           id: "routine_tb_therapy",
@@ -958,34 +900,14 @@ export default defineComponent({
           computedValue: (data: any) => this.consultation.buildValueText(
             "Previous TB treatment history", data.value
           ),
-          options: () => [
-            { 
-              label: "Currently on IPT", 
-              value: "Currently on IPT"
-            },
-            { 
-              label: "Currently on 3HP", 
-              value: "Currently on 3HP"
-            },
-            {
-              label: "Complete course of 3HP in the past (3 months RFP+INH)",
-              value: "Complete course of 3HP in the past (3 months RFP+INH)",
-            },
-            {
-              label:
-                "Complete course of IPT in the past (min. 6 months of INH)",
-              value:
-                "Complete course of IPT in the past (min. 6 months of INH)",
-            },
-            {
-              label: "Aborted course of 3HP or IPT in the past",
-              value: "Aborted course of 3HP or IPT in the past",
-            },
-            {
-              label: "Never taken IPT or 3HP",
-              value: "Never taken IPT or 3HP",
-            }
-          ]
+          options: () => this.mapStrToOptions([
+            "Currently on IPT", 
+            "Currently on 3HP",
+            "Complete course of 3HP in the past (3 months RFP+INH)",
+            "Complete course of IPT in the past (min. 6 months of INH)",
+            "Aborted course of 3HP or IPT in the past",
+            "Never taken IPT or 3HP"
+          ])
         },
         {
           id: "allergic_to_sulphur",
@@ -1023,7 +945,7 @@ export default defineComponent({
             return this.disablePrescriptions(listData, value);
           },
           options: (formData: any, c: Array<Option>, cd: any, currentOptions: any) => {
-            return this.getPrescriptionFields(formData, currentOptions)
+            return this.medicationOrderOptions(formData, currentOptions)
           },
           config: {
             footerBtns: [
@@ -1032,7 +954,7 @@ export default defineComponent({
                 onClickComponentEvents: {
                   refreshOptions: (btnEvent: FooterBtnEvent, options: Option[], formData: any): Option[] => {
                     this.allergicToSulphur = btnEvent.btnOutput === 'Allergic'
-                    return this.getPrescriptionFields(formData, options)
+                    return this.medicationOrderOptions(formData, options)
                   }
                 },
                 onClick: () => {
