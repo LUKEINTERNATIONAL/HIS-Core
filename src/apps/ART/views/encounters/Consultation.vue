@@ -130,7 +130,7 @@ export default defineComponent({
 
       const savedObs = await this.consultation.saveObservationList([
         ...computedObs, ...secondaryObs
-      ]);
+      ])
 
       if (this.askAdherence && !this.guardianVisit) await this.saveAdherence();
 
@@ -303,14 +303,14 @@ export default defineComponent({
       if (sideEffectReasons === undefined) return false
 
       if (sideEffectReasons != -1) {
-        const drugInducedConcept = ConceptService.getCachedConceptID('Drug induced')
+        const drugInducedConcept = ConceptService.getCachedConceptID('Drug induced', true)
         const isOtherReason = (reason: string) => `${reason}`.match(/other|drug/i) ? true : false
         this[attr] = sideEffectReasons.map((r: any) => ({
-            'concept_id': drugInducedConcept,
-            'value_coded': ConceptService.getCachedConceptID(r.label),
-            'value_text': isOtherReason(r.reason) ? 'Past medication history' : null,
-            'value_drug': !isOtherReason(r.reason) ? r.reason : null //Reason is drug ID number if caused by specific drug
-          }))
+          'concept_id': drugInducedConcept,
+          'value_coded': ConceptService.getCachedConceptID(r.label, true),
+          'value_text': isOtherReason(r.reason) ? 'Past medication history' : null,
+          'value_drug': !isOtherReason(r.reason) ? r.reason : null //Reason is drug ID number if caused by specific drug
+        }))
       }
       return true
     },
@@ -722,8 +722,8 @@ export default defineComponent({
             "Family planning, action to take", v.value
           ),
           options: () => [
-            { label: "Accepted", value: "Accepted" },
-            { label: "Declined", value: "Declined" },
+            { label: "Accepted", value: "Yes" },
+            { label: "Declined", value: "No" },
             { label: "Discuss with spouse", value: "Discuss with spouse" },
           ]
         },
@@ -773,10 +773,10 @@ export default defineComponent({
               () => Validation.required(data),
               () => Validation.anyEmpty(data),
             ]),
-          computedValue: (v: Option[]) => v.map(d => [
-              this.consultation.buildValueCoded('Malawi ART side effects', d.label),
-              this.consultation.buildValueCoded(d.label, d.value)])
-            .reduce((accum, cur) => accum.concat(cur), []),
+          computedValue: (v: Option[]) => v.map(async (d) => ({
+            ...(await this.consultation.buildValueCoded('Malawi ART side effects', d.label)),
+            child: (await this.consultation.buildValueCoded(d.label, d.value)) 
+          })),
           beforeNext: (data: Option[]) => this.buildSideEffectObs(data, 'malawiSideEffectReasonObs'),
           options: (_: any, checked: Array<Option>) => this.getContraindications(checked)
         },
@@ -795,11 +795,13 @@ export default defineComponent({
               () => Validation.required(data),
               () => Validation.anyEmpty(data),
             ]),
-          computedValue: (v: Option[]) => v.filter(d => d.label != 'Other (Specify)')
-            .map(d => [
-              this.consultation.buildValueCoded('Other side effect', d.label),
-              this.consultation.buildValueCoded(d.label, d.value)])
-            .reduce((accum, cur) => accum.concat(cur), []),
+          computedValue: (v: Option[]) => {
+            return v.filter(d => d.label != 'Other (Specify)')
+              .map(async (d) => ({
+              ...(await this.consultation.buildValueCoded('Other side effect', d.label)),
+              child: (await this.consultation.buildValueCoded(d.label, d.value))
+            }))
+          },
           beforeNext: (data: Option[]) => this.buildSideEffectObs(data, 'otherSideEffectReasonObs'),
           options: (_: any, checked: Array<Option>) => this.getOtherContraindications(checked),
         },
@@ -807,9 +809,10 @@ export default defineComponent({
           id: 'other_side_effect_specify',
           helpText: "Other Contraindications / Side effects (specify)",
           type: FieldType.TT_NOTE,
-          computedValue: (v: Option) => this.consultation.buildValueText(
-            'Other (Specify)', v.value 
-          ),
+          computedValue: async (v: Option) => ({
+            ...(await this.consultation.buildValueCoded('Other side effect', 'Other (Specify)')),
+            child: (await this.consultation.buildValueText('Other (Specify)', v.value ))
+          }),
           condition: (f: any) => this.inArray(f.other_side_effects, d => d.label === 'Other (Specify)'),
           validation: (v: Option) => Validation.required(v)
         },
