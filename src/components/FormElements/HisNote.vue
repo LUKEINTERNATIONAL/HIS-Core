@@ -10,7 +10,6 @@
                         <ion-button 
                             style="text-transform: none;"
                             fill="outline"
-                            color="medium"
                             strong
                             @click="keypress(cl)" 
                             :class="`key__button ${cl.toLowerCase()}_btn`">
@@ -20,7 +19,7 @@
                 </tr>
             </table>
         </div>
-        <ion-button @click="keypress('space')" strong style="width:100%;" shape="round" size="large" > Space </ion-button>
+        <ion-button fill="outline" @click="keypress('space')" strong style="width:100%;" shape="round" size="large" > Space </ion-button>
     </div>
   
 </template>
@@ -111,7 +110,7 @@ export default defineComponent({
 }
 .key__button {
   box-sizing: border-box;
-  font-size: 1.3em;
+  font-size: 1.4em;
   width: 8vw;
   height: 9vh;
   border-color: #f2f2f2;
