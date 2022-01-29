@@ -843,14 +843,14 @@ export default defineComponent({
               () => Validation.anyEmpty(data)
           ]), 
           condition: (formData: any) => formData.on_tb_treatment.value.match(/no/i),
+          options: (_: any, checked: Array<Option>) => this.getTBSymptoms(checked),
           computedValue: (vals: Option[]) => {
             this.presentedTBSymptoms = this.inArray(vals, d => d.value === "Yes")
-            return vals.map((data: Option) => [
-              this.consultation.buildValueCoded("Routine TB Screening", data.label),
-              this.consultation.buildValueCoded(data.label, data.value)
-            ]).reduce((accum, cur) => accum.concat(cur), [])
-          },
-          options: (_: any, checked: Array<Option>) => this.getTBSymptoms(checked)
+            return vals.map(async (data: Option) => ({
+              ...(await this.consultation.buildValueCoded("Routine TB Screening", data.label)),
+              child: (await this.consultation.buildValueCoded(data.label, data.value))
+            }))
+          }
         },
         {
           id: "tb_status",
