@@ -44,8 +44,9 @@ export class ConsultationService extends AppEncounterService {
   }
 
   getDrugSideEffects() {
-    const sessionDate = AppEncounterService.getSessionDate();
-    return AppEncounterService.getJson(`/programs/1/patients/${this.patientID}/medication_side_effects`, { date: sessionDate });
+    return AppEncounterService.getJson(`programs/1/patients/${this.patientID}/medication_side_effects`, { 
+      date: this.date 
+    })
   }
 
   getClient() {

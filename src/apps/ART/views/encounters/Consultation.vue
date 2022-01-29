@@ -68,10 +68,14 @@ export default defineComponent({
         if (value) {
           this.consultation = new ConsultationService(this.patientID, this.providerID)
           await this.initAdherence(this.patient, this.providerID);
-          await this.getSideEffectsHistory();
           await this.guardianOnlyVisit();
 
+          const pastSideEffectsData = await this.consultation.getDrugSideEffects()
+
+          this.setPastHistoryRows(pastSideEffectsData)
+
           this.hasTbHistoryObs = await this.consultation.hasTreatmentHistoryObs()
+
           this.CxCaEnabled = await ART_PROP.cervicalCancerScreeningEnabled()
 
           this.weightTrail = await this.patient.getWeightHistory()
@@ -189,21 +193,16 @@ export default defineComponent({
       if (!encounter) return toastWarning("Unable to create encounter");
       await orderService.saveObservationList(observations);
     },
-    async getSideEffectsHistory() {
-      const rows = [];
-      const sides = await this.consultation.getDrugSideEffects();
-      for (const key in sides) {
-        const item = sides[key];
-        const  date = HisDate.toStandardHisDisplayFormat(key);
-        const rowData = [];
-        for (const innerKey in item) {
-          const innerItem = item[innerKey];
-          const drug = innerItem.drug_induced ? `(Drug induced) ${innerItem.drug}` : `(Not drug induced)`; 
-          rowData.push(innerItem.name, drug)
-        }
-        rows.push([date, rowData.join('\n')]);
-      }
-      this.sideEffectsHistory = rows;
+    setPastHistoryRows(history: any) {
+      this.sideEffectsHistory = Object.keys(history)
+        .map((k: string) =>
+          Object.values(history[k]).map((d: any) => [
+            HisDate.toStandardHisDisplayFormat(k),
+            d.name,
+            d.drug_induced ? 'Yes' : 'No',
+            d.drug
+        ]))
+        .reduce((accum, cur) => accum.concat(cur), [])
     },
     canScreenCxCa() {
       const age = this.patient.getAge()
@@ -756,11 +755,11 @@ export default defineComponent({
           helpText: 'Side effects / Contraindications history',
           type: FieldType.TT_TABLE_VIEWER,
           options: () => {
-            let columns = ['Date', 'Condition'] as any;
+            let columns = ['Date', 'Condition', 'Drug Induced', 'Drug'] as string[]
             let rows = [];
             if(this.sideEffectsHistory.length === 0) {
               columns = [''];
-              rows = [['No Past', 'side effects / contraindications']];
+              rows = [['<h1 style="text-align:center">No Past side effects / contraindications</h1>']];
             }else {
               rows = this.sideEffectsHistory;
             }
