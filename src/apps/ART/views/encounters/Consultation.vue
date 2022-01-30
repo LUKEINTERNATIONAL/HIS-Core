@@ -412,6 +412,34 @@ export default defineComponent({
         return o
       })
     },
+    async on3HPandTPTConfictValueUpdate(listData: Option[]) {
+      const is3HPorTPT = (i: Option) => i.label.match(/ipt|3hp/i)
+      const ipt3HPConflict = listData
+        .filter(i => is3HPorTPT(i))
+        .map(i => i.isChecked)
+        .every(Boolean)
+
+      if (ipt3HPConflict) {
+        const action = await infoActionSheet(
+          "IPT / 3HP conflict",
+          "IPT and 3HP can NOT be prescribed together",
+          "Please pick either one",
+          [
+            { name: "Prescribe 3HP", slot: "start", color: "primary" },
+            { name: "Prescribe IPT", slot: "end", color: "primary" },
+          ]
+        )
+        return listData.map(i => {
+          if (is3HPorTPT(i)) {
+            i.isChecked =
+              action === 'Prescribe IPT' && i.label === 'IPT' || 
+              action ==='Prescribe 3HP' && i.label === '3HP (RFP + INH)'
+          }
+          return i
+        })
+      }
+      return listData
+    },
     medicationOrderOptions(d: any, prechecked=[] as Option[]): Option[] {
       const completed3HP = !this.completed3HP 
         ? d.routine_tb_therapy 
@@ -498,7 +526,8 @@ export default defineComponent({
           validation: (data: any) => Validation.required(data),
           computedValue: (v: Option[]) => this.buildMedicationOrders(v),
           onValueUpdate: (listData: Array<Option>, value: Option) => {
-            return this.disablePrescriptions(listData, value);
+            const list =  this.disablePrescriptions(listData, value);
+            return this.on3HPandTPTConfictValueUpdate(list)
           },
           options: (formData: any, c: Array<Option>, cd: any, l: any) => {
             return !isEmpty(l) ? l : this.medicationOrderOptions(formData)
@@ -953,7 +982,8 @@ export default defineComponent({
           validation: (data: Option) => Validation.required(data),
           computedValue: (v: Option[]) => this.buildMedicationOrders(v),
           onValueUpdate: (listData: Array<Option>, value: Option) => {
-            return this.disablePrescriptions(listData, value);
+            const list =  this.disablePrescriptions(listData, value)
+            return this.on3HPandTPTConfictValueUpdate(list)
           },
           options: (formData: any, c: Array<Option>, cd: any, currentOptions: any) => {
             return this.medicationOrderOptions(formData, currentOptions)
