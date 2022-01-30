@@ -118,5 +118,8 @@ export default defineComponent({
   text-shadow: 0 0.5px 1px #777, 0 2px 6px #f2f2f2;
   border-width: 1px;
   border-radius: 10px!important;
+    -webkit-box-shadow: var(--his-card-primary-shadow-webkit);
+-moz-box-shadow: var(--his-card-primary-shadow-moz);
+box-shadow: var(--his-card-primary-shadow);
 }
 </style>
