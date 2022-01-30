@@ -28,6 +28,11 @@ export class PatientTypeService extends AppEncounterService {
       .map(({name }: any) => ({ label: name, value: name }))
   }
 
+  static async isDrugRefillPatient(patientID: number) {
+    const patientType = await AppEncounterService.getFirstValueCoded(patientID, 'Type of patient')
+    return patientType && patientType === 'Drug Refill'
+  }
+
   async loadPatientType() {
     const pType = await this.getFirstValueCoded('Type of patient')
 

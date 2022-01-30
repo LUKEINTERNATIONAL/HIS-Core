@@ -30,6 +30,7 @@ import SideEffectsModalVue from "@/components/DataViews/SideEffectsModal.vue";
 import ART_PROP from "@/apps/ART/art_global_props";
 import { generateDateFields, EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { PatientTypeService } from "../../services/patient_type_service";
 
 export default defineComponent({
   mixins: [AdherenceMixinVue],
@@ -37,6 +38,7 @@ export default defineComponent({
   data: () => ({
     fields: [] as any,
     weightTrail: [] as any,
+    isDrugRefillPatient: false as boolean,
     weightLossPercentageNum: 0 as number,
     lostTenPercentBodyWeight: false as boolean,
     CxCaEnabled: false as boolean,
@@ -70,6 +72,8 @@ export default defineComponent({
           this.consultation = new ConsultationService(this.patientID, this.providerID)
           await this.initAdherence(this.patient, this.providerID);
           await this.guardianOnlyVisit();
+
+          this.isDrugRefillPatient = await PatientTypeService.isDrugRefillPatient(this.patientID)
 
           this.sideEffectsHistory = await this.consultation.getDrugSideEffects()
 
@@ -132,7 +136,7 @@ export default defineComponent({
         ...computedObs, ...secondaryObs
       ])
 
-      if (this.askAdherence && !this.guardianVisit) await this.saveAdherence();
+      if (this.askAdherence && !this.isNonePatientClient()) await this.saveAdherence();
 
       if (!savedObs) return toastWarning("Unable to save patient observations");
 
@@ -478,6 +482,9 @@ export default defineComponent({
         this.toOption('NONE OF THE ABOVE')
       ], prechecked)
     },
+    isNonePatientClient() {
+      return this.guardianVisit || this.isDrugRefillPatient
+    },
     getFields(): any {
       return [
         {
@@ -493,8 +500,8 @@ export default defineComponent({
           options: (formData: any, c: Array<Option>, cd: any, l: any) => {
             return !isEmpty(l) ? l : this.medicationOrderOptions(formData)
           },
-          unload: (d: any, s: any, formData: any, computedData: any) => this.onFinish(formData, computedData),
-          condition: () => this.guardianVisit
+          condition: () => this.isNonePatientClient(),
+          exitsForm: () => true
         },
         {
           id: "patient_lab_orders",
