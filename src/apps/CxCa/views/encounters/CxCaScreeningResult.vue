@@ -77,9 +77,9 @@ export default defineComponent({
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
           options: () => this.mapOptions([...this.getOptions(this.currentMethod)]),
-          unload: (data: any) => {
-            this.obs.push(this.screeningResult.buildValueCoded('Patient went for VIA?', data.value))
-          }
+          computedValue: (value: any) => ({
+            obs: this.screeningResult.buildValueCoded('Patient went for VIA?', value.value)
+          })
         },
         {
           id: "offer_via",
@@ -87,12 +87,12 @@ export default defineComponent({
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
           options: () => this.yesNoOptions(),
-          unload: (data: any) => {
-            this.obs.push(this.screeningResult.buildValueCoded('Patient went for VIA?', data.value))
-          },
           condition(formData: any) {
             return formData.screening_result.value === "HPV Positive";
           },
+          computedValue: (value: any) => ({
+            obs: this.screeningResult.buildValueCoded('Patient went for VIA?', value.value)
+          })
         },
         {
           id: "via_screening_results",
@@ -109,9 +109,9 @@ export default defineComponent({
           condition(formData: any) {
             return formData.offer_via.value === "Yes";
           },
-          unload: (data: any) => {
-            this.obs.push(this.screeningResult.buildValueCoded('VIA Results', data.value))
-          }
+          computedValue: (value: any) => ({
+            obs: this.screeningResult.buildValueCoded('VIA Results', value.value)
+          })
         },
         {
           id: "reason_for_not_offering_via",
@@ -128,9 +128,9 @@ export default defineComponent({
           condition(formData: any) {
             return formData.offer_via.value === "No";
           },
-          unload: (data: any) => {
-            this.obs.push(this.screeningResult.buildValueCoded('Other reason for not seeking services', data.value))
-          }
+          computedValue: (value: any) => ({
+            obs: this.screeningResult.buildValueCoded('Other reason for not seeking services', value.value)
+          })
         },
         {
           id: "treatment_option",
@@ -147,9 +147,9 @@ export default defineComponent({
           condition(formData: any) {
             return formData.screening_result.value === "VIA Positive";
           },
-          unload: (data: any) => {
-            this.obs.push(this.screeningResult.buildValueCoded('Directly observed treatment option', data.value))
-          }
+          computedValue: (value: any) => ({
+            obs: this.screeningResult.buildValueCoded('Directly observed treatment option', value.value)
+          })
         },
         {
           id: "postponed_reason",
@@ -166,9 +166,9 @@ export default defineComponent({
           condition(formData: any) {
             return formData.treatment_option.value === "Postponed treatment";
           },
-          unload: (data: any) => {
-            this.obs.push(this.screeningResult.buildValueCoded('Postponed reason', data.value))
-          }
+          computedValue: (value: any) => ({
+            obs: this.screeningResult.buildValueCoded('Postponed reason', value.value)
+          })
         },
         {
           id: "referral_rreason",
@@ -188,9 +188,9 @@ export default defineComponent({
           condition(formData: any) {
             return formData.treatment_option.value === "Referral";
           },
-          unload: (data: any) => {
-            this.obs.push(this.screeningResult.buildValueCoded('Referral reason', data.value))
-          }
+          computedValue: (value: any) => ({
+            obs: this.screeningResult.buildValueCoded('Referral reason', value.value)
+          })
         },
         {
           id: "location",
@@ -205,6 +205,9 @@ export default defineComponent({
           condition(formData: any) {
             return formData.treatment_option.value === "Referral";
           },
+          computedValue: (value: any) => ({
+            obs: this.screeningResult.buildValueText('Referral location', value.label)
+          })
         },
       ];
     },

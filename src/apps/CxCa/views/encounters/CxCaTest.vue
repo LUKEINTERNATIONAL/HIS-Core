@@ -25,7 +25,7 @@ export default defineComponent({
     assessment: {} as any,
     obs: [] as any,
     showHIVQuestions: true,
-    offerCxCa: false
+    offerCxCa: false,
   }),
   watch: {
     patient: {
@@ -42,16 +42,15 @@ export default defineComponent({
   },
   methods: {
     async onFinish(formData: any, computed: any) {
+      
       const encounter = await this.assessment.createEncounter();
 
       if (!encounter) return toastWarning("Unable to create encounter");
-      if(computed.hiv_test_date) {
-             this.obs.push(this.assessment.buildValueDate("HIV test date", computed.hiv_test_date.date));
-      }
-      if(computed.cxca_date) {
-             this.obs.push(this.assessment.buildValueDate("HIV test date", computed.cxca_date.date));
-      }
-      const data = await Promise.all([...this.obs, ]);
+      const vals: any = [];
+      Object.keys(computed).forEach(element => {
+        vals.push(computed[element].obs);
+      });
+      const data = await Promise.all([...this.obs, ...vals]);
 
       const obs = await this.assessment.saveObservationList(data);
 
@@ -62,18 +61,17 @@ export default defineComponent({
       this.nextTask();
     },
     async setOfferCxCa() {
-
-      const data = await this.assessment.getFirstValueCoded('Offer CxCa');
+      const data = await this.assessment.getFirstValueCoded("Offer CxCa");
       this.offerCxCa = data && data === "Yes";
-      if(!this.offerCxCa) {
-        this.obs.push(this.assessment.buildValueCoded("Ever had CxCa","No"));
+      if (!this.offerCxCa) {
+        this.obs.push(this.assessment.buildValueCoded("Ever had CxCa", "No"));
       }
-      return true
+      return true;
     },
     enterPreviousCxCaData(formData: any) {
       const everHadCxCa = formData.ever_had_cxca.value === "Yes";
       const resultsAvailable = formData.results_available.value === "Yes";
-      return everHadCxCa && resultsAvailable
+      return everHadCxCa && resultsAvailable;
     },
     getFacilities(filter = "") {
       return getFacilities(filter);
@@ -111,14 +109,9 @@ export default defineComponent({
               value: "Referral",
             },
           ],
-          unload: async (value: any) => {
-            this.obs.push(
-              this.assessment.buildValueCoded(
-                "Reason for visit",
-                value.value
-              )
-            );
-          },
+          computedValue: (value: any) => ({
+            obs: this.assessment.buildValueCoded("Reason for visit", value.value)
+          })
         },
         {
           id: "hiv_status",
@@ -148,18 +141,17 @@ export default defineComponent({
               value: "Undisclosed",
             },
           ],
-          unload: async (value: any) => {
-            this.obs.push(
-              this.assessment.buildValueCoded("HIV status", value.value)
-            );
-          },
+          computedValue: (value: any) => ({
+            obs: this.assessment.buildValueCoded("HIV status", value.value)
+          })
         },
         ...generateDateFields(
           {
             id: "hiv_test_date",
             helpText: "HIV test result date",
             required: true,
-            condition: (formData: any) => formData.hiv_status.value.match(/Negative|ART/i),
+            condition: (formData: any) =>
+              formData.hiv_status.value.match(/Negative|ART/i),
             minDate: () => this.patient.getBirthdate(),
             maxDate: () => this.assessment.getDate(),
             estimation: {
@@ -180,25 +172,26 @@ export default defineComponent({
           id: "ever_had_cxca",
           helpText: "Ever had CxCa screening",
           type: FieldType.TT_SELECT,
-          condition: (formData: any) => formData.reason_for_visit.value !== "Initial screening",
+          condition: (formData: any) =>
+            formData.reason_for_visit.value !== "Initial screening",
           options: () => this.yesNoOptions(),
           validation: (val: any) => Validation.required(val),
-          unload: async (value: any) => {
-            this.obs.push(
-              this.assessment.buildValueCoded(
-                "Ever had CxCA",
-                value.value
-              )
-            );
-          },
+          computedValue: (value: any) => ({
+            obs: this.assessment.buildValueCoded("Ever had CxCa", value.value)
+          })
         },
         {
           id: "results_available",
           helpText: "Results available?",
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
-          condition: (formData: any) => formData.reason_for_visit.value !== "Initial screening",
+          
+          condition: (formData: any) =>
+            formData.reason_for_visit.value !== "Initial screening",
           options: () => this.yesNoOptions(),
+          computedValue: (value: any) => ({
+            obs: this.assessment.buildValueCoded("CxCa test results", value.value)
+          })
         },
         {
           id: "location",
@@ -211,14 +204,9 @@ export default defineComponent({
             isFilterDataViaApi: true,
           },
           condition: (formData: any) => this.enterPreviousCxCaData(formData),
-          unload: async (value: any) => {
-            this.obs.push(
-              this.assessment.buildValueText(
-                "Previous CxCa location",
-                value.value
-              )
-            );
-          },
+          computedValue: (value: any) => ({
+            obs: this.assessment.buildValueText("Previous CxCa location", value.value)
+          })
         },
         ...generateDateFields(
           {
@@ -266,30 +254,19 @@ export default defineComponent({
               value: "Speculum Exam",
             },
           ],
-          unload: async (value: any) => {
-            this.obs.push(
-              this.assessment.buildValueCoded(
-                "Previous CxCa screening method",
-                value.value
-              )
-            );
-          },
+          computedValue: (value: any) => ({
+            obs: this.assessment.buildValueCoded("Previous CxCa screening method", value.value)
+          })
         },
         {
           id: "offer_CxCa",
           helpText: "Offer CxCa screening today",
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
-          condition: (formData: any) => !this.offerCxCa,
           options: () => this.yesNoOptions(),
-          unload: async (value: any) => {
-            this.obs.push(
-              this.assessment.buildValueCoded(
-                "Offer CxCa",
-                value.value
-              )
-            );
-          },
+          computedValue: (value: any) => ({
+            obs: this.assessment.buildValueCoded("Offer CxCa", value.value)
+          })
         },
         {
           id: "screening_method",
@@ -315,20 +292,17 @@ export default defineComponent({
               value: "Speculum Exam",
             },
           ],
+          computedValue: (value: any) => ({
+            obs: this.assessment.buildValueCoded("CxCa screening method", value.value)
+          }),
           unload: async (value: any) => {
-            this.obs.push(
-              this.assessment.buildValueCoded(
-                "CxCa screening method",
-                value.value
-              )
-            );
-            if(value.value === "VIA") {
-             this.obs.push(
-              this.assessment.buildValueCoded(
-                "Waiting for test results",
-                "No"
-              )
-            ); 
+            if (value.value === "VIA") {
+              this.obs.push(
+                this.assessment.buildValueCoded(
+                  "Waiting for test results",
+                  "No"
+                )
+              );
             }
           },
         },
@@ -337,16 +311,12 @@ export default defineComponent({
           helpText: "Waiting for lab results",
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
-          condition: (formData: any) => !formData.screening_method.value.match(/VIA|EXAM/i),
-          unload: async (value: any) => {
-            this.obs.push(
-              this.assessment.buildValueCoded(
-                "Waiting for test results",
-                value.value
-              )
-            );
-          },
+          condition: (formData: any) =>
+            !formData.screening_method.value.match(/VIA|EXAM/i),
           options: () => this.yesNoOptions(),
+          computedValue: (value: any) => ({
+            obs: this.assessment.buildValueCoded("Waiting for test results", value.value)
+          }),
         },
         {
           id: "reason_for_no_cxca",
@@ -364,14 +334,9 @@ export default defineComponent({
               value: "Not applicable",
             },
           ],
-          unload: async (value: any) => {
-            this.obs.push(
-              this.assessment.buildValueCoded(
-                "Reason for NOT offering CxCa",
-                value.value
-              )
-            );
-          },
+          computedValue: (value: any) => ({
+            obs: this.assessment.buildValueCoded("Reason for NOT offering CxCa", value.value)
+          }),
         },
       ];
     },
