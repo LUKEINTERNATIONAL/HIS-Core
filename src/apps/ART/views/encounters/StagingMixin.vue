@@ -96,17 +96,20 @@ export default defineComponent({
         getFacilities(filter='') {
             return getFacilities(filter)
         },
-        updateStagingFacts(stage: number, data: any) {
-            const activeStage = this.stagingFacts.stage === null ? 0 : this.stagingFacts.stage
-
-            if (stage >= activeStage && !isEmpty(data)) this.stagingFacts.stage = stage
-
-            this.stagingFacts.selectedConditions= [
-                ...this.stagingFacts.stageFourConditions, 
-                ...this.stagingFacts.stageThreeConditions,
-                ...this.stagingFacts.stageTwoConditions,
-                ...this.stagingFacts.stageOneConditions
+        updateStagingFacts() {
+            const conditions = [
+                this.stagingFacts.stageOneConditions,
+                this.stagingFacts.stageTwoConditions,
+                this.stagingFacts.stageThreeConditions,
+                this.stagingFacts.stageFourConditions, 
             ]
+            this.stagingFacts.stage = conditions.reduce(
+                (stage, conditions: string[], curIndex) =>
+                    isEmpty(conditions) ? stage : curIndex + 1
+                , 0)
+            this.stagingFacts.selectedConditions = conditions.reduce(
+                (accum, cur) => accum.concat(cur), []
+            )
         },
         buildReasonForArtObs() {
             return this.staging.buildReasonForArtObs(this.stagingFacts.reasonForArt)
@@ -178,8 +181,8 @@ export default defineComponent({
                 type: FieldType.TT_ART_STAGING_SUMMARY,
                 condition: (f: any) => this.hasStaging(f),
                 onload: () => {
-                    this.setWhoStage()
                     this.setReasonForArt()
+                    this.setWhoStage()
                 },
                 options: () => [
                     { 
@@ -286,13 +289,18 @@ export default defineComponent({
                     options: () => this.buildStagingOptions(4, this.stagingFacts.stageFourConditions),
                     onValue: (v: Option) => this.onStagingCondition(v),
                     computedValue: (d: Array<Option>) => {
-                        const data = d.map(i => i.label)
-                        this.stagingFacts.stageFourConditions = data
-                        this.updateStagingFacts(4, d)
                         return {
                             tag: 'staging',
-                            obs: data.map(i => this.staging.buildWhoCriteriaObs(i))
+                            obs: d.map(i => this.staging.buildWhoCriteriaObs(i.label))
                         }
+                    },
+                    unload: (d: Option[]) => {
+                        this.stagingFacts.stageFourConditions = d.map(i => i.label)
+                        this.updateStagingFacts()
+                    },
+                    onConditionFalse: () => {
+                        this.stagingFacts.stageFourConditions = []
+                        this.updateStagingFacts()
                     },
                     condition: (f: any) => this.hasStaging(f) && this.notAsymptomatic(f),
                 },
@@ -303,13 +311,18 @@ export default defineComponent({
                     options: () => this.buildStagingOptions(3, this.stagingFacts.stageThreeConditions),
                     onValue: (v: Option) => this.onStagingCondition(v),
                     computedValue: (d: Array<Option>) => {
-                        const data = d.map(i => i.label)
-                        this.stagingFacts.stageThreeConditions = data
-                        this.updateStagingFacts(3, d)
                         return {
                             tag: 'staging',
-                            obs: data.map(i => this.staging.buildWhoCriteriaObs(i))
+                            obs: d.map(i => this.staging.buildWhoCriteriaObs(i.label))
                         }
+                    },
+                    unload: (d: Option[]) => {
+                        this.stagingFacts.stageThreeConditions = d.map(i => i.label)
+                        this.updateStagingFacts()
+                    },
+                    onConditionFalse: () => {
+                        this.stagingFacts.stageThreeConditions = []
+                        this.updateStagingFacts()
                     },
                     condition: (f: any) => this.hasStaging(f) && this.notAsymptomatic(f),
                 },
@@ -319,14 +332,19 @@ export default defineComponent({
                     type: FieldType.TT_MULTIPLE_SELECT,
                     options: () => this.buildStagingOptions(2, this.stagingFacts.stageTwoConditions),
                     onValue: (v: Option) => this.onStagingCondition(v),
-                    computedValue: (d: Array<Option>) => {
-                        const data = d.map(i => i.label)
-                        this.stagingFacts.stageTwoConditions = data
-                        this.updateStagingFacts(2, d)
+                    computedValue: (d: Option[]) => {
                         return {
                             tag: 'staging',
-                            obs: data.map(i => this.staging.buildWhoCriteriaObs(i))
+                            obs: d.map(i => this.staging.buildWhoCriteriaObs(i.label))
                         }
+                    },
+                    unload: (d: Option[]) => {
+                        this.stagingFacts.stageTwoConditions = d.map(i => i.label)
+                        this.updateStagingFacts()
+                    },
+                    onConditionFalse: () => {
+                        this.stagingFacts.stageTwoConditions = []
+                        this.updateStagingFacts()
                     },
                     condition: (f: any) => this.hasStaging(f) && this.notAsymptomatic(f),
                 },
@@ -343,7 +361,7 @@ export default defineComponent({
                     computedValue: (d: Array<Option>) => {
                         const data = d.map(i => i.label)
                         this.stagingFacts.stageOneConditions = data
-                        this.updateStagingFacts(1, d)
+                        this.updateStagingFacts()
                         return {
                             tag: 'staging',
                             obs: data.map(i => this.staging.buildWhoCriteriaObs(i))
@@ -367,16 +385,23 @@ export default defineComponent({
                         const value = d.value.toString()
                         const modifier = value.charAt(0)
                         const count = parseInt(value.substring(1))
-
-                        this.stagingFacts.cd4 = count
-                        this.stagingFacts.cd4Modifier = modifier
-
                         return {
                             tag: 'staging',
+                            modifier,
+                            count,
                             obs: this.staging.buildValueNumber(
                                 'CD4 count', count, modifier
                             )
                         }
+                    },
+                    unload: (d: any, s: any, f: any, computedData: any) => {
+                        const { count, modifier } = computedData['cd4_count']
+                        this.stagingFacts.cd4 = count
+                        this.stagingFacts.cd4Modifier = modifier
+                    },
+                    onConditionFalse: () => {
+                        this.stagingFacts.cd4 = -1
+                        this.stagingFacts.cd4Modifier = ''
                     },
                     validation: (val: any) => {
                         const isCd4 = () => this.staging.cd4CountIsValid(val.value)
