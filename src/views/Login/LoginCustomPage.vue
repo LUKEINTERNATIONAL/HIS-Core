@@ -276,6 +276,11 @@ export default defineComponent({
   white-space: nowrap;
 
 }
+@media screen and (max-width: 600px){
+    .keyboard-btn {
+        font-size: 10px !important;
+    }
+}
 @media screen and (min-width: 1020px){
     .keyboard-btn {
         font-size: 25px !important;
