@@ -643,7 +643,7 @@ export default defineComponent({
           continue 
         }
         if (typeof this.currentField.exitsForm === 'function' 
-          && this.currentField.exitsForm(this.formData, this.computedData)) 
+          && this.currentField.exitsForm(this.formData, this.computedFormData)) 
           break
         await this.setActiveField(i, "next");
         return;
