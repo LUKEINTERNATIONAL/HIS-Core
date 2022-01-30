@@ -312,28 +312,40 @@ export default {
             }
         }
     },
-    getLandmarkField(): Field {
-        return {
-            id: 'landmark',
-            helpText: 'Closest Landmark or Plot Number',
-            group: 'person',
-            type: FieldType.TT_SELECT,
-            computedValue: (val: Option) => ({person: val.value}),
-            validation: (val: any) => Validation.required(val),
-            options: () => mapToOption([
-                'Catholic Church',
-                'CCAP',
-                'Seventh Day',
-                'Mosque',
-                'Primary School',
-                'Borehole',
-                'Secondary School',
-                'College',
-                'Market',
-                'Football Ground',
-                'Other'
-            ])
-        }
+    getLandmarkFields(): Field[] {
+        return [
+            {
+                id: 'default_landmarks',
+                proxyID: 'landmark',
+                helpText: 'Closest Landmark or Plot Number',
+                type: FieldType.TT_SELECT,
+                appearInSummary: (f: any) => f.default_landmarks.value != 'Other',
+                computedValue: (val: Option) => ({person: val.value}),
+                validation: (val: any) => Validation.required(val),
+                options: () => mapToOption([
+                    'Catholic Church',
+                    'CCAP',
+                    'Seventh Day',
+                    'Mosque',
+                    'Primary School',
+                    'Borehole',
+                    'Secondary School',
+                    'College',
+                    'Market',
+                    'Football Ground',
+                    'Other'
+                ])
+            },
+            {
+                id: 'other_landmark',
+                proxyID: 'landmark',
+                helpText: 'Closest Landmark or Plot Number',
+                type: FieldType.TT_NOTE,
+                condition: (f: any) => f.default_landmarks.value === 'Other',
+                computedValue: (val: Option) => ({person: val.value}),
+                validation: (v: Option) => Validation.required(v)
+            }
+        ]
     },
     getFacilityLocationField() {
         return  {
