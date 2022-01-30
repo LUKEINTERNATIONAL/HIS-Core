@@ -145,7 +145,8 @@ export default {
             type: FieldType.TT_SELECT,
             requireNext: false,
             config: {
-                showKeyboard: true
+                showKeyboard: true,
+                isFilterDataViaApi: true
             },
             defaultOutput: () => ({label: 'N/A', value: 'N/A'}),
             defaultComputedOutput: (f: any) => {
@@ -156,7 +157,7 @@ export default {
             },
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
-            options: (form: any) => getTraditionalAuthorities(form.home_district.value)
+            options: (form: any, filter: string) => getTraditionalAuthorities(form.home_district.value, filter)
         }
     },
     getHomeVillageField() {
@@ -165,7 +166,8 @@ export default {
             helpText: 'Home Village',
             type: FieldType.TT_SELECT,
             config: {
-                showKeyboard: true
+                showKeyboard: true,
+                isFilterDataViaApi: true
             },
             requireNext: false,
             defaultOutput: () => ({ label: 'N/A', value: 'N/A' }),
@@ -177,7 +179,7 @@ export default {
             },
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
-            options: (form: any) => getVillages(form.home_traditional_authority.value)
+            options: (form: any, filter: string) => getVillages(form.home_traditional_authority.value, filter)
         }
     },
     getCurrentRegionField() {
@@ -214,6 +216,10 @@ export default {
             helpText: 'Current TA',
             requireNext: false,
             type: FieldType.TT_SELECT,
+            config: {
+                showKeyboard: true,
+                isFilterDataViaApi: true
+            },
             defaultOutput: () => ({label: 'N/A', value: 'N/A'}),
             defaultComputedOutput: (f: any) => {
                 if (f.current_region && f.current_region.label.match(/foreign/i)) {
@@ -223,7 +229,7 @@ export default {
             },
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
-            options: (form: any) => getTraditionalAuthorities(form.current_district.value)
+            options: (form: any, filter: string) => getTraditionalAuthorities(form.current_district.value, filter)
         }
     },
     getCurrentVillageField() {
@@ -232,6 +238,10 @@ export default {
             helpText: 'Current Village',
             requireNext: false,
             type: FieldType.TT_SELECT,
+            config: {
+                showKeyboard: true,
+                isFilterDataViaApi: true
+            },
             defaultOutput: () => ({label: 'N/A', value: 'N/A'}),
             defaultComputedOutput: (f: any) => {
                 if (f.current_region && f.current_region.label.match(/foreign/i)) {
@@ -241,7 +251,7 @@ export default {
             },
             computedValue: (val: Option) => ({person: val.label}),
             validation: (val: any) => Validation.required(val),
-            options: (form: any) => getVillages(form.current_traditional_authority.value)
+            options: (form: any, filter: string) => getVillages(form.current_traditional_authority.value, filter)
         }
     },
     getCellNumberField() {

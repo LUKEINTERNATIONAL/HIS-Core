@@ -23,11 +23,11 @@ export class LocationService extends Service {
         return super.getJson('/districts', {'region_id': regionID, 'page_size': 1000})
     }
 
-    static getVillages(traditionalAuthorityID: number) {
-        return super.getJson('/villages', {'traditional_authority_id': traditionalAuthorityID})
+    static getVillages(traditionalAuthorityID: number, name='') {
+        return super.getJson('/villages', {'traditional_authority_id': traditionalAuthorityID, name})
     }
 
-    static getTraditionalAuthorities(villageID: number) {
-        return super.getJson('/traditional_authorities', {'district_id': villageID})
+    static getTraditionalAuthorities(villageID: number, name='') {
+        return super.getJson('/traditional_authorities', { 'district_id': villageID, name })
     }
 }
