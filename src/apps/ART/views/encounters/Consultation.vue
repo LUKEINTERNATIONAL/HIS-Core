@@ -675,6 +675,32 @@ export default defineComponent({
           ])
         },
         {
+          id: "offer_contraceptives",
+          helpText: "Offer contraceptives",
+          type: FieldType.TT_SELECT,
+          validation: (data: any) => Validation.required(data),
+          condition: (formData: any) => this.riskOfUnplannedPregnancy(formData),
+          computedValue: (v: any) => this.consultation.buildValueCoded(
+            "Family planning, action to take", v.value
+          ),
+          options: () => [
+            { label: "Accepted", value: "Yes" },
+            { label: "Declined", value: "No" },
+            { label: "Discuss with spouse", value: "Discuss with spouse" },
+          ]
+        },
+        {
+          id: "offered_intervention",
+          helpText: "Offered intervention",
+          type: FieldType.TT_MULTIPLE_SELECT,
+          validation: (data: any) => Validation.required(data),
+          condition: (formData: any) => formData.offer_contraceptives.value === "Accepted",
+          computedValue: (v: Option[]) => v.map( d =>
+            this.consultation.buildValueCoded(d.label, d.value)
+          ),
+          options: (_: any, checked: Array<Option>) => this.getFPMethods(["NONE"], checked),
+        },
+        {
           id: "offer_cxca",
           helpText: "Refer client for CxCa screening",
           type: FieldType.TT_SELECT,
@@ -719,32 +745,6 @@ export default defineComponent({
             estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
           }
         }),
-        {
-          id: "offer_contraceptives",
-          helpText: "Offer contraceptives",
-          type: FieldType.TT_SELECT,
-          validation: (data: any) => Validation.required(data),
-          condition: (formData: any) => this.riskOfUnplannedPregnancy(formData),
-          computedValue: (v: any) => this.consultation.buildValueCoded(
-            "Family planning, action to take", v.value
-          ),
-          options: () => [
-            { label: "Accepted", value: "Yes" },
-            { label: "Declined", value: "No" },
-            { label: "Discuss with spouse", value: "Discuss with spouse" },
-          ]
-        },
-        {
-          id: "offered_intervention",
-          helpText: "Offered intervention",
-          type: FieldType.TT_MULTIPLE_SELECT,
-          validation: (data: any) => Validation.required(data),
-          condition: (formData: any) => formData.offer_contraceptives.value === "Accepted",
-          computedValue: (v: Option[]) => v.map( d =>
-            this.consultation.buildValueCoded(d.label, d.value)
-          ),
-          options: (_: any, checked: Array<Option>) => this.getFPMethods(["NONE"], checked),
-        },
         {
           id: 'previous_side_effects',
           helpText: 'Side effects / Contraindications history',
