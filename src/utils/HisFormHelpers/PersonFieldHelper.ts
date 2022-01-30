@@ -13,7 +13,9 @@ import { EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper
 import HisDate from "@/utils/Date"
 import { DateFieldInterface } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { Patientservice } from "@/services/patient_service"
-import { isPlainObject } from "lodash"
+import { isPlainObject, isEmpty } from "lodash"
+import { toastSuccess, toastWarning } from '../Alerts'
+import { LocationService } from '@/services/location_service'
 
 function mapToOption(listOptions: Array<string>): Array<Option> {
     return listOptions.map((item: any) => ({ 
@@ -138,6 +140,28 @@ export default {
             options: (form: any) => getDistricts(form.home_region.value)
         }
     },
+    addCustomLocationBtnForTAorVillage(BtnName: string, formParentAddressRef: string) {
+        return {
+            name: `Add ${BtnName}`,
+            slot: "end",
+            color: "success",
+            onClick: async (f: any, c: any, field: any) => {
+                 if (typeof field.filter != 'string' || field.filter.length < 3) {
+                    return toastWarning(`Please enter a valid ${BtnName}`)
+                 }
+                 if (!isEmpty(field.filtered)) {
+                    return toastWarning(`Can't add existing ${BtnName}`)
+                 } 
+                 const address = await LocationService.createAddress(BtnName, field.filter, f[formParentAddressRef].value)
+                 if (address) {
+                    // Hack to force the list to reload the list with new data
+                    field.filter = field.filter.toUpperCase() 
+                 } else {
+                    return toastWarning(`Unable to add ${BtnName}`)
+                 }
+            }
+         }
+    },
     getHomeTaField() {
         return  {
             id: 'home_traditional_authority',
@@ -146,7 +170,10 @@ export default {
             requireNext: false,
             config: {
                 showKeyboard: true,
-                isFilterDataViaApi: true
+                isFilterDataViaApi: true,
+                footerBtns: [
+                    this.addCustomLocationBtnForTAorVillage('TA', 'home_district')
+                ]
             },
             defaultOutput: () => ({label: 'N/A', value: 'N/A'}),
             defaultComputedOutput: (f: any) => {
@@ -167,7 +194,10 @@ export default {
             type: FieldType.TT_SELECT,
             config: {
                 showKeyboard: true,
-                isFilterDataViaApi: true
+                isFilterDataViaApi: true,
+                footerBtns: [
+                    this.addCustomLocationBtnForTAorVillage('Village', 'home_traditional_authority')
+                ]
             },
             requireNext: false,
             defaultOutput: () => ({ label: 'N/A', value: 'N/A' }),
@@ -218,7 +248,10 @@ export default {
             type: FieldType.TT_SELECT,
             config: {
                 showKeyboard: true,
-                isFilterDataViaApi: true
+                isFilterDataViaApi: true,
+                footerBtns: [
+                    this.addCustomLocationBtnForTAorVillage('TA', 'current_district')
+                ]
             },
             defaultOutput: () => ({label: 'N/A', value: 'N/A'}),
             defaultComputedOutput: (f: any) => {
@@ -240,7 +273,10 @@ export default {
             type: FieldType.TT_SELECT,
             config: {
                 showKeyboard: true,
-                isFilterDataViaApi: true
+                isFilterDataViaApi: true,
+                footerBtns: [
+                    this.addCustomLocationBtnForTAorVillage('Village', 'current_traditional_authority')
+                ]
             },
             defaultOutput: () => ({label: 'N/A', value: 'N/A'}),
             defaultComputedOutput: (f: any) => {

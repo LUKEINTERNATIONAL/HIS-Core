@@ -201,7 +201,7 @@ export default defineComponent({
     async onFtButtonClicked(btn: FormFooterBtns) {
       this.ftBtnEvent.eventIndex += 1
       this.ftBtnEvent.btnName = btn.name
-      this.ftBtnEvent.btnOutput = await btn.onClick(this.formData, this.computedFormData)
+      this.ftBtnEvent.btnOutput = await btn.onClick(this.formData, this.computedFormData, this.currentFieldContext)
       if (btn.onClickComponentEvents) {
         this.ftBtnEvent.onClickComponentEvents = btn.onClickComponentEvents
       } else {
