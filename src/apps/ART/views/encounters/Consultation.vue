@@ -435,6 +435,10 @@ export default defineComponent({
         }),
         this.toOption('CPT', {
           appendOptionParams: () => {
+            if (autoSelect3HP && !this.TBSuspected 
+              && !this.allergicToSulphur) {
+              return { isChecked : true }
+            }
             return this.allergicToSulphur 
               ? disableOption('Allergic to CPT')
               : { disabled: false }
@@ -476,7 +480,6 @@ export default defineComponent({
           appendOptionParams: () => {
             if (completed3HP) return disableOption('Completed 3HP')
             if (this.TBSuspected) return disableOption('TB Suspect')
-            return { isChecked : autoSelect3HP }
           }
         }),
         this.toOption('NONE OF THE ABOVE')
