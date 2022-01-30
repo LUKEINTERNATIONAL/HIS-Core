@@ -14,7 +14,7 @@ import HisDate from "@/utils/Date"
 import { DateFieldInterface } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { Patientservice } from "@/services/patient_service"
 import { isPlainObject, isEmpty } from "lodash"
-import { toastSuccess, toastWarning } from '../Alerts'
+import { alertConfirmation, toastSuccess, toastWarning } from '../Alerts'
 import { LocationService } from '@/services/location_service'
 
 function mapToOption(listOptions: Array<string>): Array<Option> {
@@ -152,6 +152,10 @@ export default {
                  if (!isEmpty(field.filtered)) {
                     return toastWarning(`Can't add existing ${BtnName}`)
                  } 
+                 const ok = await alertConfirmation(`Do you want to add ${BtnName} ${field.filter}?`)
+
+                 if (!ok) return
+
                  const address = await LocationService.createAddress(BtnName, field.filter, f[formParentAddressRef].value)
                  if (address) {
                     // Hack to force the list to reload the list with new data
