@@ -6,6 +6,14 @@ export class LocationService extends Service {
         super()
     }
 
+    static createAddress(type: string, name: string, parentLocation: number) {
+        return this.postJson('addresses', {
+            'address_type': type,
+            'addresses_name': name,
+            'parent_location': parentLocation
+        })
+    }
+
     static getFacilities(params={} as Record<string, string | number>) {
         return super.getJson('/locations', params)
     }
