@@ -82,6 +82,8 @@ export interface Field {
      * Hook is called when the field is false. This is helpful for cleanup jobs
      */
     onConditionFalse?: Function;
+    /** When true, the onfinish is triggered when next button is clicked without going to the other fields */
+    exitsForm?: (formData: any, computedData: any) => boolean;
     condition?: Function;
     validation?: Function;
     beforeNext?: Function;
