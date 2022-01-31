@@ -132,10 +132,12 @@ export default defineComponent({
                         'patient_id': this.activeInputACard.id,
                         'doc_id': null
                     },
-                    'secondary': this.inputBSearchResults.map((s: any) => ({
-                        'patient_id': s.id,
-                        'doc_id': null
-                    }))
+                    'secondary': this.inputBSearchResults
+                        .filter(b => b.isChecked)
+                        .map((s: any) => ({
+                            'patient_id': s.id,
+                            'doc_id': null
+                     }))
                 }
                 await Patientservice.mergePatients(payload)
                 const print = new PatientPrintoutService(this.activeInputACard.id)
