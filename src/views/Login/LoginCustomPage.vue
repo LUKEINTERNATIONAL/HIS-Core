@@ -270,7 +270,7 @@ export default defineComponent({
   text-align: center;
   margin: 3px;
   width: 8vw;
-  height: 8vw;
+  height: 8vh;
   /* text-overflow: ellipsis; */
   overflow: hidden;
   white-space: nowrap;
