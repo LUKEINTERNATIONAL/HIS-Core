@@ -49,8 +49,7 @@ export const PRESCRIPTION_GUIDELINES: Record<string, GuideLineInterface> = {
                 return [7, 8, 9, 10, 11, 12].includes(code)
             },
             medicationOrders(orders: Array<string>) {
-                const threeHp = ['Rifapentine', 'INH']
-                return orders.filter(i => threeHp.includes(i)).length >= 1
+                return orders.filter(i => i.match(/3hp/i) ? true : false).length >= 1
             }
         }
     },
