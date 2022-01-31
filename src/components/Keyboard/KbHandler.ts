@@ -1,5 +1,8 @@
 export default function kbHandler(newInput: string, accumulator: string): string {
     let output = accumulator
+    if (newInput.match(/enter/i)) {
+        return `${output}\r\n`
+    }
     if (newInput.match(/clear/i)) {
         return ''
     } else if (newInput.match(/delete|del/i)) {

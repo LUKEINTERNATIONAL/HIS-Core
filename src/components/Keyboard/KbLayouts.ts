@@ -67,10 +67,10 @@ export const CHARACTERS_AND_NUMBERS_LO = [
     ['r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 ]
 export const NOTE_PAD_KEYBOARD = [
-    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'Delete'],
+    ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'Del'],
     ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", 'Clear'],
     ["a", "s", "d", "f", "g", "h", "j", "k", "l", ".", "Caps"],
-    ["z", "x", "c", "v", "b", "n", "m", "<", ">", "/"], 
+    ["z", "x", "c", "v", "b", "n", "m", "<", ">", "/", "Enter"], 
 ]
 
 export const LOGIN_KEYBOARD =  [
