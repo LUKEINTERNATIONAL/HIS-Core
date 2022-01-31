@@ -12,7 +12,6 @@
               :min-date="sessionDate"
               :max-date="runOutDate"
               :attributes="attributes"
-              :selectAttribute="selectAttribute"
               :masks="masks"
               disable-page-swipe
             >
@@ -185,21 +184,6 @@ export default defineComponent({
         }
       ]
     },
-    selectAttribute() {
-      return {
-        highlight: {
-          backgroundColor: 'white',
-          borderColor: 'red',
-          borderWidth: '3px',
-          borderStyle: 'solid',
-          width: '2.4rem',
-          height: '2.4rem',
-        },
-        contentStyle: {
-          color: 'grey',
-        }
-      }
-    }
   },
 });
 </script>
@@ -260,15 +244,11 @@ export default defineComponent({
 .custom-calendar.vc-container .vc-highlight {
   border-radius: 0 !important;
 }
-
 .selected{
   font-size: 3vh;
   height: 100%;
   margin-top: 0 !important;
   color: white;
   text-align: center;
-}
-.vs-highlight{
-  border-radius: 0px !important;
 }
 </style>
