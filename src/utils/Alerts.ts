@@ -1,7 +1,7 @@
 import { toastController, alertController, actionSheetController, modalController } from "@ionic/vue";
 import ConfimationSheet from "@/components/DataViews/actionsheet/ConfirmationSheet.vue"
 
-async function toast(message: string, color="primary", duration=10000) {
+async function toast(message: string, color="primary", duration=5000) {
     const toast = await toastController.create({
         message: message,
         position: "top",
@@ -20,7 +20,7 @@ async function toast(message: string, color="primary", duration=10000) {
     return toast.present();
 }
 
-export function toastWarning(message: string, duration=10000) {
+export function toastWarning(message: string, duration=5000) {
     return toast(message, 'warning', duration)
 }
 
@@ -28,7 +28,7 @@ export function toastSuccess(message: string, duration=1000) {
     return toast(message, 'success', duration)
 }
 
-export function toastDanger(message: string, duration=10000) {
+export function toastDanger(message: string, duration=5000) {
     return toast(message, 'danger', duration)
 }
 
@@ -58,17 +58,21 @@ export async function actionSheet(header: string, subHeader: string, buttons: Ar
     const { role } = await action.onDidDismiss();
     return role
 }
-export async function alertConfirmation(message: string, header="Confirmation") {
+export async function alertConfirmation(message: string, header="Confirmation", buttonLabels = {
+    cancel: 'Cancel',
+    confirm: 'Confirm'
+}) 
+{
     const modal = await modalController.create({
         component: ConfimationSheet,
         backdropDismiss: false,
-        cssClass: "small-modal",
+        cssClass: "small-modal custom-modal-backdrop",
         componentProps: {
             subtitle: header,
             body: message,
             actionButtons: [
                 {
-                    name: 'Cancel',
+                    name: buttonLabels.cancel,
                     size: 'large',
                     slot: 'start',
                     color: 'danger',
@@ -77,7 +81,7 @@ export async function alertConfirmation(message: string, header="Confirmation") 
                     onClick: ({role}: any) => modalController.dismiss(role)
                 },
                 {
-                    name: 'Confirm',
+                    name: buttonLabels.confirm,
                     size: 'large',
                     slot: 'end',
                     color: 'success',

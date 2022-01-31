@@ -1,7 +1,7 @@
 <template>
     <view-port>
-        <div> 
-            <ul class='primary-info'> 
+        <div class='primary-info'> 
+            <ul> 
                 <li v-for="(item, pindex) in titleItems" :key="pindex"> 
                     <b>{{ item.label }}:</b> {{item.value}}
                 </li>
@@ -44,12 +44,16 @@ export default defineComponent({
 })
 </script>
 <style scoped>
+.primary-info {
+    border-bottom: .1rem solid #cccccc;
+}
     .primary-info li {
         list-style: none;
-        margin-bottom: 10px;
+        padding-bottom: 10px;
     }
     .secondary-info li {
-        margin-bottom: 10px;
+        padding-bottom: 10px;
+        margin-left: 4%;
     }
     .view-port-content {
         padding: 2%;

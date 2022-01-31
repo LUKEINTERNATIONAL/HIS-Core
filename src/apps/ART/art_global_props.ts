@@ -18,6 +18,7 @@ export enum ART_GLOBAL_PROP {
     FILING_NUMBER_LIMIT = 'filing.number.limit',
     FILING_NUMBER_PREFIX = 'filing.number.prefix',
     CERVICAL_CANCER_SCREENING = 'activate.cervical.cancer.screening',
+    CERVICAL_CANCER_AGE_BOUNDS = 'cervical.cancer.screening.age.bounds',
     CLINIC_HOLIDAYS = 'clinic.holidays'
 }
 
@@ -73,6 +74,15 @@ function htnAgeThreshold() {
     return GlobalPropertyService.get(ART_GLOBAL_PROP.HTN_SCREENING_AGE_THRESHOLD)
 }
 
+async function cervicalCancerScreeningAgeBounds() {
+    const age = await GlobalPropertyService.get(ART_GLOBAL_PROP.CERVICAL_CANCER_AGE_BOUNDS)
+    if (age) {
+        const [start, end] = age.split(':')
+        return {start, end}
+    }
+    return {start: -1, end: -1}
+}
+
 function filingNumberLimit() {
     return GlobalPropertyService.get(ART_GLOBAL_PROP.FILING_NUMBER_LIMIT)
 }
@@ -114,6 +124,7 @@ function setFilingNumberLimit(limit: string) {
 }
 
 export default {
+    cervicalCancerScreeningAgeBounds,
     systolicThreshold,
     diastolicThreshold,
     htnAgeThreshold,

@@ -23,10 +23,25 @@ export const SYMBOLS_CONFIG = [
 export const NUMBERS_ONLY = [
     NUMBER_PAD_LO,
     [
-        ['N/A'],
-        ['Unknown', 'Delete']
+        ['Delete']
     ]
 ]
+
+export const NUMBERS_WITH_ESTIMATE = [
+    NUMBER_PAD_LO,
+    [
+        ['N/A'],
+        ['Delete', 'Unknown']
+    ]
+]
+
+export const NUMBERS_WITHOUT_NA_UNKNOWN = [
+    NUMBER_PAD_LO,
+    [
+        ['Delete']
+    ]
+]
+
 export const NUMBERS = [
     NUMBER_PAD_LO,
     [

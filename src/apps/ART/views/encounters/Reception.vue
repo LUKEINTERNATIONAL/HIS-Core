@@ -46,7 +46,7 @@ export default defineComponent({
           this.hasARVNumber = false;
 
           const j = await ProgramService.getNextSuggestedARVNumber();
-          this.suggestedNumber = j.arv_number.replace(/^\D+/g, "");
+          this.suggestedNumber = j.arv_number.replace(/^\D+|\s/g, "");
         }
         this.fields = this.getFields();
       },
@@ -95,6 +95,14 @@ export default defineComponent({
               tag: 'obs',
               obs: d.map(({ other, value }: Option) => this.reception.buildValueCoded(other.concept, value))
             }
+          },
+          onValueUpdate: async (options: Option[], active: Option) => {
+            return options.map(o => {
+              if (active.label != o.label && active.value === 'No') {
+                o.value = "Yes"
+              }
+              return o
+            })
           },
           options: (form: any) => {
             if (form.who_is_present) return form.who_is_present as Option[]

@@ -6,10 +6,21 @@ export class ConceptService extends Service {
         super()
     }
 
-    static getConceptsByCategory(categoryName: string) {
-        return ConceptNameDictionary.filter((i: any) => {
+    static getConceptsByCategory(categoryName: string, useSortIndex=false) {
+        const data = ConceptNameDictionary.filter((i: any) => {
             return i.categories.includes(categoryName)
         })
+        if (useSortIndex) return data.sort((a: any, b: any) =>{
+            try {
+                return a.sortIndex[categoryName] > b.sortIndex[categoryName] 
+                    ? 1
+                    : 0 
+            }catch(e) {
+                // Ooh well, that's life
+                return 0
+            }
+        })
+        return data
     }
 
     static async getConceptSet(conceptName: string, filter = '') {

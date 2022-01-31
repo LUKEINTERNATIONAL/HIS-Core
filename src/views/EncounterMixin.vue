@@ -109,6 +109,16 @@ export default defineComponent({
                 )
             }
         },
+        toOption(label: string, other={}) {
+            return {
+                label,
+                value: label,
+                other
+            }
+        },
+        mapStrToOptions(items: string[]) {
+            return items.map(i => ({label: i, value: i}))
+        },
         patientDashboardUrl(): string {
             return `/patient/dashboard/${this.patientID}`
         },
@@ -140,14 +150,22 @@ export default defineComponent({
             const values: any = Object.values(obs)
                 .filter((d: any) => d && (d.tag === tag || tag === ''))
                 .reduce((accum: any, cur: any) => { 
-                    if (Array.isArray(cur.obs)) {
-                        accum = accum.concat(cur.obs)
+                    const data = cur.obs ? cur.obs : cur
+                    if (Array.isArray(data)) {
+                        accum = accum.concat(data)
                     } else {
-                        accum.push(cur.obs)
+                        accum.push(data)
                     }
                     return accum
                     }, [])
             return Promise.all(values)
+        },
+        inArray(arr: Array<any>, expression: (i: any) => boolean): boolean {
+            try {
+                return arr.filter((i: any) => expression(i)).length > 0
+            } catch (e) {
+                return false
+            }
         },
         validateSeries(conditions: Array<any>){
             try {

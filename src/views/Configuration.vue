@@ -12,7 +12,7 @@ export default defineComponent({
   components: { HisStandardForm },
   methods: {
     onFinish(formData: any) {
-      GlobalPropertyService.set(this.property , formData.preference.value)
+      GlobalPropertyService.set(this.property , formData.preference)
       .then(() => toastSuccess('Property set'))
       .then(() => this.$router.push('/'))
     },
@@ -22,16 +22,11 @@ export default defineComponent({
           id: "preference",
           helpText: this.label,
           type: FieldType.TT_YES_NO,
-          preset: this.val,
-          config: {
-            showKeyboard: false,
-            showSummary: false
-          },
+          defaultValue: () => this.val,
           validation: (val: any) => Validation.required(val),
           options: ()=>([
             {
               label: this.label,
-              property: this.property,
               values: [
                 {
                   label: "yes",

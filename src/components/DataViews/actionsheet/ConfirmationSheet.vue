@@ -1,7 +1,7 @@
 <template>
-    <action-header :title="title" :subtitle="subtitle" :color="color"> </action-header>
-    <ion-content style="text-align:center; padding-top: 70px;" :style="{backgroundColur: color}">
-        <h2 style="margin-top: 5rem;">{{ body }}</h2>
+    <action-header v-show="title || subtitle" :title="title" :subtitle="subtitle" :color="color"> </action-header>
+    <ion-content style="text-align: center">
+        <h2 class="vertically-align ion-padding-horizontal">{{ body }}</h2>
     </ion-content>
     <action-footer :buttons="actionButtons"> </action-footer>
 </template>
@@ -20,6 +20,3 @@ export default defineComponent({
 
 })
 </script>
-<style scoped>
-
-</style>
