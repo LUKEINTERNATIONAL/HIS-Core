@@ -251,4 +251,7 @@ export default defineComponent({
   color: white;
   text-align: center;
 }
+.appointments {
+  color: greenyellow;
+}
 </style>
