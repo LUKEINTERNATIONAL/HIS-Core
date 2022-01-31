@@ -106,8 +106,8 @@ export default defineComponent({
                                     }
                                 ]
                             } catch (e) {
-                                toastDanger('Unable to load a patient')
-                                return []
+                                toastDanger('Unable to load patient details')
+                                return ['N/A', 'N/A', 'N/A', 'N/A', 'N/A']
                             }
                         })
                     }
