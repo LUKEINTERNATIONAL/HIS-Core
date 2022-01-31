@@ -26,7 +26,7 @@ import { modalController } from "@ionic/vue";
 import { Patientservice } from "@/services/patient_service"
 import HisDate from "@/utils/Date"
 import {PatientDemographicsExchangeService} from "@/services/patient_demographics_exchange_service"
-
+import { toastDanger } from '@/utils/Alerts'
 export default defineComponent({
     components: { ReportTemplate },
     data: () => ({
@@ -81,32 +81,34 @@ export default defineComponent({
                 component: DrillTable,
                 cssClass: 'custom-modal',
                 componentProps: {
-                    title: 'DrillTable',
+                    title: `Persons using identifier ${identifier}`,
                     columns: [
                         'Given name', 'Family name', 'Gender', 'Birth date', 'Action'
                     ],
                     onRows: async () => {
-                        const patients = await this.service
-                            .getPatientsByIdentifier(identifier)
+                        const patients = await this.service.getPatientsByIdentifier(identifier)
                         return patients.map((p: any) => {
-                            const patient = new Patientservice(p)
-                            return [
-                                patient.getGivenName(),
-                                patient.getFamilyName(),
-                                patient.getGender(),
-                                this.toDate(patient.getBirthdate()),
-                                {
-                                    type: 'button',
-                                    name: 'View',
-                                    action: () => {
-                                        modalController.dismiss().then(() => {
-                                            this.$router.push(
-                                                `/patient/dashboard/${patient.getID()}`
-                                            )
-                                        })
+                            try {
+                                const patient = new Patientservice(p)
+                                return [
+                                    patient.getGivenName(),
+                                    patient.getFamilyName(),
+                                    patient.getGender(),
+                                    this.toDate(patient.getBirthdate()),
+                                    {
+                                        type: 'button',
+                                        name: 'View',
+                                        action: () => {
+                                            modalController.dismiss().then(() => {
+                                                this.$router.push(`/patient/dashboard/${patient.getID()}`)
+                                            })
+                                        }
                                     }
-                                }
-                            ]
+                                ]
+                            } catch (e) {
+                                toastDanger('Unable to load a patient')
+                                return []
+                            }
                         })
                     }
                 }
