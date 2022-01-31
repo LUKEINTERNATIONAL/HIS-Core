@@ -23,6 +23,7 @@ export default defineComponent({
     }),
     async activated(){
         this.$emit('onFieldActivated', this)
+        if(this.config.keypad) this.keyboard = this.config.keypad
         await this.setDefaultValue()
     },
     methods: {

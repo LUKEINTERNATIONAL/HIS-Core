@@ -2,7 +2,7 @@
     <view-port>
         <div class="view-port-content">
             <ion-row class='parent-row'>
-                <ion-col size="8"> 
+                <ion-col size="7"> 
                     <apexchart
                         :width="width"
                         :height="height"
@@ -11,7 +11,7 @@
                         :series="series"
                     ></apexchart>
                 </ion-col>
-                <ion-col size="4">
+                <ion-col size="5">
                     <ion-list >
                         <ion-item> 
                             <ion-label class='title'>Previous weight</ion-label>
@@ -131,7 +131,7 @@ export default defineComponent({
             this.stats.bmi = data.bmi
 
             if (curWeight > 0 && prevWeight > 0) {
-                this.stats.curWeightChange = (((curWeight/prevWeight)*100)-100).toFixed(2)+' %'
+                this.stats.curWeightChange = Math.abs((((curWeight/prevWeight)*100)-100)).toFixed(2) +' %'
                 const increased = '/assets/images/drop-up-arrow.svg'
                 const decreased = '/assets/images/drop-down-arrow.svg'
                 this.stats.weightState = curWeight > prevWeight ? increased : decreased
