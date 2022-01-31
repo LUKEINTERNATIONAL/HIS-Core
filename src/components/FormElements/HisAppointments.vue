@@ -235,7 +235,7 @@ export default defineComponent({
   padding: 5px;
 }
 .custom-calendar.vc-container .vc-day {
-    padding: 3px 5px 3px 5px;
+    padding: 30px 5px 3px 5px;
     text-align: center;
     height: var(--day-height);
     min-width: var(--day-width);
@@ -264,7 +264,7 @@ export default defineComponent({
 .selected{
   font-size: 3vh;
   height: 100%;
-  margin-top: 5%;
+  margin-top: 0 !important;
   color: white;
   text-align: center;
 }
