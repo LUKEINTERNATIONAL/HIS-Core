@@ -141,5 +141,7 @@ export default defineComponent({
 #view-port {
     height: 53vh;
 }
-
+.view-port-content {
+    height: 80%;
+}
 </style>
