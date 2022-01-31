@@ -126,6 +126,8 @@ export default defineComponent({
     },
     methods: {
         async onMerge() {
+            const ok = await alertConfirmation('Are you sure you want to merge selected Persons?')
+            if (!ok) return
             try {
                 const payload = {
                     'primary': {
