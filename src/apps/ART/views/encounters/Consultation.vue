@@ -30,6 +30,7 @@ import SideEffectsModalVue from "@/components/DataViews/SideEffectsModal.vue";
 import ART_PROP from "@/apps/ART/art_global_props";
 import { generateDateFields, EstimationFieldType } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { PatientTypeService } from "../../services/patient_type_service";
 
 export default defineComponent({
   mixins: [AdherenceMixinVue],
@@ -37,6 +38,7 @@ export default defineComponent({
   data: () => ({
     fields: [] as any,
     weightTrail: [] as any,
+    isDrugRefillPatient: false as boolean,
     weightLossPercentageNum: 0 as number,
     lostTenPercentBodyWeight: false as boolean,
     CxCaEnabled: false as boolean,
@@ -70,6 +72,8 @@ export default defineComponent({
           this.consultation = new ConsultationService(this.patientID, this.providerID)
           await this.initAdherence(this.patient, this.providerID);
           await this.guardianOnlyVisit();
+
+          this.isDrugRefillPatient = await PatientTypeService.isDrugRefillPatient(this.patientID)
 
           this.sideEffectsHistory = await this.consultation.getDrugSideEffects()
 
@@ -132,7 +136,7 @@ export default defineComponent({
         ...computedObs, ...secondaryObs
       ])
 
-      if (this.askAdherence && !this.guardianVisit) await this.saveAdherence();
+      if (this.askAdherence && !this.isNonePatientClient()) await this.saveAdherence();
 
       if (!savedObs) return toastWarning("Unable to save patient observations");
 
@@ -408,6 +412,34 @@ export default defineComponent({
         return o
       })
     },
+    async on3HPandTPTConfictValueUpdate(listData: Option[]) {
+      const is3HPorTPT = (i: Option) => i.label.match(/ipt|3hp/i)
+      const ipt3HPConflict = listData
+        .filter(i => is3HPorTPT(i))
+        .map(i => i.isChecked)
+        .every(Boolean)
+
+      if (ipt3HPConflict) {
+        const action = await infoActionSheet(
+          "IPT / 3HP conflict",
+          "IPT and 3HP can NOT be prescribed together",
+          "Please pick either one",
+          [
+            { name: "Prescribe 3HP", slot: "start", color: "primary" },
+            { name: "Prescribe IPT", slot: "end", color: "primary" },
+          ]
+        )
+        return listData.map(i => {
+          if (is3HPorTPT(i)) {
+            i.isChecked =
+              action === 'Prescribe IPT' && i.label === 'IPT' || 
+              action ==='Prescribe 3HP' && i.label === '3HP (RFP + INH)'
+          }
+          return i
+        })
+      }
+      return listData
+    },
     medicationOrderOptions(d: any, prechecked=[] as Option[]): Option[] {
       const completed3HP = !this.completed3HP 
         ? d.routine_tb_therapy 
@@ -431,6 +463,10 @@ export default defineComponent({
         }),
         this.toOption('CPT', {
           appendOptionParams: () => {
+            if (autoSelect3HP && !this.TBSuspected 
+              && !this.allergicToSulphur) {
+              return { isChecked : true }
+            }
             return this.allergicToSulphur 
               ? disableOption('Allergic to CPT')
               : { disabled: false }
@@ -472,11 +508,13 @@ export default defineComponent({
           appendOptionParams: () => {
             if (completed3HP) return disableOption('Completed 3HP')
             if (this.TBSuspected) return disableOption('TB Suspect')
-            return { isChecked : autoSelect3HP }
           }
         }),
         this.toOption('NONE OF THE ABOVE')
       ], prechecked)
+    },
+    isNonePatientClient() {
+      return this.guardianVisit || this.isDrugRefillPatient
     },
     getFields(): any {
       return [
@@ -488,13 +526,14 @@ export default defineComponent({
           validation: (data: any) => Validation.required(data),
           computedValue: (v: Option[]) => this.buildMedicationOrders(v),
           onValueUpdate: (listData: Array<Option>, value: Option) => {
-            return this.disablePrescriptions(listData, value);
+            const list =  this.disablePrescriptions(listData, value);
+            return this.on3HPandTPTConfictValueUpdate(list)
           },
           options: (formData: any, c: Array<Option>, cd: any, l: any) => {
             return !isEmpty(l) ? l : this.medicationOrderOptions(formData)
           },
-          unload: (d: any, s: any, formData: any, computedData: any) => this.onFinish(formData, computedData),
-          condition: () => this.guardianVisit
+          condition: () => this.isNonePatientClient(),
+          exitsForm: () => true
         },
         {
           id: "patient_lab_orders",
@@ -668,6 +707,32 @@ export default defineComponent({
           ])
         },
         {
+          id: "offer_contraceptives",
+          helpText: "Offer contraceptives",
+          type: FieldType.TT_SELECT,
+          validation: (data: any) => Validation.required(data),
+          condition: (formData: any) => this.riskOfUnplannedPregnancy(formData),
+          computedValue: (v: any) => this.consultation.buildValueCoded(
+            "Family planning, action to take", v.value
+          ),
+          options: () => [
+            { label: "Accepted", value: "Yes" },
+            { label: "Declined", value: "No" },
+            { label: "Discuss with spouse", value: "Discuss with spouse" },
+          ]
+        },
+        {
+          id: "offered_intervention",
+          helpText: "Offered intervention",
+          type: FieldType.TT_MULTIPLE_SELECT,
+          validation: (data: any) => Validation.required(data),
+          condition: (formData: any) => formData.offer_contraceptives.value === "Accepted",
+          computedValue: (v: Option[]) => v.map( d =>
+            this.consultation.buildValueCoded(d.label, d.value)
+          ),
+          options: (_: any, checked: Array<Option>) => this.getFPMethods(["NONE"], checked),
+        },
+        {
           id: "offer_cxca",
           helpText: "Refer client for CxCa screening",
           type: FieldType.TT_SELECT,
@@ -712,32 +777,6 @@ export default defineComponent({
             estimationFieldType: EstimationFieldType.MONTH_ESTIMATE_FIELD
           }
         }),
-        {
-          id: "offer_contraceptives",
-          helpText: "Offer contraceptives",
-          type: FieldType.TT_SELECT,
-          validation: (data: any) => Validation.required(data),
-          condition: (formData: any) => this.riskOfUnplannedPregnancy(formData),
-          computedValue: (v: any) => this.consultation.buildValueCoded(
-            "Family planning, action to take", v.value
-          ),
-          options: () => [
-            { label: "Accepted", value: "Yes" },
-            { label: "Declined", value: "No" },
-            { label: "Discuss with spouse", value: "Discuss with spouse" },
-          ]
-        },
-        {
-          id: "offered_intervention",
-          helpText: "Offered intervention",
-          type: FieldType.TT_MULTIPLE_SELECT,
-          validation: (data: any) => Validation.required(data),
-          condition: (formData: any) => formData.offer_contraceptives.value === "Accepted",
-          computedValue: (v: Option[]) => v.map( d =>
-            this.consultation.buildValueCoded(d.label, d.value)
-          ),
-          options: (_: any, checked: Array<Option>) => this.getFPMethods(["NONE"], checked),
-        },
         {
           id: 'previous_side_effects',
           helpText: 'Side effects / Contraindications history',
@@ -943,7 +982,8 @@ export default defineComponent({
           validation: (data: Option) => Validation.required(data),
           computedValue: (v: Option[]) => this.buildMedicationOrders(v),
           onValueUpdate: (listData: Array<Option>, value: Option) => {
-            return this.disablePrescriptions(listData, value);
+            const list =  this.disablePrescriptions(listData, value)
+            return this.on3HPandTPTConfictValueUpdate(list)
           },
           options: (formData: any, c: Array<Option>, cd: any, currentOptions: any) => {
             return this.medicationOrderOptions(formData, currentOptions)
