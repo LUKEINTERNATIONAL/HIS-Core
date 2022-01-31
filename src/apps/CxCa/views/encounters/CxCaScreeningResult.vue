@@ -58,6 +58,12 @@ export default defineComponent({
       return await this.screeningResult.getFirstValueCoded('CxCa screening method');
     },
     getOptions(method: string) {
+      if(!method) {
+        
+        toastWarning("No screening methods have been selected");
+        this.gotoPatientDashboard();
+
+      }
       if(method.match(/via/i)){
         return ["VIA Negative","VIA Positive","Suspect Cancer"];
       }else if(method.match(/smear/i)){
