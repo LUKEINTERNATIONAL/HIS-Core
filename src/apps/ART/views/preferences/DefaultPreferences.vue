@@ -36,6 +36,7 @@ export default defineComponent({
 			...this.getHtnAgePreferences(),
 			...this.getClinicDaysPreferences(),
 			...this.getClinicHolidaysPreferences(),
+			...this.getCxCaScreeningPreference()
 		]
 	},
 	methods: {
@@ -48,6 +49,61 @@ export default defineComponent({
 				toastSuccess('Property has been updated', 2000)
 			}
 			this.$router.back()
+		},
+		getCxCaScreeningPreference() {
+			const prop = 'cervical_cancer'
+			const screeningProp = ART_GLOBAL_PROP.CERVICAL_CANCER_SCREENING
+			return [
+				{
+					id: screeningProp,
+					helpText: 'Activate CxCa screening',
+					type: FieldType.TT_YES_NO,
+					condition : () => this.isProp(prop),
+					computedValue: (v: Option) => v.value,
+					defaultValue: () => ART_PROP.cervicalCancerScreeningEnabled(),
+					validation: (val: any) => Validation.required(val),
+					options: () =>[
+						{
+							label: 'Activate screening?',
+							values: [
+								{
+									label: "Yes",
+									value: "true"
+								},
+								{
+									label: "No",
+									value: "false"
+								}
+							]
+						}
+					]
+				},
+				{
+					id: 'starting_screening_age',
+					proxyID: ART_GLOBAL_PROP.CERVICAL_CANCER_AGE_BOUNDS, 
+					helpText: 'Starting screening age',
+					type: FieldType.TT_NUMBER,
+					condition : (f: any) => this.isProp(prop) && f[screeningProp] === 'true',
+					defaultValue: async () => {
+						const { start } =  await ART_PROP.cervicalCancerScreeningAgeBounds()
+						if (start) return start
+					},
+					validation: (val: any) => Validation.required(val)
+				},
+				{
+					id: 'maximum_screening_age',
+					proxyID: ART_GLOBAL_PROP.CERVICAL_CANCER_AGE_BOUNDS,
+					helpText: 'Maximum screening age',
+					type: FieldType.TT_NUMBER,
+					condition : (f: any) => this.isProp(prop) && f[screeningProp] === 'true',
+					computedValue: (v: Option, f: any) => `${f.starting_screening_age.value}:${v.value}`,
+					defaultValue: async () => {
+						const {end} =  await ART_PROP.cervicalCancerScreeningAgeBounds()
+						if (end) return end
+					},
+					validation: (val: any) => Validation.required(val)
+				}
+			]
 		},
 		getClinicHolidaysPreferences() {
 			const prop = ART_GLOBAL_PROP.CLINIC_HOLIDAYS

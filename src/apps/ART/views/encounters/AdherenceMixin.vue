@@ -7,6 +7,7 @@ import { AdherenceService } from "@/apps/ART/services/adherence_service"
 import EncounterMixinVue from '../../../../views/EncounterMixin.vue'
 import Validation from "@/components/Forms/validations/StandardValidations"
 import HisDate from "@/utils/Date"
+import { isEmpty } from 'lodash'
 export default defineComponent({
     mixins: [EncounterMixinVue],
     data: () => ({
@@ -126,7 +127,10 @@ export default defineComponent({
                             }
                         })
                     },
-                    options: () => {
+                    options: (fdata: any) => {
+                        if (!isEmpty(fdata.pills_brought)) {
+                            return fdata.pills_brought
+                        }
                         return this.adherence.getLastDrugs().map((data: any) => ({
                             label: data.drug.name,
                             value: '',

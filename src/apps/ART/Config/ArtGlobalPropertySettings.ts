@@ -81,13 +81,13 @@ export const PROPERTIES: FolderInterface[] = [
                 ART_GLOBAL_PROP.THREE_HP_AUTO_SELECT
             ),
             globalPropConfig(
-                "Activate CxCa screening",
-                ART_GLOBAL_PROP.CERVICAL_CANCER_SCREENING
-            ),
-            globalPropConfig(
                 "Is this a military site?",
                 GLOBAL_PROP.MILITARY_SITE
             ),
+            {
+                name: "Activate CxCa Screening",
+                pathUrl: "/art/preferences/cervical_cancer_screening"
+            },
             {
                 name: "Set Hypertension Thresholds",
                 pathUrl: "/art/preferences/bp_thresholds"

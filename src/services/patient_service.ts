@@ -65,6 +65,14 @@ export class Patientservice extends Service {
         return []
     }
 
+    getWeightLossPercentageFromTrail(trail: any) {
+      const [curWeight, prevWeight] = trail.map((w: any) => w.weight)
+      if (!(curWeight && prevWeight)) return false
+      const decrease = parseFloat(prevWeight) - parseFloat(curWeight)
+      const weightLossPercent = (decrease / prevWeight) * 100
+      return Math.round(weightLossPercent)
+    }
+
     getGuardian() {
         return Patientservice.getJson(`people/${this.getID()}/relationships`)
     }
@@ -82,8 +90,14 @@ export class Patientservice extends Service {
     }
 
     async isPregnant() {
-        const query = await ObservationService.getFirstValueCoded(this.getID(), 'Is patient pregnant')
-        return query ? query === 'Yes' : false
+        const obs = await ObservationService.getFirstObs(this.getID(), 'Is patient pregnant')
+        return obs && (obs.value_coded.match(/Yes/i) ? true : false) 
+            && ObservationService.obsInValidPeriod(obs)
+    }
+
+    async hasPregnancyObsToday() {
+        const date = await ObservationService.getFirstObsDatetime(this.getID(), 'Is patient pregnant')
+        return date && HisDate.toStandardHisFormat(date) === Service.getSessionDate() && this.isFemale()
     }
 
     isChildBearing() {

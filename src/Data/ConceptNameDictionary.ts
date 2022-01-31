@@ -1,6 +1,96 @@
 export default [
    {
       "categories": [],
+      "concept_id": 2690,
+      "name": "TB treatment"
+   },
+   {
+      "categories": [],
+      "concept_id": 7458,
+      "name": "Confirmed TB on treatment"
+   },
+   {
+      "categories": [],
+      "concept_id": 7456,
+      "name": "Confirmed TB NOT on treatment"
+   },
+   {
+      "categories": [],
+      "concept_id": 9195,
+      "name": "Discuss with spouse"
+   },
+   {
+      "categories": [],
+      "concept_id": 7951,
+      "name": "Other side effect"
+   },
+   {
+      "categories": [],
+      "concept_id": 7755,
+      "name": "Malawi ART side effects"
+   },
+   {
+      "categories": [],
+      "concept_id": 9994,
+      "name": "CxCa test date"
+   },
+   {
+      "categories": [],
+      "concept_id": 10008,
+      "name": "Reason for NOT offering CxCa"
+   },
+   {
+      "categories": [],
+      "concept_id": 9992,
+      "name": "Offer CxCa"
+   },
+   {
+      "categories": ["reason_for_no_cxca"],
+      "concept_id": 8387,
+      "name": "Not due for screening"
+   },
+   {
+      "categories": ["reason_for_no_cxca"],
+      "concept_id": 10007,
+      "name": "Client preferred counseling",
+   },
+   {
+      "categories": ["reason_for_no_cxca"],
+      "concept_id": 1175,
+      "name": "Not applicable"
+   },
+   {
+      "categories": ["reason_for_no_cxca"],
+      "concept_id": 3580,
+      "name": "Patient refused"
+   },
+   {
+      "categories": [],
+      "concept_id": 7215,
+      "name": "Other (Specify)"
+   },
+   {
+      "categories": [],
+      "concept_id": 1719,
+      "name": "Tubal ligation"
+   },
+   {
+      "categories": [],
+      "concept_id": 1618,
+      "name": "Family planning"
+   },
+   {
+      "categories": [],
+      "concept_id": 374,
+      "name": "Method of family planning"
+   },
+   {
+      "categories": [],
+      "concept_id": 2431,
+      "name": "Other reason for not seeking services"
+   },
+   {
+      "categories": [],
       "concept_id": 2592,
       "name": "Clinician notes"
    },
@@ -347,6 +437,9 @@ export default [
    },
    {
       "categories": ["side_effect"],
+      "sortIndex": {
+         "side_effect": 10
+      },
       "concept_id": 1773,
       "name": "Heavy alcohol use"
    },
@@ -355,6 +448,10 @@ export default [
          "tb_symptom",
          "side_effect"
       ],
+      "sortIndex": {
+         "side_effect": 4,
+         "tb_symptom": 4
+      },
       "concept_id": 8260,
       "name": "Weight loss / Failure to thrive / malnutrition"
    },
@@ -374,6 +471,10 @@ export default [
          "side_effect",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "side_effect": 9,
+         "tb_symptom": 3
+      },
       "concept_id": 6029,
       name: "Night sweats"
    },
@@ -386,6 +487,10 @@ export default [
          "side_effect",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "side_effect": 1,
+         "tb_symptom": 2
+      },
       "concept_id":5945,
       "name":"Fever"
    },
@@ -406,6 +511,9 @@ export default [
          "side_effect",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "side_effect": 3
+      },
       "concept_id":5980,
       "name":"Vomiting"
    },
@@ -418,6 +526,9 @@ export default [
          "side_effect",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "side_effect": 5
+      },
       "concept_id":877,
       "name":"Dizziness"
    },
@@ -431,6 +542,9 @@ export default [
          "side_effect",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "side_effect": 7
+      },
       "concept_id":620,
       "name":"Headache"
    },
@@ -441,6 +555,9 @@ export default [
          "side_effect",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "side_effect": 2
+      },
       "concept_id":5978,
       "name":"Nausea"
    },
@@ -473,6 +590,9 @@ export default [
          "side_effect",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "side_effect": 6
+      },
       "concept_id":1458,
       "name":"Lactic acidosis"
    },
@@ -487,6 +607,10 @@ export default [
          "side_effect",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "side_effect": 8,
+         "tb_symptom": 1
+      },
       "concept_id":107,
       "name":"Cough"
    }
@@ -496,6 +620,9 @@ export default [
          "contraindication",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "contraindication": 1
+      },
       "concept_id":821,
       "name":"Peripheral neuropathy"
    },
@@ -509,6 +636,9 @@ export default [
          "contraindication",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "contraindication": 3
+      },
       "concept_id":215,
       "name":"Jaundice"
    },
@@ -521,6 +651,9 @@ export default [
          "contraindication",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "contraindication": 5
+      },
       "concept_id":2148,
       "name":"Lipodystrophy"
    },
@@ -533,6 +666,9 @@ export default [
          "contraindication",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "contraindication": 7
+      },
       "concept_id":9242,
       "name":"Kidney Failure"
    },
@@ -543,6 +679,9 @@ export default [
          "contraindication",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "contraindication": 2
+      },
       "concept_id":219,
       "name":"Psychosis"
    },
@@ -553,6 +692,9 @@ export default [
          "contraindication",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "contraindication": 4
+      },
       "concept_id":9440,
       "name":"Gynaecomastia"
    },
@@ -565,6 +707,9 @@ export default [
          "contraindication",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "contraindication": 6
+      },
       "concept_id":3,
       "name":"Anemia"
    },
@@ -574,6 +719,9 @@ export default [
          "contraindication",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "contraindication": 9
+      },
       "concept_id":512,
       "name":"Skin rash"
    },
@@ -582,6 +730,9 @@ export default [
          "contraindication",
          "adverse_effect"
       ],
+      "sortIndex": {
+         "contraindication": 8
+      },
       "concept_id":867,
       "name":"Insomnia"
    },

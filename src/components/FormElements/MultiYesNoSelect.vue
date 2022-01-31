@@ -13,7 +13,7 @@
             <ion-segment
               mode="ios"
               v-model="item.value"
-              @ionChange="onChange(item)"
+              @ionChange="() => onChange(item)"
             >
               <ion-segment-button
                 class="yes-no"
@@ -76,13 +76,22 @@ export default defineComponent({
     this.listData = await this.options(this.fdata, values);
   },
   methods: {
-    onChange(item: Option): void {
+    onChange(val: Option): void {
       this.$nextTick(async () => {
         const values = this.listData.map(i => i.value!='')
-        if(this.onValueUpdate) {
-          this.listData = await this.onValueUpdate(this.listData, item)
+        if (typeof this.onValue === 'function') {
+          const ok = await this.onValue(val, this.fdata, this.cdata)
+          if (!ok) {
+            val.value = ""
+            return
+          }
         }
-        if (values.every(Boolean)) this.$emit("onValue", this.listData)
+        if(typeof this.onValueUpdate === 'function') {
+          this.listData = await this.onValueUpdate(this.listData, val)
+        }
+        if (values.every(Boolean)) {
+          this.$emit("onValue", this.listData)
+        }
       })
     }
   }

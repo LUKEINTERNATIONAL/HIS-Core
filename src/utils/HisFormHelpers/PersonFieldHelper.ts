@@ -256,6 +256,9 @@ export default {
                     || val.value.match(/n\/a/i))) return
 
                 return Validation.isMWPhoneNumber(val)
+            },
+            config: {
+                noChars: false
             }
         }
     },

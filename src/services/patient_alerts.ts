@@ -2,7 +2,7 @@ import { ObservationService } from "./observation_service";
 import { ConceptService} from "./concept_service";
 import { Observation } from "@/interfaces/observation";
 
-async function alertSideEffects(patientId: number, typeConceptID='art side effects') {
+async function alertSideEffects(patientId: number, typeConceptID='Malawi ART side effects') {
     const data: Observation[] = await ObservationService.getObservations(
         patientId, ConceptService.getCachedConceptID(typeConceptID)
     );
