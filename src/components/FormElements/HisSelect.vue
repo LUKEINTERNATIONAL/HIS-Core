@@ -63,6 +63,13 @@ export default defineComponent({
 </script>
 <style scoped>
     .view-port-content {
-        height: 89%;
+        height: 91%;
+        padding-bottom: 0px;
+    }
+    ion-item {
+        --min-height: 46px;
+    }
+    #view-port {
+        height: 81vh;
     }
 </style>
