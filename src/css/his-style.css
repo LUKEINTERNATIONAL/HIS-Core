@@ -177,6 +177,11 @@ body {
     height: 94%;
 }
 
+.void-modal .modal-wrapper {
+    width: 75%;
+    height: 45%;
+}
+
 #view-port {
     border: 1px solid #ccc;
     background: #f7f7f7;
