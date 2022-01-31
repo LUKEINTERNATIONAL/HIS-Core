@@ -96,11 +96,13 @@ export default defineComponent({
               obs: d.map(({ other, value }: Option) => this.reception.buildValueCoded(other.concept, value))
             }
           },
-          onValueUpdate: async (options: Option[]) => {
-            const values = [...options]
-            if(values[0].value === 'No') values[1].value = "Yes"
-            if(values[1].value === 'No') values[0].value = "Yes"
-            return values
+          onValueUpdate: async (options: Option[], active: Option) => {
+            return options.map(o => {
+              if (active.label != o.label && active.value === 'No') {
+                o.value = "Yes"
+              }
+              return o
+            })
           },
           options: (form: any) => {
             if (form.who_is_present) return form.who_is_present as Option[]

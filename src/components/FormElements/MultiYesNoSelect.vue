@@ -13,7 +13,7 @@
             <ion-segment
               mode="ios"
               v-model="item.value"
-              @ionChange="onChange"
+              @ionChange="onChange(item)"
             >
               <ion-segment-button
                 class="yes-no"
@@ -45,6 +45,7 @@ import {
   IonSegment,
   IonSegmentButton,
 } from "@ionic/vue";
+import { Option } from "../Forms/FieldInterface";
 export default defineComponent({
   components: {
     IonRow,
@@ -75,11 +76,11 @@ export default defineComponent({
     this.listData = await this.options(this.fdata, values);
   },
   methods: {
-    onChange(): void {
+    onChange(item: Option): void {
       this.$nextTick(async () => {
         const values = this.listData.map(i => i.value!='')
         if(this.onValueUpdate) {
-          this.listData = await this.onValueUpdate(this.listData)
+          this.listData = await this.onValueUpdate(this.listData, item)
         }
         if (values.every(Boolean)) this.$emit("onValue", this.listData)
       })
