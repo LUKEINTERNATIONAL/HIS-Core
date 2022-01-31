@@ -519,7 +519,7 @@ export default defineComponent({
     getFields(): any {
       return [
         {
-          id: "guardina_prescription",
+          id: "other_patient_prescription",
           proxyID: "prescription",
           helpText: "Medication to prescribe during this visit",
           type: FieldType.TT_MULTIPLE_SELECT,
