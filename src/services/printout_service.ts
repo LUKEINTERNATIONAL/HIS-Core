@@ -12,7 +12,7 @@ export class PrintoutService extends Service {
     static async showPrinterImage() {
         const modal = await modalController.create({
             component: ZebraPrinterComponent,
-            backdropDismiss: true
+            backdropDismiss: false
         })
         modal.present()
     }

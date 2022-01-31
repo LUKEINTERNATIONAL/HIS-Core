@@ -8,7 +8,12 @@ export class ConceptService extends Service {
 
     static getConceptsByCategory(categoryName: string, useSortIndex=false) {
         const data = ConceptNameDictionary.filter((i: any) => {
-            return i.categories.includes(categoryName)
+            try {
+                return i.categories.includes(categoryName)
+            } catch (e) {
+                // nothing of concern
+                return false
+            }
         })
         if (useSortIndex) return data.sort((a: any, b: any) =>{
             try {

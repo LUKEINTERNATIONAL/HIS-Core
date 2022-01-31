@@ -37,7 +37,7 @@ export interface FormFooterBtns {
     color?: 'success' | 'primary' | 'warning' | 'secondary' | 'danger';
     state?: BtnStates;
     onClickComponentEvents?: ComponentActionsInterface;
-    onClick: (formData: any, computedData: any) => any;
+    onClick: (formData: any, computedData: any, fieldContext: any) => any;
 }
 export interface Option {
     label: string;

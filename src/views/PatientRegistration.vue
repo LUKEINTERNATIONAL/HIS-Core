@@ -102,7 +102,7 @@ export default defineComponent({
         fields.push(this.currentDistrictField())
         fields.push(this.currentTAField())
         fields.push(this.currentVillage())
-        fields.push(this.landmarkField())
+        fields = fields.concat(this.landmarkFields())
         fields.push(this.cellPhoneField())
         fields.push(this.patientTypeField())
         fields.push(this.facilityLocationField())
@@ -335,10 +335,10 @@ export default defineComponent({
        ].includes(form.patient_type.value)
        return facility
     },
-    landmarkField(): Field {
-        const landmark: Field = PersonField.getLandmarkField()
-        landmark.condition = () => this.editConditionCheck(['land_mark'])
-        return landmark
+    landmarkFields(): Field[] {
+        const landmarks: Field[] = PersonField.getLandmarkFields()
+        landmarks[0].condition = () => this.editConditionCheck(['landmark'])
+        return landmarks
     },
     patientTypeField(): Field {
         return {

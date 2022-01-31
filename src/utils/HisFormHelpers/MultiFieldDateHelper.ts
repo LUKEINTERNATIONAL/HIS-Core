@@ -311,7 +311,12 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     // AGE ESTIMATE CONFIG
     ageEstimate.proxyID = field.id
 
-    ageEstimate.validation = validateValueEstimate
+    ageEstimate.validation = (v: Option, f: any, c: any) => {
+        if (v && v.value > 300) {
+            return ['Age estimate is too high and exceeding hard limit of 300']
+        }
+        return validateValueEstimate(v, f, c)
+    }
 
     ageEstimate.condition = (form: any) => valueEstimateCondition(
         form, EstimationFieldType.AGE_ESTIMATE_FIELD

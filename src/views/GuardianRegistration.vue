@@ -68,7 +68,7 @@ export default defineComponent({
         fields.push(this.currentDistrictField())
         fields.push(this.currentTAField())
         fields.push(this.currentVillage())
-        fields.push(this.landmarkField())
+        fields = fields.concat(this.landmarkFields())
         fields.push(this.cellPhoneField())
         fields.push(this.relationsField())
         return fields
@@ -191,10 +191,10 @@ export default defineComponent({
         cellPhone.condition = () => this.isRegistrationMode()
         return cellPhone 
     },
-    landmarkField(): Field {
-        const landmark: Field = PersonField.getLandmarkField()
-        landmark.condition = () => this.isRegistrationMode()
-        return landmark
+    landmarkFields(): Field[] {
+        const landmarks: Field[] = PersonField.getLandmarkFields()
+        landmarks[0].condition = () => this.isRegistrationMode() 
+        return landmarks
     },
     relationsField(): Field {
         return {

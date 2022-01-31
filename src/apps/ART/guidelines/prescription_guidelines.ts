@@ -347,11 +347,10 @@ export const PRESCRIPTION_GUIDELINES: Record<string, GuideLineInterface> = {
                 return type === 'Regimen'
             },
             medicationOrders(orders: Array<string>) {
-                const threeHp = ['Rifapentine', 'INH']
-                return orders.filter(i => threeHp.includes(i)).length >= 1
+                return orders.map(i => i.match(/3hp/i) ? true : false).some(Boolean)
             },
             tptPrescriptionCount(count: number, {selectedInterval}: any){
-                return Math.round(selectedInterval / 30) > count  
+                return Math.round(selectedInterval / 30) > count
             }
         }
     }
