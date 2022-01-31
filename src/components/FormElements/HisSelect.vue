@@ -67,7 +67,8 @@ export default defineComponent({
         padding-bottom: 0px;
     }
     ion-item {
-        --min-height: 46px;
+        --min-height: 40px;
+        font-size: 1.1em;
     }
     #view-port {
         height: 81vh;
