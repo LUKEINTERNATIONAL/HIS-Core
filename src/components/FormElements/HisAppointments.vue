@@ -12,6 +12,7 @@
               :min-date="sessionDate"
               :max-date="runOutDate"
               :attributes="attributes"
+              :selectAttribute="selectAttribute"
               :masks="masks"
               disable-page-swipe
             >
@@ -183,6 +184,21 @@ export default defineComponent({
           dates: this.aDate
         }
       ]
+    },
+    selectAttribute() {
+      return {
+        highlight: {
+          backgroundColor: 'white',
+          borderColor: 'red',
+          borderWidth: '3px',
+          borderStyle: 'solid',
+          width: '2.4rem',
+          height: '2.4rem',
+        },
+        contentStyle: {
+          color: 'grey',
+        }
+      }
     }
   },
 });
@@ -202,25 +218,25 @@ export default defineComponent({
   --day-height: 82px;
   --weekday-bg: #f8fafc;
   --weekday-border: 1px solid #eaeaea;
-  border-radius: 0;
+  border-radius: 0 !important;
   width: 100%;
 }
 .custom-calendar.vc-container .vc-header {
-    background-color: #f1f5f8;
-    padding: 10px 0;
-  }
+  background-color: #f1f5f8;
+  padding: 10px 0;
+}
 .custom-calendar.vc-container .vc-weeks {
-    padding: 0;
-  }
+  padding: 0;
+}
 .custom-calendar.vc-container .vc-weekday {
-    background-color: var(--weekday-bg);
-    border-bottom: var(--weekday-border);
-    border-top: var(--weekday-border);
-    padding: 5px 0;
-  }
+  background-color: var(--weekday-bg);
+  border-bottom: var(--weekday-border);
+  border-top: var(--weekday-border);
+  padding: 5px;
+}
 .custom-calendar.vc-container .vc-day {
-    padding: 0 5px 3px 5px;
-    text-align: left;
+    padding: 30px 5px 3px 5px;
+    text-align: center;
     height: var(--day-height);
     min-width: var(--day-width);
     background-color: white;
