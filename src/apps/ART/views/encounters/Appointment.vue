@@ -17,6 +17,8 @@ import { toastWarning, toastSuccess } from "@/utils/Alerts"
 import EncounterMixinVue from '../../../../views/EncounterMixin.vue';
 import {AppointmentService} from '@/apps/ART/services/appointment_service'
 import { PatientPrintoutService } from "@/services/patient_printout_service";
+import App from "@/apps/app_lib"
+import { AppInterface } from "@/apps/interfaces/AppInterface";
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
@@ -24,7 +26,8 @@ export default defineComponent({
   data: () => ({
     appointmentDate: "" as any,
     medicationRunOutDate: "" as any,
-    appointment: {} as any
+    appointment: {} as any,
+    app: App.getActiveApp() as AppInterface,
     
   }),
   watch: {
@@ -52,7 +55,9 @@ export default defineComponent({
 
       toastSuccess('Encounter created')
       const printer = new PatientPrintoutService(this.patientID);
-      await printer.printVisitSummaryLbl();
+      if(this.app.applicationName !== "CxCa") {
+        await printer.printVisitSummaryLbl();
+      }
       this.nextTask()
     },
     async init() {

@@ -146,7 +146,7 @@ export default defineComponent({
       return prop in data ? data[prop]() : "-";
     },
     async getPatientVisitDates(patientId: number) {
-      const dates = await Patientservice.getPatientVisits(patientId);
+      const dates = await Patientservice.getPatientVisits(patientId, true);
       const f = dates.map((date: string) => {
         return this.getExtras(date).then((d) => {
           return {

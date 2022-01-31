@@ -1,5 +1,6 @@
 import { PatientPrintoutService } from "@/services/patient_printout_service"
 import { UserService } from "@/services/user_service"
+import App from "@/apps/app_lib"
 import { GLOBAL_PROP } from "./global_prop"
 
 export default {
@@ -141,7 +142,8 @@ export default {
         const lbl = new PatientPrintoutService(patient.patient_id)
         return lbl.printDemographicsLbl()
       },
-      icon: "print.png"
+      icon: "print.png",
+      condition: () => App.getActiveApp()?.applicationName !== "CxCa"
     },
     {
       id: "demographics_edit",
@@ -179,7 +181,8 @@ export default {
         const lbl = new PatientPrintoutService(patient.patient_id)
         return lbl.printVisitSummaryLbl(visitDate)
       },
-      icon: "folder.png"
+      icon: "folder.png",
+      condition: () => App.getActiveApp()?.applicationName !== "CxCa"
     },
     {
       id: "enter_lab_result",

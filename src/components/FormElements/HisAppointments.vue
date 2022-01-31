@@ -120,7 +120,7 @@ export default defineComponent({
     const date = items[0].other.appointmentDate;
     this.appointments = await this.getAppointments(date)
     this.setDate(date)
-    this.runOutDate = new Date(items[0].other.runOutDate);
+    this.runOutDate = items[0].other.runOutDate ? new Date(items[0].other.runOutDate) : null
   },
   methods: {
     getAppointments(date: string) {

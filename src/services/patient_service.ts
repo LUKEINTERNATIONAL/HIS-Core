@@ -55,9 +55,10 @@ export class Patientservice extends Service {
         return JSON.stringify(value);
     }
 
-    public static async getPatientVisits(patientId: number) {
+    public static async getPatientVisits(patientId: number, includeDefaulterDates: boolean) {
         const dates: string[] = await super.getJson(`patients/${patientId}/visits`, {
-            'program_id': super.getProgramID()
+            'program_id': super.getProgramID(),
+            'include_defaulter_dates': (includeDefaulterDates == true)
         })
         if (dates) {
             return dates.sort((a, b) => new Date(a) < new Date(b) ? 1 : 0)

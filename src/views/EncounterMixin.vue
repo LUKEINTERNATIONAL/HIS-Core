@@ -134,6 +134,11 @@ export default defineComponent({
                 { label: "No", value: "No" }
             ]
         },
+        mapOptions(options: Array<string>) {
+            return options.map((option) => {
+                return { label: option, value: option }
+            });
+        },
         yesNoUnknownOptions(): Option[] {
             return [
                 { label: "Yes", value: "Yes" },
