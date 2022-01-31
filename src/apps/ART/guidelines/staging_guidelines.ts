@@ -1,5 +1,5 @@
 import { ConceptService } from "@/services/concept_service"
-import { alertAction } from "@/utils/Alerts"
+import { alertAction, alertConfirmation } from "@/utils/Alerts"
 import { GuideLineInterface } from "@/utils/GuidelineEngine"
 
 export const ADULT_WHO_STAGE_CRITERIA: Record<string, GuideLineInterface> = {
@@ -82,16 +82,10 @@ export const CONTRADICTING_STAGE_DEFINITIONS_ALERTS: Record<string, GuideLineInt
     "Warn if Severe weight loss is selected when actual patient BMI is acceptable": {
         priority: 1,
         actions: {
-            alert: async (facts: any) => {
-                const action = await alertAction(
-                    `Patient's BMI of ${facts.bmi} greater than 18.5, do you wish to proceed?`,
-                    [
-                        { text: 'Yes, keep severe weightloss', role: 'keep' },
-                        { text: 'No, cancel', role: 'discard' }
-                    ]
-                )
-                return action === 'keep'
-            },
+            alert: async (facts: any) => await alertConfirmation(`Patient's BMI of ${facts.bmi} greater than 18.5, do you wish to proceed?`, '', {
+                confirm: 'Yes, keep severe weightloss',
+                cancel: 'No, cancel'
+            }),
         },
         conditions: {
             selectedCondition (condition: string) {
@@ -104,14 +98,11 @@ export const CONTRADICTING_STAGE_DEFINITIONS_ALERTS: Record<string, GuideLineInt
         priority: 1,
         actions: {
             alert: async (facts: any) => {
-                const action = await alertAction(
-                    'CONTRADICTING STAGE DEFINING CONDITIONS',
-                    [
-                        { text: 'Keep Asymptomatic', role: 'asymptomatic' },
-                        { text: 'Keep other(s)', role: 'keep' }
-                    ]
-                )
-                if (action === 'asymptomatic') {
+                const keepAsymptomatic = await alertConfirmation('CONTRADICTING STAGE DEFINING CONDITIONS', '', {
+                    confirm: "Keep Asymptomatic",
+                    cancel: 'Keep other(s)'
+                })
+                if(keepAsymptomatic) {
                     facts.stage = 1
                     facts.selectedConditions = []
                     facts.stageThreeConditions = []
@@ -120,7 +111,7 @@ export const CONTRADICTING_STAGE_DEFINITIONS_ALERTS: Record<string, GuideLineInt
                     return true
                 }
                 return false
-            }
+            },
         },
         conditions: {
             selectedCondition(condition: string){

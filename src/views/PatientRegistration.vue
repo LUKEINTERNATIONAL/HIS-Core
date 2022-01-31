@@ -56,6 +56,7 @@ export default defineComponent({
     patient: {} as any,
     editPersonData: {} as any,
     editPerson: -1 as number,
+    personAttribute: '' as string,
     activeField: '' as string,
     fieldComponent: '' as string,
     fields: [] as Array<Field>,
@@ -72,6 +73,7 @@ export default defineComponent({
                 this.ddeIsReassign = query.dde_reassign
                 this.ddeDocID = query.doc_id
                 this.ddeInstance.setPatientID(query.edit_person)
+                if(query.person_attribute) this.personAttribute = query.person_attribute
                 await this.initEditMode(query.edit_person)
             } else {
                 this.presets = query
@@ -143,6 +145,10 @@ export default defineComponent({
         }
         this.presets = this.editPersonData
         this.skipSummary = true
+        if(this.personAttribute) {
+            this.activeField = this.personAttribute
+            this.fieldComponent = this.activeField
+        }
     },
     async onFinish(form: Record<string, Option> | Record<string, null>, computedData: any) {
         if (!this.isEditMode()) {
@@ -182,7 +188,11 @@ export default defineComponent({
                 this.editPersonData[attr] = person[attr]
             }
         }
-        this.fieldComponent = 'edit_user'
+        if(!this.personAttribute) return this.fieldComponent = 'edit_user'
+        this.$router.back()
+    },
+    showEditDemographicsField(){
+        return this.editPerson != -1 && this.personAttribute.length
     },
     editConditionCheck(attributes=[] as Array<string>): boolean {
         if (this.isEditMode() && !attributes.includes(this.activeField)) {
@@ -614,7 +624,7 @@ export default defineComponent({
             id: 'edit_user',
             helpText: 'Edit Demographics',
             type: FieldType.TT_TABLE_VIEWER,
-            condition: () => this.editPerson != -1,
+            condition: () => this.showEditDemographicsField(),
             options: async () => {
                 const editButton = (attribute: string) => ({
                     name: 'Edit',

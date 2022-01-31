@@ -1,6 +1,6 @@
 <template>
     <view-port :showFull="false">
-        <base-input type="text" :value="value" @onValue="onKbValue"/>
+        <ion-textarea rows="6" cols="20" readonly :value="value" placeholder="Start typing...." class="input_display"/>
     </view-port>
     <div class="his-floating-keyboard"> 
         <div class="his-floating-keyboard-content"> 
@@ -9,9 +9,8 @@
                     <td  v-for="(cl, cindex) in tr" :key="cindex"> 
                         <ion-button 
                             style="text-transform: none;"
-                            fill="outline"
                             strong
-                            @click="keypress(cl)" 
+                            @click="keypress(cl)"
                             :class="`key__button ${cl.toLowerCase()}_btn`">
                             {{cl}} 
                         </ion-button>
@@ -19,7 +18,7 @@
                 </tr>
             </table>
         </div>
-        <ion-button fill="outline" @click="keypress('space')" strong style="width:100%;" shape="round" size="large" > Space </ion-button>
+        <ion-button @click="keypress('space')" strong style="width:100%;" shape="round" size="large" > Space </ion-button>
     </div>
   
 </template>
@@ -31,14 +30,13 @@ import ViewPort from "@/components/DataViews/ViewPort.vue"
 import FieldMixinVue from './FieldMixin.vue'
 import { isPlainObject } from 'lodash'
 import { NOTE_PAD_KEYBOARD } from "@/components/Keyboard/KbLayouts"
-import { IonButton } from "@ionic/vue"
-import BaseInput from "@/components/FormElements/BaseTextInput.vue"
+import { IonButton, IonTextarea } from "@ionic/vue"
 
 export default defineComponent({
     components: { 
         ViewPort,
-        BaseInput,
-        IonButton
+        IonButton, 
+        IonTextarea
     },
     mixins: [FieldMixinVue],
     data: () => ({
@@ -102,10 +100,15 @@ export default defineComponent({
 })
 </script>
 <style scoped> 
+.input_display {
+    background: white;
+    font-size: 1.3em;
+    height: 20vh;
+}
 #view-port {
     height: 53vh;
 }
-.delete_btn, .enter_btn, .clear_btn, .caps_btn {
+.del_btn, .enter_btn, .clear_btn, .caps_btn {
     width: 10vw !important;
 }
 .key__button {

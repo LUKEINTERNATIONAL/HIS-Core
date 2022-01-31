@@ -27,8 +27,10 @@ export default defineComponent({
             this.keyboard = this.config.noChars ? NUMBERS_ONLY : NUMBERS_WITH_ESTIMATE
         }
     },
-    mounted() {
+    async mounted() {
         this.setDefaultValue()
+        if(this.config.keypad) this.keyboard = this.config.keypad
+        await this.setDefaultValue()
     },
     methods: {
         async setDefaultValue() {
