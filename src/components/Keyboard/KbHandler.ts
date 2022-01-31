@@ -1,4 +1,4 @@
-export default function kbHandler(newInput: string, accumulator: string): string {
+export default function kbHandler(newInput: string, accumulator: string, showLowerCasesOnly = false): string {
     let output = accumulator
     if (newInput.match(/enter/i)) {
         return `${output}\r\n`
@@ -26,7 +26,7 @@ export default function kbHandler(newInput: string, accumulator: string): string
             output = `${accumulator}${newInput}`
         }
     }
-    if (typeof output === 'string' && output) {
+    if (typeof output === 'string' && output && !showLowerCasesOnly) {
         output = output.charAt(0).toUpperCase() + output.slice(1)
     }
     return output

@@ -6,8 +6,11 @@
           <ion-list>
             <ion-item v-for="option in item" :key="option.label">
               <div :style="{width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '11px'}">
-                <span><b>{{ option.label }}: </b></span>
-                <span><a>{{ option.value }}</a></span>
+                <span>{{ option.label }}: </span>
+                <span v-if="option.other && option.other.editable" @click="onClick(option)">
+                  <a><b>{{ option.value }}</b></a>
+                </span>
+                <span v-else><b>{{ option.value || 'N/A'}}</b></span>
               </div>
             </ion-item>
           </ion-list>
@@ -37,10 +40,25 @@ export default defineComponent({
       required: true,
     },
   },
-  setup (props) {
+  emits: ['update', 'addGuardian'],
+  setup (props, { emit }) {
+    const computedItems = computed(() => chunk(props.items, Math.ceil(props.items.length / 3)))
+    const onClick = (entry: Option) => {
+      if (entry.other.category === 'demographics') {
+        return emit('update', entry.other.attribute)
+      }
+      return emit('addGuardian')
+    }
+
     return {
-      computedItems: computed(() => chunk(props.items, Math.ceil(props.items.length / 3)))
+      computedItems,
+      onClick
     }
   } 
 });
 </script>
+<style scoped>
+ion-item {
+  padding: 1px !important;
+}
+</style>

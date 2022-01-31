@@ -430,11 +430,7 @@ export default defineComponent({
                 color: '#69bb7b',
                 icon: timeOutline,
                 items: this.labOrderCardItems,
-                onClick: () => {
-                    const columns = ['Accession#',  'Specimen', 'Time']
-                    const rows = this.labOrderCardItems.map((item: Option) => item.other.tableRow)
-                    this.openTableModal(columns, rows, `Lab Orders`)
-                }
+                onClick: () => this.$router.push(`/art/encounters/lab/${this.patient.getID()}`)
             }
         },
         alertsCard() {

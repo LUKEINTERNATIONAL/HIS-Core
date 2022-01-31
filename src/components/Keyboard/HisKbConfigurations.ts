@@ -34,6 +34,14 @@ export const NUMBERS_WITH_ESTIMATE = [
         ['Delete', 'Unknown']
     ]
 ]
+
+export const NUMBERS_WITHOUT_NA_UNKNOWN = [
+    NUMBER_PAD_LO,
+    [
+        ['Delete']
+    ]
+]
+
 export const NUMBERS = [
     NUMBER_PAD_LO,
     [

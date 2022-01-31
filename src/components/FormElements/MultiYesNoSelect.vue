@@ -45,6 +45,7 @@ import {
   IonSegment,
   IonSegmentButton,
 } from "@ionic/vue";
+import { Option } from "../Forms/FieldInterface";
 export default defineComponent({
   components: {
     IonRow,
@@ -75,7 +76,7 @@ export default defineComponent({
     this.listData = await this.options(this.fdata, values);
   },
   methods: {
-    onChange(val: any): void {
+    onChange(val: Option): void {
       this.$nextTick(async () => {
         const values = this.listData.map(i => i.value!='')
         if (typeof this.onValue === 'function') {
@@ -84,6 +85,9 @@ export default defineComponent({
             val.value = ""
             return
           }
+        }
+        if(typeof this.onValueUpdate === 'function') {
+          this.listData = await this.onValueUpdate(this.listData, val)
         }
         if (values.every(Boolean)) {
           this.$emit("onValue", this.listData)
