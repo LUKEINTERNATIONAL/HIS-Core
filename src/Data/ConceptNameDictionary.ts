@@ -28,7 +28,7 @@ export default [
       "categories": [],
       "concept_id": 9522,
       "name": "Patient went for VIA?"
-   }
+   },
    {
       "concept_id": 2690,
       "name": "TB treatment"
