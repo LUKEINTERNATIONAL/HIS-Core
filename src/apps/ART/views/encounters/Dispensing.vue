@@ -10,20 +10,21 @@ import { DispensationService } from "@/apps/ART/services/dispensation_service"
 import { isEmpty } from 'lodash'
 import EncounterMixinVue from '../../../../views/EncounterMixin.vue'
 import HisDate from "@/utils/Date"
+import ART_PROP from "@/apps/ART/art_global_props"
 
 export default defineComponent({
     mixins: [EncounterMixinVue],
     data: () => ({
-        dispensation: {} as any
+        dispensation: {} as any,
+        drugManagementEnabled: false as boolean
     }),
     watch: {
         patient: {
             async handler(patient: any){
                 this.dispensation = new DispensationService(patient.getID(), this.providerID)
-                
                 await this.dispensation.loadCurrentDrugOrder()
                 await this.dispensation.loadDrugHistory()
-
+                this.drugManagementEnabled = await ART_PROP.drugManagementEnabled()
                 this.fields = this.getFields()
             },
             deep: true
@@ -142,6 +143,7 @@ export default defineComponent({
                         return false
                     },
                     config: {
+                        drugManagementEnabled: this.drugManagementEnabled,
                         medicationHistory: this.buildMedicationHistory(),
                         toolbarInfo: [
                             { label: 'Name', value: this.patient.getFullName() },
