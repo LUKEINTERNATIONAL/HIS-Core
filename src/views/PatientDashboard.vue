@@ -430,11 +430,7 @@ export default defineComponent({
                 color: '#69bb7b',
                 icon: timeOutline,
                 items: this.labOrderCardItems,
-                onClick: () => {
-                    const columns = ['Accession#',  'Specimen', 'Time']
-                    const rows = this.labOrderCardItems.map((item: Option) => item.other.tableRow)
-                    this.openTableModal(columns, rows, `Lab Orders`)
-                }
+                onClick: () => this.$router.push(`/art/encounters/lab/${this.patient.getID()}`)
             }
         },
         alertsCard() {
@@ -469,7 +465,7 @@ export default defineComponent({
             return patient ? new Patientservice(patient): {}
         },
         async getPatientVisitDates(patientId: number) {
-            const dates = await Patientservice.getPatientVisits(patientId)
+            const dates = await Patientservice.getPatientVisits(patientId, false)
             return dates.map((date: string) => ({
                 label: this.toDate(date), value: date
             }))

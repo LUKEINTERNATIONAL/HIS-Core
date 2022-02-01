@@ -55,14 +55,23 @@ export class Patientservice extends Service {
         return JSON.stringify(value);
     }
 
-    public static async getPatientVisits(patientId: number) {
+    public static async getPatientVisits(patientId: number, includeDefaulterDates: boolean) {
         const dates: string[] = await super.getJson(`patients/${patientId}/visits`, {
-            'program_id': super.getProgramID()
+            'program_id': super.getProgramID(),
+            'include_defaulter_dates': (includeDefaulterDates == true)
         })
         if (dates) {
             return dates.sort((a, b) => new Date(a) < new Date(b) ? 1 : 0)
         }
         return []
+    }
+
+    getWeightLossPercentageFromTrail(trail: any) {
+      const [curWeight, prevWeight] = trail.map((w: any) => w.weight)
+      if (!(curWeight && prevWeight)) return false
+      const decrease = parseFloat(prevWeight) - parseFloat(curWeight)
+      const weightLossPercent = (decrease / prevWeight) * 100
+      return Math.round(weightLossPercent)
     }
 
     getGuardian() {
@@ -82,13 +91,36 @@ export class Patientservice extends Service {
     }
 
     async isPregnant() {
-        const query = await ObservationService.getFirstValueCoded(this.getID(), 'Is patient pregnant')
-        return query ? query === 'Yes' : false
+        const obs = await ObservationService.getFirstObs(this.getID(), 'Is patient pregnant')
+        return obs && (obs.value_coded.match(/Yes/i) ? true : false) 
+            && ObservationService.obsInValidPeriod(obs)
+    }
+
+    async hasPregnancyObsToday() {
+        const date = await ObservationService.getFirstObsDatetime(this.getID(), 'Is patient pregnant')
+        return date && HisDate.toStandardHisFormat(date) === Service.getSessionDate() && this.isFemale()
     }
 
     isChildBearing() {
         const age = this.getAge()
         return this.isFemale() && age >= 12 && age <= 50
+    }
+
+    async getInitialObs(concept: string) {
+        try {
+            const initialObs = await ObservationService.getAll(
+              this.getID(),
+              concept
+            );
+            const lastIndex = initialObs.length - 1;
+            return initialObs[lastIndex].value_numeric;
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    async getInitialWeight() {
+        return this.getInitialObs('weight')
     }
 
     async getRecentWeight() {
@@ -100,6 +132,11 @@ export class Patientservice extends Service {
         })
         return obs.length >= 1 ? obs[0].value_numeric: -1
     }
+    
+    async getInitialHeight() {
+        return this.getInitialObs("Height")
+    }
+
     async getRecentHeight() {
         const concept = await ConceptService.getConceptID('Height', true)
         const obs = await ObservationService.getObs({
@@ -121,6 +158,11 @@ export class Patientservice extends Service {
          return data.value_text.match(/Complete/i);
         });
     }
+
+    async getInitialBMI() {
+        return this.getInitialObs('BMI')
+    }
+
     async getBMI() {
         //TODO: weight and height should have optional parameters to get weight and height
         const weight = await this.getRecentWeight()
@@ -196,6 +238,11 @@ export class Patientservice extends Service {
 
     getFullName() {
         return getFullName(this.patient.person.names[0]);
+    }
+
+    getDocID() {
+        const id = this.findIdentifierByType('DDE person document ID')
+        return id.match(/unknown/i) ? null : id
     }
 
     getNationalID() {

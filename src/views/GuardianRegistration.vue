@@ -32,11 +32,12 @@ export default defineComponent({
     fieldAction: '' as 'Scan' | 'Search' | 'Registration',
     fieldComponent: '' as string,
     fields: [] as Array<Field>,
-    form: {} as Record<string, Option> | Record<string, null>
+    form: {} as Record<string, Option> | Record<string, null>,
+    redirectURL: '' as string 
   }),
   watch: {
     '$route': {
-        async handler({params}: any) {
+        async handler({params, query}: any) {
             if (params.patient_id) {
                 const patient = await Patientservice.findByID(params.patient_id)
                 if (patient) {
@@ -44,6 +45,7 @@ export default defineComponent({
                     this.fields = this.getFields()
                 }
             }
+            if(query.source) this.redirectURL = query.source
         },
         immediate: true,
         deep: true
@@ -66,7 +68,7 @@ export default defineComponent({
         fields.push(this.currentDistrictField())
         fields.push(this.currentTAField())
         fields.push(this.currentVillage())
-        fields.push(this.landmarkField())
+        fields = fields.concat(this.landmarkFields())
         fields.push(this.cellPhoneField())
         fields.push(this.relationsField())
         return fields
@@ -86,7 +88,8 @@ export default defineComponent({
             await RelationsService.createRelation(
                 this.patientData.id, guardianID, form.relations.other.relationship_type_id
             )
-            await nextTask(this.patientData.id, this.$router)
+            if(this.redirectURL) this.$router.push({name: this.redirectURL})
+            else await nextTask(this.patientData.id, this.$router)  
         }   
     },
     isSearchMode() {
@@ -188,10 +191,10 @@ export default defineComponent({
         cellPhone.condition = () => this.isRegistrationMode()
         return cellPhone 
     },
-    landmarkField(): Field {
-        const landmark: Field = PersonField.getLandmarkField()
-        landmark.condition = () => this.isRegistrationMode()
-        return landmark
+    landmarkFields(): Field[] {
+        const landmarks: Field[] = PersonField.getLandmarkFields()
+        landmarks[0].condition = () => this.isRegistrationMode() 
+        return landmarks
     },
     relationsField(): Field {
         return {

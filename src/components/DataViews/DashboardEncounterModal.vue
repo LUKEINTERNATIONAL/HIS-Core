@@ -118,7 +118,7 @@ export default defineComponent({
         } catch (e) {
           toastDanger(e)
         }
-      }, 'full-modal') 
+      }, 'void-modal custom-modal-backdrop') 
     },
     async showDetails(name: string, {id, columns, getRows, onVoid}: any) {
       this.active.id = id

@@ -72,6 +72,11 @@ export default [
         component: () => import("@/apps/ART/views/preferences/DefaultPreferences.vue")
     },
     {
+        name: "cervical_cancer",
+        path: "/art/preferences/cervical_cancer_screening",
+        component: () => import("@/apps/ART/views/preferences/DefaultPreferences.vue")
+    },
+    {
         name: ART_GLOBAL_PROP.HTN_SCREENING_AGE_THRESHOLD,
         path: "/art/preferences/htn_age",
         component: () => import("@/apps/ART/views/preferences/DefaultPreferences.vue")

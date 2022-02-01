@@ -56,6 +56,7 @@ export default defineComponent({
     patient: {} as any,
     editPersonData: {} as any,
     editPerson: -1 as number,
+    personAttribute: '' as string,
     activeField: '' as string,
     fieldComponent: '' as string,
     fields: [] as Array<Field>,
@@ -72,6 +73,7 @@ export default defineComponent({
                 this.ddeIsReassign = query.dde_reassign
                 this.ddeDocID = query.doc_id
                 this.ddeInstance.setPatientID(query.edit_person)
+                if(query.person_attribute) this.personAttribute = query.person_attribute
                 await this.initEditMode(query.edit_person)
             } else {
                 this.presets = query
@@ -100,7 +102,7 @@ export default defineComponent({
         fields.push(this.currentDistrictField())
         fields.push(this.currentTAField())
         fields.push(this.currentVillage())
-        fields.push(this.landmarkField())
+        fields = fields.concat(this.landmarkFields())
         fields.push(this.cellPhoneField())
         fields.push(this.patientTypeField())
         fields.push(this.facilityLocationField())
@@ -143,6 +145,10 @@ export default defineComponent({
         }
         this.presets = this.editPersonData
         this.skipSummary = true
+        if(this.personAttribute) {
+            this.activeField = this.personAttribute
+            this.fieldComponent = this.activeField
+        }
     },
     async onFinish(form: Record<string, Option> | Record<string, null>, computedData: any) {
         if (!this.isEditMode()) {
@@ -182,7 +188,11 @@ export default defineComponent({
                 this.editPersonData[attr] = person[attr]
             }
         }
-        this.fieldComponent = 'edit_user'
+        if(!this.personAttribute) return this.fieldComponent = 'edit_user'
+        this.$router.back()
+    },
+    showEditDemographicsField(){
+        return this.editPerson != -1 && this.personAttribute.length
     },
     editConditionCheck(attributes=[] as Array<string>): boolean {
         if (this.isEditMode() && !attributes.includes(this.activeField)) {
@@ -217,10 +227,22 @@ export default defineComponent({
         return name
     },
     genderField(): Field {
+        const IS_CXCA = this.app.applicationName === 'CxCa'
         const gender: Field = PersonField.getGenderField()
         gender.requireNext = this.isEditMode()
-        gender.condition = () => this.editConditionCheck(['gender'])
         gender.defaultValue = () => this.presets.gender
+        gender.condition = () => {
+            if (!this.isEditMode() && IS_CXCA) {
+                return false
+            }
+            return this.editConditionCheck(['gender'])
+        }
+
+        if (IS_CXCA && !this.isEditMode()) {
+            gender.defaultOutput = () => ({ label: 'Female', value: 'F' })
+            gender.defaultComputedOutput = () => ({ person: 'F' })
+        } 
+
         gender.beforeNext = async (data: Option) => {
             /**
              * Provide warning when changing gender in edit mode
@@ -313,10 +335,10 @@ export default defineComponent({
        ].includes(form.patient_type.value)
        return facility
     },
-    landmarkField(): Field {
-        const landmark: Field = PersonField.getLandmarkField()
-        landmark.condition = () => this.editConditionCheck(['land_mark'])
-        return landmark
+    landmarkFields(): Field[] {
+        const landmarks: Field[] = PersonField.getLandmarkFields()
+        landmarks[0].condition = () => this.editConditionCheck(['landmark'])
+        return landmarks
     },
     patientTypeField(): Field {
         return {
@@ -416,12 +438,13 @@ export default defineComponent({
         })
     },
     relationshipField(): Field {
+        const IS_CXCA = this.app.applicationName === 'CxCa'
         return {
             id: 'relationship',
             helpText: 'Register guardian?',
             type: FieldType.TT_SELECT,
             computedValue: (val: Option) => ({person: val.value}),
-            condition: () => this.editConditionCheck(['relationship']),
+            condition: () => this.editConditionCheck(['relationship']) && !IS_CXCA,
             validation: (val: any) => Validation.required(val),
             options: () => this.mapToOption(['Yes', 'No'])
         }
@@ -614,7 +637,7 @@ export default defineComponent({
             id: 'edit_user',
             helpText: 'Edit Demographics',
             type: FieldType.TT_TABLE_VIEWER,
-            condition: () => this.editPerson != -1,
+            condition: () => this.showEditDemographicsField(),
             options: async () => {
                 const editButton = (attribute: string) => ({
                     name: 'Edit',

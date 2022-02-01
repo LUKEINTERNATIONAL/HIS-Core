@@ -118,7 +118,7 @@ export default defineComponent({
             await this.emitValue({ label: text, value: text })
         },
         async keypress(text: any){
-            const input = handleVirtualInput(text, this.value)
+            const input = handleVirtualInput(text, this.value, this.config.showLowerCasesOnly)
             await this.emitValue({ label: input, value: input })
         }
     },
@@ -141,5 +141,7 @@ export default defineComponent({
 #view-port {
     height: 53vh;
 }
-
+.view-port-content {
+    height: 80%;
+}
 </style>

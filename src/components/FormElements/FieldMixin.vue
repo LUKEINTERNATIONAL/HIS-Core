@@ -53,7 +53,10 @@ export default defineComponent({
         },
         onValueUpdate: {
             type: Function
+        },
+        footerButtonEvent: {
+            type: Object
         }
-    }    
+    }
 })
 </script>

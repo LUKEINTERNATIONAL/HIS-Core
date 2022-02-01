@@ -283,7 +283,10 @@ export default defineComponent({
                 validation: (val: any) => Validation.validateSeries([
                     () => Validation.required(val),
                     () => Validation.hasLengthRangeOf(val, 4, 15)
-                ]) 
+                ]),
+                config: {
+                    showLowerCasesOnly: true
+                },
             },
             {
                 id: 'new_password',

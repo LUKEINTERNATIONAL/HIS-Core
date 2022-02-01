@@ -11,14 +11,33 @@ export interface BtnStates {
     disabled?: Record<string, (formData: any, computedData: any) => boolean>;
 }
 
+export interface ComponentActionsInterface {
+    refreshOptions: (
+        btnEvent: FooterBtnEvent, 
+        currentOptionData: Option | Option[], 
+        formData: any, computedData: any
+    ) => Option[];
+}
+
+/**
+ * This event is sent to Form components to update their internal
+ * state if applicable
+ */
+export interface FooterBtnEvent {
+    eventIndex: number;
+    btnName: string;
+    btnOutput: any;
+    onClickComponentEvents?: ComponentActionsInterface;
+}
+
 export interface FormFooterBtns {
     name: string;
     size?: 'large' | 'small';
     slot?: 'start' | 'end';
     color?: 'success' | 'primary' | 'warning' | 'secondary' | 'danger';
     state?: BtnStates;
-    onClick: (btn: FormFooterBtns, formData: any) => void;
-
+    onClickComponentEvents?: ComponentActionsInterface;
+    onClick: (formData: any, computedData: any, fieldContext: any) => any;
 }
 export interface Option {
     label: string;
@@ -59,6 +78,12 @@ export interface Field {
      * the field fails to pass a condition
     */
     defaultComputedOutput?: (fdata?: any, cdata?: any, other?: any) => any;
+    /**
+     * Hook is called when the field is false. This is helpful for cleanup jobs
+     */
+    onConditionFalse?: Function;
+    /** When true, the onfinish is triggered when next button is clicked without going to the other fields */
+    exitsForm?: (formData: any, computedData: any) => boolean;
     condition?: Function;
     validation?: Function;
     beforeNext?: Function;
