@@ -854,7 +854,9 @@ export default defineComponent({
             ...(await this.consultation.buildValueCoded('Other side effect', 'Other (Specify)')),
             child: (await this.consultation.buildValueText('Other (Specify)', v.value ))
           }),
-          condition: (f: any) => this.inArray(f.other_side_effects, d => d.label === 'Other (Specify)'),
+          condition: (f: any) => this.inArray(
+            f.other_side_effects, d => d.label === "Other (Specify)" && d.value === 'Yes'
+          ),
           validation: (v: Option) => Validation.required(v)
         },
         {
