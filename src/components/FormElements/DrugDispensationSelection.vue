@@ -40,14 +40,14 @@
                             <table class="his-table">
                                 <tr>
                                     <th> Medication</th>
-                                    <th v-if="isStockManagementEnabled"> Amount in stock</th>
+                                    <th> Amount in stock</th>
                                     <th> Amount needed</th>
                                     <th> Amount dispensed </th>
                                     <th> Reset </th>
                                 </tr>
                                 <tr v-for="(data, index) in listData" :key="index">
                                     <td> {{ data.label }} </td>
-                                    <td v-if="isStockManagementEnabled"> {{ isStockManagementEnabled && data.other.available_stock ? data.other.available_stock : '-' }} </td>
+                                    <td> {{ data.other.available_stock ? data.other.available_stock : '-' }} </td>
                                     <td> {{ data.other.amount_needed }} </td>
                                     <td> <ion-input 
                                             :disabled="data.value > 0" 
@@ -106,9 +106,6 @@ export default defineComponent({
   }),
   async activated() {
     this.$emit('onFieldActivated', this)
-    this.isStockManagementEnabled = typeof this.config.drugManagementEnabled === 'boolean'
-        ? this.config.drugManagementEnabled
-        : false
     this.listData = await this.options(this.fdata)
   },
   computed: {
