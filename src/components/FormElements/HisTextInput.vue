@@ -98,7 +98,10 @@ export default defineComponent({
             }
         },
         async emitValue(v: Option) {
-            if (v.value === '') return this.$emit('onValue', null)
+            if (v.value === '') {
+                this.value = ''
+                return this.$emit('onValue', null)
+            }
 
             if (this.onValue) {
                 const ok = await this.onValue(v)
