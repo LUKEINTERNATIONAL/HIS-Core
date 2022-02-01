@@ -191,8 +191,8 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             && year.toString().match(/unknown/i)) {
             return ['Value unknown is not permitted']
         }
-        if (year && !['Unknown'].includes(year.toString())
-            && isNaN(parseInt(year.toString()))
+        if (year && !['Unknown'].includes(year as string)
+            && isNaN(year as number)
             || year < 1900) {
             return ['Invalid Year']
         }
