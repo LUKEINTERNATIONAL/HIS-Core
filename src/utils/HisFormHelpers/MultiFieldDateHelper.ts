@@ -24,7 +24,6 @@ export interface DateFieldInterface {
     required?: boolean;
     defaultValue?: Function;
     beforeNext?: Function;
-    minYear?: () => number;
     minDate?(formData: any, computeForm: any): string;
     maxDate?(formData: any, computeForm: any): string;
     unload?(data: any, state: string, formData: any,  computeForm: any): void; 
@@ -183,7 +182,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         ? field.condition(f) 
         : true
 
-    year.validation = (v: Option) => {
+    year.validation = (v: Option, f: any, c: any) => {
         if (field.required && StandardValidations.required(v)) {
             return ['Year cannot be empty']
         }
@@ -199,12 +198,20 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             return ['Invalid Year']
         }
 
-        if (year && typeof field.minYear === 'function') {
-            const minYear = field.minYear()
+        if (year && typeof field.minDate === 'function') {
+            const minYear = HisDate.getYear(field.minDate(f, c)) 
             if (parseInt(year as any) < minYear) {
-                return [`Year of ${year} is less than min year of ${minYear}`]
+                return [`Year of ${year} is less than Minimum year of ${minYear}`]
             }
         }
+
+        if (year && typeof field.maxDate === 'function') {
+            const maxYear = HisDate.getYear(field.maxDate(f, c))
+            if (year > maxYear) {
+                return [`Year of ${year} exceeds Maximum year of ${maxYear}`]
+            }
+        }
+
         return null
     }
     /**
