@@ -98,12 +98,15 @@ export default defineComponent({
             }
         },
         async emitValue(v: Option) {
+            if (v.value === '') return this.$emit('onValue', null)
+
             if (this.onValue) {
                 const ok = await this.onValue(v)
                 if (!ok) {
                     return
                 }
             }
+         
             //Automatically concat prepended value with input
             v.value = this.prependValue 
                 ? `${this.prependValue}${v.value}`
