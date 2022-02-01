@@ -333,10 +333,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     }
     // If not configured to do estimates, dont show Unknown Button which appears by default
     // on MonthlyDay component.
-    if (typeof field?.estimation?.allowUnknownMonthDay === 'boolean'
-        && !field?.estimation?.allowUnknownMonthDay) {
-            day.config.keyboardActions = []
-    }
+    if (!estimateMonthOrDay) day.config.keyboardActions = []
 
     const validateValueEstimate = (v: Option, f: any, c: any) => {
         if (StandardValidations.required(v)) {
