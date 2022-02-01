@@ -280,11 +280,14 @@ export default defineComponent({
       return listData;
     },
     buildMedicationOrders(options: Option[]) {
-      return this.inArray(options, o => o.label === "NONE OF THE ABOVE")
-        ? this.consultation.buildValueCoded('Prescribe drugs', 'No')
-        : options.map( o => this.consultation.buildValueCoded(
-          'Medication orders', o.label
-        ))
+      if (this.inArray(options, o => o.label === "NONE OF THE ABOVE")) {
+        return this.consultation.buildValueCoded('Prescribe drugs', 'No')
+      }
+      const priscribed = this.consultation.buildValueCoded('Prescribe drugs', 'Yes')
+      const medications = options.map( o => this.consultation.buildValueCoded(
+        'Medication orders', o.label
+      ))
+      return [priscribed, ...medications]
     },
     declinedFPM(formData: any) {
       return this.inArray(formData.fp_methods, d => d.value === "NONE")
