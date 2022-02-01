@@ -140,10 +140,8 @@ export default defineComponent({
           this.testTypes[index]['currentIndex'] = index;
           this.activeIndex = index;
         } else {
-          this.specimens = [];
-          this.activeIndex = null;
+          this.removeOrder(index)
         }
-        
       })
     },
     async getActivities() {
