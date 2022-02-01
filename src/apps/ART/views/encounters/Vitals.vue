@@ -22,11 +22,13 @@ import { BMIService } from "@/services/bmi_service";
 import { ProgramService } from "@/services/program_service";
 import ART_PROP from "@/apps/ART/art_global_props"
 import { find, isEmpty } from "lodash";
+import HisApp from "@/apps/app_lib"
 
 export default defineComponent({
   mixins: [EncounterMixinVue],
   components: { HisStandardForm },
   data: () => ({
+    app: HisApp.getActiveApp() as any,
     activeField: "",
     age: null as any,
     gender: null as any,
@@ -272,8 +274,10 @@ export default defineComponent({
           helpText: "Already taking drugs for blood pressure?",
           type: FieldType.TT_SELECT,
           validation: (val: any) => Validation.required(val),
-          condition() {
-            return HTNEnabled && !hasHTNObs;
+          condition: () => {
+            // This page is reused in other programs that's why we're adding
+            // an ART check. 
+            return HTNEnabled && !hasHTNObs && this.app?.applicationName === 'ART';
           },
           options: () => [
             {
