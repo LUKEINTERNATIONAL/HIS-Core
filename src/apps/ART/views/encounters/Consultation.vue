@@ -796,7 +796,9 @@ export default defineComponent({
             rows: () => {
               return Object.keys(this.sideEffectsHistory)
               .map((k: string) =>
-                Object.values(this.sideEffectsHistory[k]).map((d: any) => [
+                Object.values(this.sideEffectsHistory[k])
+                .filter((d: any) => !isEmpty(d.name))
+                .map((d: any) => [
                   table.tdDate(k),
                   table.td(d.name),
                   table.td(d.drug_induced ? 'Yes' : 'No'),
@@ -855,7 +857,9 @@ export default defineComponent({
             ...(await this.consultation.buildValueCoded('Other side effect', 'Other (Specify)')),
             child: (await this.consultation.buildValueText('Other (Specify)', v.value ))
           }),
-          condition: (f: any) => this.inArray(f.other_side_effects, d => d.label === 'Other (Specify)'),
+          condition: (f: any) => this.inArray(
+            f.other_side_effects, d => d.label === "Other (Specify)" && d.value === 'Yes'
+          ),
           validation: (v: Option) => Validation.required(v)
         },
         {

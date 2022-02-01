@@ -132,12 +132,11 @@ export default defineComponent({
                 results.forEach(({other}: Option) => {
                     const filterByGender = (gender: 'F' | 'M') => {
                         return other.filter(
-                            (i: any) => i.gender === gender 
-                                && i.age_group === group
-                            ).map((i: any) => i.id)
+                            (i: any) => i.gender === gender && i.age_group === group
+                        ).map((i: any) => i.patient_id)
                     }
-                    maleRow.push(this.drill(filterByGender('M')))
-                    femaleRow.push(this.drill(filterByGender('F')))
+                    maleRow.push(this.drill(filterByGender('M'), `Males of ${group}`))
+                    femaleRow.push(this.drill(filterByGender('F'), `Females of ${group}`))
                 })
                 males.push(maleRow)
                 females.push(femaleRow)
