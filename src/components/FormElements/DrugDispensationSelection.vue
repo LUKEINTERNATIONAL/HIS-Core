@@ -47,7 +47,7 @@
                                 </tr>
                                 <tr v-for="(data, index) in listData" :key="index">
                                     <td> {{ data.label }} </td>
-                                    <td> {{ data.other.available_stock ? data.other.available_stock : '-' }} </td>
+                                    <td> {{ isStockManagementEnabled && data.other.available_stock ? data.other.available_stock : '-' }} </td>
                                     <td> {{ data.other.amount_needed }} </td>
                                     <td> <ion-input 
                                             :disabled="data.value > 0" 
@@ -84,6 +84,7 @@ import NavButton from "@/components/Buttons/ActionSideButton.vue"
 import ResetButton from "@/components/Buttons/ResetButton.vue"
 import ArtDispensationModal from "@/components/DataViews/ArtDispensationModal.vue"
 import FieldMixinVue from './FieldMixin.vue'
+import ART_PROP from "@/apps/ART/art_global_props";
 import {
     IonRow,
     IonCol
@@ -106,6 +107,7 @@ export default defineComponent({
   }),
   async activated() {
     this.$emit('onFieldActivated', this)
+    this.isStockManagementEnabled = await ART_PROP.drugManagementEnabled()
     this.listData = await this.options(this.fdata)
   },
   computed: {

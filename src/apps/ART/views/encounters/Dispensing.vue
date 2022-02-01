@@ -14,16 +14,16 @@ import HisDate from "@/utils/Date"
 export default defineComponent({
     mixins: [EncounterMixinVue],
     data: () => ({
-        dispensation: {} as any,
-        drugManagementEnabled: false as boolean
+        dispensation: {} as any
     }),
     watch: {
         patient: {
             async handler(patient: any){
                 this.dispensation = new DispensationService(patient.getID(), this.providerID)
-
+                
                 await this.dispensation.loadCurrentDrugOrder()
                 await this.dispensation.loadDrugHistory()
+
                 this.fields = this.getFields()
             },
             deep: true
