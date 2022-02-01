@@ -241,7 +241,8 @@ export class Patientservice extends Service {
     }
 
     getDocID() {
-        return this.findIdentifierByType('DDE person document ID', null)
+        const id = this.findIdentifierByType('DDE person document ID')
+        return id.match(/unknown/i) ? null : id
     }
 
     getNationalID() {
@@ -277,9 +278,9 @@ export class Patientservice extends Service {
         return !isEmpty(finder) ? finder[0].identifier : ''
     }
 
-    private findIdentifierByType(type: string, defaultValue: string | null ="Unknown") {
+    private findIdentifierByType(type: string) {
         const ids = this.patient.patient_identifiers.filter((i: any) => i.type.name === type )
-        return ids.length >= 1 ? ids[0].identifier : defaultValue
+        return ids.length >= 1 ? ids[0].identifier : 'Unknown'
     }
 
     getIdentifiers() {
