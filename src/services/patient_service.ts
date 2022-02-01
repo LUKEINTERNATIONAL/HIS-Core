@@ -240,6 +240,11 @@ export class Patientservice extends Service {
         return getFullName(this.patient.person.names[0]);
     }
 
+    getDocID() {
+        const id = this.findIdentifierByType('DDE person document ID')
+        return id.match(/unknown/i) ? null : id
+    }
+
     getNationalID() {
         return this.findIdentifierByType('National id')
     }

@@ -126,16 +126,20 @@ export default defineComponent({
     },
     methods: {
         async onMerge() {
+            const ok = await alertConfirmation('Are you sure you want to merge selected Persons?')
+            if (!ok) return
             try {
                 const payload = {
                     'primary': {
                         'patient_id': this.activeInputACard.id,
-                        'doc_id': null
+                        'doc_id': this.activeInputACard.docID
                     },
-                    'secondary': this.inputBSearchResults.map((s: any) => ({
-                        'patient_id': s.id,
-                        'doc_id': null
-                    }))
+                    'secondary': this.inputBSearchResults
+                        .filter(b => b.isChecked)
+                        .map((s: any) => ({
+                            'patient_id': s.id,
+                            'doc_id': s.docID
+                     }))
                 }
                 await Patientservice.mergePatients(payload)
                 const print = new PatientPrintoutService(this.activeInputACard.id)
@@ -186,6 +190,7 @@ export default defineComponent({
                     index: i,
                     id: patient.getID(),
                     name: patient.getFullName(),
+                    docID: patient.getDocID(),
                     birthdate: patient.getBirthdate(),
                     arvNum: patient.getArvNumber(),
                     gender: patient.getGender(),
