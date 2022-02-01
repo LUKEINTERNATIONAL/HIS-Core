@@ -6,7 +6,13 @@
   </ion-header>
   <ion-content class="ion-padding">
     <ion-list style="height: 90%; overflow-x: auto;">
-      <ion-row>
+      <div v-if="singleView">
+        <ion-item v-for="(entry, index) in appActivities" :key="index" color="light">
+            <ion-label> {{ entry.value }} </ion-label>
+            <ion-checkbox v-model="entry.selected" slot="start"/>
+          </ion-item>
+      </div>
+      <ion-row v-if="!singleView">
         <ion-col width-50>
           <ion-item v-for="(entry, index) in leftLs" :key="index" color="light">
             <ion-label> {{ entry.value }} </ion-label>
@@ -110,16 +116,24 @@ export default defineComponent({
         .join(",");
     },
     leftLs(): any {
-      return this.appActivities.filter( (element, index) => index < 5)
+      return this.appActivities.filter( (element, index) => index < this.splitFactor)
     },
     rightLs(): any {
-      return this.appActivities.filter( (element, index) => index > 5)
+      return this.appActivities.filter( (element, index) => index > this.splitFactor)
+    },
+    singleView(): boolean {
+      const size = this.appActivities.length
+      if (size > this.splitFactor) 
+        return  false
+
+      return true
     }
   },
   data() {
     return {
       content: "Content",
-      appActivities: [] as Array<ActivityInterface>
+      appActivities: [] as Array<ActivityInterface>,
+      splitFactor: 5
     };
   },
   components: {
