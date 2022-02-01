@@ -24,6 +24,7 @@ export interface DateFieldInterface {
     required?: boolean;
     defaultValue?: Function;
     beforeNext?: Function;
+    minYear?: () => number;
     minDate?(formData: any, computeForm: any): string;
     maxDate?(formData: any, computeForm: any): string;
     unload?(data: any, state: string, formData: any,  computeForm: any): void; 
@@ -191,10 +192,18 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             && year.toString().match(/unknown/i)) {
             return ['Value unknown is not permitted']
         }
+    
         if (year && !['Unknown'].includes(year as string)
             && isNaN(year as number)
             || year < 1900) {
             return ['Invalid Year']
+        }
+
+        if (year && typeof field.minYear === 'function') {
+            const minYear = field.minYear()
+            if (parseInt(year as any) < minYear) {
+                return [`Year of ${year} is less than min year of ${minYear}`]
+            }
         }
         return null
     }

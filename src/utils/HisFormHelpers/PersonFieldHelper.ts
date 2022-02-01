@@ -94,6 +94,10 @@ export default {
             summaryLabel: 'Date of Birth',
             helpText: 'Birth',
             required: true,
+            minYear: () => {
+                const [year] = HisDate.estimateDateFromAge(100).split('-')
+                return parseInt(year)
+            },
             minDate: () => HisDate.estimateDateFromAge(100),
             maxDate: () => PersonService.getSessionDate(),
             estimation: {
