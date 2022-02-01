@@ -78,6 +78,11 @@ export default defineComponent({
                 return
             }
 
+            if (num.match(/unknown/i)) {
+                this.$emit('onValue', {label: 'Unknown', value: 'Unknown'})
+                return
+            }
+
             if (isNaN(num)) {
                 this.errors = 'Invalid number'
                 this.$emit('onValue', null)

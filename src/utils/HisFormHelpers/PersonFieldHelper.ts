@@ -98,6 +98,7 @@ export default {
             maxDate: () => PersonService.getSessionDate(),
             estimation: {
                 allowUnknown: true,
+                allowUnknownMonthDay: true,
                 estimationFieldType: EstimationFieldType.AGE_ESTIMATE_FIELD
             },
             computeValue: (date: string, isEstimate: boolean) => {
