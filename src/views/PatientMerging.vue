@@ -132,13 +132,13 @@ export default defineComponent({
                 const payload = {
                     'primary': {
                         'patient_id': this.activeInputACard.id,
-                        'doc_id': null
+                        'doc_id': this.activeInputACard.docID
                     },
                     'secondary': this.inputBSearchResults
                         .filter(b => b.isChecked)
                         .map((s: any) => ({
                             'patient_id': s.id,
-                            'doc_id': null
+                            'doc_id': s.docID
                      }))
                 }
                 await Patientservice.mergePatients(payload)
@@ -190,6 +190,7 @@ export default defineComponent({
                     index: i,
                     id: patient.getID(),
                     name: patient.getFullName(),
+                    docID: patient.getDocID(),
                     birthdate: patient.getBirthdate(),
                     arvNum: patient.getArvNumber(),
                     gender: patient.getGender(),
