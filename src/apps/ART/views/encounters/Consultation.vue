@@ -198,7 +198,7 @@ export default defineComponent({
     },
     canScreenCxCa() {
       const age = this.patient.getAge()
-      return this.patient.isFemale() 
+      return this.patient.isFemale()
         && this.DueForCxCa
         && this.CxCaEnabled 
         && age >= this.CxCaStartAge && age <= this.CxCaMaxAge
@@ -226,7 +226,6 @@ export default defineComponent({
             p => p.label === 'Pregnant' && p.value === 'Yes'
           )
       } catch (e) {
-        alert(e)
         return false
       }
     },
@@ -737,7 +736,7 @@ export default defineComponent({
           helpText: "Refer client for CxCa screening",
           type: FieldType.TT_SELECT,
           validation: (v: Option) => Validation.required(v),
-          condition: () => this.canScreenCxCa(),
+          condition: (f: any) => this.canScreenCxCa() && !this.isPregnant(f),
           computedValue: (v: Option) => this.consultation.buildValueCoded(
             'Offer CxCa', v.value
           ),
