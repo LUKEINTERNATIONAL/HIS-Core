@@ -198,7 +198,7 @@ export default defineComponent({
     },
     canScreenCxCa() {
       const age = this.patient.getAge()
-      return this.patient.isFemale() 
+      return this.patient.isFemale()
         && this.DueForCxCa
         && this.CxCaEnabled 
         && age >= this.CxCaStartAge && age <= this.CxCaMaxAge
@@ -226,7 +226,6 @@ export default defineComponent({
             p => p.label === 'Pregnant' && p.value === 'Yes'
           )
       } catch (e) {
-        alert(e)
         return false
       }
     },
@@ -415,12 +414,58 @@ export default defineComponent({
         return o
       })
     },
-    async on3HPandTPTConfictValueUpdate(listData: Option[]) {
+    /**
+     * Checks formdata and previous observation state if a patient completed 3HP
+     */
+    didCompleted3HP(formData: any) {
+      return !this.completed3HP 
+        ? formData.routine_tb_therapy 
+        && formData.routine_tb_therapy.value.match(/complete/i) ? true : false
+        : true
+    },
+    /**
+     * Checks if 3HP can be auto selected based on FormData and 
+     * if  it is enabled in global preferences
+     */
+    tptAutoSelectionMode(formData: any) {
+      return this.autoSelect3HP && !this.didCompleted3HP(formData)
+    },
+    /**
+     * Provides validations for TPT selections and value updates
+     */
+    async on3HPValueUpdate(listData: Option[], curOption: Option, formData: any) {
       const is3HPorTPT = (i: Option) => i.label.match(/ipt|3hp/i)
+      //Checks if IPT and 3HP are both selected and returns a boolean
       const ipt3HPConflict = listData
         .filter(i => is3HPorTPT(i))
         .map(i => i.isChecked)
         .every(Boolean)
+      // check if no tpt is present
+      const noTpTPresent = is3HPorTPT(curOption) 
+        && listData.filter(i => is3HPorTPT(i)).map(i => !i.isChecked)
+          .every(Boolean)
+  
+      if (noTpTPresent && this.tptAutoSelectionMode(formData)) {
+        const modal = await optionsActionSheet(
+          'Reasons for declining TPT', 
+          '',
+          [
+            'Patient declined',
+            'Side-effects (previous or current)',
+            'Stock-out',
+            'Starting TB treatment',
+            'Other'
+          ],
+          [
+            { name : 'Done', slot: 'start', role: 'action'}
+          ]
+        )
+        this.reasonForDecliningTPTObs = this.consultation.buildValueText(
+          'Other reason for not seeking services', modal.selection
+        )
+      } else {
+        this.reasonForDecliningTPTObs = {}
+      }
 
       if (ipt3HPConflict) {
         const action = await infoActionSheet(
@@ -443,12 +488,10 @@ export default defineComponent({
       }
       return listData
     },
-    medicationOrderOptions(d: any, prechecked=[] as Option[]): Option[] {
-      const completed3HP = !this.completed3HP 
-        ? d.routine_tb_therapy 
-        && d.routine_tb_therapy.value.match(/complete/i) ? true : false
-        : true
-      const autoSelect3HP = this.autoSelect3HP && !completed3HP
+    medicationOrderOptions(formData: any, prechecked=[] as Option[]): Option[] {
+      const completed3HP = this.didCompleted3HP(formData)
+      const autoSelect3HP = this.tptAutoSelectionMode(formData)
+
       const disableOption = (text: string) => ({
         disabled: true,
         isChecked: false,
@@ -458,6 +501,7 @@ export default defineComponent({
           text
         }
       })
+
       return this.runAppendOptionParams([
         this.toOption('ARVs', {
           appendOptionParams: () => ({ 
@@ -476,29 +520,6 @@ export default defineComponent({
           }
         }),
         this.toOption('3HP (RFP + INH)', {
-          onEvent: async (isChecked: boolean) =>  {
-            if (!isChecked) {
-              const modal = await optionsActionSheet(
-                'Reasons for declining TPT', 
-                '',
-                [
-                  'Patient declined',
-                  'Side-effects (previous or current)',
-                  'Stock-out',
-                  'Starting TB treatment',
-                  'Other'
-                ],
-                [
-                  { name : 'Done', slot: 'start', role: 'action'}
-                ]
-              )
-              this.reasonForDecliningTPTObs = this.consultation.buildValueText(
-                'Other reason for not seeking services', modal.selection
-              )
-            } else {
-              this.reasonForDecliningTPTObs = {}
-            }
-          },
           appendOptionParams: () => { 
             if (completed3HP) return disableOption('Completed 3HP')
 
@@ -528,9 +549,9 @@ export default defineComponent({
           type: FieldType.TT_MULTIPLE_SELECT,
           validation: (data: any) => Validation.required(data),
           computedValue: (v: Option[]) => this.buildMedicationOrders(v),
-          onValueUpdate: (listData: Array<Option>, value: Option) => {
-            const list =  this.disablePrescriptions(listData, value);
-            return this.on3HPandTPTConfictValueUpdate(list)
+          onValueUpdate: (listData: Array<Option>, value: Option, f: any) => {          
+            const list = this.disablePrescriptions(listData, value);
+            return this.on3HPValueUpdate(list, value, f)
           },
           options: (formData: any, c: Array<Option>, cd: any, l: any) => {
             return !isEmpty(l) ? l : this.medicationOrderOptions(formData)
@@ -740,7 +761,7 @@ export default defineComponent({
           helpText: "Refer client for CxCa screening",
           type: FieldType.TT_SELECT,
           validation: (v: Option) => Validation.required(v),
-          condition: () => this.canScreenCxCa(),
+          condition: (f: any) => this.canScreenCxCa() && !this.isPregnant(f),
           computedValue: (v: Option) => this.consultation.buildValueCoded(
             'Offer CxCa', v.value
           ),
@@ -796,7 +817,9 @@ export default defineComponent({
             rows: () => {
               return Object.keys(this.sideEffectsHistory)
               .map((k: string) =>
-                Object.values(this.sideEffectsHistory[k]).map((d: any) => [
+                Object.values(this.sideEffectsHistory[k])
+                .filter((d: any) => !isEmpty(d.name))
+                .map((d: any) => [
                   table.tdDate(k),
                   table.td(d.name),
                   table.td(d.drug_induced ? 'Yes' : 'No'),
@@ -855,7 +878,9 @@ export default defineComponent({
             ...(await this.consultation.buildValueCoded('Other side effect', 'Other (Specify)')),
             child: (await this.consultation.buildValueText('Other (Specify)', v.value ))
           }),
-          condition: (f: any) => this.inArray(f.other_side_effects, d => d.label === 'Other (Specify)'),
+          condition: (f: any) => this.inArray(
+            f.other_side_effects, d => d.label === "Other (Specify)" && d.value === 'Yes'
+          ),
           validation: (v: Option) => Validation.required(v)
         },
         {
@@ -984,9 +1009,9 @@ export default defineComponent({
           type: FieldType.TT_MULTIPLE_SELECT,
           validation: (data: Option) => Validation.required(data),
           computedValue: (v: Option[]) => this.buildMedicationOrders(v),
-          onValueUpdate: (listData: Array<Option>, value: Option) => {
+          onValueUpdate: (listData: Array<Option>, value: Option, formData: any) => {
             const list =  this.disablePrescriptions(listData, value)
-            return this.on3HPandTPTConfictValueUpdate(list)
+            return this.on3HPValueUpdate(list, value, formData)
           },
           options: (formData: any, c: Array<Option>, cd: any, currentOptions: any) => {
             return this.medicationOrderOptions(formData, currentOptions)

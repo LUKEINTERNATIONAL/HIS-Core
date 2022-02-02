@@ -45,7 +45,7 @@ export default defineComponent({
         option.isChecked = event.target.checked
 
         if (typeof option?.other?.onEvent === 'function') {
-          await option.other.onEvent(option.isChecked, event)
+          await option.other.onEvent(option.isChecked)
         } 
 
         if (this.onValue && option.isChecked) {
@@ -55,7 +55,7 @@ export default defineComponent({
           }
         }
         if (this.onValueUpdate) {
-          this.listData = await this.onValueUpdate([...this.listData], option)
+          this.listData = await this.onValueUpdate([...this.listData], option, this.fdata, this.cdata)
         }
         this.$emit('onValue', this.getChecked(this.listData))
       })
