@@ -1,6 +1,7 @@
 import { AppEncounterService } from "@/services/app_encounter_service";
 import { DrugOrderService } from "@/services/drug_order_service";
 import { StockService } from "./stock_service";
+import ART_PROP from '@/apps/ART/art_global_props';
 // ripped from old ART system
 export const DRUG_PACK_SIZES: Record<string, any> = {
     '11': [ 30 ],
@@ -42,11 +43,16 @@ export const DRUG_PACK_SIZES: Record<string, any> = {
 export class DispensationService extends AppEncounterService {
     drugHistory: Array<any>;
     currentDrugOrder: Array<any>;
-
+    useDrugManagement: boolean; 
     constructor(patientID: number, providerID: number) {
         super(patientID, 54, providerID)
         this.drugHistory = []
         this.currentDrugOrder = []
+        this.useDrugManagement = false
+    }
+
+    async loadDrugManagementEnabled() {
+        this.useDrugManagement = await ART_PROP.drugManagementEnabled()
     }
 
     getDrugHistory() {
@@ -90,11 +96,15 @@ export class DispensationService extends AppEncounterService {
     async loadCurrentDrugOrder() {
         const res = await DrugOrderService.getDrugOrders(this.patientID)
         if (res) {
-            const drugs = res.map(async (d: any) => {
-                d['available_stock'] = await StockService.fetchAvailableDrugStock(d.drug.drug_id)
-                return d
-            })
-            this.currentDrugOrder = await Promise.all(drugs)
+            if (this.useDrugManagement) {
+                const drugs = res.map(async (d: any) => {
+                    d['available_stock'] = await StockService.fetchAvailableDrugStock(d.drug.drug_id)
+                    return d
+                })
+                this.currentDrugOrder = await Promise.all(drugs)
+                return
+            }
+            this.currentDrugOrder = res
         }
     }
 

@@ -7,7 +7,7 @@ import { FieldType } from "@/components/Forms/BaseFormElements"
 import { Field, Option } from "@/components/Forms/FieldInterface"
 import { toastWarning, alertConfirmation } from "@/utils/Alerts"
 import { DispensationService } from "@/apps/ART/services/dispensation_service"
-import { isEmpty } from 'lodash'
+import {isEmpty } from 'lodash'
 import EncounterMixinVue from '../../../../views/EncounterMixin.vue'
 import HisDate from "@/utils/Date"
 
@@ -20,7 +20,7 @@ export default defineComponent({
         patient: {
             async handler(patient: any){
                 this.dispensation = new DispensationService(patient.getID(), this.providerID)
-                
+                await this.dispensation.loadDrugManagementEnabled()
                 await this.dispensation.loadCurrentDrugOrder()
                 await this.dispensation.loadDrugHistory()
 
@@ -67,9 +67,10 @@ export default defineComponent({
                 label: d.drug.name,
                 value: d.quantity || 0,
                 other: {
+                    'order': d,
                     'drug_id': d.drug.drug_id,
                     'order_id': d.order.order_id,
-                    'available_stock': d.available_stock,
+                    'available_stock': d.available_stock || '-',
                     'amount_needed': this.calculateCompletePack(d),
                     'pack_sizes': this.getPackSizesRows(d.drug.drug_id, d.available_stock || 0),
                 }
