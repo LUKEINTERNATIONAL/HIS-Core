@@ -140,10 +140,8 @@ export default defineComponent({
           this.testTypes[index]['currentIndex'] = index;
           this.activeIndex = index;
         } else {
-          this.specimens = [];
-          this.activeIndex = null;
+          this.removeOrder(index)
         }
-        
       })
     },
     async getActivities() {
@@ -159,6 +157,7 @@ export default defineComponent({
       this.testTypes[index]['isChecked'] = false;
       this.testTypes[index]['reason'] = null;
       this.testTypes[index]['specimen'] = null;
+      this.testTypes[index]['specimenConcept'] = null
       this.activeIndex = null
       this.specimens = []
     },

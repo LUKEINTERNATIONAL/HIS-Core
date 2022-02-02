@@ -14,6 +14,7 @@ export enum EstimationFieldType {
 export interface EstimationInterface {
     estimationFieldType?: EstimationFieldType;
     allowUnknown: boolean; 
+    allowUnknownMonthDay?: boolean;
 }
 
 export interface DateFieldInterface {
@@ -140,7 +141,14 @@ function validateMinMax(date: string, field: DateFieldInterface, form: any, comp
         }
     }
 }
-
+/**
+ * This Jungle of code generates Fields of Year, Month and Day.
+ * 
+ * if you're brave please refactor this. Just dont break anything Ok!
+ * @param field 
+ * @param refDate 
+ * @returns 
+ */
 export function generateDateFields(field: DateFieldInterface, refDate=''): Array<Field> {
     let fullDate = ''
     let yearValue = ''
@@ -159,6 +167,9 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
 
     const ageEstimate = getAgeEstimateField(ageEstimateID, field.helpText)
     const durationEstimate = getMonthDurationEstimateField(durationEstimateID, field.helpText)
+
+    const estimateMonthOrDay = typeof field.estimation.allowUnknownMonthDay === 'boolean'
+        && field.estimation.allowUnknownMonthDay
 
     const datePartCondition = (f: any) => {
         if (f[yearID] && f[yearID].value) {
@@ -182,7 +193,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
         ? field.condition(f) 
         : true
 
-    year.validation = (v: Option) => {
+    year.validation = (v: Option, f: any, c: any) => {
         if (field.required && StandardValidations.required(v)) {
             return ['Year cannot be empty']
         }
@@ -191,11 +202,27 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
             && year.toString().match(/unknown/i)) {
             return ['Value unknown is not permitted']
         }
-        if (year && !['Unknown'].includes(year.toString())
-            && isNaN(parseInt(year.toString()))
+    
+        if (year && !['Unknown'].includes(year as string)
+            && isNaN(year as number)
             || year < 1900) {
             return ['Invalid Year']
         }
+
+        if (year && typeof field.minDate === 'function') {
+            const minYear = HisDate.getYear(field.minDate(f, c)) 
+            if (parseInt(year as any) < minYear) {
+                return [`Year of ${year} is less than Minimum year of ${minYear}`]
+            }
+        }
+
+        if (year && typeof field.maxDate === 'function') {
+            const maxYear = HisDate.getYear(field.maxDate(f, c))
+            if (year > maxYear) {
+                return [`Year of ${year} exceeds Maximum year of ${maxYear}`]
+            }
+        }
+
         return null
     }
     /**
@@ -240,15 +267,28 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
 
     month.defaultValue = () => getDefaultDate(field, 'Month')
 
+    // Add Unknown value to trigger default estimated Month
+    if (estimateMonthOrDay) {
+        month.options = () => [...MonthOptions, { label: 'Unknown', value: 'Unknown'}]
+    }
+
     /**
+     *
      * This helps to keep compute value up to date when month changes
      * @param val
      * @returns
      */
-    month.computedValue = (val: Option) => {
+    month.computedValue = (val: Option, f: any) => {
+        // Estimate Month and Day when Month Value is Unknown
+        if (`${val.value}`.match(/unknown/i)) {
+            fullDate = `${f[yearID].value}-07-15`
+            return field.computeValue(fullDate, true)
+        }
+        // Default date behaviour
         if (fullDate) {
             const [year, _, day] = fullDate.split('-')
-            fullDate = `${year}-${appendLeadingZero(val.value.toString())}-${day}`
+            const month = appendLeadingZero(`${val.value}`)
+            fullDate = `${year}-${month}-${day}`
             return field.computeValue(fullDate, false)
         }
     }
@@ -256,7 +296,7 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     day.proxyID = field.id
 
     // DAY CONFIG
-    day.condition = (f: any) => datePartCondition(f) 
+    day.condition = (f: any) => !`${f[monthID].value}`.match(/unknown/i) && datePartCondition(f) 
 
     day.validation =  (v: Option, f: any, c: any) => {
         if (StandardValidations.required(v)) {
@@ -268,9 +308,11 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     day.defaultValue = () => getDefaultDate(field, 'Day')
 
     day.computedValue = (v: Option) => {
-        dayValue = appendLeadingZero(v.value.toString())
+        const isEstimate = `${v.value}`.match(/unknown/i) ? true : false
+        // Use 15 as default value if day is estimated
+        dayValue = isEstimate ? '15' :  appendLeadingZero(`${v.value}`)
         fullDate = `${yearValue}-${monthValue}-${dayValue}`
-        return field.computeValue(fullDate, false)
+        return field.computeValue(fullDate, isEstimate)
     }
 
     day.unload = (d: any, s: any, f: any, c: any) => {
@@ -284,10 +326,14 @@ export function generateDateFields(field: DateFieldInterface, refDate=''): Array
     }
 
     day.config = { 
-        keyboardActions: [],
+        // Monthly days shown on the Day component depends on this configuration
+        // to show approprite days based on specific year and month calendar
         year: (f: any) => f[yearID].value,
-        month: (f: any) => f[monthID].value 
+        month: (f: any) => f[monthID].value
     }
+    // If not configured to do estimates, dont show Unknown Button which appears by default
+    // on MonthlyDay component.
+    if (!estimateMonthOrDay) day.config.keyboardActions = []
 
     const validateValueEstimate = (v: Option, f: any, c: any) => {
         if (StandardValidations.required(v)) {

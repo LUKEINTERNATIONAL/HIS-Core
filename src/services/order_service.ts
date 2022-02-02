@@ -51,7 +51,7 @@ export class OrderService extends Service {
         )  return true
 
         if((result.value_modifier  === '>' || result.value_modifier  === '&gt') 
-            && (parseFloat(result.value) >= 1000 || result.value.toUpperCase().replace(/\s+/g, '') == 'LDL')
+            && (parseFloat(result.value) >= 1000 || `${result.value}`.toUpperCase().replace(/\s+/g, '') == 'LDL')
         )  return true
 
         return false

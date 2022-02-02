@@ -25,7 +25,7 @@ export default defineComponent({
 	components: { HisStandardForm, IonPage },
 	data: () => ({
 		preference: '' as string,
-		fields: [] as Field[]
+		fields: [] as any
 	}),
 	created() {
 		this.preference = this.$route.name as string
@@ -59,7 +59,7 @@ export default defineComponent({
 					helpText: 'Activate CxCa screening',
 					type: FieldType.TT_YES_NO,
 					condition : () => this.isProp(prop),
-					computedValue: (v: Option) => v.value,
+					computedValue: (v: string) => v,
 					defaultValue: () => ART_PROP.cervicalCancerScreeningEnabled(),
 					validation: (val: any) => Validation.required(val),
 					options: () =>[

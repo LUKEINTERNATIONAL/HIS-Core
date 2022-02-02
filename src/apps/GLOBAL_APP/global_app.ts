@@ -94,14 +94,20 @@ export default {
         {
           name: "Data Cleaning",
           pathUrl: "/data_cleaning",
+          condition: () => App.getActiveApp() ? App.getActiveApp()?.applicationName === 'ART'
+            : false
         },
         {
           name: "Merge patients",
           pathUrl: "/patients/merge",
+          condition: () => App.getActiveApp() ? App.getActiveApp()?.applicationName === 'ART'
+            : false
         },
         {
           name: "Patient visit stats",
-          pathUrl: "/art/patient_visits"
+          pathUrl: "/art/patient_visits",
+          condition: () => App.getActiveApp() ? App.getActiveApp()?.applicationName === 'ART'
+            : false
         }
       ]
     },
