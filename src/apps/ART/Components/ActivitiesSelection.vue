@@ -4,31 +4,29 @@
       <ion-title>Select activities</ion-title>
     </ion-toolbar>
   </ion-header>
-  <ion-content class="ion-padding">
-    <ion-list style="height: 90%; overflow-x: auto;">
-      <div v-if="singleView">
-        <ion-item v-for="(entry, index) in appActivities" :key="index" color="light">
-            <ion-label> {{ entry.value }} </ion-label>
-            <ion-checkbox v-model="entry.selected" slot="start"/>
-          </ion-item>
-      </div>
-      <ion-row v-if="!singleView">
-        <ion-col width-50>
-          <ion-item v-for="(entry, index) in leftLs" :key="index" color="light">
-            <ion-label> {{ entry.value }} </ion-label>
-            <ion-checkbox v-model="entry.selected" slot="start"/>
-          </ion-item>
-        </ion-col>
-        <ion-col width-50>
-          <ion-item v-for="(entry, index) in rightLs" :key="index" color="light">
-            <ion-label> {{ entry.value }} </ion-label>
-            <ion-checkbox v-model="entry.selected" slot="start"/>
-          </ion-item>
+  <ion-content>
+    <ion-grid>
+      <ion-row>
+        <ion-col v-for="(entries, index) in multiViewActivities" :key="index" :size="singleView ? 12: 6" >
+         <div class="his-card clickable" v-for="(entry, index) in entries" :key="index" @click="entry.selected = !entry.selected"> 
+            <ion-row >
+              <ion-col size="1" style="border-right: 1px solid gray; mouse: ">
+                <ion-checkbox v-model="entry.selected" />
+              </ion-col>
+              <ion-col class="ion-text-center">
+                {{ entry.value }}
+              </ion-col>
+            </ion-row>
+          </div>
         </ion-col>
       </ion-row>
-    </ion-list>
-    <ion-button @click="postActivities" :disabled="selectedActivities.length == 0" style="float: right">finish</ion-button>
+    </ion-grid>
   </ion-content>
+  <ion-footer>
+    <ion-toolbar>
+      <ion-button @click="postActivities" color="success" :disabled="selectedActivities.length == 0" size="large" style="float: right;">finish</ion-button>
+    </ion-toolbar>
+  </ion-footer>
 </template>
 <script lang="ts">
 import {
@@ -37,16 +35,14 @@ import {
   IonHeader,
   IonTitle,
   IonToolbar,
-  IonLabel,
   modalController,
-  IonList,
-  IonItem,
   IonCheckbox,
 } from "@ionic/vue";
 import { defineComponent, PropType } from "vue";
 import { toastWarning } from "@/utils/Alerts"
 import ApiClient from "@/services/api_client";
 import { ActivityInterface } from "@/apps/interfaces/AppInterface"
+import { chunk } from "lodash";
 
 export default defineComponent({
   name: "Modal",
@@ -115,25 +111,24 @@ export default defineComponent({
         .map((el) => el.value )
         .join(",");
     },
-    leftLs(): any {
-      return this.appActivities.filter( (element, index) => index < this.splitFactor)
-    },
-    rightLs(): any {
-      return this.appActivities.filter( (element, index) => index > this.splitFactor)
-    },
     singleView(): boolean {
       const size = this.appActivities.length
       if (size > this.splitFactor) 
         return  false
-
       return true
+    },
+    multiViewActivities():  Array<ActivityInterface[]>{
+      const size = this.singleView 
+        ? this.appActivities.length 
+        : Math.ceil(this.appActivities.length/2)
+      return chunk(this.appActivities, size)
     }
   },
   data() {
     return {
       content: "Content",
       appActivities: [] as Array<ActivityInterface>,
-      splitFactor: 5
+      splitFactor: 7
     };
   },
   components: {
@@ -142,10 +137,14 @@ export default defineComponent({
     IonHeader,
     IonTitle,
     IonToolbar,
-    IonLabel,
-    IonList,
-    IonItem,
     IonCheckbox,
   },
 });
 </script>
+<style scoped>
+ .his-card {
+    padding: 0.55em;
+    margin: .5em;
+ }
+
+</style>
