@@ -326,6 +326,8 @@ export default defineComponent({
     FormData(data: any) {
       return Object.keys(data).map((d) => {
         const display: any = (d === 'outcome_date') ? HisDate.toStandardHisDisplayFormat(data[d]) : data[d];
+        if(d.match(/height/i)) d += ' (cm)'
+        if(d.match(/weight/i)) d += ' (Kg)'
         return {
           label: this.camelCase(d),
           value: this.joinData(display),
