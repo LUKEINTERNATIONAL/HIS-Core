@@ -318,8 +318,7 @@ export default defineComponent({
       onClick: async () => {
         let shouldRebuildCache = false
         if (this.hasServerSideCaching) {
-          const ok = await alertConfirmation('Do you want to rebuild report cache?', "Rebuild Report")
-          shouldRebuildCache = ok ? true : false
+          shouldRebuildCache = await alertConfirmation('Do you want to rebuild report cache?', { header: "Rebuild Report"})
         }
         this.reloadReport(shouldRebuildCache)
       } 

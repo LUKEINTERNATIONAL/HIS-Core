@@ -60,10 +60,9 @@ export default defineComponent({
         if (healthCheckInterval.value) {
           clearInterval(healthCheckInterval.value)
           healthCheckInterval.value = null
-          const confirm = await alertConfirmation(
-            'Do you want to refresh the page?',
-            'API connection is back'
-          )
+          const confirm = await alertConfirmation('Do you want to refresh the page?', {
+            header: 'API connection is back'
+          })
           if (confirm) location.reload()
         }
         if (res && res.status === 401 && route.name != 'Login') {

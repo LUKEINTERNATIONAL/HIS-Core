@@ -175,14 +175,10 @@ export default defineComponent({
         
         if(!d) return toastWarning('Unable to save lab orders')
 
-        const canPrintOrders = await alertConfirmation(
-          'Lab orders and encounter created!, print out your last orders?', 
-          'Confirmation',
-          { 
-            confirm: 'Yes',
-            cancel: 'No'
-          }
-        )
+        const canPrintOrders = await alertConfirmation('Lab orders and encounter created!, print out your last orders?', { 
+          confirmBtnLabel: 'Yes',
+          cancelBtnLabel: 'No'
+        })
         if(canPrintOrders) await this.printOrders(d)
         else await this.closeModal(d)
       }
