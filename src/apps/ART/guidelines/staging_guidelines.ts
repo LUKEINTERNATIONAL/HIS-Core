@@ -1,5 +1,5 @@
 import { ConceptService } from "@/services/concept_service"
-import { alertAction, alertConfirmation } from "@/utils/Alerts"
+import { alertConfirmation } from "@/utils/Alerts"
 import { GuideLineInterface } from "@/utils/GuidelineEngine"
 
 export const ADULT_WHO_STAGE_CRITERIA: Record<string, GuideLineInterface> = {

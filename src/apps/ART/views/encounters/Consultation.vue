@@ -13,7 +13,7 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import { FooterBtnEvent, Option } from "@/components/Forms/FieldInterface";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
-import { alertAction, alertConfirmation, infoAlert, toastSuccess, toastWarning } from "@/utils/Alerts";
+import { infoAlert, toastSuccess, toastWarning } from "@/utils/Alerts";
 import HisDate from "@/utils/Date";
 import { findIndex, isEmpty, find } from "lodash";
 import { ConsultationService } from "@/apps/ART/services/consultation_service";

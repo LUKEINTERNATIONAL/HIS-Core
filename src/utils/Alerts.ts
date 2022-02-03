@@ -32,32 +32,20 @@ export function toastDanger(message: string, duration=5000) {
     return toast(message, 'danger', duration)
 }
 
-export async function alertAction(message: string, buttons: any) {
-    const alert = await alertController.create({
-        cssClass: 'my-custom-class',
-        mode: 'ios',
-        message,
-        backdropDismiss: false,
-        buttons
-    });
+// export async function alertAction(message: string, buttons: any) {
+//     const alert = await alertController.create({
+//         cssClass: 'my-custom-class',
+//         mode: 'ios',
+//         message,
+//         backdropDismiss: false,
+//         buttons
+//     });
 
-    alert.present();    
-    const { role } = await alert.onDidDismiss()
-    return role || ''
-}
+//     alert.present();    
+//     const { role } = await alert.onDidDismiss()
+//     return role || ''
+// }
 
-export async function actionSheet(header: string, subHeader: string, buttons: Array<string>) {
-    const action = await actionSheetController.create({
-        header,
-        subHeader,
-        mode: 'ios',
-        backdropDismiss: false,
-        buttons: buttons.map((i: any) => ({text: i, role: i.toLowerCase()}))
-    })
-    action.present()
-    const { role } = await action.onDidDismiss();
-    return role
-}
 export async function alertConfirmation(message: string, header="Confirmation", buttonLabels = {
     cancel: 'Cancel',
     confirm: 'Confirm'
