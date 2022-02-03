@@ -40,6 +40,8 @@ import { alertConfirmation } from "@/utils/Alerts";
 import { ProgramService } from "@/services/program_service";
 import { PatientPrintoutService } from "@/services/patient_printout_service";
 import { NavBtnInterface } from "@/components/HisDynamicNavFooterInterface";
+import moment from "dayjs";
+
 export default defineComponent({
   components: {
     IonPage,
@@ -366,7 +368,7 @@ export default defineComponent({
         backdropDismiss: false,
         cssClass: "custom-modal",
         componentProps: {
-          title: `${title}: ${date}`,
+          title: `${title}: ${moment(date).format('DD/MMM/YYYY')}`,
           visitData: this.FormData(data),
         },
       });
