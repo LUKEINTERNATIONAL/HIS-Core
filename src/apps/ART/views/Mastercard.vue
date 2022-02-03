@@ -325,7 +325,7 @@ export default defineComponent({
     },
     FormData(data: any) {
       return Object.keys(data).map((d) => {
-        const display: any = data[d];
+        const display: any = (d === 'outcome_date') ? HisDate.toStandardHisDisplayFormat(data[d]) : data[d];
         return {
           label: this.camelCase(d),
           value: this.joinData(display),
@@ -366,7 +366,7 @@ export default defineComponent({
         backdropDismiss: false,
         cssClass: "custom-modal",
         componentProps: {
-          title: `${title}: ${date}`,
+          title: `${title}: ${HisDate.toStandardHisDisplayFormat(date)}`,
           visitData: this.FormData(data),
         },
       });
