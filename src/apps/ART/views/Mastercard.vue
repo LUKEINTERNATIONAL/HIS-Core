@@ -2,6 +2,7 @@
   <ion-page style="background: #fff">
     <information-header 
       :items="patientCardInfo"
+      :numberOfColumns="4"
       @addGuardian="addGuardian"
       @update="updateDemographics"
     ></information-header>
@@ -244,7 +245,6 @@ export default defineComponent({
             category: 'demographics'
           }
         },
-        { label: "Occupation", value: 'Unknown' },
         { 
           label: "Location",
           value:  patient.getCurrentVillage(),

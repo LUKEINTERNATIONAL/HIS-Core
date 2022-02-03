@@ -2,10 +2,10 @@
   <div style="padding: .1rem;">
     <ion-grid>
       <ion-row style="border: 1px solid #a5a5a599">
-        <ion-col v-for="(item, index) in computedItems" :key="index" :size="4">
+        <ion-col v-for="(item, index) in computedItems" :key="index" :size="grid[numberOfColumns]">
           <ion-list>
-            <ion-item v-for="option in item" :key="option.label">
-              <div :style="{width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '11px'}">
+            <ion-item v-for="option in item" :key="option.label" style="padding: 0 !important; margin: 0 !important;">
+              <div :style="{width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '11px', margin: 0, padding: 0}">
                 <span>{{ option.label }}: </span>
                 <span v-if="option.other && option.other.editable" @click="onClick(option)">
                   <a><b>{{ option.value }}</b></a>
@@ -39,10 +39,17 @@ export default defineComponent({
       type: Object as PropType<Option[]>,
       required: true,
     },
+    numberOfColumns: {
+      type: Number,
+      default: 2
+    },
   },
   emits: ['update', 'addGuardian'],
   setup (props, { emit }) {
-    const computedItems = computed(() => chunk(props.items, Math.ceil(props.items.length / 3)))
+    const grid: Record<number, number> = {1:12, 2:6, 3:4, 4:3}
+    const computedItems = computed(() => 
+      chunk(props.items, Math.ceil(props.items.length / props.numberOfColumns))
+    )
     const onClick = (entry: Option) => {
       if (entry.other.category === 'demographics') {
         return emit('update', entry.other.attribute)
@@ -52,7 +59,8 @@ export default defineComponent({
 
     return {
       computedItems,
-      onClick
+      onClick,
+      grid,
     }
   } 
 });
