@@ -1,5 +1,6 @@
 import { toastController, alertController, actionSheetController, modalController } from "@ionic/vue";
 import ConfimationSheet from "@/components/DataViews/actionsheet/ConfirmationSheet.vue"
+import { NavBtnInterface } from '../components/HisDynamicNavFooterInterface';
 
 async function toast(message: string, color="primary", duration=5000) {
     const toast = await toastController.create({
@@ -95,4 +96,29 @@ export async function alertConfirmation(message: string, header="Confirmation", 
     modal.present()
     const { data } = await modal.onDidDismiss()
     return data === 'Confirm' 
+}
+
+export async function infoAlert(message: string, header="Information") 
+{
+  const modal = await modalController.create({
+      component: ConfimationSheet,
+      backdropDismiss: false,
+      cssClass: "small-modal custom-modal-backdrop",
+      componentProps: {
+          subtitle: header,
+          body: message,
+          actionButtons: [
+              {
+                  name: "OK",
+                  size: 'large',
+                  slot: 'end',
+                  color: 'success',
+                  visible: true,
+                  role: 'Confirm',
+                  onClick: () => modalController.dismiss()
+              },
+          ],
+      }
+  })
+  modal.present() 
 }
