@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 const STANDARD_DATE_FORMAT = 'YYYY-MM-DD'
 const DISPLAY_DATE_FORMAT = 'DD/MMM/YYYY'
 
+
 function currentDisplayDate() {
     return dayjs().format(DISPLAY_DATE_FORMAT)
 }
@@ -65,6 +66,16 @@ function getDateBeforeByDays(date: string, days: number) {
     return toStandardHisFormat(dateObj)
 }
 
+/**
+ * Get Year of specified age in years
+ * @param age
+ * @returns 
+ */
+function getYearOfAge(ageInYears: number): number {
+    const [year] = estimateDateFromAge(ageInYears).split('-')
+    return parseInt(year)
+}
+
 function stitchDate(year: number | string, month=-1 as number | string, day=-1 as number | string) {
     let fmonth = month.toString()
     let fday = day.toString()
@@ -87,6 +98,7 @@ function stitchDate(year: number | string, month=-1 as number | string, day=-1 a
 }
 
 export default {
+    getYearOfAge,
     getYear,
     dateDiffInDays,
     getAgeInYears,

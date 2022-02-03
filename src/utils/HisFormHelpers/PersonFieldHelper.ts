@@ -14,7 +14,7 @@ import HisDate from "@/utils/Date"
 import { DateFieldInterface } from "@/utils/HisFormHelpers/MultiFieldDateHelper"
 import { Patientservice } from "@/services/patient_service"
 import { isPlainObject, isEmpty } from "lodash"
-import { alertConfirmation, toastSuccess, toastWarning } from '../Alerts'
+import { alertConfirmation, toastWarning } from '../Alerts'
 import { LocationService } from '@/services/location_service'
 
 function mapToOption(listOptions: Array<string>): Array<Option> {
@@ -98,6 +98,7 @@ export default {
             maxDate: () => PersonService.getSessionDate(),
             estimation: {
                 allowUnknown: true,
+                allowUnknownMonthDay: true,
                 estimationFieldType: EstimationFieldType.AGE_ESTIMATE_FIELD
             },
             computeValue: (date: string, isEstimate: boolean) => {
