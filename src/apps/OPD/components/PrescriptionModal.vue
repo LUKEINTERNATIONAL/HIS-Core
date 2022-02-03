@@ -112,7 +112,7 @@ export default defineComponent({
       for (const drug of drugs.value) {
         const freq = getFrequencyCount(drug.frequency)
         const duration: number = drug.duration
-        if(!freq && !duration){
+        if(!freq  || !duration){
           toastWarning(`complete prescription details for ${drug.name}`)
           return false
         }
@@ -121,7 +121,6 @@ export default defineComponent({
     }
     const savePrescriptions = () => {
       if(isComplete()) {
-
         modalController.dismiss(drugs.value)
       }
     }

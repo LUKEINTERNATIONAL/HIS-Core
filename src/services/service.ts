@@ -2,6 +2,7 @@ import ApiClient from "./api_client"
 import Url from "@/utils/Url"
 import HisApp from "@/apps/app_lib"
 import { AppInterface } from "@/apps/interfaces/AppInterface"
+import useSWRV from "swrv"
 
 export class IncompleteEntityError extends Error {
     entity: any
@@ -45,6 +46,14 @@ export class Service {
     static async getText(url: string) {
         const req = await ApiClient.get(url)
         if (req && req.ok) return req?.text()
+    }
+
+    static getJsonSWR(url: string, params = {} as Record<string, any>){
+        const transformedUrl = `${url}?${Url.parameterizeObjToString(params)}`
+        const { data, error } = useSWRV(transformedUrl, key => {
+            return this.getJson(key)
+          })
+        return data
     }
 
     static async getJson(url: string, params = {} as Record<string, any>) {

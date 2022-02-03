@@ -12,8 +12,8 @@
     <ion-row>
       <ion-col>
         <opd-stat-chart
-          :series="series"
-          :categories="categories"
+          :series="accumulativeVisits.visits"
+          :categories="accumulativeVisits.days"
         ></opd-stat-chart>
       </ion-col>
     </ion-row>
@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
+import { computed, defineComponent } from 'vue'
 import { IonGrid, IonRow, IonCol} from "@ionic/vue";
 import OpdStatCard from '@/apps/OPD/components/OpdStatCard.vue'
 import OpdStatChart from '@/apps/OPD/components/OpdStatChart.vue'
@@ -36,25 +36,19 @@ export default defineComponent({
     IonCol
   },
   setup() {
-    const patientSummaryStats = ref()
-    const categories = ref<string[]>([])
-    const series = ref<any[]>([])
-    
-    onMounted(async function() {
-      try {
-        const {todaysVisits, accumulativeVisits } = await PatientVisitsService.fetchPatientStats()
-        patientSummaryStats.value = todaysVisits
-        categories.value = accumulativeVisits?.days
-        series.value = accumulativeVisits?.visits
-      } catch (e) {
-        console.log(e)
+    const data = PatientVisitsService.getStatistics()
+    const patientSummaryStats = computed(() => {
+      return data.value ? PatientVisitsService.getTodaysPatientVisits(data.value?.top) : []
+    })
+    const accumulativeVisits = computed(() => {
+      return data.value ? PatientVisitsService.getAccumulativePatientVisits(data.value?.down) : {
+        days: [] as Array<string>,
+        visits: [] as Array<any>
       }
     })
-
     return {
       patientSummaryStats,
-      series,
-      categories
+      accumulativeVisits,
     }
   },
 })
