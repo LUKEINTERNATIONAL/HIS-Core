@@ -1,6 +1,5 @@
 import { toastController, alertController, actionSheetController, modalController } from "@ionic/vue";
 import ConfimationSheet from "@/components/DataViews/actionsheet/ConfirmationSheet.vue"
-import { NavBtnInterface } from '../components/HisDynamicNavFooterInterface';
 
 async function toast(message: string, color="primary", duration=5000) {
     const toast = await toastController.create({
