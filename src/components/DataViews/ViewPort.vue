@@ -19,4 +19,7 @@ export default defineComponent({
     .half {
         height: 53vh !important;
     }
+    .half .view-port-content {
+        height: 86%;
+    }
 </style>

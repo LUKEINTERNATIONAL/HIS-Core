@@ -78,7 +78,7 @@
 
 .his-table > tr > td, .his-table > tr > th {
     text-align: left;
-    padding: 0.6em;
+    padding: 0.5em;
 }
 
 .his-table > tr:nth-child(even) {
