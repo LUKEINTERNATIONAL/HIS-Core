@@ -8,17 +8,11 @@ export default class PatientVisitsService extends Service {
     super()
   }
 
-  static async fetchPatientStats() {
-    const data =  await super.getJson('dashboard_stats', {
+  static getStatistics() {
+    return super.getJsonSWR('dashboard_stats', {
       date: super.getSessionDate(),
-      // eslint-disable-next-line @typescript-eslint/camelcase
-      program_id: super.getProgramID()
+      'program_id': super.getProgramID()
     })
-
-    return {
-      todaysVisits: this.getTodaysPatientVisits(data.top),
-      accumulativeVisits: this.getAccumulativePatientVisits(data.down)
-    }
   }
 
   static getTodaysPatientVisits(data: any) {
