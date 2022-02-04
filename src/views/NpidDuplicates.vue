@@ -145,10 +145,9 @@ export default defineComponent({
         },
         async reassignIdentifier(item: any) {
             if (!item.isComplete) {
-                const ok = await alertConfirmation(
-                    'Do you want to update missing information?', 
-                    'Incomplete Demographics'
-                )
+                const ok = await alertConfirmation('Do you want to update missing information?', {
+                    header: 'Incomplete Demographics'
+                })
                 if (ok) {
                     let params = `edit_person=${item.patientID}`
                     params += '&dde_reassign=true'

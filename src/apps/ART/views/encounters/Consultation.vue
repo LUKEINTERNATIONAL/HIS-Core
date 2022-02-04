@@ -13,7 +13,7 @@ import { FieldType } from "@/components/Forms/BaseFormElements";
 import { FooterBtnEvent, Option } from "@/components/Forms/FieldInterface";
 import HisStandardForm from "@/components/Forms/HisStandardForm.vue";
 import Validation from "@/components/Forms/validations/StandardValidations";
-import { alertAction, toastSuccess, toastWarning } from "@/utils/Alerts";
+import { infoAlert, toastSuccess, toastWarning } from "@/utils/Alerts";
 import HisDate from "@/utils/Date";
 import { findIndex, isEmpty, find } from "lodash";
 import { ConsultationService } from "@/apps/ART/services/consultation_service";
@@ -232,7 +232,7 @@ export default defineComponent({
     isOnTubalLigation(formData: any) {
       return this.inArray(formData.current_fp_methods, d => d.value === "TUBAL LIGATION")
     },
-    disableFPMethods(listData: Array<Option>, value: Option) {
+    async disableFPMethods(listData: Array<Option>, value: Option) {
       if (value.isChecked && value.label === "NONE") {
         return listData.map((i) => {
           if (i.label != "NONE") {
@@ -242,14 +242,7 @@ export default defineComponent({
           return i;
         });
       } else if (value.label != "NONE" && value.isChecked) {
-        if (value.label.match(/condom/gi)) {
-          alertAction("Combine with other modern methods of family planning", [
-            {
-              text: "OK",
-              handler: () => null,
-            },
-          ]);
-        }
+        if (value.label.match(/condom/gi)) infoAlert("Combine with other modern methods of family planning") 
         const noneIndex = findIndex(listData, { label: "NONE" });
         listData[noneIndex].isChecked = false;
         const vals = this.consultation.familyPlanningMethods(

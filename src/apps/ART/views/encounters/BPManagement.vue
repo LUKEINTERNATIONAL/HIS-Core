@@ -109,7 +109,7 @@ import {
   IonLabel,
   loadingController
 } from "@ionic/vue";
-import { toastWarning, alertAction, toastSuccess } from "@/utils/Alerts";
+import { toastWarning, toastSuccess } from "@/utils/Alerts";
 import EncounterMixinVue from "../../../../views/EncounterMixin.vue";
 import RiskFactorModal from "@/components/DataViews/RiskFactorModal.vue";
 import { ObservationService } from "@/services/observation_service";
@@ -125,6 +125,7 @@ import { toastDanger } from "@/utils/Alerts";
 import { PatientProgramService } from "@/services/patient_program_service";
 import DataTable from "@/components/DataViews/tables/ReportDataTable.vue"
 import table from "@/components/DataViews/tables/ReportDataTable"
+import { infoActionSheet } from "@/utils/ActionSheets";
 
 const HEADER_STYLE = {
   background: '#444444',
@@ -366,25 +367,33 @@ export default defineComponent({
         });
       }
     },
-    alertHtnEnrollment() {
-      return alertAction("Do you want to enroll this client in the HTN program?", [
-        {
-          text: "Yes",
-          handler: async () => {
-            await this.enrollInHTN();
-            await this.setHtnTransferred('Yes')
-            this.patientFirstVisit = false;
-            await this.getItems();
+    async alertHtnEnrollment() {
+      const action = await infoActionSheet(
+        'Programme Enrollment',
+        "Do you want to enroll this client in the HTN program?",
+        '',
+        [
+          { 
+            name: 'Yes', 
+            slot: 'end', 
+            color: 'success'
           },
-        },
-        {
-          text: "No",
-          handler: async () => {
-            await this.setHtnTransferred('No')
-            this.nextTask()
+          { 
+            name: 'No',  
+            slot: 'start', 
+            color: 'danger'
           }
-        }
-      ])
+        ]
+      )
+      if(action === 'Yes') {
+        await this.enrollInHTN();
+        await this.setHtnTransferred('Yes')
+        this.patientFirstVisit = false;
+        await this.getItems();
+      } else {
+        await this.setHtnTransferred('No')
+        this.nextTask()
+      }
     },
     async enrollInHTN() {
       try {

@@ -1,5 +1,5 @@
 import { ConceptService } from "@/services/concept_service"
-import { alertAction, alertConfirmation } from "@/utils/Alerts"
+import { alertConfirmation } from "@/utils/Alerts"
 import { GuideLineInterface } from "@/utils/GuidelineEngine"
 
 export const ADULT_WHO_STAGE_CRITERIA: Record<string, GuideLineInterface> = {
@@ -82,9 +82,9 @@ export const CONTRADICTING_STAGE_DEFINITIONS_ALERTS: Record<string, GuideLineInt
     "Warn if Severe weight loss is selected when actual patient BMI is acceptable": {
         priority: 1,
         actions: {
-            alert: async (facts: any) => await alertConfirmation(`Patient's BMI of ${facts.bmi} greater than 18.5, do you wish to proceed?`, '', {
-                confirm: 'Yes, keep severe weightloss',
-                cancel: 'No, cancel'
+            alert: async (facts: any) => await alertConfirmation(`Patient's BMI of ${facts.bmi} greater than 18.5, do you wish to proceed?`, {
+                confirmBtnLabel: 'Yes, keep severe weightloss',
+                cancelBtnLabel: 'No, cancel'
             }),
         },
         conditions: {
@@ -98,9 +98,9 @@ export const CONTRADICTING_STAGE_DEFINITIONS_ALERTS: Record<string, GuideLineInt
         priority: 1,
         actions: {
             alert: async (facts: any) => {
-                const keepAsymptomatic = await alertConfirmation('CONTRADICTING STAGE DEFINING CONDITIONS', '', {
-                    confirm: "Keep Asymptomatic",
-                    cancel: 'Keep other(s)'
+                const keepAsymptomatic = await alertConfirmation('CONTRADICTING STAGE DEFINING CONDITIONS', {
+                    confirmBtnLabel: "Keep Asymptomatic",
+                    cancelBtnLabel: 'Keep other(s)'
                 })
                 if(keepAsymptomatic) {
                     facts.stage = 1

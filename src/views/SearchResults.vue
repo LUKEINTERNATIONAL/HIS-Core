@@ -175,7 +175,9 @@ export default defineComponent({
     async onRegisterAsNew() {
       const confirmation = await alertConfirmation(
         'Do you want to register person as new patient?', 
-        `Register ${this.gname} ${this.fname}`
+        {
+          header: `Register ${this.gname} ${this.fname}`
+        }
       )
 
       if (confirmation) {
