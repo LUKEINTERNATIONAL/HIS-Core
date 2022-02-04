@@ -24,7 +24,7 @@ export default defineComponent({
   data: () => ({
     columns: [[
       table.thTxt('Visit Date', largeText),
-      table.thTxt('Weight', largeText),
+      table.thTxt('Weight (Kg)', largeText),
       table.thTxt('Reg', largeText),
       table.thTxt('ADH', largeText),
       table.thTxt('Outcome', largeText),

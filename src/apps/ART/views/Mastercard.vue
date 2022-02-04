@@ -2,6 +2,7 @@
   <ion-page style="background: #fff">
     <information-header 
       :items="patientCardInfo"
+      :numberOfColumns="4"
       @addGuardian="addGuardian"
       @update="updateDemographics"
     ></information-header>
@@ -246,7 +247,6 @@ export default defineComponent({
             category: 'demographics'
           }
         },
-        { label: "Occupation", value: 'Unknown' },
         { 
           label: "Location",
           value:  patient.getCurrentVillage(),
@@ -327,7 +327,9 @@ export default defineComponent({
     },
     FormData(data: any) {
       return Object.keys(data).map((d) => {
-        const display: any = data[d];
+        const display: any = (d === 'outcome_date') ? HisDate.toStandardHisDisplayFormat(data[d]) : data[d];
+        if(d.match(/height/i)) d += ' (cm)'
+        if(d.match(/weight/i)) d += ' (Kg)'
         return {
           label: this.camelCase(d),
           value: this.joinData(display),
@@ -368,7 +370,7 @@ export default defineComponent({
         backdropDismiss: false,
         cssClass: "custom-modal",
         componentProps: {
-          title: `${title}: ${moment(date).format('DD/MMM/YYYY')}`,
+          title: `${title}: ${HisDate.toStandardHisDisplayFormat(date)}`,
           visitData: this.FormData(data),
         },
       });
