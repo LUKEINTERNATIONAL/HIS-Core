@@ -285,6 +285,8 @@ export default defineComponent({
       this.sessionDate = HisDate.toStandardHisDisplayFormat(
         Service.getSessionDate()
       )
+       if(this.app.applicationName == "Triage")
+        window.location.href = "/triage"
     },
     async openModal() {
       const data = await HisApp.selectApplication('HomePage') 

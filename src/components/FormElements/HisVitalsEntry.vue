@@ -19,7 +19,7 @@
             >
             </option-button>
           </ion-col>
-          <ion-col size-lg="6" size-sm="10">
+          <ion-col size-lg="6" size-sm="6">
             <div class="centered his-card">
               <ion-input
                 type="text"
@@ -163,7 +163,7 @@ export default defineComponent({
 .full-component-view {
   display: block;
 }
-.mobile-component-view {
+/* .mobile-component-view {
   display: none;
 }
 
@@ -174,7 +174,7 @@ export default defineComponent({
   .mobile-component-view {
       display: block;
   }
-}
+} */
 .view-port-content {
   height: 100%;
   background: white;
@@ -196,7 +196,8 @@ ion-col {
   margin: auto;
 }
 .his-keyboard-btn {
-  width: 110px;
+  width: 11vw;
+  max-width: 110px;
   font-size: 1.4em;
   height: 70px;
 }
