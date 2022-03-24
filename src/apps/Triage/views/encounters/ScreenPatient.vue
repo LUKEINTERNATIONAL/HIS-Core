@@ -272,9 +272,9 @@ export default defineComponent({
   
   for(const totalEncounters in this.encounters)
   {
-  if(this.encounters[totalEncounters].observations.length > 0 && ( this.encounters[totalEncounters].encounter_type ==194 || this.encounters[totalEncounters].encounter_type ==104))
+  if(this.encounters[totalEncounters].observations.length > 0 && ( this.encounters[totalEncounters].encounter_type ==193 || this.encounters[totalEncounters].encounter_type ==104))
   {
-    if(this.encounters[totalEncounters].encounter_type ==194 ){
+    if(this.encounters[totalEncounters].encounter_type ==193 ){
       this.noOtherSymptom = "No"
       this.coughDuration = "No";
       this.difficultyBreathing = "No";
@@ -287,7 +287,7 @@ export default defineComponent({
       this.soreThroat = "No"
     }
 
-    if(this.encounters[totalEncounters].encounter_type ==194)
+    if(this.encounters[totalEncounters].encounter_type ==193)
       this.registrationEncounterID = this.encounters[totalEncounters].encounter_id;
     if(this.encounters[totalEncounters].encounter_type ==104)
       this.presentingComplantEncounterID = this.encounters[totalEncounters].encounter_id;
@@ -617,7 +617,7 @@ export default defineComponent({
      createPresentingComplantsEncounter(patientID: any) {
     
     return EncounterService.create({
-        'encounter_type_id': 194, //TODO: get key from api or reference dictionary using name
+        'encounter_type_id': 193, //TODO: get key from api or reference dictionary using name
         'patient_id': patientID
     })
     },
